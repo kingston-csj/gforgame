@@ -1,0 +1,42 @@
+# 忽略编译生成的文件
+*.exe
+*.out
+*.obj
+*.o
+
+# 忽略 Go 编译生成的文件和目录
+*.gotmp/
+*_generated.go
+bin/
+obj/
+.git/
+ 
+# 忽略依赖包目录
+vendor/
+pkg/
+
+# 忽略 IDE 和编辑器的配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# 忽略操作系统生成的文件
+.DS_Store
+.DS_Store?
+
+# 忽略 Go 测试生成的覆盖率报告文件
+cover*.out
+coverage.*
+
+# 忽略 Go 工具链生成的缓存文件
+*/.cache/
+*/ Godeps/
+
+# 忽略 Go 模块缓存
+~/go/bin/
+~/.cache/go-build/
+
+ logs/
+ tmp/
