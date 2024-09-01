@@ -38,5 +38,5 @@ coverage.*
 ~/go/bin/
 ~/.cache/go-build/
 
- logs/
- tmp/
+
+**/logs/
