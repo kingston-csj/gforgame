@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/github/gforgame/codec/json"
+	"io/github/gforgame/codec/protobuf"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"log"
@@ -28,7 +28,8 @@ func main() {
 	defer conn.Close()
 	fmt.Println("已连接到服务器:", address)
 
-	session := network.NewSession(&conn, &json.JsonCodec{})
+	//session := network.NewSession(&conn, &json.JsonCodec{})
+	session := network.NewSession(&conn, &protobuf.ProtobufCodec{})
 
 	//req := &protos.ReqJoinRoom{RoomId: 123, PlayerId: 123}
 	req := &protos.ReqPlayerCreate{Name: "gforgame"}

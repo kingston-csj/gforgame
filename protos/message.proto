@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package game;
+option go_package = "/protos";
+// 玩家登录请求
+message ReqPlayerLogin {
+  int64 Id = 1;
+}
+
+// 玩家登录响应
+message ResPlayerLogin {
+  bool Succ = 1;
+}
+
+// 玩家创建请求
+message ReqPlayerCreate {
+  string Name = 1;
+}
+
+// 玩家创建响应
+message ResPlayerCreate {
+  int64 Id = 1;
+}
+
+// 加入房间请求
+message ReqJoinRoom {
+  int64 RoomId = 1;
+  int64 PlayerId = 2;
+}
+
+// 聊天请求
+message ReqChat {
+  string Id = 1;
+}
+

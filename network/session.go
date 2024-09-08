@@ -37,7 +37,7 @@ func (s *Session) Send(msg any) {
 	}
 
 	cmd, e2 := GetMessageCmd(msg)
-	if e2 == nil {
+	if e2 != nil {
 		panic(e2)
 	}
 	fmt.Println("发送消息:", cmd)
