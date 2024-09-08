@@ -13,12 +13,14 @@ type LogType int
 // 日志类型枚举，每一个类型对应独立的文件
 const (
 	Admin LogType = iota
-	APPLICATION
+	Application
+	Player
 )
 
 var logName = map[LogType]string{
 	Admin:       "admin",
-	APPLICATION: "application",
+	Application: "application",
+	Player:      "player",
 }
 
 var (
@@ -65,7 +67,18 @@ func createConsoleLog() *logrus.Logger {
 	return logger
 }
 
-func Info(name LogType, args ...interface{}) {
+// Log records a message with the specified log type and arguments.
+// The Log function writes a log message to the log file
+// Parameters:
+//
+//	name LogType: The type of log message being recorded.
+//	args ...interface{}: A variadic list of arguments to include in the log message.
+//
+// Example:
+//
+//	Log(Admin, "User logged in", user)
+//	Log(Player, "Failed to save data", err)
+func Log(name LogType, args ...interface{}) {
 	if len(args)%2 != 0 {
 		panic("log arguments must be odd number")
 	}
@@ -90,7 +103,7 @@ func Info(name LogType, args ...interface{}) {
 	logger.Info(sb.String())
 }
 
-// Printf 记录一条日志
-func Printf(v string) {
+// Info 记录一条日志
+func Info(v string) {
 	consoleLog.Info(v)
 }

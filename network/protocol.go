@@ -16,8 +16,8 @@ type MessageHeader struct {
 	Size int //消息长度
 }
 
-// ErrPacketSizeExcced is the error used for encode/decode.
-var ErrPacketSizeExcced = errors.New("Protocol: packet size exceed")
+// ErrPacketSizeExceed is the error used for encode/decode.
+var ErrPacketSizeExceed = errors.New("Protocol: packet size exceed")
 
 type Protocol struct {
 	buf *bytes.Buffer
@@ -37,7 +37,7 @@ func (c *Protocol) readHeader() (*MessageHeader, error) {
 
 	// packet length limitation
 	if size > MaxPacketSize {
-		return nil, ErrPacketSizeExcced
+		return nil, ErrPacketSizeExceed
 	}
 	return &MessageHeader{Cmd: id, Size: size}, nil
 }
@@ -48,10 +48,7 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 	if c.buf.Len() < HeadLength {
 		return nil, errors.New("length too small")
 	}
-
-	var (
-		packets []*Packet
-	)
+	var packets []*Packet
 
 	for c.buf.Len() > 0 {
 		header, err := c.readHeader()

@@ -2,8 +2,8 @@ package network
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
+	"strconv"
 )
 
 var (
@@ -13,10 +13,17 @@ var (
 )
 
 func RegisterMessage(cmd int, msg any) {
+	typeOf := reflect.TypeOf(msg)
+	if typeOf.Kind() != reflect.Ptr {
+		panic("msg must be ptr")
+	}
+	_, ok := id2Msg[cmd]
+	if ok {
+		panic("cmd duplicated: " + strconv.Itoa(cmd))
+	}
 
-	id2Msg[cmd] = reflect.TypeOf(msg)
-
-	msg2Id[reflect.TypeOf(msg)] = cmd
+	id2Msg[cmd] = typeOf
+	msg2Id[typeOf] = cmd
 }
 
 func init() {
@@ -29,17 +36,16 @@ func GetMessageCmd(msg any) (int, error) {
 	if ok {
 		return value, nil
 	} else {
-		return 0, errors.New("not found")
+		return 0, errors.New("GetMessageCmd not found")
 	}
 }
 
 func GetMessageCmdFromType(typ reflect.Type) (int, error) {
-	fmt.Println("type", typ)
 	value, ok := msg2Id[typ]
 	if ok {
 		return value, nil
 	} else {
-		return 0, errors.New("not found")
+		return 0, errors.New("GetMessageCmdFromType not found")
 	}
 }
 

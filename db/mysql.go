@@ -1,4 +1,4 @@
-package db
+package mysqldb
 
 import (
 	"gorm.io/driver/mysql"
@@ -6,13 +6,14 @@ import (
 )
 
 var (
-	database *gorm.DB
+	Db *gorm.DB
 )
 
 func init() {
 	dsn := "root:123456@tcp(localhost:3306)/game_user?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var database, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
+	Db = database
 }

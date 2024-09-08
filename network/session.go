@@ -12,7 +12,6 @@ type Session struct {
 
 	ProtocolCodec *Protocol
 
-	// TODO 改为接口
 	MessageCodec codec.MessageCodec
 
 	attrs map[string]interface{}
@@ -37,7 +36,10 @@ func (s *Session) Send(msg any) {
 		log.Fatal("连接服务器失败:", err)
 	}
 
-	cmd, _ := GetMessageCmd(msg)
+	cmd, e2 := GetMessageCmd(msg)
+	if e2 == nil {
+		panic(e2)
+	}
 	fmt.Println("发送消息:", cmd)
 	frame, _ := s.ProtocolCodec.Encode(cmd, msg_data)
 	(*s.conn).Write(frame)

@@ -6,11 +6,6 @@ type Packet struct {
 	Data []byte
 }
 
-// create a NewPacket Packet instance.
-func NewPacket() *Packet {
-	return &Packet{}
-}
-
 type RequestDataFrame struct {
 	Header MessageHeader
 

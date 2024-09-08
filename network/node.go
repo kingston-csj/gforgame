@@ -9,11 +9,7 @@ import (
 )
 
 type Node struct {
-	Name string // 服务器名称
-	//ServiceAddr  string // current server service address (RPC)
-	//MessageCodec codec.MessageCodec
-	//IoDispatch   *BaseIoDispatch
-
+	Name   string // 服务器名称
 	option Options
 }
 
@@ -78,12 +74,6 @@ func handleClient(node *Node, conn net.Conn) {
 
 			io_frame := &RequestDataFrame{Header: p.Header, Msg: msg}
 			node.option.IoDispatch.OnMessageReceived(ioSession, *io_frame)
-
-			msg_handler, _ := GetHandler(p.Header.Cmd)
-
-			args := []reflect.Value{msg_handler.Receiver, reflect.ValueOf(ioSession), reflect.ValueOf(msg)}
-			// 反射
-			msg_handler.Method.Func.Call(args)
 		}
 
 	}

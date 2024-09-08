@@ -1,4 +1,4 @@
-package codec
+package json
 
 import (
 	"encoding/json"
@@ -25,6 +25,6 @@ func (*JsonCodec) Decode(data []byte, v any) error {
 	return fmt.Errorf("decode need a pointer type")
 }
 
-func NewJsonCodec() JsonCodec {
-	return JsonCodec{}
-}
+//func NewSerializer() *JsonCodec {
+//	return &JsonCodec{}
+//}

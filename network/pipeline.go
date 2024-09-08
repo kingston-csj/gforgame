@@ -5,7 +5,7 @@ type IoDispatch interface {
 	// OnSessionCreated session创建时触发
 	OnSessionCreated(session *Session)
 
-	// OnMessageReceived 收到消息时触发
+	// OnMessageReceived 收到消息时触发 TODO RequestDataFrame改为引用
 	OnMessageReceived(session *Session, msg RequestDataFrame)
 
 	// OnSessionClosed session关闭时触发

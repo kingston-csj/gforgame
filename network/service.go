@@ -50,21 +50,17 @@ func isHandlerMethod(method reflect.Method) bool {
 	if method.PkgPath != "" {
 		return false
 	}
-
 	// Method needs three ins: receiver, *Session, []byte or pointer.
 	if mt.NumIn() != 3 {
 		return false
 	}
-
 	// Method needs one outs: error
 	if mt.NumOut() != 1 {
 		return false
 	}
-
 	if t1 := mt.In(1); t1.Kind() != reflect.Ptr || t1 != typeOfSession {
 		return false
 	}
-
 	if (mt.In(2).Kind() != reflect.Ptr && mt.In(2) != typeOfBytes) || mt.Out(0) != typeOfError {
 		return false
 	}
