@@ -15,16 +15,23 @@ type GameTaskHandler struct {
 }
 
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame network.RequestDataFrame) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(r.(error))
+		}
+	}()
 	msgHandler, _ := network.GetHandler(frame.Header.Cmd)
 	args := []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
 	// 反射
-	msgHandler.Method.Func.Call(args)
+	values := msgHandler.Method.Func.Call(args)
+	if len(values) > 0 {
+		session.Send(values[0].Interface())
+	}
+
 	return true
 }
 
 func main() {
-	log.Info("----test---")
-
 	network.RegisterModule(chat.NewRoomService())
 	network.RegisterModule(player.NewPlayerService())
 

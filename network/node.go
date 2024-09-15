@@ -53,6 +53,8 @@ func handleClient(node *Node, conn net.Conn) {
 
 	ioSession := NewSession(&conn, node.option.MessageCodec)
 
+	go ioSession.Write()
+
 	// read loop
 	buf := make([]byte, 2048)
 	for {

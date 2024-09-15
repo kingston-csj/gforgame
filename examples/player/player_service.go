@@ -28,15 +28,15 @@ func (rs PlayerService) Init() {
 	mysqldb.Db.AutoMigrate(&Player{})
 }
 
-func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) error {
+func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
 	var player Player
 	mysqldb.Db.First(&player, "id=?", 1001)
 	fmt.Println(msg.Id, "登录成功，姓名为：", player.Name)
-	s.Send(&protos.ResPlayerLogin{Succ: true})
+	//return &protos.ResPlayerLogin{Succ: true}
 	return nil
 }
 
-func (rs PlayerService) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) error {
+func (rs PlayerService) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
 	id := util.GetNextId()
 	player := &Player{Id: id, Name: msg.Name}
 	mysqldb.Db.Create(&player)
@@ -44,5 +44,4 @@ func (rs PlayerService) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreat
 	log.Log(log.Player, "Id", player.Id, "name", player.Name)
 
 	fmt.Printf(player.Name)
-	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -26,6 +27,7 @@ var logName = map[LogType]string{
 var (
 	logs       map[string]*logrus.Logger
 	consoleLog *logrus.Logger
+	errorLog   *logrus.Logger
 )
 
 func init() {
@@ -38,6 +40,8 @@ func init() {
 
 	// 创建一个新的Logger
 	consoleLog = createConsoleLog()
+
+	errorLog = createErrorLog()
 }
 
 func createBusinessLog(name string) *logrus.Logger {
@@ -63,6 +67,18 @@ func createConsoleLog() *logrus.Logger {
 	)
 	logger.Out = writer
 	// 设置Logger的日志级别
+	logger.Level = logrus.InfoLevel
+	return logger
+}
+
+func createErrorLog() *logrus.Logger {
+	logger := logrus.New()
+	logger.Formatter = &logrus.TextFormatter{ForceColors: true}
+	writer, _ := rotatelogs.New(
+		"logs/err/"+"error.%Y%m%d",
+		rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
+	)
+	logger.Out = writer
 	logger.Level = logrus.InfoLevel
 	return logger
 }
@@ -106,4 +122,14 @@ func Log(name LogType, args ...interface{}) {
 // Info 记录一条日志
 func Info(v string) {
 	consoleLog.Info(v)
+}
+
+func Error(err error) {
+	if err != nil {
+		stack := make([]byte, 1024)
+		n := runtime.Stack(stack, false)
+		errorLog.WithFields(logrus.Fields{
+			"error": err,
+		}).Error(string(stack[:n]))
+	}
 }

@@ -11,6 +11,15 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 
 ## 快速入门
 下载代码到本地，导入项目到vscode或者goland开发工具
+项目自带多个模块案例代码，如player_service,chat_service
+
+```
+    # 消息处理器格式： 第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端，
+    func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
+    
+    }
+```
+
 服务器入口： main.go
 客户端入口： client.go
 
@@ -19,7 +28,7 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 * 日志模块
 * 事件驱动
 * 玩家数据读写
-* 通信协议支持protobuf
+* 通信协议支持json+protobuf
 
 ## 近期功能
 * websocket接入

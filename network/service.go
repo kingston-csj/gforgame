@@ -61,7 +61,7 @@ func isHandlerMethod(method reflect.Method) bool {
 	if t1 := mt.In(1); t1.Kind() != reflect.Ptr || t1 != typeOfSession {
 		return false
 	}
-	if (mt.In(2).Kind() != reflect.Ptr && mt.In(2) != typeOfBytes) || mt.Out(0) != typeOfError {
+	if mt.In(2).Kind() != reflect.Ptr && mt.In(2) != typeOfBytes {
 		return false
 	}
 	return true
