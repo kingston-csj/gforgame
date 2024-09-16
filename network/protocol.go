@@ -32,8 +32,8 @@ func NewDecoder() *Protocol {
 
 func (c *Protocol) readHeader() (*MessageHeader, error) {
 	buff := c.buf.Next(HeadLength)
-	id := bytesToInt(buff[0:3])
-	size := bytesToInt(buff[4:7])
+	id := bytesToInt(buff[0:4])
+	size := bytesToInt(buff[4:HeadLength])
 
 	// packet length limitation
 	if size > MaxPacketSize {
@@ -70,11 +70,11 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 
 func (c *Protocol) Encode(cmd int, data []byte) ([]byte, error) {
 	// p := &Packet{Cmd: cmd, Length: len(data)}
-	len := len(data)
-	buf := make([]byte, len+HeadLength)
+	bodyLen := len(data)
+	buf := make([]byte, HeadLength+bodyLen)
 
-	copy(buf[0:3], intToBytes(cmd))
-	copy(buf[4:HeadLength], intToBytes(len))
+	copy(buf[0:4], intToBytes(cmd))
+	copy(buf[4:HeadLength], intToBytes(bodyLen))
 	copy(buf[HeadLength:], data)
 
 	return buf, nil
@@ -90,9 +90,10 @@ func bytesToInt(b []byte) int {
 }
 
 func intToBytes(n int) []byte {
-	buf := make([]byte, 3)
-	buf[0] = byte((n >> 16) & 0xFF)
-	buf[1] = byte((n >> 8) & 0xFF)
-	buf[2] = byte(n & 0xFF)
+	buf := make([]byte, 4)
+	buf[0] = byte((n >> 24) & 0xFF)
+	buf[1] = byte((n >> 16) & 0xFF)
+	buf[2] = byte((n >> 8) & 0xFF)
+	buf[3] = byte(n & 0xFF)
 	return buf
 }

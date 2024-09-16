@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	network.RegisterMessage(protos.CmdChatReqJoin, &protos.ReqJoinRoom{})
 	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
 	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})
@@ -31,8 +30,8 @@ func main() {
 	defer conn.Close()
 	fmt.Println("已连接到服务器:", address)
 
-	//session := network.NewSession(&conn, &json.JsonCodec{})
 	msgCodec := &protobuf.ProtobufCodec{}
+	//msgCodec := &json.JsonCodec{}
 	session := network.NewSession(&conn, msgCodec)
 	go session.Write()
 
@@ -59,9 +58,8 @@ func main() {
 			}
 		}
 	}()
-	//req := &protos.ReqJoinRoom{RoomId: 123, PlayerId: 123}
-	req := &protos.ReqPlayerLogin{Id: 1001}
-	session.Send(req)
+	session.Send(&protos.ReqPlayerLogin{Id: 1001})
+	session.Send(&protos.ReqJoinRoom{RoomId: 123, PlayerId: 123})
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)

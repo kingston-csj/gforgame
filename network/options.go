@@ -7,6 +7,8 @@ type Options struct {
 	ServiceAddr  string // current server service address (RPC)
 	MessageCodec codec.MessageCodec
 	IoDispatch   *BaseIoDispatch
+	isWebsocket  bool
+	wsPath       string
 }
 
 type Option func(*Options)
@@ -29,5 +31,19 @@ func WithIoDispatch(dispatch *BaseIoDispatch) Option {
 func WithCodec(codec codec.MessageCodec) Option {
 	return func(opt *Options) {
 		opt.MessageCodec = codec
+	}
+}
+
+// WithWebsocket 设置为websocket
+func WithWebsocket() Option {
+	return func(opt *Options) {
+		opt.isWebsocket = true
+	}
+}
+
+// WithWsPath 设置websocket的路径
+func WithWsPath(path string) Option {
+	return func(opt *Options) {
+		opt.wsPath = path
 	}
 }

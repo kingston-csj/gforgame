@@ -30,10 +30,9 @@ func (rs PlayerService) Init() {
 
 func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
 	var player Player
-	mysqldb.Db.First(&player, "id=?", 1001)
+	mysqldb.Db.First(&player, "id=?", msg.Id)
 	fmt.Println(msg.Id, "登录成功，姓名为：", player.Name)
-	//return &protos.ResPlayerLogin{Succ: true}
-	return nil
+	return &protos.ResPlayerLogin{Succ: true}
 }
 
 func (rs PlayerService) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
