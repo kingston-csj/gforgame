@@ -14,7 +14,7 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 ### 代码导入
 下载代码到本地，导入项目到vscode或者goland开发工具
 项目自带多个模块案例代码，如player_service,chat_service
-服务器入口： main.go  (参数增加network.WithWebsocket()代表选择websocket，默认为tcpsocket)
+服务器入口： main.go 
 客户端入口： client.go
 
 ### 私有协议栈
@@ -47,6 +47,10 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 模块需继承Module，并在Init()方法注册该模块的所有通信协议
 新模块要通过network.RegisterModule(player.NewPlayerService())进行注册（扫描消息路由）
 
+### websocket
+node.Startup()方法参数增加network.WithWebsocket()代表选择websocket
+example/h5/welcome.html为ws的客户端测试页面
+
 ## 已实现功能
 * tcp网关，消息路由，消息分发链  
 * 日志模块
@@ -54,8 +58,11 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 * 玩家数据读写
 * 通信协议支持json+protobuf
 * websocket接入
+* 使用原生map实现一套高效cache工具，直接存储原生对象引用而非byte[]，避免频繁序列化与反序列化
 
 ## 近期功能
+* http管理后台
 * csv配置文件读取, jforgame-data实现
-* 数据缓存与异步持久化
-* grpc接入
+* 玩家数据异步持久化
+* grpc跨服通信接入
+* 代码热更新机制

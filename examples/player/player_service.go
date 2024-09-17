@@ -3,10 +3,12 @@ package player
 import (
 	"fmt"
 	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/context"
 	"io/github/gforgame/log"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
+	"strconv"
 )
 
 type PlayerService struct {
@@ -26,11 +28,22 @@ func (rs PlayerService) Init() {
 
 	// 自动建表
 	mysqldb.Db.AutoMigrate(&Player{})
+
+	dbLoader := func(key string) (interface{}, error) {
+		var p Player
+		mysqldb.Db.First(&p, "id=?", key)
+		return &p, nil
+	}
+	context.CacheManager.Register("player", dbLoader)
 }
 
 func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
-	var player Player
-	mysqldb.Db.First(&player, "id=?", msg.Id)
+	cache, err := context.CacheManager.GetCache("player")
+	if err != nil {
+		log.Error(err)
+	}
+	entity, _ := cache.Get(strconv.FormatInt(msg.Id, 10))
+	var player, _ = entity.(*Player)
 	fmt.Println(msg.Id, "登录成功，姓名为：", player.Name)
 	return &protos.ResPlayerLogin{Succ: true}
 }
