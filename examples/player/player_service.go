@@ -8,18 +8,17 @@ import (
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
-	"strconv"
 )
 
-type PlayerService struct {
+type Service struct {
 	network.Base
 }
 
-func NewPlayerService() PlayerService {
-	return PlayerService{}
+func NewPlayerService() *Service {
+	return &Service{}
 }
 
-func (rs PlayerService) Init() {
+func (ps *Service) Init() {
 	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})
 	network.RegisterMessage(protos.CmdPlayerResLogin, &protos.ResPlayerLogin{})
 
@@ -27,8 +26,12 @@ func (rs PlayerService) Init() {
 	network.RegisterMessage(protos.CmdPlayerResCreate, &protos.ResPlayerCreate{})
 
 	// 自动建表
-	mysqldb.Db.AutoMigrate(&Player{})
+	err := mysqldb.Db.AutoMigrate(&Player{})
+	if err != nil {
+		panic(err)
+	}
 
+	// 缓存数据读取
 	dbLoader := func(key string) (interface{}, error) {
 		var p Player
 		mysqldb.Db.First(&p, "id=?", key)
@@ -37,23 +40,38 @@ func (rs PlayerService) Init() {
 	context.CacheManager.Register("player", dbLoader)
 }
 
-func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
+func (ps *Service) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
 	cache, err := context.CacheManager.GetCache("player")
 	if err != nil {
 		log.Error(err)
 	}
-	entity, _ := cache.Get(strconv.FormatInt(msg.Id, 10))
-	var player, _ = entity.(*Player)
+	cacheEntity, _ := cache.Get(msg.Id)
+	player, _ := cacheEntity.(*Player)
+	player.Name = "hello,gforgame"
+	player.Level = 999
+
+	ps.SavePlayer(player)
+
 	fmt.Println(msg.Id, "登录成功，姓名为：", player.Name)
 	return &protos.ResPlayerLogin{Succ: true}
 }
 
-func (rs PlayerService) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
+func (ps *Service) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
 	id := util.GetNextId()
-	player := &Player{Id: id, Name: msg.Name}
+	player := &Player{
+		Id:   id,
+		Name: msg.Name}
 	mysqldb.Db.Create(&player)
 
 	log.Log(log.Player, "Id", player.Id, "name", player.Name)
 
 	fmt.Printf(player.Name)
+}
+
+func (ps *Service) SavePlayer(player interface{}) {
+	entity, ok := player.(mysqldb.Entity)
+	if !ok {
+		panic("not player")
+	}
+	context.DbService.SaveToDb(entity)
 }

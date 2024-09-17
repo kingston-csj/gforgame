@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/github/gforgame/codec/protobuf"
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/player"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"reflect"
+	"time"
 )
 
 type GameTaskHandler struct {
@@ -32,6 +34,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame networ
 }
 
 func main() {
+	startTime := time.Now()
 	network.RegisterModule(chat.NewRoomService())
 	network.RegisterModule(player.NewPlayerService())
 
@@ -49,8 +52,6 @@ func main() {
 
 	// 设置服务器监听的地址和端口
 	node := &network.Node{}
-
-	log.Info("game server is starting ...")
 	codec := &protobuf.ProtobufCodec{}
 	//codec := &json.JsonCodec{}
 	err := node.Startup(network.WithAddress("127.0.0.1:9090"), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec))
@@ -58,15 +59,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	endTime := time.Now()
+	log.Info("game server is starting, cost " + endTime.Sub(startTime).String())
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)
 	sig := <-sg
-	log.Log(log.Application, "game server is closing(signal: %v)", sig)
+	log.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
 
 	for _, c := range modules {
 		c.Shutdown()
 	}
-
 	log.Info("game server has closed...")
 }

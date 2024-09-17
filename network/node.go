@@ -26,11 +26,15 @@ func (n *Node) Startup(opts ...Option) error {
 	if n.option.ServiceAddr == "" {
 		return errors.New("service address cannot be empty in master node")
 	}
-	if n.option.isWebsocket {
-		n.listenWsConn()
-	} else {
-		n.listenTcpConn()
-	}
+
+	go func() {
+		if n.option.isWebsocket {
+			n.listenWsConn()
+		} else {
+			n.listenTcpConn()
+		}
+	}()
+
 	return nil
 }
 

@@ -59,10 +59,10 @@ example/h5/welcome.html为ws的客户端测试页面
 * 通信协议支持json+protobuf
 * websocket接入
 * 使用原生map实现一套高效cache工具，直接存储原生对象引用而非byte[]，避免频繁序列化与反序列化
+* 数据异步持久化，玩家数据实时更新缓存，定时持久化到数据库
 
 ## 近期功能
 * http管理后台
 * csv配置文件读取, jforgame-data实现
-* 玩家数据异步持久化
 * grpc跨服通信接入
 * 代码热更新机制

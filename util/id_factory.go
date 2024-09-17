@@ -1,6 +1,7 @@
 package util
 
 import (
+	"strconv"
 	"sync/atomic"
 	"time"
 )
@@ -21,7 +22,7 @@ func init() {
 }
 
 // GetNextId 生成全局唯一id
-func GetNextId() int64 {
+func GetNextId() string {
 	// 高16位为serverId
 	// 中32位为系统秒数
 	// 低16位为自增长号
@@ -32,5 +33,5 @@ func GetNextId() int64 {
 		(currentTimeSeconds << 16) |
 		generator.Add(1)&0xFFFF
 
-	return id
+	return strconv.FormatInt(id, 10)
 }

@@ -58,7 +58,7 @@ func main() {
 			}
 		}
 	}()
-	session.Send(&protos.ReqPlayerLogin{Id: 1001})
+	session.Send(&protos.ReqPlayerLogin{Id: "1001"})
 	session.Send(&protos.ReqJoinRoom{RoomId: 123, PlayerId: 123})
 
 	sg := make(chan os.Signal)
