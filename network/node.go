@@ -11,8 +11,9 @@ import (
 )
 
 type Node struct {
-	Name   string // 服务器名称
-	option Options
+	Name    string // 服务器名称
+	option  Options
+	Running chan bool
 }
 
 func (n *Node) Startup(opts ...Option) error {
@@ -62,6 +63,10 @@ func handleClient(node *Node, conn net.Conn) {
 	defer conn.Close() // 确保在函数结束时关闭连接
 
 	ioSession := NewSession(&conn, node.option.MessageCodec)
+
+	// session created hook
+	node.option.IoDispatch.OnSessionCreated(ioSession)
+
 	// 异步向客户端写数据
 	go ioSession.Write()
 

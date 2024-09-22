@@ -11,6 +11,8 @@ import (
 type Config struct {
 	DbUrl     string
 	ServerUrl string
+	//后端管理地址
+	HttpUrl string
 }
 
 //go:embed default.yml
@@ -62,6 +64,7 @@ func init() {
 	ServerConfig = Config{
 		DbUrl:     v.GetString("db.url"),
 		ServerUrl: v.GetString("server.addr"),
+		HttpUrl:   v.GetString("server.httpAddr"),
 	}
 	fmt.Println("dbUrl", ServerConfig.DbUrl)
 	fmt.Println("serverAddr", ServerConfig.ServerUrl)

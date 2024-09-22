@@ -58,13 +58,12 @@ func (ps *Service) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) inte
 
 func (ps *Service) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
 	id := util.GetNextId()
-	player := &Player{
-		Id:   id,
-		Name: msg.Name}
+	player := &Player{}
+	player.Id = id
+	player.Name = msg.Name
 	mysqldb.Db.Create(&player)
 
 	log.Log(log.Player, "Id", player.Id, "name", player.Name)
-
 	fmt.Printf(player.Name)
 }
 

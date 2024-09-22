@@ -6,19 +6,19 @@ type Entity interface {
 	SetDeleted()
 }
 
-//type BaseEntity struct {
-//	Id     string `json:"id"`
-//	Delete bool
-//}
-//
-//func (s *BaseEntity) GetId() string {
-//	return s.Id
-//}
-//
-//func (s *BaseEntity) IsDeleted() bool {
-//	return s.Delete
-//}
-//
-//func (s *BaseEntity) SetDeleted() {
-//	s.Delete = true
-//}
+type BaseEntity struct {
+	Id     string `json:"id"`
+	Delete bool
+}
+
+func (s *BaseEntity) GetId() string {
+	return s.Id
+}
+
+func (s *BaseEntity) IsDeleted() bool {
+	return s.Delete
+}
+
+func (s *BaseEntity) SetDeleted() {
+	s.Delete = true
+}

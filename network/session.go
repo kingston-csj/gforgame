@@ -35,22 +35,23 @@ func NewSession(conn *net.Conn, messageCodec codec.MessageCodec) *Session {
 	}
 }
 
-func (s *Session) Send(msg any) {
+func (s *Session) Send(msg any) error {
 	if msg == nil {
-		return
+		return nil
 	}
 	msg_data, err := s.MessageCodec.Encode(msg)
 	if err != nil {
-		log.Fatal("连接服务器失败:", err)
+		return fmt.Errorf("encode message %s cmd failed", msg)
 	}
 
 	cmd, e2 := GetMessageCmd(msg)
 	if e2 != nil {
-		panic(e2)
+		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
 	fmt.Println("发送消息:", cmd)
 	frame, _ := s.ProtocolCodec.Encode(cmd, msg_data)
 	s.dataToSend <- frame
+	return nil
 }
 
 func (s *Session) Write() {

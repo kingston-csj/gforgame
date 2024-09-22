@@ -12,25 +12,25 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 
 ## 快速入门
 ### 代码导入
-下载代码到本地，导入项目到vscode或者goland开发工具
-项目自带多个模块案例代码，如player_service,chat_service
-服务器入口： main.go
+下载代码到本地，导入项目到vscode或者goland开发工具  
+项目自带多个模块案例代码，如player_service,chat_service  
+服务器入口： main.go  
 客户端入口： client.go  
 
+
 ### 私有协议栈
-包括包头及包体，格式如下
-//      header(8bytes)     | body
-// msgLength = 8+len(body) | body
-//  cmd | msgLength        | body
+包括包头及包体，格式如下  
+//      header(8bytes)     | body  
+//  cmd | len(body)        | body  
 
 ### 消息编解码
-在message.go统一管理所有协议的id
-如果采用json的话，可直接在message.go定义协议结构
-如果采用protobuf的话，则通过message.proto进行注册，再通过gen_proto.bat脚本生成message.pb.go文件
-（使用protobuf，需要下载protobuf编译工具，以及go插件，并将两者添加到系统环境变量）
+在message.go统一管理所有协议的id  
+如果采用json的话，可直接在message.go定义协议结构  
+如果采用protobuf的话，则通过message.proto进行注册，再通过gen_proto.bat脚本生成message.pb.go文件  
+（使用protobuf，需要下载protobuf编译工具，以及go插件，并将两者添加到系统环境变量）  
 
 ### 消息路由
-遵循“约定大于配置”思想，根据方法签名自动扫描，满足一定格式的方法即为消息处理器，
+遵循“约定大于配置”思想，根据方法签名自动扫描，满足一定格式的方法即为消息处理器  
 ```golang
     // 消息处理器格式： 第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端
     func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
@@ -39,17 +39,17 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 ```
 
 ### 玩家数据读写
-数据库使用mysql, orm使用gorm，
-当有数据发生变化时，定时全量更新，结合cache机制，提高读写性能
+数据库使用mysql, orm使用gorm  
+当有数据发生变化时，定时全量更新，结合cache机制，提高读写性能  
 
 ### 功能模块
-每个功能以模块的形式组织业务，例如背包，任务，技能等等
-模块需继承Module，并在Init()方法注册该模块的所有通信协议
-新模块要通过network.RegisterModule(player.NewPlayerService())进行注册（扫描消息路由）
+每个功能以模块的形式组织业务，例如背包，任务，技能等等  
+模块需继承Module，并在Init()方法注册该模块的所有通信协议  
+新模块要通过network.RegisterModule(player.NewPlayerService())进行注册（扫描消息路由）  
 
 ### websocket
-node.Startup()方法参数增加network.WithWebsocket()代表选择websocket
-example/h5/welcome.html为ws的客户端测试页面
+node.Startup()方法参数增加network.WithWebsocket()代表选择websocket  
+example/h5/welcome.html为ws的客户端测试页面  
 
 ## 已实现功能
 * tcp网关，消息路由，消息分发链  
@@ -61,9 +61,9 @@ example/h5/welcome.html为ws的客户端测试页面
 * websocket接入
 * 使用原生map实现一套高效cache工具，直接存储原生对象引用而非byte[]，避免频繁序列化与反序列化
 * 数据异步持久化，玩家数据实时更新缓存，定时持久化到数据库
+* http管理后台
 
 ## 近期功能
-* http管理后台
 * csv配置文件读取, jforgame-data实现
 * grpc跨服通信接入
 * 代码热更新机制
