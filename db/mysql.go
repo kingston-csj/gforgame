@@ -3,6 +3,7 @@ package db
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"io/github/gforgame/config"
 )
 
 var (
@@ -10,8 +11,7 @@ var (
 )
 
 func init() {
-	dsn := "root:123456@tcp(localhost:3306)/game_user?charset=utf8mb4&parseTime=True&loc=Local"
-	var database, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	var database, err = gorm.Open(mysql.Open(config.ServerConfig.DbUrl), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/github/gforgame/codec/protobuf"
+	"io/github/gforgame/config"
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/log"
@@ -54,8 +55,8 @@ func main() {
 	node := &network.Node{}
 	codec := &protobuf.ProtobufCodec{}
 	//codec := &json.JsonCodec{}
-	err := node.Startup(network.WithAddress("127.0.0.1:9090"), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec))
-	//err := node.Startup(network.WithAddress("127.0.0.1:9090"), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec), network.WithWebsocket())
+	err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec))
+	//err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec), network.WithWebsocket())
 	if err != nil {
 		panic(err)
 	}

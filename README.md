@@ -14,8 +14,8 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 ### 代码导入
 下载代码到本地，导入项目到vscode或者goland开发工具
 项目自带多个模块案例代码，如player_service,chat_service
-服务器入口： main.go 
-客户端入口： client.go
+服务器入口： main.go
+客户端入口： client.go  
 
 ### 私有协议栈
 包括包头及包体，格式如下
@@ -40,7 +40,7 @@ gforgame，jforgame的go语言实现。是一个轻量级高性能手游服务�
 
 ### 玩家数据读写
 数据库使用mysql, orm使用gorm，
-当有数据发生变化时，定时全量更新，结合cache机制(待实现)，提高读写性能
+当有数据发生变化时，定时全量更新，结合cache机制，提高读写性能
 
 ### 功能模块
 每个功能以模块的形式组织业务，例如背包，任务，技能等等
@@ -54,6 +54,7 @@ example/h5/welcome.html为ws的客户端测试页面
 ## 已实现功能
 * tcp网关，消息路由，消息分发链  
 * 日志模块
+* 多环境配置
 * 事件驱动
 * 玩家数据读写
 * 通信协议支持json+protobuf

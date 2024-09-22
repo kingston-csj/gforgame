@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	loaders = map[string]func(key string) (interface{}, error){}
+	loaders map[string]func(key string) (interface{}, error)
 )
 
 func init() {
-	loaders = map[string]func(string) (interface{}, error){}
+	loaders = make(map[string]func(key string) (interface{}, error))
 }
 
 type CacheManager struct {
