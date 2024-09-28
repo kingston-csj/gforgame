@@ -14,22 +14,22 @@ func init() {
 	loaders = make(map[string]func(key string) (interface{}, error))
 }
 
-type CacheManager struct {
+type Manager struct {
 	caches map[string]*Cache
 	mu     sync.Mutex
 }
 
-func NewCacheManager() *CacheManager {
-	return &CacheManager{
+func NewCacheManager() *Manager {
+	return &Manager{
 		caches: make(map[string]*Cache),
 	}
 }
 
-func (cm *CacheManager) Register(table string, loader func(key string) (interface{}, error)) {
+func (cm *Manager) Register(table string, loader func(key string) (interface{}, error)) {
 	loaders[table] = loader
 }
 
-func (cm *CacheManager) GetCache(table string) (*Cache, error) {
+func (cm *Manager) GetCache(table string) (*Cache, error) {
 	cm.mu.Lock()
 	defer cm.mu.Unlock()
 

@@ -6,7 +6,7 @@ import (
 import mysqldb "io/github/gforgame/db"
 
 var (
-	CacheManager *cache.CacheManager
+	CacheManager *cache.Manager
 	DbService    *mysqldb.AsyncDbService
 )
 

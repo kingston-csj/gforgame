@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// CacheItem 表示缓存条目
-type CacheItem struct {
+// Item 表示缓存条目
+type Item struct {
 	Value      interface{}
 	LastAccess time.Time
 }
@@ -14,7 +14,7 @@ type CacheItem struct {
 // Cache 表示缓存
 type Cache struct {
 	mu              sync.RWMutex
-	items           map[string]*CacheItem
+	items           map[string]*Item
 	expiry          time.Duration
 	cleanupInterval time.Duration
 	loader          func(key string) (interface{}, error)
@@ -23,7 +23,7 @@ type Cache struct {
 // NewCache 创建一个新的缓存实例
 func NewCache(expiry time.Duration, cleanupInterval time.Duration, loader func(key string) (interface{}, error)) *Cache {
 	cache := &Cache{
-		items:           make(map[string]*CacheItem),
+		items:           make(map[string]*Item),
 		expiry:          expiry,
 		cleanupInterval: cleanupInterval,
 		loader:          loader,
@@ -53,7 +53,7 @@ func (c *Cache) Get(key string) (interface{}, error) {
 	}
 
 	c.mu.Lock()
-	c.items[key] = &CacheItem{
+	c.items[key] = &Item{
 		Value:      value,
 		LastAccess: time.Now(),
 	}
@@ -65,7 +65,7 @@ func (c *Cache) Get(key string) (interface{}, error) {
 // Set 更新缓存中的数据
 func (c *Cache) Set(key string, value interface{}) {
 	c.mu.Lock()
-	c.items[key] = &CacheItem{
+	c.items[key] = &Item{
 		Value:      value,
 		LastAccess: time.Now(),
 	}

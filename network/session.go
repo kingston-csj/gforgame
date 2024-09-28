@@ -8,7 +8,7 @@ import (
 )
 
 type Session struct {
-	conn *net.Conn
+	conn net.Conn
 
 	die chan bool
 
@@ -25,13 +25,13 @@ type Session struct {
 	remoteAddr string
 }
 
-func NewSession(conn *net.Conn, messageCodec codec.MessageCodec) *Session {
+func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	return &Session{conn: conn,
 		ProtocolCodec: NewDecoder(),
 		MessageCodec:  messageCodec,
 		dataToSend:    make(chan []byte),
-		localAddr:     (*conn).LocalAddr().String(),
-		remoteAddr:    (*conn).RemoteAddr().String(),
+		localAddr:     conn.LocalAddr().String(),
+		remoteAddr:    conn.RemoteAddr().String(),
 	}
 }
 
@@ -39,7 +39,7 @@ func (s *Session) Send(msg any) error {
 	if msg == nil {
 		return nil
 	}
-	msg_data, err := s.MessageCodec.Encode(msg)
+	msgData, err := s.MessageCodec.Encode(msg)
 	if err != nil {
 		return fmt.Errorf("encode message %s cmd failed", msg)
 	}
@@ -49,7 +49,7 @@ func (s *Session) Send(msg any) error {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
 	fmt.Println("发送消息:", cmd)
-	frame, _ := s.ProtocolCodec.Encode(cmd, msg_data)
+	frame, _ := s.ProtocolCodec.Encode(cmd, msgData)
 	s.dataToSend <- frame
 	return nil
 }
@@ -60,7 +60,7 @@ func (s *Session) Write() {
 	for {
 		select {
 		case data := <-s.dataToSend:
-			if _, err := (*s.conn).Write(data); err != nil {
+			if _, err := s.conn.Write(data); err != nil {
 				log.Println(err.Error())
 				//s.Close()
 			}

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"log"
+	"io/github/gforgame/log"
 	"net"
 	"net/http"
 	"reflect"
@@ -43,26 +43,35 @@ func (n *Node) Startup(opts ...Option) error {
 func (n *Node) listenTcpConn() {
 	listener, err := net.Listen("tcp", n.option.ServiceAddr)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Error(err)
 	}
 
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(fmt.Errorf("new tcp conn failed %v", err))
 			continue
 		}
-
 		go handleClient(n, conn)
 	}
 }
 
 // 处理客户端连接，包括socket,websocket
 func handleClient(node *Node, conn net.Conn) {
-	defer conn.Close() // 确保在函数结束时关闭连接
+	defer func() {
+		// 处理客户端网络断开
+		s := GetSession(conn)
+		node.option.IoDispatch.OnSessionCreated(s)
+		unregisterSession(conn)
+		err := conn.Close()
+		if err != nil {
+			log.Error(fmt.Errorf("close tcp conn failed %v", err))
+		}
+	}()
 
-	ioSession := NewSession(&conn, node.option.MessageCodec)
+	ioSession := NewSession(conn, node.option.MessageCodec)
+	registerSession(conn, ioSession)
 
 	// session created hook
 	node.option.IoDispatch.OnSessionCreated(ioSession)
@@ -75,7 +84,7 @@ func handleClient(node *Node, conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Printf(fmt.Sprintf("Read message error: %s, session will be closed immediately", err.Error()))
+			log.Error(fmt.Errorf("read message  failed %v", err))
 			return
 		}
 		if n <= 0 {
@@ -83,7 +92,7 @@ func handleClient(node *Node, conn net.Conn) {
 		}
 		packets, err := ioSession.ProtocolCodec.Decode(buf[:n])
 		if err != nil {
-			log.Println(err.Error())
+			log.Error(fmt.Errorf("decode protocol  failed %v", err))
 			return
 		}
 		// process packets decoded
@@ -92,11 +101,11 @@ func handleClient(node *Node, conn net.Conn) {
 			msg := reflect.New(typ.Elem()).Interface()
 			err := node.option.MessageCodec.Decode(p.Data, msg)
 			if err != nil {
-				log.Println(err.Error())
+				log.Error(fmt.Errorf("decode message  failed %v", err))
 				continue
 			}
 			ioFrame := &RequestDataFrame{Header: p.Header, Msg: msg}
-			node.option.IoDispatch.OnMessageReceived(ioSession, *ioFrame)
+			node.option.IoDispatch.OnMessageReceived(ioSession, ioFrame)
 		}
 	}
 }
@@ -117,18 +126,18 @@ func (n *Node) listenWsConn() {
 	http.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Println(fmt.Sprintf("Upgrade failure, URI=%s, Error=%s", r.RequestURI, err.Error()))
+			log.Error(fmt.Errorf("websocket conn failed %v", err))
 			return
 		}
 
 		c, err := newWSConn(conn)
 		if err != nil {
-			log.Println(err)
+			log.Error(fmt.Errorf("new websocket conn failed %v", err))
 			return
 		}
 		go handleClient(n, c)
 	})
 	if err := http.ListenAndServe(n.option.ServiceAddr, nil); err != nil {
-		log.Fatal(err.Error())
+		panic(err)
 	}
 }

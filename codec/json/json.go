@@ -6,15 +6,15 @@ import (
 	"reflect"
 )
 
-type JsonCodec struct {
+type Codec struct {
 }
 
-func (*JsonCodec) Encode(v any) ([]byte, error) {
+func (*Codec) Encode(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
 // Decode 将byte数组反序列化为bean
-func (*JsonCodec) Decode(data []byte, v any) error {
+func (*Codec) Decode(data []byte, v any) error {
 	// 反射用于检查接口类型并进行解码
 	rv := reflect.ValueOf(v)
 	if rv.Kind() == reflect.Ptr {
@@ -25,6 +25,6 @@ func (*JsonCodec) Decode(data []byte, v any) error {
 	return fmt.Errorf("decode need a pointer type")
 }
 
-//func NewSerializer() *JsonCodec {
-//	return &JsonCodec{}
-//}
+func NewSerializer() *Codec {
+	return &Codec{}
+}

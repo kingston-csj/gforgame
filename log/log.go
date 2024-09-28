@@ -9,16 +9,16 @@ import (
 	"time"
 )
 
-type LogType int
+type Type int
 
 // 日志类型枚举，每一个类型对应独立的文件
 const (
-	Admin LogType = iota
+	Admin Type = iota
 	Application
 	Player
 )
 
-var logName = map[LogType]string{
+var logName = map[Type]string{
 	Admin:       "admin",
 	Application: "application",
 	Player:      "player",
@@ -94,7 +94,7 @@ func createErrorLog() *logrus.Logger {
 //
 //	Log(Admin, "User logged in", user)
 //	Log(Player, "Failed to save data", err)
-func Log(name LogType, args ...interface{}) {
+func Log(name Type, args ...interface{}) {
 	if len(args)%2 != 0 {
 		panic("log arguments must be odd number")
 	}

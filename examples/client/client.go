@@ -30,9 +30,9 @@ func main() {
 	defer conn.Close()
 	fmt.Println("已连接到服务器:", address)
 
-	msgCodec := &protobuf.ProtobufCodec{}
+	msgCodec := &protobuf.Codec{}
 	//msgCodec := &json.JsonCodec{}
-	session := network.NewSession(&conn, msgCodec)
+	session := network.NewSession(conn, msgCodec)
 	go session.Write()
 
 	go func() {

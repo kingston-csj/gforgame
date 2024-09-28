@@ -23,7 +23,7 @@ var (
 	router *gin.Engine
 )
 
-func (g *GameTaskHandler) MessageReceived(session *network.Session, frame network.RequestDataFrame) bool {
+func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *network.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error(r.(error))
@@ -34,7 +34,11 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame networ
 	// 反射
 	values := msgHandler.Method.Func.Call(args)
 	if len(values) > 0 {
-		session.Send(values[0].Interface())
+		err := session.Send(values[0].Interface())
+		if err != nil {
+			log.Error(fmt.Errorf("session.Send: %v", err))
+			return false
+		}
 	}
 	return true
 }
@@ -55,20 +59,7 @@ func StartHttpServer(router *gin.Engine) {
 	}
 }
 
-func slowOp() {
-	defer trace()()
-	time.Sleep(3 * time.Second)
-}
-
-func trace() func() {
-	fmt.Println("start " + time.Now().Format("2006-01-02 15:04:05"))
-	return func() {
-		fmt.Println("end " + time.Now().Format("2006-01-02 15:04:05"))
-	}
-}
-
 func main() {
-	slowOp()
 	startTime := time.Now()
 	network.RegisterModule(chat.NewRoomService())
 	network.RegisterModule(player.NewPlayerService())
@@ -83,14 +74,14 @@ func main() {
 	}
 
 	ioDispatcher := &network.BaseIoDispatch{}
-	(*ioDispatcher).AddHandler(&GameTaskHandler{})
+	ioDispatcher.AddHandler(&GameTaskHandler{})
 
 	// 设置服务器监听的地址和端口
 	node = &network.Node{
 		Running: make(chan bool),
 	}
-	codec := &protobuf.ProtobufCodec{}
-	//codec := &json.JsonCodec{}
+	codec := protobuf.NewSerializer()
+	//codec := &json.NewSerializer()
 	err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec))
 	//err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec), network.WithWebsocket())
 	if err != nil {

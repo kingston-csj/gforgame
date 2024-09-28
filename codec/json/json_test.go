@@ -12,7 +12,7 @@ type Message struct {
 
 func TestJsonCodec(t *testing.T) {
 	m := Message{1, "hello world"}
-	s := &JsonCodec{}
+	s := &Codec{}
 	b, err := s.Encode(m)
 	if err != nil {
 		t.Fail()
@@ -24,5 +24,23 @@ func TestJsonCodec(t *testing.T) {
 	}
 	if !reflect.DeepEqual(m, m2) {
 		t.Fail()
+	}
+}
+
+func BenchmarkJsonCodec(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		m := Message{1, "hello world"}
+		s := &Codec{}
+		body, err := s.Encode(m)
+		if err != nil {
+			b.Fail()
+		}
+		m2 := Message{}
+		if err := s.Decode(body, &m2); err != nil {
+			b.Fail()
+		}
+		if !reflect.DeepEqual(m, m2) {
+			b.Fail()
+		}
 	}
 }

@@ -17,7 +17,7 @@ type MessageHeader struct {
 }
 
 // ErrPacketSizeExceed is the error used for encode/decode.
-var ErrPacketSizeExceed = errors.New("Protocol: packet size exceed")
+var ErrPacketSizeExceed = errors.New("protocol: packet size exceed")
 
 type Protocol struct {
 	buf *bytes.Buffer
