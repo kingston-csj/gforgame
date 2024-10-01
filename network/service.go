@@ -1,7 +1,7 @@
 package network
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -72,6 +72,6 @@ func GetHandler(cmd int) (*Handler, error) {
 	if ok {
 		return value, nil
 	} else {
-		return nil, errors.New("not found")
+		return nil, fmt.Errorf("cmd [%d] handler not found", cmd)
 	}
 }

@@ -3,9 +3,10 @@ package config
 import (
 	"embed"
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 type Config struct {
@@ -13,6 +14,8 @@ type Config struct {
 	ServerUrl string
 	//后端管理地址
 	HttpUrl string
+	// pprof性能监测地址
+	PprofAddr string
 }
 
 //go:embed default.yml
@@ -65,6 +68,7 @@ func init() {
 		DbUrl:     v.GetString("db.url"),
 		ServerUrl: v.GetString("server.addr"),
 		HttpUrl:   v.GetString("server.httpAddr"),
+		PprofAddr: v.GetString("server.pprofAddr"),
 	}
 	fmt.Println("dbUrl", ServerConfig.DbUrl)
 	fmt.Println("serverAddr", ServerConfig.ServerUrl)

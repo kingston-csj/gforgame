@@ -2,17 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/github/gforgame/codec/protobuf"
 	"io/github/gforgame/config"
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/log"
 	"io/github/gforgame/network"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"reflect"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type GameTaskHandler struct {
@@ -92,6 +95,12 @@ func main() {
 	router = NewHttpServer()
 	go func() {
 		StartHttpServer(router)
+	}()
+
+	go func() {
+		mux := NewServeMux()
+		// 监听并在 0.0.0.0:6060 上启动服务器
+		http.ListenAndServe(config.ServerConfig.PprofAddr, mux)
 	}()
 
 	endTime := time.Now()
