@@ -10,8 +10,12 @@ import (
 )
 
 type Config struct {
-	DbUrl     string
-	ServerUrl string
+	DbUrl string
+	// 服务器id
+	ServerId uint32
+	//对外暴露的rpc服务地址
+	RpcServerUrl string
+	ServerUrl    string
 	//后端管理地址
 	HttpUrl string
 	// pprof性能监测地址
@@ -61,15 +65,15 @@ func init() {
 	v.AddConfigPath("./config")
 	// 再次读取配置文件，这次是根据环境变量，使用合并配置的方法确保旧配置被替换
 	if err := v.MergeInConfig(); err != nil {
-		panic(fmt.Errorf("failed to read config: %w", err))
+		// panic(fmt.Errorf("failed to read config: %w", err))
 	}
 
 	ServerConfig = Config{
-		DbUrl:     v.GetString("db.url"),
-		ServerUrl: v.GetString("server.addr"),
-		HttpUrl:   v.GetString("server.httpAddr"),
-		PprofAddr: v.GetString("server.pprofAddr"),
+		ServerId:     v.GetUint32("server.id"),
+		DbUrl:        v.GetString("db.url"),
+		ServerUrl:    v.GetString("server.addr"),
+		RpcServerUrl: v.GetString("server.rpcAddr"),
+		HttpUrl:      v.GetString("server.httpAddr"),
+		PprofAddr:    v.GetString("server.pprofAddr"),
 	}
-	fmt.Println("dbUrl", ServerConfig.DbUrl)
-	fmt.Println("serverAddr", ServerConfig.ServerUrl)
 }

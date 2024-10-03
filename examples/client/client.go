@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"io/github/gforgame/codec/protobuf"
+	"io/github/gforgame/db"
+	"io/github/gforgame/examples/cross"
+	"io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"log"
@@ -13,6 +16,11 @@ import (
 )
 
 func main() {
+
+	// rpc客户端测试代码
+	p := &player.Player{db.BaseEntity{Id: "123456"}, "gforgame", 999}
+	cross.PlayerLoginRemote(p, cross.Island)
+
 	network.RegisterMessage(protos.CmdChatReqJoin, &protos.ReqJoinRoom{})
 	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
 	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})

@@ -31,7 +31,7 @@ func wrapPprofHandler(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func NewServeMux() *http.ServeMux {
+func NewHttpServeMux() *http.ServeMux {
 	// 创建默认的 pprof 处理器
 	mux := http.NewServeMux()
 	mux.HandleFunc("/debug/pprof/", wrapPprofHandler(http.HandlerFunc(pprof.Index)))

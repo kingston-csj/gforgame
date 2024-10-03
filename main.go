@@ -8,7 +8,6 @@ import (
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/log"
 	"io/github/gforgame/network"
-	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -63,6 +62,7 @@ func StartHttpServer(router *gin.Engine) {
 }
 
 func main() {
+
 	startTime := time.Now()
 	network.RegisterModule(chat.NewRoomService())
 	network.RegisterModule(player.NewPlayerService())
@@ -91,17 +91,25 @@ func main() {
 		panic(err)
 	}
 
-	//// 启动后台http服务器
-	router = NewHttpServer()
-	go func() {
-		StartHttpServer(router)
-	}()
+	// 启动rpc服务器
+	if len(config.ServerConfig.RpcServerUrl) > 0 {
+		go func() {
+			NewRpcServer(config.ServerConfig.RpcServerUrl)
+		}()
+	}
 
-	go func() {
-		mux := NewServeMux()
-		// 监听并在 0.0.0.0:6060 上启动服务器
-		http.ListenAndServe(config.ServerConfig.PprofAddr, mux)
-	}()
+	// 启动后台http服务器
+	// router = NewHttpServer()
+	// go func() {
+	// 	StartHttpServer(router)
+	// }()
+
+	// pprof性能监控
+	// go func() {
+	// 	mux := NewHttpServeMux()
+	// 	// 监听并在 0.0.0.0:6060 上启动服务器
+	// 	http.ListenAndServe(config.ServerConfig.PprofAddr, mux)
+	// }()
 
 	endTime := time.Now()
 	log.Info("game server is starting, cost " + endTime.Sub(startTime).String())

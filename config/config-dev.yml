@@ -1,4 +1,6 @@
 server:
+  id: 1001
   addr: 127.0.0.1:9090
+  rpcAddr: :50051
   httpAddr: 127.0.0.1:8080
   pprofAddr: :6060

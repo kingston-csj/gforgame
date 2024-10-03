@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rpc;
+option go_package = "/rpc";
+
+service Rpc {
+  rpc EnterRemote (PlayerCrossRequest) returns (PlayerCrossReply) {}
+}
+
+message PlayerCrossRequest {
+  bytes  data = 1;
+}
+
+message PlayerCrossReply {
+  string message = 1;
+}
