@@ -1,10 +1,11 @@
-package log
+package logger
 
 import (
 	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type consoleLogFormatter struct{}

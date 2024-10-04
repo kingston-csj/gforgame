@@ -61,6 +61,11 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket  
 example/h5/welcome.html 为 ws 的客户端测试页面
 
+### 跨服通信
+
+使用 grpc 进行跨进程通信，需要先安装 protobuf 和 protoc-gen-go-grpc 编译插件  
+根据不同的跨服类型，自行定义业务逻辑，参考 examples/cross 相关代码（流程待完善）
+
 ## 已实现功能
 
 - tcp 网关，消息路由，消息分发链

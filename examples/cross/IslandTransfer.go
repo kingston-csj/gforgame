@@ -3,7 +3,7 @@ package cross
 import (
 	"fmt"
 	"io/github/gforgame/examples/player"
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 )
 
 type IslandTransfer struct {
@@ -22,7 +22,7 @@ func (t IslandTransfer) GetTargetServerId(p *player.Player) uint32 {
 }
 
 func (t IslandTransfer) LocalEnterScene(p *player.Player) error {
-	log.Info(fmt.Sprintf("player %s enter island", p.Id))
+	logger.Info(fmt.Sprintf("player %s enter island", p.Id))
 	return nil
 }
 

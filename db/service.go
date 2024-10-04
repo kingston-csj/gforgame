@@ -1,7 +1,7 @@
 package db
 
 import (
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 	"runtime"
 	"strconv"
 )
@@ -39,7 +39,7 @@ func (s *AsyncDbService) SaveToDb(entity Entity) {
 	}
 	num, err := strconv.ParseInt((entity).GetId(), 10, 64)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		panic(err)
 	}
 	index := num % int64(s.workerCapacity)

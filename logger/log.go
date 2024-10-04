@@ -1,12 +1,13 @@
-package log
+package logger
 
 import (
 	"fmt"
-	"github.com/lestrrat-go/file-rotatelogs"
-	"github.com/sirupsen/logrus"
 	"runtime"
 	"strings"
 	"time"
+
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/sirupsen/logrus"
 )
 
 type Type int

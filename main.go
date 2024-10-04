@@ -6,7 +6,7 @@ import (
 	"io/github/gforgame/config"
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/player"
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	_ "net/http/pprof"
 	"os"
@@ -28,7 +28,7 @@ var (
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *network.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error(r.(error))
+			logger.Error(r.(error))
 		}
 	}()
 	msgHandler, _ := network.GetHandler(frame.Header.Cmd)
@@ -38,7 +38,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *netwo
 	if len(values) > 0 {
 		err := session.Send(values[0].Interface())
 		if err != nil {
-			log.Error(fmt.Errorf("session.Send: %v", err))
+			logger.Error(fmt.Errorf("session.Send: %v", err))
 			return false
 		}
 	}
@@ -112,16 +112,16 @@ func main() {
 	// }()
 
 	endTime := time.Now()
-	log.Info("game server is starting, cost " + endTime.Sub(startTime).String())
+	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)
 	select {
 	case sig := <-sg:
-		log.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
+		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
 		showDown(modules)
 	case <-node.Running:
-		log.Info(fmt.Sprintf("game server is closing (signal: http)"))
+		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
 		showDown(modules)
 	}
 }
@@ -130,5 +130,5 @@ func showDown(modules []network.Module) {
 	for _, c := range modules {
 		c.Shutdown()
 	}
-	log.Info("game server has closed...")
+	logger.Info("game server has closed...")
 }

@@ -3,11 +3,12 @@ package network
 import (
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 	"net"
 	"net/http"
 	"reflect"
+
+	"github.com/gorilla/websocket"
 )
 
 type Node struct {
@@ -43,14 +44,14 @@ func (n *Node) Startup(opts ...Option) error {
 func (n *Node) listenTcpConn() {
 	listener, err := net.Listen("tcp", n.option.ServiceAddr)
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 
 	defer listener.Close()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Error(fmt.Errorf("new tcp conn failed %v", err))
+			logger.Error(fmt.Errorf("new tcp conn failed %v", err))
 			continue
 		}
 		go handleClient(n, conn)
@@ -66,7 +67,7 @@ func handleClient(node *Node, conn net.Conn) {
 		unregisterSession(conn)
 		err := conn.Close()
 		if err != nil {
-			log.Error(fmt.Errorf("close tcp conn failed %v", err))
+			logger.Error(fmt.Errorf("close tcp conn failed %v", err))
 		}
 	}()
 
@@ -84,7 +85,7 @@ func handleClient(node *Node, conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.Error(fmt.Errorf("read message  failed %v", err))
+			logger.Error(fmt.Errorf("read message  failed %v", err))
 			return
 		}
 		if n <= 0 {
@@ -92,7 +93,7 @@ func handleClient(node *Node, conn net.Conn) {
 		}
 		packets, err := ioSession.ProtocolCodec.Decode(buf[:n])
 		if err != nil {
-			log.Error(fmt.Errorf("decode protocol  failed %v", err))
+			logger.Error(fmt.Errorf("decode protocol  failed %v", err))
 			return
 		}
 		// process packets decoded
@@ -101,7 +102,7 @@ func handleClient(node *Node, conn net.Conn) {
 			msg := reflect.New(typ.Elem()).Interface()
 			err := node.option.MessageCodec.Decode(p.Data, msg)
 			if err != nil {
-				log.Error(fmt.Errorf("decode message  failed %v", err))
+				logger.Error(fmt.Errorf("decode message  failed %v", err))
 				continue
 			}
 			ioFrame := &RequestDataFrame{Header: p.Header, Msg: msg}
@@ -126,13 +127,13 @@ func (n *Node) listenWsConn() {
 	http.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			log.Error(fmt.Errorf("websocket conn failed %v", err))
+			logger.Error(fmt.Errorf("websocket conn failed %v", err))
 			return
 		}
 
 		c, err := newWSConn(conn)
 		if err != nil {
-			log.Error(fmt.Errorf("new websocket conn failed %v", err))
+			logger.Error(fmt.Errorf("new websocket conn failed %v", err))
 			return
 		}
 		go handleClient(n, c)

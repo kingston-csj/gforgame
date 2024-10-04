@@ -4,7 +4,7 @@ import (
 	"fmt"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
@@ -43,7 +43,7 @@ func (ps *Service) Init() {
 func (ps *Service) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
 	cache, err := context.CacheManager.GetCache("player")
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 	cacheEntity, _ := cache.Get(msg.Id)
 	player, _ := cacheEntity.(*Player)
@@ -63,7 +63,7 @@ func (ps *Service) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
 	player.Name = msg.Name
 	mysqldb.Db.Create(&player)
 
-	log.Log(log.Player, "Id", player.Id, "name", player.Name)
+	logger.Log(logger.Player, "Id", player.Id, "name", player.Name)
 	fmt.Printf(player.Name)
 }
 

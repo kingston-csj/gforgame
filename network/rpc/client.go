@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"fmt"
-	"io/github/gforgame/log"
+	"io/github/gforgame/logger"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -34,7 +34,7 @@ func GetOrCreateClient(sid uint32) (RpcClient, error) {
 			}
 
 			c := NewRpcClient(conn)
-			log.Info(fmt.Sprintf("connect to rpc server %d)", sid))
+			logger.Info(fmt.Sprintf("connect to rpc server %d)", sid))
 			clients[sid] = c
 			return c, nil
 		}
