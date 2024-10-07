@@ -8,6 +8,7 @@ import (
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
+	"io/github/gforgame/network/protocol"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -25,7 +26,7 @@ var (
 	router *gin.Engine
 )
 
-func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *network.RequestDataFrame) bool {
+func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error(r.(error))
@@ -36,7 +37,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *netwo
 	// 反射
 	values := msgHandler.Method.Func.Call(args)
 	if len(values) > 0 {
-		err := session.Send(values[0].Interface())
+		err := session.Send(values[0].Interface(), frame.Header.Index)
 		if err != nil {
 			logger.Error(fmt.Errorf("session.Send: %v", err))
 			return false
@@ -92,11 +93,11 @@ func main() {
 	}
 
 	// 启动rpc服务器
-	if len(config.ServerConfig.RpcServerUrl) > 0 {
-		go func() {
-			NewRpcServer(config.ServerConfig.RpcServerUrl)
-		}()
-	}
+	// if len(config.ServerConfig.RpcServerUrl) > 0 {
+	// 	go func() {
+	// 		NewRpcServer(config.ServerConfig.RpcServerUrl)
+	// 	}()
+	// }
 
 	// 启动后台http服务器
 	// router = NewHttpServer()

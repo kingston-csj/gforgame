@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/github/gforgame/logger"
+	"io/github/gforgame/network/protocol"
 	"net"
 	"net/http"
 	"reflect"
@@ -105,7 +106,7 @@ func handleClient(node *Node, conn net.Conn) {
 				logger.Error(fmt.Errorf("decode message  failed %v", err))
 				continue
 			}
-			ioFrame := &RequestDataFrame{Header: p.Header, Msg: msg}
+			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
 			node.option.IoDispatch.OnMessageReceived(ioSession, ioFrame)
 		}
 	}

@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	id2Msg map[int]reflect.Type
-
-	msg2Id map[reflect.Type]int
+	id2Msg map[int]reflect.Type = make(map[int]reflect.Type)
+	msg2Id map[reflect.Type]int = make(map[reflect.Type]int)
 )
 
 func RegisterMessage(cmd int, msg any) {
@@ -24,11 +23,6 @@ func RegisterMessage(cmd int, msg any) {
 
 	id2Msg[cmd] = typeOf
 	msg2Id[typeOf] = cmd
-}
-
-func init() {
-	id2Msg = make(map[int]reflect.Type)
-	msg2Id = make(map[reflect.Type]int)
 }
 
 func GetMessageCmd(msg any) (int, error) {

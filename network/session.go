@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"io/github/gforgame/codec"
+	"io/github/gforgame/network/protocol"
 	"log"
 	"net"
 )
@@ -12,7 +13,7 @@ type Session struct {
 
 	die chan bool
 
-	ProtocolCodec *Protocol
+	ProtocolCodec *protocol.Protocol
 
 	MessageCodec codec.MessageCodec
 
@@ -27,7 +28,7 @@ type Session struct {
 
 func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	return &Session{conn: conn,
-		ProtocolCodec: NewDecoder(),
+		ProtocolCodec: protocol.NewDecoder(),
 		MessageCodec:  messageCodec,
 		dataToSend:    make(chan []byte),
 		localAddr:     conn.LocalAddr().String(),
@@ -35,7 +36,10 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	}
 }
 
-func (s *Session) Send(msg any) error {
+// func (s *Session) Send(msg any) error {
+
+// }
+func (s *Session) Send(msg any, index int) error {
 	if msg == nil {
 		return nil
 	}
@@ -49,7 +53,7 @@ func (s *Session) Send(msg any) error {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
 	fmt.Println("发送消息:", cmd)
-	frame, _ := s.ProtocolCodec.Encode(cmd, msgData)
+	frame, _ := s.ProtocolCodec.Encode(cmd, index, msgData)
 	s.dataToSend <- frame
 	return nil
 }

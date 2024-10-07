@@ -15,16 +15,11 @@ type (
 )
 
 var (
-	typeOfError   = reflect.TypeOf((*error)(nil)).Elem()
 	typeOfBytes   = reflect.TypeOf(([]byte)(nil))
 	typeOfSession = reflect.TypeOf(&Session{})
 
-	handlers map[int]*Handler
+	handlers map[int]*Handler = make(map[int]*Handler)
 )
-
-func init() {
-	handlers = make(map[int]*Handler)
-}
 
 func RegisterMessageHandlers(comp Module) error {
 	clazz := reflect.TypeOf(comp)

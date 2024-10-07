@@ -1,4 +1,4 @@
-package network
+package protocol
 
 import (
 	"bytes"
@@ -7,13 +7,14 @@ import (
 
 // Protocol constants.
 const (
-	HeadLength    = 8
+	HeadLength    = 12
 	MaxPacketSize = 64 * 1024
 )
 
 type MessageHeader struct {
-	Cmd  int //消息类型
-	Size int //消息长度
+	Cmd   int //消息类型
+	Index int //客户端消息索引，由客户端维护自增长
+	Size  int //消息长度
 }
 
 // ErrPacketSizeExceed is the error used for encode/decode.
@@ -33,13 +34,14 @@ func NewDecoder() *Protocol {
 func (c *Protocol) readHeader() (*MessageHeader, error) {
 	buff := c.buf.Next(HeadLength)
 	id := bytesToInt(buff[0:4])
-	size := bytesToInt(buff[4:HeadLength])
+	index := bytesToInt(buff[4:8])
+	size := bytesToInt(buff[8:HeadLength])
 
 	// packet length limitation
 	if size > MaxPacketSize {
 		return nil, ErrPacketSizeExceed
 	}
-	return &MessageHeader{Cmd: id, Size: size}, nil
+	return &MessageHeader{Cmd: id, Index: index, Size: size}, nil
 }
 
 func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
@@ -68,13 +70,14 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 	return packets, nil
 }
 
-func (c *Protocol) Encode(cmd int, data []byte) ([]byte, error) {
+func (c *Protocol) Encode(cmd int, index int, data []byte) ([]byte, error) {
 	// p := &Packet{Cmd: cmd, Length: len(data)}
 	bodyLen := len(data)
 	buf := make([]byte, HeadLength+bodyLen)
 
 	copy(buf[0:4], intToBytes(cmd))
-	copy(buf[4:HeadLength], intToBytes(bodyLen))
+	copy(buf[4:8], intToBytes(index))
+	copy(buf[8:HeadLength], intToBytes(bodyLen))
 	copy(buf[HeadLength:], data)
 
 	return buf, nil

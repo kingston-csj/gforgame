@@ -1,6 +1,7 @@
 package util
 
 import (
+	"io/github/gforgame/config"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -18,7 +19,8 @@ var (
 )
 
 func init() {
-	idFactory = &IdGenerator{ServerId: 1001}
+	sid := config.ServerConfig.ServerId
+	idFactory = &IdGenerator{ServerId: int64(sid)}
 }
 
 // GetNextId 生成全局唯一id

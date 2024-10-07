@@ -7,6 +7,7 @@ import (
 	"io/github/gforgame/examples/cross"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
+	"io/github/gforgame/network/client"
 	"io/github/gforgame/protos"
 	"log"
 	"net"
@@ -15,8 +16,18 @@ import (
 	"reflect"
 )
 
-func main() {
+// 实现 RequestCallback 接口的匿名对象
+type commonCallback struct{}
 
+func (rc *commonCallback) OnSuccess(result any) {
+	fmt.Println("OnSuccess: ", result)
+}
+
+func (rc *commonCallback) OnError(err error) {
+	fmt.Println("OnError: ", err)
+}
+
+func main() {
 	// rpc客户端测试代码
 	p := &player.Player{db.BaseEntity{Id: "123456"}, "gforgame", 999}
 	cross.PlayerLoginRemote(p, cross.Island)
@@ -62,12 +73,19 @@ func main() {
 				typ, _ := network.GetMessageType(p.Header.Cmd)
 				msg := reflect.New(typ.Elem()).Interface()
 				msgCodec.Decode(p.Data, msg)
-				fmt.Println("客户端收到消息：(", p.Header.Cmd, ")", msg)
+				if p.Header.Index > 0 {
+					client.CallBackManager.FillCallBack(p.Header.Index, msg)
+				} else {
+					fmt.Println("客户端收到消息：(", p.Header.Cmd, ")", msg)
+				}
 			}
 		}
 	}()
-	session.Send(&protos.ReqPlayerLogin{Id: "1001"})
-	session.Send(&protos.ReqJoinRoom{RoomId: 123, PlayerId: 123})
+
+	// session.Send(&protos.ReqPlayerLogin{Id: "1001"}, 0)
+	client.SendCallback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
+
+	// session.Send(&protos.ReqJoinRoom{RoomId: 123, PlayerId: 123}, 0)
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)
