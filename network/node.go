@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io/github/gforgame/logger"
-	"io/github/gforgame/network/protocol"
 	"net"
 	"net/http"
-	"reflect"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,6 +14,7 @@ type Node struct {
 	Name    string // 服务器名称
 	option  Options
 	Running chan bool
+	Router  MessageRoute
 }
 
 func (n *Node) Startup(opts ...Option) error {
@@ -28,6 +27,15 @@ func (n *Node) Startup(opts ...Option) error {
 
 	if n.option.ServiceAddr == "" {
 		return errors.New("service address cannot be empty in master node")
+	}
+
+	modules := n.option.modules
+	for _, c := range modules {
+		c.Init()
+		err := n.Router.RegisterMessageHandlers(c)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	go func() {
@@ -78,37 +86,13 @@ func handleClient(node *Node, conn net.Conn) {
 	// session created hook
 	node.option.IoDispatch.OnSessionCreated(ioSession)
 
-	// 异步向客户端写数据
+	// 异步读写数据
+	go ioSession.Read()
 	go ioSession.Write()
 
 	// read loop
-	buf := make([]byte, 2048)
-	for {
-		n, err := conn.Read(buf)
-		if err != nil {
-			logger.Error(fmt.Errorf("read message  failed %v", err))
-			return
-		}
-		if n <= 0 {
-			continue
-		}
-		packets, err := ioSession.ProtocolCodec.Decode(buf[:n])
-		if err != nil {
-			logger.Error(fmt.Errorf("decode protocol  failed %v", err))
-			return
-		}
-		// process packets decoded
-		for _, p := range packets {
-			typ, _ := GetMessageType(p.Header.Cmd)
-			msg := reflect.New(typ.Elem()).Interface()
-			err := node.option.MessageCodec.Decode(p.Data, msg)
-			if err != nil {
-				logger.Error(fmt.Errorf("decode message  failed %v", err))
-				continue
-			}
-			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
-			node.option.IoDispatch.OnMessageReceived(ioSession, ioFrame)
-		}
+	for ioFrame := range ioSession.DataReceived {
+		node.option.IoDispatch.OnMessageReceived(ioSession, ioFrame)
 	}
 }
 

@@ -86,18 +86,28 @@ func (s *CallBackService) scanExpiredRequest() {
 	for _, rf := range rfList {
 		cause := ErrTimeOut
 		rf.Cause = cause
-		rf.ExecuteRequestCallback()
+		// 异步回调
+		if rf.RequestCallback != nil {
+			rf.RequestCallback.OnError(rf.Cause)
+		} else {
+			// 同步调用
+			rf.waitCause <- rf.Cause
+		}
 	}
 }
 
 // FillCallBack 填充回调
-func (s *CallBackService) FillCallBack(index int, message interface{}) {
+func (s *CallBackService) FillCallBack(index int, message any) {
 	future := s.Remove(index)
 	if future == nil {
 		return
 	}
 	callback := future.RequestCallback
+	// 异步回调
 	if callback != nil {
 		callback.OnSuccess(message)
+	} else {
+		// 同步调用
+		future.waitResponse <- message
 	}
 }

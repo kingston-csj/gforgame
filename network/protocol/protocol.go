@@ -71,7 +71,6 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 }
 
 func (c *Protocol) Encode(cmd int, index int, data []byte) ([]byte, error) {
-	// p := &Packet{Cmd: cmd, Length: len(data)}
 	bodyLen := len(data)
 	buf := make([]byte, HeadLength+bodyLen)
 

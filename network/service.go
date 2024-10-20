@@ -12,34 +12,36 @@ type (
 		Method   reflect.Method // method stub
 		Type     reflect.Type   // arg type of method
 	}
+
+	MessageRoute struct {
+		Handlers map[int]*Handler
+	}
 )
 
 var (
 	typeOfBytes   = reflect.TypeOf(([]byte)(nil))
 	typeOfSession = reflect.TypeOf(&Session{})
-
-	handlers map[int]*Handler = make(map[int]*Handler)
 )
 
-func RegisterMessageHandlers(comp Module) error {
+func (self *MessageRoute) RegisterMessageHandlers(comp Module) error {
 	clazz := reflect.TypeOf(comp)
 	for m := 0; m < clazz.NumMethod(); m++ {
 		method := clazz.Method(m)
 		mt := method.Type
-		if isHandlerMethod(method) {
+		if self.isHandlerMethod(method) {
 			cmd, err := GetMessageCmdFromType(mt.In(2))
 			if err != nil {
 				return err
 			}
 
-			handlers[cmd] = &Handler{Receiver: reflect.ValueOf(comp), Method: method, Type: mt.In(2)}
+			self.Handlers[cmd] = &Handler{Receiver: reflect.ValueOf(comp), Method: method, Type: mt.In(2)}
 		}
 	}
 	return nil
 }
 
 // isHandlerMethod decide a method is suitable handler method
-func isHandlerMethod(method reflect.Method) bool {
+func (self *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 	mt := method.Type
 	// Method must be exported.
 	if method.PkgPath != "" {
@@ -62,8 +64,8 @@ func isHandlerMethod(method reflect.Method) bool {
 	return true
 }
 
-func GetHandler(cmd int) (*Handler, error) {
-	value, ok := handlers[cmd]
+func (self *MessageRoute) GetHandler(cmd int) (*Handler, error) {
+	value, ok := self.Handlers[cmd]
 	if ok {
 		return value, nil
 	} else {

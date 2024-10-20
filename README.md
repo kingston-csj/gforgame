@@ -61,17 +61,56 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket  
 example/h5/welcome.html 为 ws 的客户端测试页面
 
-### 跨服通信
+### 跨服通信方式一：基于 rpc
 
 使用 grpc 进行跨进程通信，需要先安装 protobuf 和 protoc-gen-go-grpc 编译插件  
 根据不同的跨服类型，自行定义业务逻辑，参考 examples/cross 相关代码（流程待完善）
 
+### 跨服通信方式二：基于 socket
+
+推荐使用原生的 socket 进行跨进程通信，无论是游戏应用作为客户端，还是跨服节点作为客户端  
+都使用统一的调用方式，也无须引入 grpc  
+客户端消息处理支持三种方法：  
+1，类似服务器消息路由（通过方法签名）  
+2，客户端同步阻塞(通过方法返回值)
+
+```golang
+
+    import "io/github/gforgame/network/client"
+    r, err := client.Request(session, &protos.ReqPlayerLogin{Id: "1001"})
+	if err != nil {
+		fmt.Println(err)
+	}
+	resPlayerLogin := r.(*protos.ResPlayerLogin)
+	fmt.Println("客户端收到消息：(", resPlayerLogin, ")")
+```
+
+3，客户端异步回调(通过注册回调函数，类似 ajax)
+
+```golang
+
+    import "io/github/gforgame/network/client"
+
+    // 实现 RequestCallback 接口的匿名对象
+    type commonCallback struct{}
+
+    func (rc *commonCallback) OnSuccess(result any) {
+        fmt.Println("OnSuccess: ", result)
+    }
+
+    func (rc *commonCallback) OnError(err error) {
+        fmt.Println("OnError: ", err)
+    }
+
+    client.Callback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
+```
+
 ## 已实现功能
 
 - tcp 网关，消息路由，消息分发链
+- 客户端支持三种消息处理：异步回调/同步请求/消息路由
 - 日志模块
 - 多环境配置
-- 事件驱动
 - 玩家数据读写
 - 通信协议支持 json+protobuf
 - websocket 接入

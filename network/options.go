@@ -9,6 +9,7 @@ type Options struct {
 	IoDispatch   *BaseIoDispatch
 	isWebsocket  bool
 	wsPath       string
+	modules      []Module
 }
 
 type Option func(*Options)
@@ -45,5 +46,12 @@ func WithWebsocket() Option {
 func WithWsPath(path string) Option {
 	return func(opt *Options) {
 		opt.wsPath = path
+	}
+}
+
+// WithModules 注册消息路由
+func WithModules(ms ...Module) Option {
+	return func(opt *Options) {
+		opt.modules = append(opt.modules, ms...)
 	}
 }

@@ -14,20 +14,11 @@ type RequestResponseFuture struct {
 	Cause           error
 	Response        any
 	RequestCallback RequestCallback
+	waitResponse    chan any
+	waitCause       chan error
 }
 
 func (f *RequestResponseFuture) isTimeout() bool {
 	now := time.Now().Second()
 	return now-f.start > 5
-}
-
-// ExecuteRequestCallback 执行请求回调
-func (r *RequestResponseFuture) ExecuteRequestCallback() {
-	if r.RequestCallback != nil {
-		if r.Cause != nil {
-			r.RequestCallback.OnError(r.Cause)
-		} else {
-			r.RequestCallback.OnSuccess(r.Response)
-		}
-	}
 }

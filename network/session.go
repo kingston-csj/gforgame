@@ -3,9 +3,11 @@ package network
 import (
 	"fmt"
 	"io/github/gforgame/codec"
+	"io/github/gforgame/logger"
 	"io/github/gforgame/network/protocol"
 	"log"
 	"net"
+	"reflect"
 )
 
 type Session struct {
@@ -19,7 +21,9 @@ type Session struct {
 
 	dataToSend chan []byte
 
-	attrs map[string]interface{}
+	DataReceived chan *protocol.RequestDataFrame
+
+	Attrs map[string]interface{}
 	// (当前链接的本地地址)
 	localAddr string
 	// (当前链接的远程地址)
@@ -30,15 +34,14 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	return &Session{conn: conn,
 		ProtocolCodec: protocol.NewDecoder(),
 		MessageCodec:  messageCodec,
-		dataToSend:    make(chan []byte),
+		dataToSend:    make(chan []byte, 128),
+		DataReceived:  make(chan *protocol.RequestDataFrame, 128),
+		Attrs:         map[string]interface{}{},
 		localAddr:     conn.LocalAddr().String(),
 		remoteAddr:    conn.RemoteAddr().String(),
 	}
 }
 
-// func (s *Session) Send(msg any) error {
-
-// }
 func (s *Session) Send(msg any, index int) error {
 	if msg == nil {
 		return nil
@@ -70,6 +73,37 @@ func (s *Session) Write() {
 			}
 		case <-s.die:
 			return
+		}
+	}
+}
+
+func (s *Session) Read() {
+	buf := make([]byte, 2048)
+	for {
+		n, err := s.conn.Read(buf)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		if n <= 0 {
+			continue
+		}
+		packets, err := s.ProtocolCodec.Decode(buf[:n])
+		if err != nil {
+			log.Println(fmt.Errorf("decode protocol  failed %v", err))
+			return
+		}
+		// process packets decoded
+		for _, p := range packets {
+			typ, _ := GetMessageType(p.Header.Cmd)
+			msg := reflect.New(typ.Elem()).Interface()
+			err := s.MessageCodec.Decode(p.Data, msg)
+			if err != nil {
+				logger.Error(fmt.Errorf("decode message  failed %v", err))
+				continue
+			}
+			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
+			s.DataReceived <- ioFrame
 		}
 	}
 }

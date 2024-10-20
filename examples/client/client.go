@@ -6,11 +6,11 @@ import (
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/cross"
 	"io/github/gforgame/examples/player"
+	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/client"
+	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/protos"
-	"log"
-	"net"
 	"os"
 	"os/signal"
 	"reflect"
@@ -27,6 +27,44 @@ func (rc *commonCallback) OnError(err error) {
 	fmt.Println("OnError: ", err)
 }
 
+type GameTaskHandler struct {
+	Router network.MessageRoute
+}
+
+func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error(r.(error))
+		}
+	}()
+
+	// 如果有消息流水号，优先走消息回调
+	if frame.Header.Index > 0 {
+		client.CallBackManager.FillCallBack(frame.Header.Index, frame.Msg)
+	} else {
+		// 通过方法签名，能否找到消息路由
+		msgHandler, err := g.Router.GetHandler(frame.Header.Cmd)
+		if err == nil {
+			args := []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
+			// 反射
+			values := msgHandler.Method.Func.Call(args)
+			if len(values) > 0 {
+				err := session.Send(values[0].Interface(), frame.Header.Index)
+				if err != nil {
+					logger.Error(fmt.Errorf("session.Send: %v", err))
+					return false
+				}
+			}
+
+		} else {
+			// 没有找到，直接打印
+			fmt.Println("客户端收到消息：(", frame.Header.Cmd, ")", frame.Msg)
+		}
+	}
+
+	return true
+}
+
 func main() {
 	// rpc客户端测试代码
 	p := &player.Player{db.BaseEntity{Id: "123456"}, "gforgame", 999}
@@ -41,49 +79,31 @@ func main() {
 
 	// 服务器地址和端口
 	address := "127.0.0.1:9090"
-	// 连接服务器
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		log.Fatal("连接服务器失败:", err)
-	}
-	defer conn.Close()
-	fmt.Println("已连接到服务器:", address)
-
 	msgCodec := &protobuf.Codec{}
 	//msgCodec := &json.JsonCodec{}
-	session := network.NewSession(conn, msgCodec)
-	go session.Write()
+
+	ioDispatcher := &network.BaseIoDispatch{}
+	ioDispatcher.AddHandler(&GameTaskHandler{})
+	tcpClient := &client.TcpSocketClient{RemoteAddress: address, MsgCodec: msgCodec}
+	session, err := tcpClient.OpenSession()
+	if err != nil {
+		panic(err)
+	}
 
 	go func() {
-		// read loop
-		buf := make([]byte, 2048)
-		for {
-			n, err := conn.Read(buf)
-			if err != nil {
-				log.Printf(fmt.Sprintf("Read message error: %s, session will be closed immediately", err.Error()))
-				return
-			}
-			packets, err := session.ProtocolCodec.Decode(buf[:n])
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-			// process packets decoded
-			for _, p := range packets {
-				typ, _ := network.GetMessageType(p.Header.Cmd)
-				msg := reflect.New(typ.Elem()).Interface()
-				msgCodec.Decode(p.Data, msg)
-				if p.Header.Index > 0 {
-					client.CallBackManager.FillCallBack(p.Header.Index, msg)
-				} else {
-					fmt.Println("客户端收到消息：(", p.Header.Cmd, ")", msg)
-				}
-			}
+		for frame := range session.DataReceived {
+			ioDispatcher.OnMessageReceived(session, frame)
 		}
 	}()
 
 	// session.Send(&protos.ReqPlayerLogin{Id: "1001"}, 0)
-	client.SendCallback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
+	// client.Callback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
+	r, err := client.Request(session, &protos.ReqPlayerLogin{Id: "1001"})
+	if err != nil {
+		fmt.Println(err)
+	}
+	resPlayerLogin := r.(*protos.ResPlayerLogin)
+	fmt.Println("客户端收到消息：(", resPlayerLogin, ")")
 
 	// session.Send(&protos.ReqJoinRoom{RoomId: 123, PlayerId: 123}, 0)
 
