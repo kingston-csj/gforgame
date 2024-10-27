@@ -1,10 +1,11 @@
-package network
+package ws
 
 import (
-	"github.com/gorilla/websocket"
 	"io"
 	"net"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type wsConn struct {

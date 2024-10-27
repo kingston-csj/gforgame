@@ -9,6 +9,7 @@ import (
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
+	"io/github/gforgame/network/tcp"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -19,11 +20,12 @@ import (
 )
 
 var (
-	node   *network.Node
+	node   network.Server
 	router *gin.Engine
 )
 
 type GameTaskHandler struct {
+	router *network.MessageRoute
 }
 
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
@@ -32,7 +34,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			logger.Error(r.(error))
 		}
 	}()
-	msgHandler, _ := node.Router.GetHandler(frame.Header.Cmd)
+	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	var args []reflect.Value
 	if msgHandler.Indindexed {
 		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Header.Index), reflect.ValueOf(frame.Msg)}
@@ -52,38 +54,39 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	return true
 }
 
-func NewHttpServer() *gin.Engine {
-	router := gin.Default()
-	// 关闭游戏服务器进程
-	router.GET("/admin/stop", func(c *gin.Context) {
-		node.Running <- true
-	})
-	return router
-}
+// func NewHttpServer() *gin.Engine {
+// 	router := gin.Default()
+// 	// 关闭游戏服务器进程
+// 	router.GET("/admin/stop", func(c *gin.Context) {
+// 		node.Running <- true
+// 	})
+// 	return router
+// }
 
-func StartHttpServer(router *gin.Engine) {
-	err := router.Run(config.ServerConfig.HttpUrl)
-	if err != nil {
-		panic(err)
-	}
-}
+// func StartHttpServer(router *gin.Engine) {
+// 	err := router.Run(config.ServerConfig.HttpUrl)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
 
 func main() {
 
 	startTime := time.Now()
 
+	router := &network.MessageRoute{Handlers: make(map[int]*network.Handler)}
 	ioDispatcher := &network.BaseIoDispatch{}
-	ioDispatcher.AddHandler(&GameTaskHandler{})
-
-	// 设置服务器监听的地址和端口
-	node = &network.Node{
-		Running: make(chan bool),
-		Router:  network.MessageRoute{Handlers: make(map[int]*network.Handler)},
-	}
+	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
 	codec := protobuf.NewSerializer()
-	//codec := &json.NewSerializer()
-	err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec), network.WithModules(chat.NewRoomService(), player.NewPlayerService()))
-	//err := node.Startup(network.WithAddress(config.ServerConfig.ServerUrl), network.WithIoDispatch(ioDispatcher), network.WithCodec(codec), network.WithWebsocket())
+	// codec := json.NewSerializer()
+
+	node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
+		tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+
+	// node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
+	// 	ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+
+	err := node.Start()
 	if err != nil {
 		panic(err)
 	}
@@ -119,4 +122,7 @@ func main() {
 	case <-node.Running:
 		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
 	}
+
+	// 执行所有关服逻辑
+	node.Stop()
 }

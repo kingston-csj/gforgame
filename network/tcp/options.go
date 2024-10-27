@@ -1,15 +1,17 @@
-package network
+package tcp
 
-import "io/github/gforgame/codec"
+import (
+	"io/github/gforgame/codec"
+	"io/github/gforgame/network"
+)
 
 type Options struct {
 	Name         string // 服务器名称
 	ServiceAddr  string // current server service address (RPC)
 	MessageCodec codec.MessageCodec
-	IoDispatch   *BaseIoDispatch
-	isWebsocket  bool
-	wsPath       string
-	modules      []Module
+	IoDispatch   *network.BaseIoDispatch
+	modules      []network.Module
+	Router       *network.MessageRoute
 }
 
 type Option func(*Options)
@@ -22,7 +24,7 @@ func WithAddress(addr string) Option {
 }
 
 // WithIoDispatch 消息处理链
-func WithIoDispatch(dispatch *BaseIoDispatch) Option {
+func WithIoDispatch(dispatch *network.BaseIoDispatch) Option {
 	return func(opt *Options) {
 		opt.IoDispatch = dispatch
 	}
@@ -35,22 +37,15 @@ func WithCodec(codec codec.MessageCodec) Option {
 	}
 }
 
-// WithWebsocket 设置为websocket
-func WithWebsocket() Option {
+// WithRouter 消息路由器
+func WithRouter(r *network.MessageRoute) Option {
 	return func(opt *Options) {
-		opt.isWebsocket = true
-	}
-}
-
-// WithWsPath 设置websocket的路径
-func WithWsPath(path string) Option {
-	return func(opt *Options) {
-		opt.wsPath = path
+		opt.Router = r
 	}
 }
 
 // WithModules 注册消息路由
-func WithModules(ms ...Module) Option {
+func WithModules(ms ...network.Module) Option {
 	return func(opt *Options) {
 		opt.modules = append(opt.modules, ms...)
 	}

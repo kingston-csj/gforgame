@@ -9,6 +9,10 @@ import (
 type Codec struct {
 }
 
+func NewSerializer() *Codec {
+	return &Codec{}
+}
+
 func (*Codec) Encode(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
@@ -23,8 +27,4 @@ func (*Codec) Decode(data []byte, v any) error {
 	}
 	// 如果不是指针类型，返回错误
 	return fmt.Errorf("decode need a pointer type")
-}
-
-func NewSerializer() *Codec {
-	return &Codec{}
 }

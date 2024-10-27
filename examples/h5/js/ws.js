@@ -70,16 +70,19 @@
    */
   $.sendBytes = function (msgId, msg) {
     if (this.socket) {
-      let headerSize = 8
+      let headerSize = 12;
       let json = JSON.stringify(msg);
       let msgSize = json.length;
       let buffer = new Uint8Array(headerSize + msgSize);
       // 将命令和长度转换为字节并复制到缓冲区
       const cmdBytes = intToBytes(msgId);
+      // 流水号统一为0
+      const indexBytes = intToBytes(0);
       const lenBytes = intToBytes(msgSize);
 
       buffer.set(cmdBytes, 0);
-      buffer.set(lenBytes, 4);
+      buffer.set(indexBytes, 4);
+      buffer.set(lenBytes, 8);
       buffer.set(new TextEncoder().encode(json), headerSize);
       this.socket.send(buffer);
       return true;
@@ -90,10 +93,10 @@
 
   function intToBytes(n) {
     const buf = new Uint8Array(4);
-    buf[0] = (n >> 24) & 0xFF;
-    buf[1] = (n >> 16) & 0xFF;
-    buf[2] = (n >> 8) & 0xFF;
-    buf[3] = n & 0xFF;
+    buf[0] = (n >> 24) & 0xff;
+    buf[1] = (n >> 16) & 0xff;
+    buf[2] = (n >> 8) & 0xff;
+    buf[3] = n & 0xff;
     return buf;
   }
 
