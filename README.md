@@ -24,8 +24,8 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 ### 私有协议栈
 
 包括包头及包体，格式如下  
-// header(8bytes) | body  
-// cmd | len(body) | body
+// header(12bytes) | body  
+// cmd | index| len(body) | body
 
 ### 消息编解码
 
@@ -36,11 +36,19 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 
 ### 消息路由
 
-遵循“约定大于配置”思想，根据方法签名自动扫描，满足一定格式的方法即为消息处理器
+遵循“约定大于配置”思想，根据方法（非函数）签名自动扫描，满足一定格式的方法即为消息处理器
 
 ```golang
-    // 消息处理器格式： 第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端
+    // 消息处理器格式1： 方法第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端
     func (rs PlayerService) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
+
+    }
+```
+
+```golang
+    // 消息处理器格式2： 方法第一个参数要求是session,第二个参数是一个index; 第个参数要求是已注册的消息
+    // 索引用于异步给客户端发送请求(例如另起协程)，如果是同步的话，直接通过格式1即可
+    func (rs PlayerService) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin)  {
 
     }
 ```

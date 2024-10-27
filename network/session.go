@@ -12,21 +12,21 @@ import (
 
 type Session struct {
 	conn net.Conn
-
+	// 关闭标记（暂未使用）
 	die chan bool
-
+	// 私有协议栈编解码
 	ProtocolCodec *protocol.Protocol
-
+	// 消息编解码
 	MessageCodec codec.MessageCodec
-
+	// 准备发送的出队消息(带缓冲)
 	dataToSend chan []byte
-
+	// 已经收到的入队消息(带缓冲)
 	DataReceived chan *protocol.RequestDataFrame
-
+	// session自定义属性
 	Attrs map[string]interface{}
-	// (当前链接的本地地址)
+	// 当前链接的本地地址
 	localAddr string
-	// (当前链接的远程地址)
+	// 当前链接的远程地址
 	remoteAddr string
 }
 
@@ -69,7 +69,6 @@ func (s *Session) Write() {
 		case data := <-s.dataToSend:
 			if _, err := s.conn.Write(data); err != nil {
 				log.Println(err.Error())
-				//s.Close()
 			}
 		case <-s.die:
 			return

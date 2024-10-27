@@ -52,7 +52,7 @@ func (s *CallBackService) Remove(correlationId int) *RequestResponseFuture {
 
 // Start 启动定时任务
 func (s *CallBackService) Start() {
-	s.ticker = time.NewTicker(1 * time.Second)
+	s.ticker = time.NewTicker(2 * time.Second)
 	go func() {
 		for {
 			select {

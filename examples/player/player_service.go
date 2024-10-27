@@ -40,7 +40,7 @@ func (ps *Service) Init() {
 	context.CacheManager.Register("player", dbLoader)
 }
 
-func (ps *Service) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
+func (ps *Service) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) interface{} {
 	cache, err := context.CacheManager.GetCache("player")
 	if err != nil {
 		logger.Error(err)

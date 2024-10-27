@@ -33,7 +33,13 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		}
 	}()
 	msgHandler, _ := node.Router.GetHandler(frame.Header.Cmd)
-	args := []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
+	var args []reflect.Value
+	if msgHandler.Indindexed {
+		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Header.Index), reflect.ValueOf(frame.Msg)}
+	} else {
+		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
+	}
+
 	// 反射
 	values := msgHandler.Method.Func.Call(args)
 	if len(values) > 0 {
