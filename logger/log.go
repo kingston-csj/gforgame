@@ -2,6 +2,8 @@ package logger
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -72,18 +74,6 @@ func createConsoleLog() *logrus.Logger {
 	return logger
 }
 
-func createErrorLog() *logrus.Logger {
-	logger := logrus.New()
-	logger.Formatter = &logrus.TextFormatter{ForceColors: true}
-	writer, _ := rotatelogs.New(
-		"logs/err/"+"error.%Y%m%d",
-		rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
-	)
-	logger.Out = writer
-	logger.Level = logrus.InfoLevel
-	return logger
-}
-
 // Log records a message with the specified log type and arguments.
 // The Log function writes a log message to the log file
 // Parameters:
@@ -125,12 +115,68 @@ func Info(v string) {
 	consoleLog.Info(v)
 }
 
+func createErrorLog() *logrus.Logger {
+	logger := logrus.New()
+
+	// 确保日志目录存在
+	logDir := "logs/err"
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		logrus.Fatalf("Failed to create log directory: %v", err)
+	}
+
+	// 创建 rotatelogs 实例
+	writer, err := rotatelogs.New(
+		filepath.Join(logDir, "error.%Y%m%d"),
+		rotatelogs.WithMaxAge(24*time.Hour),
+	)
+	if err != nil {
+		logrus.Fatalf("Failed to create rotatelogs: %v", err)
+	}
+
+	// 自定义日志格式
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableTimestamp: true, // 禁用默认时间戳
+		DisableQuote:     true, // 禁用字段值的引号
+	})
+
+	// 设置日志输出
+	logger.Out = writer
+
+	// 设置日志级别
+	logger.Level = logrus.ErrorLevel
+
+	return logger
+}
+
 func Error(err error) {
 	if err != nil {
+		// 获取调用栈信息
 		stack := make([]byte, 1024)
 		n := runtime.Stack(stack, false)
-		errorLog.WithFields(logrus.Fields{
-			"error": err,
-		}).Error(string(stack[:n]))
+		stackStr := string(stack[:n])
+
+		// 优化调用栈输出
+		stackLines := strings.Split(stackStr, "\n")
+		var optimizedStack []string
+		for i, line := range stackLines {
+			if i%2 == 0 {
+				// 函数名行
+				optimizedStack = append(optimizedStack, line)
+			} else {
+				// 文件路径行，只显示文件名
+				parts := strings.Split(line, "/")
+				if len(parts) > 0 {
+					optimizedStack = append(optimizedStack, "\t"+parts[len(parts)-1])
+				}
+			}
+		}
+
+		// 记录日志
+		errorLog.Out.Write([]byte(fmt.Sprintf(
+			"%s ERROR EXCEPTION - %s \n%s\n",
+			time.Now().Format("2006-01-02 15:04:05"),
+			fmt.Sprintf("\"%s\"", err),
+			strings.Join(optimizedStack, "\n"),
+		)))
 	}
 }

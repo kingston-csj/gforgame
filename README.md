@@ -126,8 +126,9 @@ example/h5/welcome.html 为 ws 的客户端测试页面
 - 数据异步持久化，玩家数据实时更新缓存，定时持久化到数据库
 - http 管理后台
 - grpc 跨服通信接入
+- excel 配置文件读取, jforgame-data 实现
 
 ## 近期功能
 
-- csv 配置文件读取, jforgame-data 实现
+- 游戏业务代码示例
 - 代码热更新机制
