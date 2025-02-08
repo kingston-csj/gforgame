@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io/github/gforgame/codec/protobuf"
 	"io/github/gforgame/config"
+	"io/github/gforgame/examples/api"
 	"io/github/gforgame/examples/chat"
+	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
@@ -16,12 +18,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-)
-
-var (
-	node   network.Server
-	router *gin.Engine
 )
 
 type GameTaskHandler struct {
@@ -54,24 +52,31 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	return true
 }
 
-// func NewHttpServer() *gin.Engine {
-// 	router := gin.Default()
-// 	// 关闭游戏服务器进程
-// 	router.GET("/admin/stop", func(c *gin.Context) {
-// 		node.Running <- true
-// 	})
-// 	return router
-// }
+func NewHttpServer() *gin.Engine {
+	router := gin.Default()
+	// 关闭游戏服务器进程
+	router.POST("/admin/stop", func(c *gin.Context) {
+		api.StopServer(c)
+	})
+	// 配置 CORS 中间件
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // 允许所有源，生产环境应指定具体域名
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-// func StartHttpServer(router *gin.Engine) {
-// 	err := router.Run(config.ServerConfig.HttpUrl)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
+	err := router.Run(config.ServerConfig.HttpUrl)
+	if err != nil {
+		panic(err)
+	}
+
+	return router
+}
 
 func main() {
-
 	startTime := time.Now()
 
 	router := &network.MessageRoute{Handlers: make(map[int]*network.Handler)}
@@ -82,7 +87,7 @@ func main() {
 
 	node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
 		tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
-
+	context.TcpServer = node
 	// node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
 	// 	ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerService()))
 
@@ -99,10 +104,9 @@ func main() {
 	// }
 
 	// 启动后台http服务器
-	// router = NewHttpServer()
-	// go func() {
-	// 	StartHttpServer(router)
-	// }()
+	go func() {
+		context.HttpServer = NewHttpServer()
+	}()
 
 	// pprof性能监控
 	// go func() {

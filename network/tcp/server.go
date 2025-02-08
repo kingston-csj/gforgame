@@ -8,19 +8,19 @@ import (
 	"net"
 )
 
-type tcpServer struct {
+type TcpServer struct {
 	Options
 	Name    string // 服务器名称
 	Running chan bool
 }
 
-func NewServer(opts ...Option) *tcpServer {
+func NewServer(opts ...Option) *TcpServer {
 	opt := Options{}
 	for _, option := range opts {
 		option(&opt)
 	}
 
-	s := &tcpServer{
+	s := &TcpServer{
 		Options: opt,
 		Running: make(chan bool),
 	}
@@ -28,7 +28,7 @@ func NewServer(opts ...Option) *tcpServer {
 	return s
 }
 
-func (s *tcpServer) Start() error {
+func (s *TcpServer) Start() error {
 	if s.ServiceAddr == "" {
 		return errors.New("service address cannot be empty")
 	}
@@ -49,12 +49,12 @@ func (s *tcpServer) Start() error {
 	return nil
 }
 
-func (s *tcpServer) Addr() string {
+func (s *TcpServer) Addr() string {
 	return s.ServiceAddr
 }
 
 // Enable current server accept connection
-func (s *tcpServer) startListen() {
+func (s *TcpServer) startListen() {
 	listener, err := net.Listen("tcp", s.ServiceAddr)
 	if err != nil {
 		logger.Error(err)
@@ -72,7 +72,7 @@ func (s *tcpServer) startListen() {
 }
 
 // 处理客户端连接，包括socket,websocket
-func onClientConnected(node *tcpServer, conn net.Conn) {
+func onClientConnected(node *TcpServer, conn net.Conn) {
 	defer func() {
 		// 处理客户端网络断开
 		s := network.GetSession(conn)
@@ -100,7 +100,7 @@ func onClientConnected(node *tcpServer, conn net.Conn) {
 	}
 }
 
-func (n *tcpServer) Stop() {
+func (n *TcpServer) Stop() {
 	for _, c := range n.modules {
 		c.Shutdown()
 	}
