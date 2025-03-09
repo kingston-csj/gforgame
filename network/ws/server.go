@@ -11,19 +11,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type wsServer struct {
+type WsServer struct {
 	Options
 	Name    string // 服务器名称
 	Running chan bool
 }
 
-func NewServer(opts ...Option) *wsServer {
+func NewServer(opts ...Option) *WsServer {
 	opt := Options{}
 	for _, option := range opts {
 		option(&opt)
 	}
 
-	s := &wsServer{
+	s := &WsServer{
 		Options: opt,
 		Running: make(chan bool),
 	}
@@ -31,7 +31,7 @@ func NewServer(opts ...Option) *wsServer {
 	return s
 }
 
-func (n *wsServer) Start() error {
+func (n *WsServer) Start() error {
 	if n.ServiceAddr == "" {
 		return errors.New("service address cannot be empty")
 	}
@@ -52,12 +52,12 @@ func (n *wsServer) Start() error {
 	return nil
 }
 
-func (n *wsServer) Addr() string {
+func (n *WsServer) Addr() string {
 	return n.ServiceAddr
 }
 
 // Enable current server accept connection
-func (n *wsServer) startListen() {
+func (n *WsServer) startListen() {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -90,7 +90,7 @@ func (n *wsServer) startListen() {
 }
 
 // 处理客户端连接，包括socket,websocket
-func onClientConnected(node *wsServer, conn net.Conn) {
+func onClientConnected(node *WsServer, conn net.Conn) {
 	defer func() {
 		// 处理客户端网络断开
 		s := network.GetSession(conn)
@@ -118,7 +118,7 @@ func onClientConnected(node *wsServer, conn net.Conn) {
 	}
 }
 
-func (n *wsServer) Stop() {
+func (n *WsServer) Stop() {
 	for _, c := range n.modules {
 		c.Shutdown()
 	}

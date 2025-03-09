@@ -1,6 +1,7 @@
 package player
 
 import (
+	"errors"
 	"fmt"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
@@ -9,6 +10,9 @@ import (
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
 )
+
+var ErrNotFound = errors.New("record not found")
+var ErrCast = errors.New("cast exception")
 
 type Service struct {
 	network.Base
@@ -43,16 +47,28 @@ func (ps *Service) Init() {
 func (ps *Service) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) interface{} {
 	cache, err := context.CacheManager.GetCache("player")
 	if err != nil {
-		logger.Error(err)
+		return &protos.ResPlayerLogin{Succ: false}
 	}
-	cacheEntity, _ := cache.Get(msg.Id)
-	player, _ := cacheEntity.(*Player)
-	player.Name = "hello,gforgame"
-	player.Level = 999
+	playerId := msg.Id
+	cacheEntity, err := cache.Get(playerId)
+	var player *Player
+	if errors.Is(err, ErrNotFound) {
+		// 新增玩家
+		player = &Player{}
+		player.Name = ""
+		player.Level = 1
+		player.Id = playerId
+		cache.Set(playerId, player)
 
-	ps.SavePlayer(player)
+		ps.SavePlayer(player)
+		return &protos.ResPlayerLogin{Succ: true}
+	} else if err != nil {
+		return &protos.ResPlayerLogin{Succ: false}
+	} else {
+		player, _ = cacheEntity.(*Player)
+	}
 
-	fmt.Println(msg.Id, "登录成功，姓名为：", player.Name)
+	fmt.Println("登录成功，id为：", player.Id)
 	return &protos.ResPlayerLogin{Succ: true}
 }
 

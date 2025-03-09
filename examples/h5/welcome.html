@@ -8,19 +8,19 @@
     <script src="js/PacketType.js" type="text/javascript"></script>
     <script type="text/javascript">
       ws.init({
-        url: "localhost:9090/ws",
+        url: '127.0.0.1:9527/ws',
       }).connect();
 
       //当有消息过来的时候触发
       ws.onmessage = function (event) {
         decode(event.data)
           .then((response) => {
-            var respMessage = document.getElementById("respMessage");
-            respMessage.value = response.cmd + "：" + response.msg;
+            var respMessage = document.getElementById('respMessage');
+            respMessage.value = response.cmd + '：' + response.msg;
             PacketType.handle(response.cmd, response.msg);
           })
           .catch((error) => {
-            console.error("Error decoding blob:", error);
+            console.error('Error decoding blob:', error);
           });
       };
 
@@ -41,7 +41,7 @@
               // 读取接下来的四个字节作为 size
               const size = view.getUint32(8);
               // 解码剩下的数据
-              const decoder = new TextDecoder("utf-8");
+              const decoder = new TextDecoder('utf-8');
               const text = decoder.decode(arrayBuffer.slice(12));
 
               // 构造并返回解码后的对象
@@ -57,7 +57,7 @@
           };
 
           reader.onerror = function (event) {
-            reject(new Error("FileReader error: " + reader.error));
+            reject(new Error('FileReader error: ' + reader.error));
           };
 
           reader.readAsArrayBuffer(blob);
@@ -66,21 +66,21 @@
 
       //连接关闭的时候触发
       ws.onclose = function (event) {
-        var respMessage = document.getElementById("respMessage");
-        respMessage.value = respMessage.value + "\n断开连接";
+        var respMessage = document.getElementById('respMessage');
+        respMessage.value = respMessage.value + '\n断开连接';
       };
 
       //连接打开的时候触发
       ws.onopen = function (event) {
-        var respMessage = document.getElementById("respMessage");
-        respMessage.value = "建立连接";
+        var respMessage = document.getElementById('respMessage');
+        respMessage.value = '建立连接';
       };
 
       function sendMsg(msg) {
         //发送消息
         if (window.WebSocket) {
           msg = {
-            Id: "1001",
+            Id: '1001',
           };
 
           ws.sendBytes(PacketType.ReqAccountLogin, msg);
@@ -91,11 +91,7 @@
   <body>
     <form onsubmit="return false">
       <textarea style="width: 300px; height: 200px" name="message"></textarea>
-      <input
-        type="button"
-        onclick="sendMsg(this.form.message.value)"
-        value="发送"
-      /><br />
+      <input type="button" onclick="sendMsg(this.form.message.value)" value="发送" /><br />
       <h3>信息</h3>
       <textarea style="width: 300px; height: 200px" id="respMessage"></textarea>
       <input

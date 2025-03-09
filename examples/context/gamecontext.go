@@ -2,18 +2,17 @@ package context
 
 import (
 	"io/github/gforgame/cache"
-	"io/github/gforgame/network/tcp"
+	"io/github/gforgame/network/ws"
 
 	mysqldb "io/github/gforgame/db"
-
-	"github.com/gin-gonic/gin"
 )
 
 var (
 	CacheManager *cache.Manager
 	DbService    *mysqldb.AsyncDbService
-	TcpServer    *tcp.TcpServer
-	HttpServer   *gin.Engine
+	// TcpServer    *tcp.TcpServer
+	WsServer     *ws.WsServer
+	// HttpServer   *gin.Engine
 )
 
 func init() {

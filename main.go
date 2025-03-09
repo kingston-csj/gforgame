@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/github/gforgame/codec/protobuf"
+	"io/github/gforgame/codec/json"
 	"io/github/gforgame/config"
 	"io/github/gforgame/examples/api"
 	"io/github/gforgame/examples/chat"
@@ -11,7 +11,7 @@ import (
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/network/tcp"
+	"io/github/gforgame/network/ws"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -82,14 +82,16 @@ func main() {
 	router := &network.MessageRoute{Handlers: make(map[int]*network.Handler)}
 	ioDispatcher := &network.BaseIoDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
-	codec := protobuf.NewSerializer()
-	// codec := json.NewSerializer()
+	// codec := protobuf.NewSerializer()
+	codec := json.NewSerializer()
 
-	node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
-		tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
-	context.TcpServer = node
-	// node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
-	// 	ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+	// node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
+	// 	tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+		
+
+	node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
+		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+	context.WsServer = node
 
 	err := node.Start()
 	if err != nil {
@@ -104,9 +106,9 @@ func main() {
 	// }
 
 	// 启动后台http服务器
-	go func() {
-		context.HttpServer = NewHttpServer()
-	}()
+	// go func() {
+	// 	context.HttpServer = NewHttpServer()
+	// }()
 
 	// pprof性能监控
 	// go func() {

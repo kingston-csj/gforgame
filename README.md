@@ -18,8 +18,11 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 
 下载代码到本地，导入项目到 vscode 或者 goland 开发工具  
 项目自带多个模块案例代码，如 player_service,chat_service  
-服务器入口： main.go  
-客户端入口： client.go
+服务器入口： main.go
+
+go 客户端入口： client.go
+h5 客户端入口：welcome.html
+cocos 客户端工程：client/cocos
 
 ### 私有协议栈
 
@@ -130,5 +133,5 @@ example/h5/welcome.html 为 ws 的客户端测试页面
 
 ## 近期功能
 
-- 游戏业务代码示例
+- 游戏业务代码示例 cocos 交互界面
 - 代码热更新机制
