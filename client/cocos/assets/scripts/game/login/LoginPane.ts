@@ -4,10 +4,13 @@ import GameContext from '../../GameContext';
 import RespLogin from '../../net/RespLogin';
 import ReqLogin from '../../net/ReqLogin';
 import { MessageDispatch } from '../../MessageDispatch';
+import UiView from '../../ui/UiView';
+import { LayerIdx } from '../../ui/LayerIds';
+import R from '../../ui/R';
 const { ccclass, property } = _decorator;
 
-@ccclass('LoginScene')
-export class LoginScene extends Component {
+@ccclass('LoginPane')
+export class LoginPane extends Component {
   @property(EditBox)
   usernameInput: EditBox = null!;
 
@@ -28,8 +31,6 @@ export class LoginScene extends Component {
     MessageDispatch.register(RespLogin.cmd, (msg: RespLogin) => {
       console.log('登录成功', msg);
     });
-
-    GameContext.instance.WebSocketClient.connect('ws://127.0.0.1:9527/ws');
   }
 
   onLoginClick() {
@@ -39,9 +40,6 @@ export class LoginScene extends Component {
     // 这里添加登录验证逻辑
     if (username && password) {
       console.log('登录信息:', { username, password });
-      // TODO: 实现实际的登录逻辑
-      // 登录成功后跳转到游戏主场景
-      // director.loadScene('GameMain');
 
       GameContext.instance.WebSocketClient.sendMessage(
         ReqLogin.cmd,
@@ -51,6 +49,7 @@ export class LoginScene extends Component {
         },
         (msg: RespLogin) => {
           console.log('登录成功');
+          UiView.createUi(R.mainPane, LayerIdx.layer2, () => {});
         }
       );
     } else {

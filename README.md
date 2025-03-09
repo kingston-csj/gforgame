@@ -135,3 +135,11 @@ example/h5/welcome.html 为 ws 的客户端测试页面
 
 - 游戏业务代码示例 cocos 交互界面
 - 代码热更新机制
+
+## 部分 cocos 客户端运行效果
+
+登录界面  
+![](/screenshots/login.jpg '登录界面')
+
+主界面  
+![](/screenshots/main.jpgg '主界面')
