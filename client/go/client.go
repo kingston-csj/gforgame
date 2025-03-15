@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/github/gforgame/codec/protobuf"
+	"io/github/gforgame/codec/json"
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/cross"
 	"io/github/gforgame/examples/player"
@@ -66,7 +66,6 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 }
 
 func main() {
-	// rpc客户端测试代码
 	p := &player.Player{db.BaseEntity{Id: "123456"}, "gforgame", 999}
 	cross.PlayerLoginRemote(p, cross.Island)
 
@@ -79,8 +78,8 @@ func main() {
 
 	// 服务器地址和端口
 	address := "127.0.0.1:9090"
-	msgCodec := &protobuf.Codec{}
-	//msgCodec := &json.JsonCodec{}
+	// msgCodec := protobuf.NewSerializer()
+	msgCodec := json.NewSerializer()
 
 	ioDispatcher := &network.BaseIoDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{})

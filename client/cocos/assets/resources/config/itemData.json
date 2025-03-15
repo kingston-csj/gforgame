@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1001,
+    "type": 0,
+    "name": "升级丹",
+    "quality": 1,
+    "tips": "等级+1",
+    "icon": "1.png"
+  },
+  {
+    "id": 1002,
+    "type": 1,
+    "name": "改名卡",
+    "quality": 1,
+    "tips": "修改角色姓名",
+    "icon": "2.png"
+  },
+  {
+    "id": 2001,
+    "type": 2,
+    "name": "吕布碎片",
+    "quality": 3,
+    "tips": "吕布碎片，用于合成英雄",
+    "icon": "3.png"
+  },
+  {
+    "id": 2002,
+    "type": 2,
+    "name": "刘备碎片",
+    "quality": 3,
+    "tips": "刘备碎片，用于合成英雄",
+    "icon": "4.png"
+  }
+]

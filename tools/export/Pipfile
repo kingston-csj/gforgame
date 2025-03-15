@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+setuptools = "*"
+pyautogui = "*"
+pyscreeze = "*"
+pyinstaller = "==5.13.2"
+pandas = "*"
+openpyxl   = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
+python_full_version = "3.12.3"

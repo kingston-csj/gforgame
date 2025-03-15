@@ -1,0 +1,6 @@
+build/
+excel/
+json/
+ts/
+dist/
+__pycache__
