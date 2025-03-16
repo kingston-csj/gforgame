@@ -51,6 +51,9 @@ func (c *Cache) Get(key string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	if value == nil {
+		return nil, nil
+	}
 
 	c.mu.Lock()
 	c.items[key] = &Item{

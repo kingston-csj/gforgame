@@ -32,10 +32,13 @@
     "_components": [
       {
         "__id__": 146
+      },
+      {
+        "__id__": 148
       }
     ],
     "_prefab": {
-      "__id__": 148
+      "__id__": 150
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -1964,7 +1967,7 @@
       "__id__": 70
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 78
@@ -2903,7 +2906,7 @@
   {
     "__type__": "cc.Node",
     "_name": "Other",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 1
@@ -2957,7 +2960,7 @@
   {
     "__type__": "cc.Node",
     "_name": "ToggleGroup",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 122
@@ -3008,7 +3011,7 @@
   {
     "__type__": "cc.Node",
     "_name": "Toggle1",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 123
@@ -3065,7 +3068,7 @@
   {
     "__type__": "cc.Node",
     "_name": "Checkmark",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
       "__id__": 124
@@ -3496,6 +3499,25 @@
   {
     "__type__": "cc.CompPrefabInfo",
     "fileId": "2dhbGzsiVCPqTg/i6LfhmO"
+  },
+  {
+    "__type__": "d315avs5XFHqJ5mtxTQcP+n",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 149
+    },
+    "gmButton": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "54YAHZAA1Ndb3TsOjuOhYp"
   },
   {
     "__type__": "cc.PrefabInfo",

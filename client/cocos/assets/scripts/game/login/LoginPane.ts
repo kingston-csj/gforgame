@@ -1,5 +1,4 @@
 import { _decorator, Component, Node, EditBox, Button, director } from 'cc';
-import { WebSocketClient } from '../../net/WebSocketClient';
 import GameContext from '../../GameContext';
 import RespLogin from '../../net/RespLogin';
 import ReqLogin from '../../net/ReqLogin';
@@ -7,10 +6,12 @@ import { MessageDispatch } from '../../MessageDispatch';
 import UiView from '../../ui/UiView';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
+import { UIViewController } from '../../ui/UiViewController';
+import { MainPaneController } from '../main/MainPaneController';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoginPane')
-export class LoginPane extends Component {
+export class LoginPane extends UIViewController {
   @property(EditBox)
   usernameInput: EditBox = null!;
 
@@ -27,10 +28,6 @@ export class LoginPane extends Component {
     // 注册登录按钮点击事件
     this.passwordInput.inputFlag = EditBox.InputFlag.PASSWORD;
     this.loginButton.node.on(Button.EventType.CLICK, this.onLoginClick, this);
-
-    MessageDispatch.register(RespLogin.cmd, (msg: RespLogin) => {
-      console.log('登录成功', msg);
-    });
   }
 
   onLoginClick() {
@@ -49,7 +46,18 @@ export class LoginPane extends Component {
         },
         (msg: RespLogin) => {
           console.log('登录成功');
-          UiView.createUi(R.mainPane, LayerIdx.layer2, () => {});
+          MainPaneController.display();
+        }
+      );
+
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqLogin.cmd,
+        {
+          id: username,
+          pwd: password,
+        },
+        (msg: RespLogin) => {
+          console.log('登录成功');
         }
       );
     } else {

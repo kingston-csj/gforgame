@@ -78,6 +78,13 @@ func (s *Session) Write() {
 
 func (s *Session) Read() {
 	buf := make([]byte, 2048)
+
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error(r.(error))
+		}
+	}()
+
 	for {
 		n, err := s.conn.Read(buf)
 		if err != nil {
@@ -95,6 +102,10 @@ func (s *Session) Read() {
 		// process packets decoded
 		for _, p := range packets {
 			typ, _ := GetMessageType(p.Header.Cmd)
+			if typ == nil {
+				logger.Error(fmt.Errorf("message type not found %v", p.Header.Cmd))
+				continue
+			}
 			msg := reflect.New(typ.Elem()).Interface()
 			err := s.MessageCodec.Decode(p.Data, msg)
 			if err != nil {

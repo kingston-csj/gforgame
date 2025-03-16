@@ -20,10 +20,10 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (*
 	}
 
 	// 创建 Container
-	container := NewContainer[int64, interface{}]()
+	container := NewContainer[int64, any]()
 
 	// 定义 ID 获取函数
-	getIdFunc := func(record interface{}) int64 {
+	getIdFunc := func(record any) int64 {
 		val := reflect.ValueOf(record)
 		// 如果 record 是指针，则调用 Elem() 获取实际值
 		if val.Kind() == reflect.Ptr {
@@ -34,10 +34,10 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (*
 	}
 
 	// 定义索引函数
-	indexFuncs := make(map[string]func(interface{}) interface{})
+	indexFuncs := make(map[string]func(any) interface{})
 	if config.IndexFuncs != nil {
 		for indexName, fieldName := range config.IndexFuncs {
-			indexFuncs[indexName] = func(record interface{}) interface{} {
+			indexFuncs[indexName] = func(record any) interface{} {
 				val := reflect.ValueOf(record)
 				// 如果 record 是指针，则调用 Elem() 获取实际值
 				if val.Kind() == reflect.Ptr {

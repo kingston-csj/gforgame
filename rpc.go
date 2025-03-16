@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"io/github/gforgame/codec/json"
-	"io/github/gforgame/examples/player"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/network/rpc"
 	"net"
 
@@ -16,7 +16,7 @@ type server struct {
 
 func (s *server) EnterRemote(ctx context.Context, in *rpc.PlayerCrossRequest) (*rpc.PlayerCrossReply, error) {
 	codec := json.NewSerializer()
-	p := player.Player{}
+	p := playerdomain.Player{}
 	codec.Decode(in.Data, &p)
 	return &rpc.PlayerCrossReply{Message: "name: " + p.Name}, nil
 }

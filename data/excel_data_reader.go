@@ -20,9 +20,9 @@ func NewExcelDataReader(ignoreUnknownFields bool) *ExcelDataReader {
 	}
 }
 
-func (r *ExcelDataReader) Read(filePath string, clazz interface{}) ([]interface{}, error) {
+func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 使用 xlsx.OpenFile 打开 Excel 文件
-	xlFile, err := xlsx.OpenFile(filePath)
+	xlFile, err := xlsx.OpenFile("data/" + filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Excel file: %v", err)
 	}
@@ -59,8 +59,8 @@ func (r *ExcelDataReader) Read(filePath string, clazz interface{}) ([]interface{
 	return r.readRecords(clazz, records)
 }
 
-func (r *ExcelDataReader) readRecords(clazz interface{}, rows [][]CellColumn) ([]interface{}, error) {
-	var records []interface{}
+func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, error) {
+	var records []any
 	clazzType := reflect.TypeOf(clazz).Elem()
 
 	for _, row := range rows {
@@ -95,7 +95,7 @@ func (r *ExcelDataReader) readRecords(clazz interface{}, rows [][]CellColumn) ([
 	return records, nil
 }
 
-func (r *ExcelDataReader) readHeader(clazz interface{}, cells []*xlsx.Cell) ([]CellHeader, error) {
+func (r *ExcelDataReader) readHeader(clazz any, cells []*xlsx.Cell) ([]CellHeader, error) {
 	var headers []CellHeader
 
 	for _, cell := range cells {
@@ -145,7 +145,7 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 	return columns
 }
 
-func convertValue(value string, fieldType reflect.Type) (interface{}, error) {
+func convertValue(value string, fieldType reflect.Type) (any, error) {
 	switch fieldType.Kind() {
 	case reflect.String:
 		return value, nil

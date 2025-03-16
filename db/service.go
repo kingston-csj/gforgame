@@ -40,7 +40,7 @@ func (s *AsyncDbService) SaveToDb(entity Entity) {
 	num, err := strconv.ParseInt((entity).GetId(), 10, 64)
 	if err != nil {
 		logger.Error(err)
-		panic(err)
+		return
 	}
 	index := num % int64(s.workerCapacity)
 	s.workers[index].addToQueue(entity)

@@ -3,6 +3,7 @@ import ResourceItem from './ResourceItem';
 import { LayerIdx } from './LayerIds';
 import AssetLoader from './AssertLoader';
 import UiContext from './UiContext';
+import { UIViewController } from './UiViewController';
 
 const { ccclass, property } = _decorator;
 
@@ -13,7 +14,6 @@ export default class UiView extends Component {
     AssetLoader.loadPrefab(ui.path, (err, prefab) => {
       if (err) {
         console.error('加载UI预制体失败:', err);
-        callback(err, null);
         return;
       }
 
@@ -27,6 +27,12 @@ export default class UiView extends Component {
 
       const root = UiContext.getLayer(layer);
       root.addChild(node);
+      const uiView = node.getComponent(UIViewController);
+      uiView.scheduleOnce(() => {
+        if (callback) {
+          callback(uiView);
+        }
+      });
     });
   }
 }

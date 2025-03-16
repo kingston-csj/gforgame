@@ -12,18 +12,10 @@ export class WebSocketClient {
    */
   public sendMessage(msgId: number, msg: any, callback: Function): void {
     this._index++;
-    const req = {
-      cmd: msgId,
-      index: this._index,
-      msg: JSON.stringify(msg),
-    };
 
     if (callback) {
       this.handles.set(this._index, callback);
     }
-
-    // 发送消息
-    // this.ws.send(JSON.stringify(req));
 
     this.sendBytes(msgId, this._index, msg);
   }

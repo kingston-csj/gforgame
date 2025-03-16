@@ -7,6 +7,7 @@ import (
 	"io/github/gforgame/examples/api"
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
@@ -87,10 +88,9 @@ func main() {
 
 	// node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
 	// 	tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
-		
 
 	node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
-		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(), gm.NewGmController()))
 	context.WsServer = node
 
 	err := node.Start()
@@ -116,6 +116,8 @@ func main() {
 	// 	// 监听并在 0.0.0.0:6060 上启动服务器
 	// 	http.ListenAndServe(config.ServerConfig.PprofAddr, mux)
 	// }()
+
+	context.GetDataManager()
 
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())

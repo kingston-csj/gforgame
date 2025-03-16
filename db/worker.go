@@ -44,6 +44,7 @@ func (w *worker) processQueue() {
 			Db.Delete(entity)
 		} else {
 			// 保存操作
+			entity.BeforeSave(nil)
 			Db.Save(entity)
 		}
 		delete(w.data, id)

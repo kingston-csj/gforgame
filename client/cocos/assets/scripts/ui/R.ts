@@ -10,4 +10,9 @@ export default class R {
     name: 'mainPane',
     path: 'prefabs/MainPane',
   };
+
+  public static gmPane: ResourceItem = {
+    name: 'gmPane',
+    path: 'prefabs/GmPane',
+  };
 }
