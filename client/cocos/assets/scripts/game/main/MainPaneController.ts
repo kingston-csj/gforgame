@@ -1,16 +1,17 @@
-import { _decorator, Component, Node, EditBox, Button, director } from 'cc';
+import { _decorator, Toggle, Node, EditBox, Button, director } from 'cc';
 
 import UiView from '../../ui/UiView';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import { UIViewController } from '../../ui/UiViewController';
+import { BagPanelController } from '../item/BagPanelController';
 
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneController')
 export class MainPaneController extends UIViewController {
-  @property(Button)
-  gmButton: Button = null!;
+  @property(Node)
+  bagPane: Node;
 
   private static instance: MainPaneController;
 
@@ -20,13 +21,18 @@ export class MainPaneController extends UIViewController {
     } else {
       MainPaneController.instance = new MainPaneController();
 
-      UiView.createUi(R.mainPane, LayerIdx.layer2, () => {});
+      UiView.createUi(R.mainPane, LayerIdx.layer1, (ui: MainPaneController) => {
+        MainPaneController.instance = ui;
+        ui.display();
+      });
     }
   }
 
-  start() {}
+  protected start(): void {
+    this.registerClickEvent(this.bagPane, this.onBagClick, this);
+  }
 
-  public static close() {
-    console.info('------------MainPaneController.close------------');
+  onBagClick() {
+    BagPanelController.display();
   }
 }

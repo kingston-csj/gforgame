@@ -4,6 +4,8 @@ import (
 	"io/github/gforgame/common"
 	"io/github/gforgame/common/i18n"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/player"
+
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/network"
 	"sync"
@@ -48,6 +50,8 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 	}
 
 	p.Backpack.AddItem(itemId, count)
+
+	player.GetPlayerService().SavePlayer(p)
 
 	return nil
 }

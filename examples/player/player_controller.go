@@ -50,29 +50,26 @@ func (ps *PlayerController) Init() {
 	context.CacheManager.Register("player", dbLoader)
 }
 
-func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) interface{} {
-
-	player := GetPlayerService().GetPlayer(msg.Id)
-	if player == nil {
-		// 新增玩家
-		player = &playerdomain.Player{}
-		player.Name = ""
-		player.Level = 1
-		player.Id = msg.Id
-
-		GetPlayerService().SavePlayer(player)
-
-		GetSessionManager().AddSession(s, player)
-
-		return &protos.ResPlayerLogin{Succ: true}
-	}
-
+func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
+	player := GetPlayerService().GetOrCreatePlayer(msg.Id)
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 添加session
 	GetSessionManager().AddSession(s, player)
 
-	return &protos.ResPlayerLogin{Succ: true}
+	s.Send(&protos.ResPlayerLogin{Succ: true}, index)
+
+	resBackpack := &protos.ResBackpackInfo{}
+	if player.Backpack != nil {
+		// 临时处理，后续采用事件驱动
+		for id, count := range player.Backpack.Items {
+			resBackpack.Items = append(resBackpack.Items, protos.ItemInfo{
+				Id:    int32(id),
+				Count: int32(count),
+			})
+		}
+	}
+	s.SendWithoutIndex(resBackpack)
 }
 
 func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {

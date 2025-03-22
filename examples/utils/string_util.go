@@ -11,3 +11,7 @@ func StringToInt32(s string) (int32, error) {
 	}
 	return int32(num), nil
 }
+
+func IsEmpty(s string) bool {
+	return s == "" || s == "null"
+}

@@ -15,4 +15,9 @@ export default class R {
     name: 'gmPane',
     path: 'prefabs/GmPane',
   };
+
+  public static bagPane: ResourceItem = {
+    name: 'bagPane',
+    path: 'prefabs/BagPane',
+  };
 }

@@ -3,6 +3,7 @@ package player
 import (
 	"encoding/json"
 	"io/github/gforgame/db"
+	"io/github/gforgame/examples/utils"
 
 	"gorm.io/gorm"
 )
@@ -16,16 +17,20 @@ type Player struct {
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
-	jsonData, err := json.Marshal(p.Backpack)
-	if err != nil {
-		return err
+	if p.Backpack == nil {
+		p.BackpackJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.Backpack)
+		if err != nil {
+			return err
+		}
+		p.BackpackJson = string(jsonData)
 	}
-	p.BackpackJson = string(jsonData)
 	return nil
 }
 
 func (p *Player) AfterFind(tx *gorm.DB) error {
-	if p.BackpackJson == "" {
+	if utils.IsEmpty(p.BackpackJson) {
 		p.Backpack = &Backpack{
 			Items: make(map[int32]int32),
 		}

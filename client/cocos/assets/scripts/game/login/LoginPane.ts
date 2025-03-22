@@ -27,7 +27,7 @@ export class LoginPane extends UIViewController {
   start() {
     // 注册登录按钮点击事件
     this.passwordInput.inputFlag = EditBox.InputFlag.PASSWORD;
-    this.loginButton.node.on(Button.EventType.CLICK, this.onLoginClick, this);
+    this.registerClickEvent(this.loginButton.node, this.onLoginClick, this);
   }
 
   onLoginClick() {
@@ -47,17 +47,6 @@ export class LoginPane extends UIViewController {
         (msg: RespLogin) => {
           console.log('登录成功');
           MainPaneController.display();
-        }
-      );
-
-      GameContext.instance.WebSocketClient.sendMessage(
-        ReqLogin.cmd,
-        {
-          id: username,
-          pwd: password,
-        },
-        (msg: RespLogin) => {
-          console.log('登录成功');
         }
       );
     } else {

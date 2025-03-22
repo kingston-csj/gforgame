@@ -38,6 +38,18 @@ func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
 	return player
 }
 
+func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player {
+	player := ps.GetPlayer(playerId)
+	if player == nil {
+		player = &playerdomain.Player{}
+		player.Id = playerId
+		player.Name = ""
+		player.Level = 1
+		ps.SavePlayer(player)
+	}
+	return player
+}
+
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	cache, _ := context.CacheManager.GetCache("player")
 	cache.Set(player.GetId(), player)

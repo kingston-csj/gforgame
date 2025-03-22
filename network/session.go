@@ -61,6 +61,10 @@ func (s *Session) Send(msg any, index int) error {
 	return nil
 }
 
+func (s *Session) SendWithoutIndex(msg any) error {
+	return s.Send(msg, -1)
+}
+
 func (s *Session) Write() {
 	defer close(s.dataToSend)
 

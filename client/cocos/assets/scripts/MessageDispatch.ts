@@ -1,11 +1,23 @@
+import Bagpack from './data/user/Bagpack';
+import GameContext from './GameContext';
+import ResBackpackInfo from './net/ResBackpackInfo';
+
 export class MessageDispatch {
   // 绑定cmd与对应的handler
   private static handlers: Map<number, Function> = new Map();
 
+  public static init(): void {
+    MessageDispatch.register(ResBackpackInfo.cmd, (msg: ResBackpackInfo) => {
+      GameContext.instance.playerData.Bagpack = new Bagpack(
+        new Map(msg.items.map((item) => [item.id, item]))
+      );
+    });
+  }
+
   /**
    * 注册消息处理器
    */
-  public static register(cmd: number, handler: Function): void {
+  private static register(cmd: number, handler: Function): void {
     this.handlers.set(cmd, handler);
   }
 

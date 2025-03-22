@@ -11,6 +11,8 @@ const (
 
 	CmdGmReqAction = 3001
 	CmdGmResAction = 3002
+
+	CmdItemResBackpackInfo = 4001
 )
 
 type ReqPlayerLogin struct {
@@ -41,12 +43,12 @@ type ReqChat struct {
 }
 
 type ResBackpackInfo struct {
-	Items []ItemInfo
+	Items []ItemInfo `json:"items"`
 }
 
 type ItemInfo struct {
-	Id    int32
-	Count int32
+	Id    int32 `json:"id"`
+	Count int32 `json:"count"`
 }
 
 type ReqGmAction struct {

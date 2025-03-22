@@ -15,4 +15,8 @@ export default class GameContext {
   public get WebSocketClient(): WebSocketClient {
     return this._wsClient;
   }
+
+  public get playerData(): PlayerData {
+    return this._playerData;
+  }
 }

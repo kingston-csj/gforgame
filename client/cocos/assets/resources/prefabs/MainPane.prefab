@@ -233,7 +233,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 3.58,
-      "y": -526.275,
+      "y": -541.255,
       "z": 0
     },
     "_lrot": {
@@ -2242,7 +2242,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "DungeonItem",
+    "_name": "BagItem",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -3512,7 +3512,9 @@
     "__prefab": {
       "__id__": 149
     },
-    "gmButton": null,
+    "bagPane": {
+      "__id__": 107
+    },
     "_id": ""
   },
   {

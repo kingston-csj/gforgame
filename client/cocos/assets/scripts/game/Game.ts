@@ -7,6 +7,7 @@ import R from '../ui/R';
 import UiContext from '../ui/UiContext';
 import UiView from '../ui/UiView';
 import ConfigItemContainer from '../data/config/container/ConfigItemContainer';
+import { MessageDispatch } from '../MessageDispatch';
 
 const { ccclass, property } = _decorator;
 
@@ -33,6 +34,9 @@ export class LoginScene extends Component {
 
     // 挂载备份节点
     UiContext.init(this.layer1, this.layer2, this.layer3, this.layer4, this.layer5);
+
+    // 初始化消息监听
+    MessageDispatch.init();
 
     // 连接服务器
     GameContext.instance.WebSocketClient.connect('ws://127.0.0.1:9527/ws');

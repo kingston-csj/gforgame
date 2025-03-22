@@ -9,7 +9,7 @@ import (
 )
 
 type DataManager struct {
-	containers map[string]*data.Container[int64, interface{}]
+	containers map[string]*data.Container[int64, any]
 }
 
 var instance *DataManager
@@ -34,7 +34,7 @@ func GetDataManager() *DataManager {
 		}
 
 		// 处理每张表
-		containers := make(map[string]*data.Container[int64, interface{}])
+		containers := make(map[string]*data.Container[int64, any])
 		for _, config := range tableConfigs {
 			container, err := data.ProcessTable(reader, config.TableName+".xlsx", config)
 			if err != nil {

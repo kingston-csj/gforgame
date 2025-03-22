@@ -32,7 +32,7 @@ export default class UiView extends Component {
         if (callback) {
           callback(uiView);
         }
-      });
+      }, 0.2);
     });
   }
 }
