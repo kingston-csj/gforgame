@@ -8,6 +8,7 @@ import UiContext from '../ui/UiContext';
 import UiView from '../ui/UiView';
 import ConfigItemContainer from '../data/config/container/ConfigItemContainer';
 import { MessageDispatch } from '../MessageDispatch';
+import ConfigHeroContainer from '../data/config/container/ConfigHeroContainer';
 
 const { ccclass, property } = _decorator;
 
@@ -31,6 +32,7 @@ export class LoginScene extends Component {
   start() {
     // 加载所有的配置数据
     ConfigItemContainer.getInstance();
+    ConfigHeroContainer.getInstance();
 
     // 挂载备份节点
     UiContext.init(this.layer1, this.layer2, this.layer3, this.layer4, this.layer5);

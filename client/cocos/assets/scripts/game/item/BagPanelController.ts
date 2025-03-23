@@ -58,7 +58,7 @@ export class BagPanelController extends UIViewController {
     );
   }
 
-  public static display() {
+  public static openUi() {
     if (BagPanelController.instance) {
       BagPanelController.instance.display();
     } else {

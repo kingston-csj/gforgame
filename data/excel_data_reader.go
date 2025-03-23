@@ -129,7 +129,7 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 		if i == 0 {
 			continue
 		}
-		if i >= len(headers) {
+		if i > len(headers) {
 			break
 		}
 
@@ -149,7 +149,13 @@ func convertValue(value string, fieldType reflect.Type) (any, error) {
 	switch fieldType.Kind() {
 	case reflect.String:
 		return value, nil
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	case reflect.Int8, reflect.Int16, reflect.Int32:
+		num, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse int: %v", err)
+		}
+		return int32(num), nil
+	case reflect.Int, reflect.Int64:
 		return strconv.ParseInt(value, 10, 64)
 	case reflect.Float32, reflect.Float64:
 		return strconv.ParseFloat(value, 64)

@@ -14,6 +14,8 @@ type Player struct {
 	Level        uint      `gorm:"player's' level"`
 	Backpack     *Backpack `gorm:"-"`
 	BackpackJson string    `gorm:"backpack"`
+	HeroBox      *HeroBox  `gorm:"-"`
+	HeroBoxJson  string    `gorm:"herobox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -26,6 +28,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.BackpackJson = string(jsonData)
 	}
+	if p.HeroBox == nil {
+		p.HeroBoxJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.HeroBox)
+		if err != nil {
+			return err
+		}
+		p.HeroBoxJson = string(jsonData)
+	}
 	return nil
 }
 
@@ -36,6 +47,13 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		}
 	} else {
 		json.Unmarshal([]byte(p.BackpackJson), &p.Backpack)
+	}
+	if utils.IsEmpty(p.HeroBoxJson) {
+		p.HeroBox = &HeroBox{
+			Heros: make(map[int32]*Hero),
+		}
+	} else {
+		json.Unmarshal([]byte(p.HeroBoxJson), &p.HeroBox)
 	}
 	return nil
 }

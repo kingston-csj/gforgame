@@ -20,4 +20,14 @@ export default class R {
     name: 'bagPane',
     path: 'prefabs/BagPane',
   };
+
+  public static recruitPane: ResourceItem = {
+    name: 'recruitPane',
+    path: 'prefabs/RecruitPane',
+  };
+
+  public static recruitSettlePane: ResourceItem = {
+    name: 'recruitSettlePane',
+    path: 'prefabs/RecruitSettlePane',
+  };
 }

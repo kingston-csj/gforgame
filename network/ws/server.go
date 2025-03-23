@@ -93,12 +93,17 @@ func (n *WsServer) startListen() {
 func onClientConnected(node *WsServer, conn net.Conn) {
 	defer func() {
 		// 处理客户端网络断开
-		s := network.GetSession(conn)
-		node.IoDispatch.OnSessionCreated(s)
-		network.UnregisterSession(conn)
-		err := conn.Close()
-		if err != nil {
-			logger.Error(fmt.Errorf("close ws conn failed %v", err))
+		// s := network.GetSession(conn)
+		// node.IoDispatch.OnSessionCreated(s)
+		// network.UnregisterSession(conn)
+		// err := conn.Close()
+		// if err != nil {
+		// 	logger.Error(fmt.Errorf("close ws conn failed %v", err))
+		// }
+		if r := recover(); r != nil {
+			logger.Error(fmt.Errorf("Recovered from panic: %v", r))
+			// 可能的话发送错误响应到客户端
+			// 记录详细错误日志
 		}
 	}()
 

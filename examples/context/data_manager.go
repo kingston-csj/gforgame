@@ -31,6 +31,12 @@ func GetDataManager() *DataManager {
 				IDField:    "Id",
 				RecordType: reflect.TypeOf(domain.ItemData{}),
 			},
+			// 英雄表
+			{
+				TableName:  "hero",
+				IDField:    "Id",
+				RecordType: reflect.TypeOf(domain.HeroData{}),
+			},
 		}
 
 		// 处理每张表
@@ -39,7 +45,7 @@ func GetDataManager() *DataManager {
 			container, err := data.ProcessTable(reader, config.TableName+".xlsx", config)
 			if err != nil {
 				fmt.Printf("Failed to process table %s: %v\n", config.TableName, err)
-				continue
+				panic(err)
 			}
 			containers[config.TableName] = container
 		}
@@ -59,4 +65,12 @@ func (dm *DataManager) GetRecord(name string, id int64) any {
 		return nil
 	}
 	return record
+}
+
+func (dm *DataManager) GetRecords(name string) []any {
+	container := dm.containers[name]
+	if container == nil {
+		return nil
+	}
+	return container.GetAllRecords()
 }

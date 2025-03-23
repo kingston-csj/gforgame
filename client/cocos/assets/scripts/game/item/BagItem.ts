@@ -29,10 +29,11 @@ export class BagItem extends UIViewController {
 
   showItemDetail() {
     let root = this.node.parent.parent.parent.children[2];
-    root.active = true;
-
-    let itemInfo = root.getComponent(BagItemInfo);
-    itemInfo.fillData(this.itemData);
+    if (root) {
+      root.active = true;
+      let itemInfo = root.getComponent(BagItemInfo);
+      itemInfo.fillData(this.itemData);
+    }
   }
 
   public fillData(item: Item) {
@@ -44,10 +45,8 @@ export class BagItem extends UIViewController {
     // 使用AssetLoader加载图片资源
     const iconPath = `picture/item/${this.itemData.icon}`;
 
-    // 先确保icon节点上有Sprite组件
     let iconSprite = this.icon.getComponent(Sprite);
     if (!iconSprite) {
-      console.log('Adding Sprite component to icon node');
       iconSprite = this.icon.addComponent(Sprite);
     }
 
@@ -81,7 +80,6 @@ export class BagItem extends UIViewController {
           const uiTrans = iconSprite.node.getComponent(UITransform);
           if (uiTrans) {
             uiTrans.setContentSize(nodeWidth, nodeHeight);
-            console.log(`Resized sprite to: ${nodeWidth}x${nodeHeight}`);
           }
         }
       } else {

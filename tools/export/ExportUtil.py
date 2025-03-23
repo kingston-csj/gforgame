@@ -7,9 +7,9 @@ import json
 
 ignoreColumns = {"id"}
 
-source_directory = 'excel'
-target_json_directory = "json\\"
-target_typescript_directory = "ts\\"
+source_directory = '../../data/'
+target_json_directory = "../../client/cocos/assets/resources/config"
+target_typescript_directory = "../../client/cocos/assets/scripts/data/config/model"
 
 
 class ExportUtil:
@@ -118,8 +118,9 @@ class ExportUtil:
                 "type": ts_type
             })
 
+        config_name = str.upper(class_name[0])+ class_name[1:]
         config_class_code += f'''
-        export default class Config_{class_name}Data extends BaseConfigItem {{
+        export default class {config_name}Data extends BaseConfigItem {{
           public static fileName:string = "{class_name}Data";
         '''
         for field in field_lists:
@@ -158,3 +159,5 @@ class ExportUtil:
         except Exception as e:
             print(e)
 
+if __name__ == '__main__':
+    ExportUtil.exportData(source_directory)

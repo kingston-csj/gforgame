@@ -16,7 +16,6 @@ export default class AssetLoader {
         callback(err, null);
         return;
       }
-      console.log('预制体加载成功:', prefab);
       callback(null, prefab);
     });
   }
@@ -36,7 +35,6 @@ export default class AssetLoader {
         callback(err, null);
         return;
       }
-      console.log('精灵帧加载成功:', spriteFrame);
       callback(null, spriteFrame);
     });
   }
@@ -56,7 +54,6 @@ export default class AssetLoader {
         callback(err, null);
         return;
       }
-      console.log('图片资源加载成功:', imageAsset);
       callback(null, imageAsset);
     });
   }

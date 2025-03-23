@@ -6,6 +6,8 @@ import R from '../../ui/R';
 import { UIViewController } from '../../ui/UiViewController';
 import { BagPanelController } from '../item/BagPanelController';
 
+import { RecruitPaneController } from '../recruit/RecruitPaneController';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneController')
@@ -13,9 +15,12 @@ export class MainPaneController extends UIViewController {
   @property(Node)
   bagPane: Node;
 
+  @property(Node)
+  recruitePane: Node;
+
   private static instance: MainPaneController;
 
-  public static display() {
+  public static openUi() {
     if (MainPaneController.instance) {
       MainPaneController.instance.display();
     } else {
@@ -30,9 +35,14 @@ export class MainPaneController extends UIViewController {
 
   protected start(): void {
     this.registerClickEvent(this.bagPane, this.onBagClick, this);
+    this.registerClickEvent(this.recruitePane, this.onRecruiteClick, this);
   }
 
   onBagClick() {
-    BagPanelController.display();
+    BagPanelController.openUi();
+  }
+
+  onRecruiteClick() {
+    RecruitPaneController.openUi();
   }
 }

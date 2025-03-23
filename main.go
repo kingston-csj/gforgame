@@ -8,6 +8,7 @@ import (
 	"io/github/gforgame/examples/chat"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/gm"
+	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/logger"
@@ -91,7 +92,8 @@ func main() {
 	// 	tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
 
 	node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
-		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(), gm.NewGmController(), item.NewItemController()))
+		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(),
+			gm.NewGmController(), item.NewItemController(), hero.NewHeroController()))
 	context.WsServer = node
 
 	err := node.Start()

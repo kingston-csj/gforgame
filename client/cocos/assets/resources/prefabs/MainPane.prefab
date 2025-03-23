@@ -2401,7 +2401,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "bf671473-d769-4bb9-87fc-f6b98db8fb30@f9941",
+      "__uuid__": "c139a9d6-231d-458c-9322-353a07c0ee84@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -2537,7 +2537,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "bf671473-d769-4bb9-87fc-f6b98db8fb30@f9941",
+      "__uuid__": "c139a9d6-231d-458c-9322-353a07c0ee84@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -3010,7 +3010,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Toggle1",
+    "_name": "RecruitePane",
     "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
@@ -3166,7 +3166,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "f297e165-5bb8-4942-8e90-e894561773cc@f9941",
+      "__uuid__": "f243ff00-67a5-4d6a-99a4-70e65fdb3d58@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -3252,7 +3252,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "f12a23c4-b924-4322-a260-3d982428f1e8@f9941",
+      "__uuid__": "f243ff00-67a5-4d6a-99a4-70e65fdb3d58@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -3317,18 +3317,13 @@
       "b": 124,
       "a": 255
     },
-    "_normalSprite": {
-      "__uuid__": "f12a23c4-b924-4322-a260-3d982428f1e8@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
+    "_normalSprite": null,
     "_hoverSprite": null,
     "_pressedSprite": null,
     "_disabledSprite": null,
     "_duration": 0.1,
     "_zoomScale": 1.2,
-    "_target": {
-      "__id__": 124
-    },
+    "_target": null,
     "checkEvents": [],
     "_isChecked": true,
     "_checkMark": {
@@ -3436,10 +3431,7 @@
       "b": 255,
       "a": 255
     },
-    "_spriteFrame": {
-      "__uuid__": "57520716-48c8-4a19-8acf-41c9f8777fb0@f9941",
-      "__expectedType__": "cc.SpriteFrame"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_fillType": 0,
     "_sizeMode": 1,
@@ -3514,6 +3506,9 @@
     },
     "bagPane": {
       "__id__": 107
+    },
+    "recruitePane": {
+      "__id__": 124
     },
     "_id": ""
   },

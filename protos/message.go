@@ -13,6 +13,9 @@ const (
 	CmdGmResAction = 3002
 
 	CmdItemResBackpackInfo = 4001
+
+	CmdHeroReqRecruit = 5001
+	CmdHeroResRecruit = 5002
 )
 
 type ReqPlayerLogin struct {
@@ -58,4 +61,18 @@ type ReqGmAction struct {
 
 type ResGmAction struct {
 	Code int32
+}
+
+type ReqHeroRecruit struct {
+	Times int32
+}
+
+type ResHeroRecruit struct {
+	Code        int32
+	RewardInfos []*RewardInfo `json:"rewardInfos"`
+}
+
+type RewardInfo struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }

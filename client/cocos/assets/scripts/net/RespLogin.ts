@@ -1,5 +1,5 @@
 export default class RespLogin {
-  public static cmd: number = 2002;
+  public static cmd: number = 1100;
 
-  public succ: boolean;
+  public playerId: number;
 }
