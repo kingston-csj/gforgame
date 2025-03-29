@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, EditBox, Button, director } from 'cc';
+import { _decorator, Button, EditBox } from 'cc';
 import { BaseUiView } from '../../ui/BaseUiView';
 
 const { ccclass, property } = _decorator;

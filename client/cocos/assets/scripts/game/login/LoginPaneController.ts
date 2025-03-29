@@ -1,8 +1,8 @@
-import { _decorator, Button, Component } from 'cc';
-import { MainPaneController } from '../main/MainPaneController';
-import { LoginPaneView } from './LoginPaneView';
-import { LoginModel } from './LoginModel';
+import { _decorator } from 'cc';
 import { BaseController } from '../../ui/BaseController';
+import { MainPaneController } from '../main/MainPaneController';
+import { LoginModel } from './LoginModel';
+import { LoginPaneView } from './LoginPaneView';
 const { ccclass, property } = _decorator;
 
 @ccclass('LoginPaneController')

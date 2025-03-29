@@ -1,9 +1,9 @@
 import { _decorator, Node } from 'cc';
 
-import UiViewFactory from '../../ui/UiViewFactory';
+import { BaseUiView } from '../../ui/BaseUiView';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
-import { BaseUiView } from '../../ui/BaseUiView';
+import UiViewFactory from '../../ui/UiViewFactory';
 import { BagPanelController } from '../item/BagPanelController';
 
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
@@ -26,7 +26,7 @@ export class MainPaneController extends BaseUiView {
     } else {
       MainPaneController.instance = new MainPaneController();
 
-      UiViewFactory.createUi(R.mainPane, LayerIdx.layer1, (ui: MainPaneController) => {
+      UiViewFactory.createUi(R.Prefabs.MainPane, LayerIdx.layer1, (ui: MainPaneController) => {
         MainPaneController.instance = ui;
         ui.display();
       });

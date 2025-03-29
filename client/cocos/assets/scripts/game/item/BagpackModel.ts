@@ -3,19 +3,23 @@ export default class BagpackModel {
 
   public static getInstance(): BagpackModel {
     if (!BagpackModel.instance) {
-      BagpackModel.instance = new BagpackModel(new Map());
+      BagpackModel.instance = new BagpackModel();
     }
     return BagpackModel.instance;
   }
 
   private _items: Map<number, Item> = new Map();
 
-  constructor(items: Map<number, Item>) {
-    this._items = items;
+  public reset(data: Map<number, Item>) {
+    this._items = data;
   }
 
   public getItems(): Array<Item> {
     return Array.from(this._items.values());
+  }
+
+  public getItemByModelId(itemId: number): Item | undefined {
+    return this._items.get(itemId);
   }
 
   public addItem(item: Item): void {

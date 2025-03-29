@@ -1,4 +1,4 @@
-import { Prefab, resources, SpriteFrame, ImageAsset, assetManager } from 'cc';
+import { ImageAsset, Prefab, resources, SpriteFrame } from 'cc';
 
 export default class AssetLoader {
   /**

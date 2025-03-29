@@ -1,15 +1,17 @@
-import { _decorator, Component } from 'cc';
+import { _decorator } from 'cc';
 
 import { ResHeroRecruit } from '../../net/ResHeroRecruit';
 
-import { RecruitSettleModel } from './RecruitSettleModel';
-import { RecruitSettlePaneController } from './RecruitSettlePaneController';
-import { RecruitPaneView } from './RecruitPaneView';
-import { RecruitModel } from './RecruitModel';
+import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
-import { BaseController } from '../../ui/BaseController';
+import { GameConstants } from '../GameConstants';
+import BagpackModel from '../item/BagpackModel';
+import { RecruitModel } from './RecruitModel';
+import { RecruitPaneView } from './RecruitPaneView';
+import { RecruitSettleModel } from './RecruitSettleModel';
+import { RecruitSettlePaneController } from './RecruitSettlePaneController';
 const { ccclass, property } = _decorator;
 
 @ccclass('RecruitPaneController')
@@ -33,6 +35,10 @@ export class RecruitPaneController extends BaseController {
   }
 
   onRecruitBtnClick(times: number) {
+    let ownItem = BagpackModel.getInstance().getItemByModelId(GameConstants.ITEM_RECRUIT_ID);
+    if (!ownItem || ownItem.count < times) {
+      return;
+    }
     this.recruitModel.doRecruit(times).then((msg: ResHeroRecruit) => {
       RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
       RecruitSettlePaneController.openUi();
@@ -59,11 +65,15 @@ export class RecruitPaneController extends BaseController {
       return this.creatingPromise;
     }
     this.creatingPromise = new Promise((resolve) => {
-      UiViewFactory.createUi(R.recruitPane, LayerIdx.layer4, (ui: RecruitPaneController) => {
-        this.instance = ui;
-        this.creatingPromise = null;
-        resolve(ui);
-      });
+      UiViewFactory.createUi(
+        R.Prefabs.RecruitPane,
+        LayerIdx.layer4,
+        (ui: RecruitPaneController) => {
+          this.instance = ui;
+          this.creatingPromise = null;
+          resolve(ui);
+        }
+      );
     });
     return this.creatingPromise;
   }

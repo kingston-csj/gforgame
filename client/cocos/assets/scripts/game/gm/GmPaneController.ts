@@ -1,11 +1,11 @@
-import { _decorator, Component, Node, EditBox, Button, director } from 'cc';
-import { BaseUiView } from '../../ui/BaseUiView';
-import UiViewFactory from '../../ui/UiViewFactory';
-import { LayerIdx } from '../../ui/LayerIds';
-import R from '../../ui/R';
+import { _decorator, EditBox, Node } from 'cc';
 import GameContext from '../../GameContext';
 import ReqGmAction from '../../net/ReqGmAction';
 import ResGmAction from '../../net/ResGmAction';
+import { BaseUiView } from '../../ui/BaseUiView';
+import { LayerIdx } from '../../ui/LayerIds';
+import R from '../../ui/R';
+import UiViewFactory from '../../ui/UiViewFactory';
 
 const { ccclass, property } = _decorator;
 
@@ -28,7 +28,7 @@ export class GmPaneController extends BaseUiView {
     } else {
       GmPaneController.instance = new GmPaneController();
 
-      UiViewFactory.createUi(R.gmPane, LayerIdx.layer2, () => {});
+      UiViewFactory.createUi(R.Prefabs.GmPane, LayerIdx.layer2, () => {});
     }
   }
 

@@ -1,14 +1,4 @@
-import {
-  _decorator,
-  Component,
-  Label,
-  Node,
-  Sprite,
-  SpriteFrame,
-  ImageAsset,
-  Size,
-  UITransform,
-} from 'cc';
+import { _decorator, Component, Label, Sprite, SpriteFrame, UITransform } from 'cc';
 import ItemData from '../../data/config/model/ItemData';
 import AssetLoader from '../../ui/AssertLoader';
 const { ccclass, property } = _decorator;

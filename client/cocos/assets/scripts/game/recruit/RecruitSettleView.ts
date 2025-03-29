@@ -1,9 +1,9 @@
-import { _decorator, Component, Node, EditBox, Button, director, instantiate, Prefab } from 'cc';
+import { _decorator, instantiate, Node, Prefab } from 'cc';
 
 import { BaseUiView } from '../../ui/BaseUiView';
 
-import { RecruitSettleModel } from './RecruitSettleModel';
 import { RewardItem } from '../reward/RewardItem';
+import { RecruitSettleModel } from './RecruitSettleModel';
 
 const { ccclass, property } = _decorator;
 

@@ -1,9 +1,9 @@
-import { _decorator, Component, instantiate, Node } from 'cc';
-import ResourceItem from './ResourceItem';
-import { LayerIdx } from './LayerIds';
+import { _decorator, Component, instantiate } from 'cc';
 import AssetLoader from './AssertLoader';
-import UiContext from './UiContext';
 import { BaseController } from './BaseController';
+import { LayerIdx } from './LayerIds';
+import ResourceItem from './ResourceItem';
+import UiContext from './UiContext';
 
 const { ccclass, property } = _decorator;
 

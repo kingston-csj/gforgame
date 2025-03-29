@@ -1,4 +1,4 @@
-import { _decorator, Button, Component, instantiate, Node, Prefab, Toggle } from 'cc';
+import { _decorator, Button, Component, Node, Toggle } from 'cc';
 const { ccclass, property } = _decorator;
 @ccclass('BaseUiView')
 export class BaseUiView extends Component {

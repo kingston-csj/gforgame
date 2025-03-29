@@ -55,21 +55,11 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 添加session
-	GetSessionManager().AddSession(s, player)
+	context.SessionManager.AddSession(s, player)
 
 	s.Send(&protos.ResPlayerLogin{Succ: true}, index)
 
-	resBackpack := &protos.ResBackpackInfo{}
-	if player.Backpack != nil {
-		// 临时处理，后续采用事件驱动
-		for id, count := range player.Backpack.Items {
-			resBackpack.Items = append(resBackpack.Items, protos.ItemInfo{
-				Id:    int32(id),
-				Count: int32(count),
-			})
-		}
-	}
-	s.SendWithoutIndex(resBackpack)
+	context.EventBus.Publish("player_login", player)
 }
 
 func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {

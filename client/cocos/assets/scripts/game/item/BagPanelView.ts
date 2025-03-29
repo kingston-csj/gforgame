@@ -1,10 +1,10 @@
-import { _decorator, instantiate, Node, Prefab, Sprite, Toggle } from 'cc';
-import { BaseUiView } from '../../ui/BaseUiView';
+import { _decorator, instantiate, Node, Prefab, Toggle } from 'cc';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import ItemData from '../../data/config/model/ItemData';
+import GameContext from '../../GameContext';
+import { BaseUiView } from '../../ui/BaseUiView';
 import { BagItem } from './BagItem';
 import { Item } from './BagpackModel';
-import GameContext from '../../GameContext';
 const { ccclass, property } = _decorator;
 
 @ccclass('BagPanelView')

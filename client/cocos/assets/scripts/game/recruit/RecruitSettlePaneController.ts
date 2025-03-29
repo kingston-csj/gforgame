@@ -1,14 +1,14 @@
-import { _decorator, Component } from 'cc';
+import { _decorator } from 'cc';
 
-import UiViewFactory from '../../ui/UiViewFactory';
 import { LayerIdx } from '../../ui/LayerIds';
+import UiViewFactory from '../../ui/UiViewFactory';
 
 import { ResHeroRecruit } from '../../net/ResHeroRecruit';
 import R from '../../ui/R';
 import { RecruitSettleModel } from './RecruitSettleModel';
 
-import { RecruitSettleView } from './RecruitSettleView';
 import { BaseController } from '../../ui/BaseController';
+import { RecruitSettleView } from './RecruitSettleView';
 const { ccclass, property } = _decorator;
 
 @ccclass('RecruitSettlePaneController')
@@ -56,7 +56,7 @@ export class RecruitSettlePaneController extends BaseController {
 
     this.creatingPromise = new Promise((resolve) => {
       UiViewFactory.createUi(
-        R.recruitSettlePane,
+        R.Prefabs.RecruitSettlePane,
         LayerIdx.layer5,
         (ui: RecruitSettlePaneController) => {
           this.instance = ui;

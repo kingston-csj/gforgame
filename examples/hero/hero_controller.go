@@ -30,7 +30,7 @@ func (ps *HeroController) Init() {
 func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
 	rewardInfos := make([]*protos.RewardInfo, 0)
 
-	p := player.GetSessionManager().GetPlayerBySession(s)
+	p := context.SessionManager.GetPlayerBySession(s).(*playerdomain.Player)
 
 	for i := 0; i < int(msg.Times); i++ {
 		heroData := ps.GetRandomHero()

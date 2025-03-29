@@ -1,4 +1,4 @@
-import { JsonAsset, resources } from 'cc';
+import AssetResourceFactory from '../../ui/AssetResourceFactory';
 
 export default class ConfigContainer<T> {
   protected _datas: Map<number, T> = new Map<number, T>();
@@ -12,39 +12,29 @@ export default class ConfigContainer<T> {
   }
 
   private loadConfig() {
-    // 加载JSON配置文件，路径相对于resources目录
-    resources.load(`config/${this._fileName}`, JsonAsset, (err, jsonAsset) => {
-      if (err) {
-        console.error(`加载配置文件 ${this._fileName} 失败:`, err);
-        return;
-      }
-
-      const jsonData = jsonAsset.json;
-      if (!Array.isArray(jsonData)) {
-        console.error(`配置文件 ${this._fileName} 格式错误，应该是数组`);
-        return;
-      }
-
-      // 解析每一条配置数据
-      for (const item of jsonData) {
-        try {
-          // 使用传入的类型创建实例
-          const config = new this._meta(item);
+    let jsonAsset = AssetResourceFactory.instance.getConfig(this._fileName);
+    let jsonData = jsonAsset.json;
+    if (!Array.isArray(jsonData)) {
+      console.error(`配置文件 ${this._fileName} 格式错误，应该是数组`);
+      return;
+    }
+    for (const item of jsonData) {
+      try {
+        const config = new this._meta(item);
+        this._datas.set(config.id, config as T);
+        // 使用id作为key存储到Map中
+        if ('id' in config) {
           this._datas.set(config.id, config as T);
-          // 使用id作为key存储到Map中
-          if ('id' in config) {
-            this._datas.set(config.id, config as T);
-          } else {
-            console.error(`配置项缺少id字段:`, item);
-          }
-        } catch (e) {
-          console.error(`解析配置项失败:`, item, e);
+        } else {
+          console.error(`配置项缺少id字段:`, item);
         }
+      } catch (e) {
+        console.error(`解析配置项失败:`, item, e);
       }
+    }
 
-      console.log(`配置文件 ${this._fileName} 加载完成，共 ${this._datas.size} 条数据`);
-      this.afterLoad();
-    });
+    console.log(`配置文件 ${this._fileName} 加载完成，共 ${this._datas.size} 条数据`);
+    this.afterLoad();
   }
 
   /**

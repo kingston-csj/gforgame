@@ -2,8 +2,9 @@ package gm
 
 import (
 	"io/github/gforgame/common/i18n"
+	"io/github/gforgame/examples/context"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/item"
-	"io/github/gforgame/examples/player"
 
 	"io/github/gforgame/examples/utils"
 	"io/github/gforgame/network"
@@ -40,8 +41,8 @@ func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.Req
 		if err != nil {
 			return &protos.ResGmAction{Code: i18n.ErrorIllegalParams}
 		}
-		player := player.GetSessionManager().GetPlayerBySession(s)
-		item.GetInstance().AddByModelId(player, itemId, itemNum)
+		player := context.SessionManager.GetPlayerBySession(s)
+		item.GetInstance().AddByModelId(player.(*playerdomain.Player), itemId, itemNum)
 	}
 
 	return &protos.ResGmAction{Code: 0}

@@ -10,6 +10,7 @@ import (
 
 type Player struct {
 	db.BaseEntity
+	ID           string    `gorm:"player's ID"`
 	Name         string    `gorm:"player's name"`
 	Level        uint      `gorm:"player's' level"`
 	Backpack     *Backpack `gorm:"-"`
@@ -56,4 +57,8 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		json.Unmarshal([]byte(p.HeroBoxJson), &p.HeroBox)
 	}
 	return nil
+}
+
+func (p *Player) GetID() string {
+	return p.ID
 }

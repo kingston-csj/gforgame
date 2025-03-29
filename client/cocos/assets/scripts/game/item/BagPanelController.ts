@@ -35,7 +35,7 @@ export class BagPanelController extends BaseController {
       return this.creatingPromise;
     }
     this.creatingPromise = new Promise((resolve) => {
-      UiViewFactory.createUi(R.bagPane, LayerIdx.layer4, (ui: BagPanelController) => {
+      UiViewFactory.createUi(R.Prefabs.BagPane, LayerIdx.layer4, (ui: BagPanelController) => {
         this.instance = ui;
         this.creatingPromise = null;
         resolve(ui);

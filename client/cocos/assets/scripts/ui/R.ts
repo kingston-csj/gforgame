@@ -1,33 +1,41 @@
-import ResourceItem from './ResourceItem';
-
+// 资源枚举
 export default class R {
-  public static loginPane: ResourceItem = {
-    name: 'loginPane',
-    path: 'prefabs/LoginPane',
+  // 预制体枚举
+  static readonly Prefabs = {
+    AssetResourceFactory: {
+      name: 'assetResourceFactory',
+      path: 'prefabs/AssetResourceFactory',
+    },
+
+    LoginPane: {
+      name: 'loginPane',
+      path: 'prefabs/LoginPane',
+    },
+    MainPane: {
+      name: 'mainPane',
+      path: 'prefabs/MainPane',
+    },
+    GmPane: {
+      name: 'gmPane',
+      path: 'prefabs/GmPane',
+    },
+    BagPane: {
+      name: 'bagPane',
+      path: 'prefabs/BagPane',
+    },
+    RecruitPane: {
+      name: 'recruitPane',
+      path: 'prefabs/RecruitPane',
+    },
+    RecruitSettlePane: {
+      name: 'recruitSettlePane',
+      path: 'prefabs/RecruitSettlePane',
+    },
   };
 
-  public static mainPane: ResourceItem = {
-    name: 'mainPane',
-    path: 'prefabs/MainPane',
-  };
-
-  public static gmPane: ResourceItem = {
-    name: 'gmPane',
-    path: 'prefabs/GmPane',
-  };
-
-  public static bagPane: ResourceItem = {
-    name: 'bagPane',
-    path: 'prefabs/BagPane',
-  };
-
-  public static recruitPane: ResourceItem = {
-    name: 'recruitPane',
-    path: 'prefabs/RecruitPane',
-  };
-
-  public static recruitSettlePane: ResourceItem = {
-    name: 'recruitSettlePane',
-    path: 'prefabs/RecruitSettlePane',
+  // 图片纹理图集枚举
+  static readonly Sprites = {
+    Hero: 'hero_all',
+    Item: 'item_all',
   };
 }
