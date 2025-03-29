@@ -3,12 +3,12 @@ import ResourceItem from './ResourceItem';
 import { LayerIdx } from './LayerIds';
 import AssetLoader from './AssertLoader';
 import UiContext from './UiContext';
-import { UIViewController } from './UiViewController';
+import { BaseController } from './BaseController';
 
 const { ccclass, property } = _decorator;
 
-@ccclass('UiView')
-export default class UiView extends Component {
+@ccclass('UiViewFactory')
+export default class UiViewFactory extends Component {
   public static createUi(ui: ResourceItem, layer: LayerIdx, callback: Function) {
     // 使用AssetLoader加载预制体
     AssetLoader.loadPrefab(ui.path, (err, prefab) => {
@@ -27,12 +27,14 @@ export default class UiView extends Component {
 
       const root = UiContext.getLayer(layer);
       root.addChild(node);
-      const uiView = node.getComponent(UIViewController);
-      uiView.scheduleOnce(() => {
-        if (callback) {
-          callback(uiView);
-        }
-      }, 0.2);
+      const uiView = node.getComponent(BaseController);
+      if (uiView) {
+        uiView.scheduleOnce(() => {
+          if (callback) {
+            callback(uiView);
+          }
+        }, 0.2);
+      }
     });
   }
 }

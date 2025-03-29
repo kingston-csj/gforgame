@@ -1,4 +1,4 @@
-import Bagpack from './data/user/Bagpack';
+import BagpackModel from './game/item/BagpackModel';
 import GameContext from './GameContext';
 import ResBackpackInfo from './net/ResBackpackInfo';
 
@@ -9,11 +9,11 @@ export class MessageDispatch {
   public static init(): void {
     MessageDispatch.register(ResBackpackInfo.cmd, (msg: ResBackpackInfo) => {
       if (msg.items) {
-        GameContext.instance.playerData.Bagpack = new Bagpack(
+        GameContext.instance.playerData.Bagpack = new BagpackModel(
           new Map(msg.items.map((item) => [item.id, item]))
         );
       } else {
-        GameContext.instance.playerData.Bagpack = new Bagpack(new Map());
+        GameContext.instance.playerData.Bagpack = new BagpackModel(new Map());
       }
     });
   }

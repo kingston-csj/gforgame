@@ -1,79 +1,70 @@
-import { _decorator, Component, Node, EditBox, Button, director, instantiate, Prefab } from 'cc';
-import GameContext from '../../GameContext';
+import { _decorator, Component } from 'cc';
 
-import { UIViewController } from '../../ui/UiViewController';
-
-import UiView from '../../ui/UiView';
+import UiViewFactory from '../../ui/UiViewFactory';
 import { LayerIdx } from '../../ui/LayerIds';
-import { ReqHeroRecruit } from '../../net/ReqHeroRecruit';
+
 import { ResHeroRecruit } from '../../net/ResHeroRecruit';
 import R from '../../ui/R';
-import { RecruitSettleModel } from '../../model/RecruitSettleModel';
-import { RewardItem } from '../reward/RewardItem';
+import { RecruitSettleModel } from './RecruitSettleModel';
+
+import { RecruitSettleView } from './RecruitSettleView';
+import { BaseController } from '../../ui/BaseController';
 const { ccclass, property } = _decorator;
 
 @ccclass('RecruitSettlePaneController')
-export class RecruitSettlePaneController extends UIViewController {
-  @property(Node)
-  public itemContainer: Node;
+export class RecruitSettlePaneController extends BaseController {
+  @property(RecruitSettleView)
+  public recruitSettleView: RecruitSettleView | null = null;
 
-  @property(Prefab)
-  public itemPrefab: Prefab;
+  private recruitSettleModel: RecruitSettleModel = RecruitSettleModel.getInstance();
 
-  @property(Node)
-  public againBtn: Node;
-
-  @property(Node)
-  public okBtn: Node;
+  private static creatingPromise: Promise<RecruitSettlePaneController> | null = null;
 
   private static instance: RecruitSettlePaneController;
 
   protected start(): void {
-    this.registerClickEvent(this.againBtn, () => this.onRecruitBtnClick(1), this);
-    this.registerClickEvent(this.okBtn, this.hide, this);
+    this.recruitSettleView.node.on('recruitBtnClick', this.onRecruitBtnClick, this);
+    this.recruitSettleView.node.on('closeBtnClick', this.onCloseBtnClick, this);
   }
 
-  onRecruitBtnClick(time: number) {
-    GameContext.instance.WebSocketClient.sendMessage(
-      ReqHeroRecruit.cmd,
-      {
-        times: time,
-      },
-      (msg: ResHeroRecruit) => {
-        RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
-        RecruitSettlePaneController.openUi();
-      }
-    );
+  onRecruitBtnClick(times: number) {
+    this.recruitSettleModel.doRecruit(times).then((msg: ResHeroRecruit) => {
+      this.recruitSettleModel.setRewardItems(msg.rewardInfos);
+      this.recruitSettleView.display();
+    });
   }
 
   onCloseBtnClick() {
-    this.hide();
+    this.recruitSettleView.hide();
   }
 
   public static openUi() {
-    if (RecruitSettlePaneController.instance) {
-      RecruitSettlePaneController.instance.display();
-    } else {
-      RecruitSettlePaneController.instance = new RecruitSettlePaneController();
-
-      UiView.createUi(R.recruitSettlePane, LayerIdx.layer5, (ui: RecruitSettlePaneController) => {
-        RecruitSettlePaneController.instance = ui;
-        ui.display();
-      });
-    }
+    this.getInstance().then((controller) => {
+      if (controller.recruitSettleView) {
+        controller.recruitSettleView.display();
+      }
+    });
   }
 
-  protected onDisplay() {
-    this.showItems();
-  }
-
-  private showItems() {
-    let rewardItems = RecruitSettleModel.getInstance().getRewardItems();
-    for (let i = 0; i < rewardItems.length; i++) {
-      let itemUi = instantiate(this.itemPrefab);
-      itemUi.setParent(this.itemContainer);
-
-      itemUi.getComponent(RewardItem).fillData(rewardItems[i]);
+  private static getInstance(): Promise<RecruitSettlePaneController> {
+    if (this.instance) {
+      return Promise.resolve(this.instance);
     }
+    if (this.creatingPromise) {
+      return this.creatingPromise;
+    }
+
+    this.creatingPromise = new Promise((resolve) => {
+      UiViewFactory.createUi(
+        R.recruitSettlePane,
+        LayerIdx.layer5,
+        (ui: RecruitSettlePaneController) => {
+          this.instance = ui;
+          this.creatingPromise = null;
+          resolve(ui);
+        }
+      );
+    });
+    return this.creatingPromise;
   }
 }

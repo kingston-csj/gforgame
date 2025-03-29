@@ -1,10 +1,10 @@
-import Bagpack from './Bagpack';
+import BagpackModel from '../../game/item/BagpackModel';
 
 export default class PlayerData {
   private _id: string;
   private _name: string;
 
-  private _bagpack: Bagpack;
+  private _bagpack: BagpackModel;
 
   public get Id(): string {
     return this._id;
@@ -14,11 +14,11 @@ export default class PlayerData {
     return this._name;
   }
 
-  public get Bagpack(): Bagpack {
+  public get Bagpack(): BagpackModel {
     return this._bagpack;
   }
 
-  public set Bagpack(bagpack: Bagpack) {
+  public set Bagpack(bagpack: BagpackModel) {
     this._bagpack = bagpack;
   }
 }

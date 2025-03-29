@@ -1,9 +1,9 @@
-import { _decorator, Toggle, Node, EditBox, Button, director } from 'cc';
+import { _decorator, Node } from 'cc';
 
-import UiView from '../../ui/UiView';
+import UiViewFactory from '../../ui/UiViewFactory';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
-import { UIViewController } from '../../ui/UiViewController';
+import { BaseUiView } from '../../ui/BaseUiView';
 import { BagPanelController } from '../item/BagPanelController';
 
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
@@ -11,7 +11,7 @@ import { RecruitPaneController } from '../recruit/RecruitPaneController';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneController')
-export class MainPaneController extends UIViewController {
+export class MainPaneController extends BaseUiView {
   @property(Node)
   bagPane: Node;
 
@@ -26,7 +26,7 @@ export class MainPaneController extends UIViewController {
     } else {
       MainPaneController.instance = new MainPaneController();
 
-      UiView.createUi(R.mainPane, LayerIdx.layer1, (ui: MainPaneController) => {
+      UiViewFactory.createUi(R.mainPane, LayerIdx.layer1, (ui: MainPaneController) => {
         MainPaneController.instance = ui;
         ui.display();
       });

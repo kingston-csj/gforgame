@@ -2,8 +2,9 @@ package cross
 
 import (
 	"errors"
-	"io/github/gforgame/examples/player"
 	"strconv"
+
+	playerdomain "io/github/gforgame/examples/domain/player"
 )
 
 type TransferType int
@@ -13,19 +14,17 @@ const (
 	Moba                       // Moba pvp
 )
 
-var (
-	services map[TransferType]Transfer = make(map[TransferType]Transfer)
-)
+var services map[TransferType]Transfer = make(map[TransferType]Transfer)
 
 type Transfer interface {
 	// 能否登录到跨服节点
-	CanTransfer(p *player.Player) int
+	CanTransfer(p *playerdomain.Player) int
 	// 获取目标服务器id
-	GetTargetServerId(p *player.Player) uint32
+	GetTargetServerId(p *playerdomain.Player) uint32
 	// 本服玩家进入跨服场景
-	LocalEnterScene(p *player.Player) error
+	LocalEnterScene(p *playerdomain.Player) error
 	// 玩家跨服成功后进入跨服场景
-	RemoteEnterScene(p *player.Player) error
+	RemoteEnterScene(p *playerdomain.Player) error
 }
 
 func RegisterTransfer(kind TransferType, t Transfer) {

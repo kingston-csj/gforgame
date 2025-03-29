@@ -1,7 +1,7 @@
 import { _decorator, Component, Label, Node, Sprite, SpriteFrame, UITransform } from 'cc';
 import ItemData from '../../data/config/model/ItemData';
 import AssetLoader from '../../ui/AssertLoader';
-import { UIViewController } from '../../ui/UiViewController';
+import { BaseUiView } from '../../ui/BaseUiView';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import RewardInfo from '../../net/MsgItems/RewardInfo';
 import ConfigHeroContainer from '../../data/config/container/ConfigHeroContainer';
@@ -10,7 +10,7 @@ import HeroData from '../../data/config/model/HeroData';
 const { ccclass, property } = _decorator;
 
 @ccclass('RewardItem')
-export class RewardItem extends UIViewController {
+export class RewardItem extends BaseUiView {
   @property(Sprite)
   public kuang: Sprite;
 

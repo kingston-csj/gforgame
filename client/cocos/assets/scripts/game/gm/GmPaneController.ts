@@ -1,19 +1,16 @@
 import { _decorator, Component, Node, EditBox, Button, director } from 'cc';
-import { UIViewController } from '../../ui/UiViewController';
-import UiView from '../../ui/UiView';
+import { BaseUiView } from '../../ui/BaseUiView';
+import UiViewFactory from '../../ui/UiViewFactory';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import GameContext from '../../GameContext';
-import ReqLogin from '../../net/ReqLogin';
-import RespLogin from '../../net/RespLogin';
-import { MainPaneController } from '../main/MainPaneController';
 import ReqGmAction from '../../net/ReqGmAction';
 import ResGmAction from '../../net/ResGmAction';
 
 const { ccclass, property } = _decorator;
 
 @ccclass('GmPaneController')
-export class GmPaneController extends UIViewController {
+export class GmPaneController extends BaseUiView {
   private static instance: GmPaneController;
 
   @property(Node)
@@ -31,7 +28,7 @@ export class GmPaneController extends UIViewController {
     } else {
       GmPaneController.instance = new GmPaneController();
 
-      UiView.createUi(R.gmPane, LayerIdx.layer2, () => {});
+      UiViewFactory.createUi(R.gmPane, LayerIdx.layer2, () => {});
     }
   }
 

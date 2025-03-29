@@ -3,14 +3,15 @@ package cross
 import (
 	"context"
 	"fmt"
+
 	"io/github/gforgame/codec/json"
 	"io/github/gforgame/config"
-	"io/github/gforgame/examples/player"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network/rpc"
 )
 
-func PlayerLoginRemote(p *player.Player, kind TransferType) {
+func PlayerLoginRemote(p *playerdomain.Player, kind TransferType) {
 	t, err := GetTransfer(kind)
 	if err != nil {
 		logger.Error(err)
@@ -26,7 +27,7 @@ func PlayerLoginRemote(p *player.Player, kind TransferType) {
 	}
 }
 
-func transferToRemote(p *player.Player, t Transfer) error {
+func transferToRemote(p *playerdomain.Player, t Transfer) error {
 	localSid := config.ServerConfig.ServerId
 	targetSid := t.GetTargetServerId(p)
 
@@ -47,7 +48,7 @@ func transferToRemote(p *player.Player, t Transfer) error {
 	return nil
 }
 
-func doEnterCrossServer(p *player.Player, t Transfer) error {
+func doEnterCrossServer(p *playerdomain.Player, t Transfer) error {
 	codec := json.NewSerializer()
 	data, err := codec.Encode(p)
 	if err != nil {

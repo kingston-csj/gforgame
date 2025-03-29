@@ -1,7 +1,7 @@
 import { _decorator, Button, Component, instantiate, Node, Prefab, Toggle } from 'cc';
 const { ccclass, property } = _decorator;
-@ccclass('UI_View')
-export class UIViewController extends Component {
+@ccclass('BaseUiView')
+export class BaseUiView extends Component {
   public display() {
     this.node.active = true;
     this.onDisplay();
@@ -15,12 +15,6 @@ export class UIViewController extends Component {
   }
 
   protected onHide() {}
-
-  onLoad(): void {
-    this._onLoad();
-  }
-
-  protected _onLoad() {}
 
   /**
    * 为节点注册点击事件

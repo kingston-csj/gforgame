@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"reflect"
+
 	"io/github/gforgame/codec/json"
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/cross"
-	"io/github/gforgame/examples/player"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/client"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/protos"
-	"os"
-	"os/signal"
-	"reflect"
 )
 
 // 实现 RequestCallback 接口的匿名对象
@@ -66,9 +67,12 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 }
 
 func main() {
-	p := &player.Player{db.BaseEntity{Id: "123456"}, "gforgame", 999}
+	p := &playerdomain.Player{
+		BaseEntity: db.BaseEntity{Id: "123456"},
+		Name:       "gforgame",
+		Level:      999,
+	}
 	cross.PlayerLoginRemote(p, cross.Island)
-
 	network.RegisterMessage(protos.CmdChatReqJoin, &protos.ReqJoinRoom{})
 	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
 	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})

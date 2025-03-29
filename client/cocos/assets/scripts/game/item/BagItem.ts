@@ -1,14 +1,14 @@
 import { _decorator, Component, Label, Node, Sprite, SpriteFrame, UITransform } from 'cc';
 import ItemData from '../../data/config/model/ItemData';
 import AssetLoader from '../../ui/AssertLoader';
-import { UIViewController } from '../../ui/UiViewController';
+import { BaseUiView } from '../../ui/BaseUiView';
 import { BagItemInfo } from './BagItemInfo';
-import { Item } from '../../data/user/Bagpack';
+import { Item } from './BagpackModel';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 const { ccclass, property } = _decorator;
 
 @ccclass('BagItem')
-export class BagItem extends UIViewController {
+export class BagItem extends BaseUiView {
   @property(Sprite)
   public kuang: Sprite;
 

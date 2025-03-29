@@ -5,7 +5,7 @@ import { LayerIdx } from '../ui/LayerIds';
 
 import R from '../ui/R';
 import UiContext from '../ui/UiContext';
-import UiView from '../ui/UiView';
+import UiViewFactory from '../ui/UiViewFactory';
 import ConfigItemContainer from '../data/config/container/ConfigItemContainer';
 import { MessageDispatch } from '../MessageDispatch';
 import ConfigHeroContainer from '../data/config/container/ConfigHeroContainer';
@@ -44,6 +44,6 @@ export class LoginScene extends Component {
     GameContext.instance.WebSocketClient.connect('ws://127.0.0.1:9527/ws');
 
     // 创建登录界面
-    UiView.createUi(R.loginPane, LayerIdx.layer1, () => {});
+    UiViewFactory.createUi(R.loginPane, LayerIdx.layer1, () => {});
   }
 }

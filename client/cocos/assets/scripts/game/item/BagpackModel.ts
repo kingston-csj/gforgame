@@ -1,4 +1,13 @@
-export default class Bagpack {
+export default class BagpackModel {
+  private static instance: BagpackModel;
+
+  public static getInstance(): BagpackModel {
+    if (!BagpackModel.instance) {
+      BagpackModel.instance = new BagpackModel(new Map());
+    }
+    return BagpackModel.instance;
+  }
+
   private _items: Map<number, Item> = new Map();
 
   constructor(items: Map<number, Item>) {
