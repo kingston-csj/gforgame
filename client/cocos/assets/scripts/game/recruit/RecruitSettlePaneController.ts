@@ -8,6 +8,7 @@ import R from '../../ui/R';
 import { RecruitSettleModel } from './RecruitSettleModel';
 
 import { BaseController } from '../../ui/BaseController';
+import { TipsPaneController } from '../common/TipsPaneController';
 import { RecruitSettleView } from './RecruitSettleView';
 const { ccclass, property } = _decorator;
 
@@ -29,8 +30,12 @@ export class RecruitSettlePaneController extends BaseController {
 
   onRecruitBtnClick(times: number) {
     this.recruitSettleModel.doRecruit(times).then((msg: ResHeroRecruit) => {
-      this.recruitSettleModel.setRewardItems(msg.rewardInfos);
-      this.recruitSettleView.display();
+      if (msg.code === 0) {
+        RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
+        RecruitSettlePaneController.openUi();
+      } else {
+        TipsPaneController.openUi(msg.code);
+      }
     });
   }
 

@@ -19,7 +19,9 @@ var instance *ItemService
 var once sync.Once
 var errorIllegalParams = common.NewBusinessRequestException(i18n.ErrorIllegalParams)
 
-func GetInstance() *ItemService {
+var RecruitItemId int32 = 2002
+
+func GetItemService() *ItemService {
 	once.Do(func() {
 		instance = &ItemService{}
 		instance.init()

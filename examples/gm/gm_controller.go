@@ -42,7 +42,7 @@ func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.Req
 			return &protos.ResGmAction{Code: i18n.ErrorIllegalParams}
 		}
 		player := context.SessionManager.GetPlayerBySession(s)
-		item.GetInstance().AddByModelId(player.(*playerdomain.Player), itemId, itemNum)
+		item.GetItemService().AddByModelId(player.(*playerdomain.Player), itemId, itemNum)
 	}
 
 	return &protos.ResGmAction{Code: 0}

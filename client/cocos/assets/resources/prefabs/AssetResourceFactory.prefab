@@ -72,10 +72,6 @@
       {
         "__uuid__": "3c0155c3-7454-4358-862a-ada9076bf79b",
         "__expectedType__": "cc.SpriteAtlas"
-      },
-      {
-        "__uuid__": "a2b85e51-a453-4e8e-8c8d-6109003050df",
-        "__expectedType__": "cc.SpriteAtlas"
       }
     ],
     "configs": [
@@ -84,7 +80,15 @@
         "__expectedType__": "cc.JsonAsset"
       },
       {
+        "__uuid__": "2d9218f7-628f-40c0-b96f-92428aad90f0",
+        "__expectedType__": "cc.JsonAsset"
+      },
+      {
         "__uuid__": "588807d2-11f0-4b2e-809b-ed8e6c40091e",
+        "__expectedType__": "cc.JsonAsset"
+      },
+      {
+        "__uuid__": "5fd9cada-6cd5-4da5-a5eb-aa52ed4839b3",
         "__expectedType__": "cc.JsonAsset"
       }
     ],

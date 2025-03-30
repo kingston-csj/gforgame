@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 
+	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
@@ -31,6 +32,13 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 	rewardInfos := make([]*protos.RewardInfo, 0)
 
 	p := context.SessionManager.GetPlayerBySession(s).(*playerdomain.Player)
+	if p.Backpack.GetItemCount(item.RecruitItemId) < int32(msg.Times) {
+		return &protos.ResHeroRecruit{
+			Code: constants.ITEM_NOT_ENOUGH,
+		}
+	}
+
+	p.Backpack.RemoveItem(item.RecruitItemId, msg.Times)
 
 	for i := 0; i < int(msg.Times); i++ {
 		heroData := ps.GetRandomHero()
@@ -40,7 +48,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 				Type:  "item",
 				Value: fmt.Sprintf("%d=%d", heroData.Item, heroData.Shard),
 			})
-			item.GetInstance().AddByModelId(p, heroData.Item, heroData.Shard)
+			item.GetItemService().AddByModelId(p, heroData.Item, heroData.Shard)
 		} else {
 			rewardInfos = append(rewardInfos, &protos.RewardInfo{
 				Type:  "hero",

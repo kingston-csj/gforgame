@@ -6,6 +6,7 @@ import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
+import { TipsPaneController } from '../common/TipsPaneController';
 import { GameConstants } from '../GameConstants';
 import BagpackModel from '../item/BagpackModel';
 import { RecruitModel } from './RecruitModel';
@@ -36,12 +37,16 @@ export class RecruitPaneController extends BaseController {
 
   onRecruitBtnClick(times: number) {
     let ownItem = BagpackModel.getInstance().getItemByModelId(GameConstants.ITEM_RECRUIT_ID);
-    if (!ownItem || ownItem.count < times) {
-      return;
-    }
+    // if (!ownItem || ownItem.count < times) {
+    //   return;
+    // }
     this.recruitModel.doRecruit(times).then((msg: ResHeroRecruit) => {
-      RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
-      RecruitSettlePaneController.openUi();
+      if (msg.code === 0) {
+        RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
+        RecruitSettlePaneController.openUi();
+      } else {
+        TipsPaneController.openUi(msg.code);
+      }
     });
   }
 

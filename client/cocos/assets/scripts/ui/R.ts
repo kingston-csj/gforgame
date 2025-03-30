@@ -31,6 +31,10 @@ export default class R {
       name: 'recruitSettlePane',
       path: 'prefabs/RecruitSettlePane',
     },
+    TipsPane: {
+      name: 'tipsPane',
+      path: 'prefabs/TipsPane',
+    },
   };
 
   // 图片纹理图集枚举

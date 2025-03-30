@@ -184,6 +184,21 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
+            <key>2002.png</key>
+            <dict>
+                <key>aliases</key>
+                <array/>
+                <key>spriteOffset</key>
+                <string>{0,0}</string>
+                <key>spriteSize</key>
+                <string>{200,200}</string>
+                <key>spriteSourceSize</key>
+                <string>{200,200}</string>
+                <key>textureRect</key>
+                <string>{{0,1200},{200,200}}</string>
+                <key>textureRotated</key>
+                <false/>
+            </dict>
         </dict>
         <key>metadata</key>
         <dict>
@@ -196,9 +211,9 @@
             <key>realTextureFileName</key>
             <string>item_all.png</string>
             <key>size</key>
-            <string>{400,1200}</string>
+            <string>{400,1400}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:478803bc01576c68bb671c40c13b2a98:cde7f612e47170fd229779e177eb8e94:6e27422f52a1b7035787133a5cf10057$</string>
+            <string>$TexturePacker:SmartUpdate:2e4cf5358fff05a1a9dc9b5434e28677:2da287baea008808f9a7b6a7f06fb622:6e27422f52a1b7035787133a5cf10057$</string>
             <key>textureFileName</key>
             <string>item_all.png</string>
         </dict>

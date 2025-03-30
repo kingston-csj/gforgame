@@ -60,15 +60,15 @@ type ReqGmAction struct {
 }
 
 type ResGmAction struct {
-	Code int32
+	Code int32 `json:"code"`
 }
 
 type ReqHeroRecruit struct {
-	Times int32
+	Times int32 `json:"times"`
 }
 
 type ResHeroRecruit struct {
-	Code        int32
+	Code        int32         `json:"code"`
 	RewardInfos []*RewardInfo `json:"rewardInfos"`
 }
 
