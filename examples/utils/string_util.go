@@ -2,6 +2,7 @@ package utils
 
 import (
 	"strconv"
+	"strings"
 )
 
 func StringToInt32(s string) (int32, error) {
@@ -14,4 +15,14 @@ func StringToInt32(s string) (int32, error) {
 
 func IsEmpty(s string) bool {
 	return s == "" || s == "null"
+}
+
+func EqualsIgnoreCase(s1, s2 string) bool {
+	if s1 == "" && s2 == "" {
+		return true
+	}
+	if s1 == "" || s2 == "" {
+		return false
+	}
+	return strings.EqualFold(s1, s2)
 }

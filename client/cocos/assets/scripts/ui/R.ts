@@ -35,11 +35,16 @@ export default class R {
       name: 'tipsPane',
       path: 'prefabs/TipsPane',
     },
+    HeroMainPane: {
+      name: 'heroMainPane',
+      path: 'prefabs/HeroMainPane',
+    },
   };
 
   // 图片纹理图集枚举
   static readonly Sprites = {
     Hero: 'hero_all',
     Item: 'item_all',
+    Quality: 'quality_all',
   };
 }

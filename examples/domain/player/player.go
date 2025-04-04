@@ -17,6 +17,8 @@ type Player struct {
 	BackpackJson string    `gorm:"backpack"`
 	HeroBox      *HeroBox  `gorm:"-"`
 	HeroBoxJson  string    `gorm:"herobox"`
+	Purse        *Purse    `gorm:"-"`
+	PurseJson    string    `gorm:"purse"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -38,6 +40,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.HeroBoxJson = string(jsonData)
 	}
+	if p.Purse == nil {
+		p.PurseJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.Purse)
+		if err != nil {
+			return err
+		}
+		p.PurseJson = string(jsonData)
+	}
 	return nil
 }
 
@@ -55,6 +66,14 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		}
 	} else {
 		json.Unmarshal([]byte(p.HeroBoxJson), &p.HeroBox)
+	}
+	if utils.IsEmpty(p.PurseJson) {
+		p.Purse = &Purse{
+			Diamond: 0,
+			Gold:    0,
+		}
+	} else {
+		json.Unmarshal([]byte(p.PurseJson), &p.Purse)
 	}
 	return nil
 }

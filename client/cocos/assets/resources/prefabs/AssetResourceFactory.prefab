@@ -70,13 +70,25 @@
     },
     "spriteAtlas": [
       {
+        "__uuid__": "a2b85e51-a453-4e8e-8c8d-6109003050df",
+        "__expectedType__": "cc.SpriteAtlas"
+      },
+      {
         "__uuid__": "3c0155c3-7454-4358-862a-ada9076bf79b",
+        "__expectedType__": "cc.SpriteAtlas"
+      },
+      {
+        "__uuid__": "b95784ec-9154-4664-a0dc-19b82b56cd6c",
         "__expectedType__": "cc.SpriteAtlas"
       }
     ],
     "configs": [
       {
         "__uuid__": "48afc850-0e9c-4533-9488-40ab834ebadb",
+        "__expectedType__": "cc.JsonAsset"
+      },
+      {
+        "__uuid__": "bb794ada-a798-402e-acc4-b3b7d517779b",
         "__expectedType__": "cc.JsonAsset"
       },
       {

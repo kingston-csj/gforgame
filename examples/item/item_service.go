@@ -1,23 +1,27 @@
 package item
 
 import (
+	"sync"
+
 	"io/github/gforgame/common"
-	"io/github/gforgame/common/i18n"
+
+	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/player"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/network"
-	"sync"
 )
 
 type ItemService struct {
 	network.Base
 }
 
-var instance *ItemService
-var once sync.Once
-var errorIllegalParams = common.NewBusinessRequestException(i18n.ErrorIllegalParams)
+var (
+	instance           *ItemService
+	once               sync.Once
+	errorIllegalParams = common.NewBusinessRequestException(constants.COMMON_ILLEGAL_PARAMS)
+)
 
 var RecruitItemId int32 = 2002
 
@@ -30,7 +34,6 @@ func GetItemService() *ItemService {
 }
 
 func (s *ItemService) init() {
-
 }
 
 func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count int32) error {

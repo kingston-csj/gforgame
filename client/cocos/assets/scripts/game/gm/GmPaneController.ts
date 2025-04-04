@@ -22,6 +22,12 @@ export class GmPaneController extends BaseUiView {
   @property(EditBox)
   public itemNumBox: EditBox = null!;
 
+  @property(EditBox)
+  public goldBox: EditBox = null!;
+
+  @property(EditBox)
+  public diamondBox: EditBox = null!;
+
   public static display() {
     if (GmPaneController.instance) {
       GmPaneController.instance.display();
@@ -45,6 +51,32 @@ export class GmPaneController extends BaseUiView {
       {
         topic: 'add_item',
         params: itemId + '=' + itemNum,
+      },
+      (msg: ResGmAction) => {}
+    );
+  }
+
+  public onAddGoldBtnClick() {
+    const gold = this.goldBox.string;
+
+    GameContext.instance.WebSocketClient.sendMessage(
+      ReqGmAction.cmd,
+      {
+        topic: 'add_gold',
+        params: gold,
+      },
+      (msg: ResGmAction) => {}
+    );
+  }
+
+  public onAddDiamondBtnClick() {
+    const diamond = this.diamondBox.string;
+
+    GameContext.instance.WebSocketClient.sendMessage(
+      ReqGmAction.cmd,
+      {
+        topic: 'add_diamond',
+        params: diamond,
       },
       (msg: ResGmAction) => {}
     );

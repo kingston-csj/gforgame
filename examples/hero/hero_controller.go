@@ -2,13 +2,12 @@ package hero
 
 import (
 	"fmt"
-	"math/rand"
 	"strconv"
 
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
@@ -26,6 +25,29 @@ func NewHeroController() *HeroController {
 func (ps *HeroController) Init() {
 	network.RegisterMessage(protos.CmdHeroReqRecruit, &protos.ReqHeroRecruit{})
 	network.RegisterMessage(protos.CmdHeroResRecruit, &protos.ResHeroRecruit{})
+	network.RegisterMessage(protos.CmdHeroResAllHero, &protos.ResAllHeroInfo{})
+
+	network.RegisterMessage(protos.CmdHeroReqLevelUp, &protos.ReqHeroLevelUp{})
+	network.RegisterMessage(protos.CmdHeroResLevelUp, &protos.ResHeroLevelUp{})
+	network.RegisterMessage(protos.CmdHeroPushAdd, &protos.PushHeroAdd{})
+	context.EventBus.Subscribe("player_login", func(data interface{}) {
+		ps.OnPlayerLogin(data.(*playerdomain.Player))
+	})
+}
+
+func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
+	resAllHeroInfo := &protos.ResAllHeroInfo{}
+
+	for _, hero := range player.HeroBox.Heros {
+		resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
+			Id:       hero.ModelId,
+			Level:    hero.Level,
+			Position: 0,
+			Stage:    0,
+		})
+	}
+
+	io.NotifyPlayer(player, resAllHeroInfo)
 }
 
 func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
@@ -41,7 +63,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 	p.Backpack.RemoveItem(item.RecruitItemId, msg.Times)
 
 	for i := 0; i < int(msg.Times); i++ {
-		heroData := ps.GetRandomHero()
+		heroData := GetHeroService().GetRandomHero()
 		// 如果已经拥有该英雄，则转为碎片
 		if p.HeroBox.HasHero(heroData.Id) {
 			rewardInfos = append(rewardInfos, &protos.RewardInfo{
@@ -56,13 +78,16 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 			})
 			p.HeroBox.AddHero(&playerdomain.Hero{
 				ModelId: heroData.Id,
+				Level:   1,
+			})
+			io.NotifyPlayer(p, &protos.PushHeroAdd{
+				HeroId: heroData.Id,
 			})
 		}
 
 	}
 
 	player.GetPlayerService().SavePlayer(p)
-	// Return the recruited hero info
 
 	return &protos.ResHeroRecruit{
 		Code:        0,
@@ -70,29 +95,33 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 	}
 }
 
-func (ps *HeroController) GetRandomHero() config.HeroData {
-	heroDatas := context.GetDataManager().GetRecords("hero")
-	// 根据HeroData的Prob进行抽奖
-	var totalProb int32 = 0
-	for _, data := range heroDatas {
-		heroData := data.(config.HeroData)
-		totalProb += heroData.Prob
-	}
+func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
+	p := context.SessionManager.GetPlayerBySession(s).(*playerdomain.Player)
 
-	// Generate random number between 0 and total probability
-	randProb := rand.Int31n(totalProb)
-	var currentProb int32 = 0
-	var selectedHero config.HeroData
-
-	// Find the hero based on probability ranges
-	for _, data := range heroDatas {
-		heroData := data.(config.HeroData)
-		currentProb += heroData.Prob
-		if randProb < currentProb {
-			selectedHero = heroData
-			break
+	hero := p.HeroBox.GetHero(msg.HeroId)
+	if hero == nil {
+		return &protos.ResHeroLevelUp{
+			Code: constants.COMMON_NOT_FOUND,
 		}
 	}
 
-	return selectedHero
+	consume := GetHeroService().calcTotalUpLevelConsume(hero.Level, msg.ToLevel)
+	if !p.Purse.IsEnoughGold(consume) {
+		return &protos.ResHeroLevelUp{
+			Code: constants.Gold_NOT_ENOUGH,
+		}
+	}
+
+	p.Purse.SubGold(consume)
+	io.NotifyPlayer(p, &protos.PushPurseInfo{
+		Gold:    p.Purse.Gold,
+		Diamond: p.Purse.Diamond,
+	})
+	hero.Level = msg.ToLevel
+
+	player.GetPlayerService().SavePlayer(p)
+
+	return &protos.ResHeroLevelUp{
+		Code: 0,
+	}
 }

@@ -4,6 +4,7 @@ import GameContext from '../GameContext';
 import { LayerIdx } from '../ui/LayerIds';
 
 import ConfigHeroContainer from '../data/config/container/ConfigHeroContainer';
+import ConfigHeroLevelContainer from '../data/config/container/ConfigHeroLevelContainer';
 import { ConfigI18nContainer } from '../data/config/container/ConfigI18nContainer';
 import ConfigItemContainer from '../data/config/container/ConfigItemContainer';
 import { MessageDispatch } from '../MessageDispatch';
@@ -34,13 +35,11 @@ export class LoginScene extends Component {
     // 挂载备份节点
     UiContext.init(this.layer1, this.layer2, this.layer3, this.layer4, this.layer5);
 
-    // 初始化资源工厂
-    // UiViewFactory.createUi(R.Prefabs.AssetResourceFactory, LayerIdx.layer1, () => {});
-
     // 加载所有的配置数据
     ConfigItemContainer.getInstance();
     ConfigHeroContainer.getInstance();
     ConfigI18nContainer.getInstance();
+    ConfigHeroLevelContainer.getInstance();
 
     // 初始化消息监听
     MessageDispatch.init();

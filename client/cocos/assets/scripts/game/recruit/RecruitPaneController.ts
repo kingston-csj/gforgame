@@ -62,6 +62,17 @@ export class RecruitPaneController extends BaseController {
     });
   }
 
+  public static closeUi() {
+    if (!this.instance) {
+      return Promise.resolve();
+    }
+    return this.getInstance().then((controller) => {
+      if (controller.recruitPaneView) {
+        controller.recruitPaneView.hide();
+      }
+    });
+  }
+
   private static getInstance(): Promise<RecruitPaneController> {
     if (this.instance) {
       return Promise.resolve(this.instance);

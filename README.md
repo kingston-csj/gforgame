@@ -140,13 +140,16 @@ example/h5/welcome.html 为 ws 的客户端测试页面
 ## 部分 cocos 客户端运行效果
 
 登录界面  
-![](/screenshots/login.jpg '登录界面')
+![](/screenshots/login.png '登录界面')
 
 主界面  
-![](/screenshots/main.jpg '主界面')
+![](/screenshots/main.png '主界面')
 
 背包界面  
 ![](/screenshots/bag.jpg '背包界面')
 
 招募界面  
 ![](/screenshots/recruit.jpg '招募界面')
+
+英雄主界面  
+![](/screenshots/hero.png '英雄主界面')

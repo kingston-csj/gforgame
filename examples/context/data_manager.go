@@ -2,18 +2,21 @@ package context
 
 import (
 	"fmt"
-	"io/github/gforgame/data"
-	domain "io/github/gforgame/examples/domain/config"
 	"reflect"
 	"sync"
+
+	"io/github/gforgame/data"
+	domain "io/github/gforgame/examples/domain/config"
 )
 
 type DataManager struct {
 	containers map[string]*data.Container[int64, any]
 }
 
-var instance *DataManager
-var once sync.Once
+var (
+	instance *DataManager
+	once     sync.Once
+)
 
 func GetDataManager() *DataManager {
 	once.Do(func() {
@@ -24,7 +27,6 @@ func GetDataManager() *DataManager {
 
 		// 定义表配置
 		tableConfigs := []data.TableMeta{
-
 			// 道具表
 			{
 				TableName:  "item",
@@ -36,6 +38,12 @@ func GetDataManager() *DataManager {
 				TableName:  "hero",
 				IDField:    "Id",
 				RecordType: reflect.TypeOf(domain.HeroData{}),
+			},
+			// 英雄等级表
+			{
+				TableName:  "herolevel",
+				IDField:    "Id",
+				RecordType: reflect.TypeOf(domain.HeroLevelData{}),
 			},
 		}
 

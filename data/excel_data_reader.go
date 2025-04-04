@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"io/github/gforgame/examples/utils"
+
 	"github.com/tealeg/xlsx"
 )
 
@@ -36,7 +38,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 遍历每一行
 	for _, row := range rows {
 		firstCell := getCellValue(row.Cells[0])
-		if firstCell == "HEADER" {
+		if utils.EqualsIgnoreCase(firstCell, "HEADER") {
 			headers, err = r.readHeader(clazz, row.Cells)
 			if err != nil {
 				return nil, err
@@ -51,7 +53,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if firstCell == "end" {
+		if utils.EqualsIgnoreCase(firstCell, "END") {
 			break
 		}
 	}
@@ -63,7 +65,7 @@ func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, er
 	var records []any
 	clazzType := reflect.TypeOf(clazz).Elem()
 
-	for _, row := range rows {
+	for i, row := range rows {
 		obj := reflect.New(clazzType).Elem()
 
 		for _, column := range row {
@@ -76,14 +78,14 @@ func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, er
 			field, err := findFieldByTag(obj, colName)
 			if err != nil {
 				if !r.ignoreUnknownFields {
-					return nil, err
+					return nil, fmt.Errorf("row %d, column '%s': %v", i+1, colName, err)
 				}
 				continue
 			}
 
 			fieldVal, err := convertValue(column.Value, field.Type())
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("row %d, column '%s': %v", i+1, colName, err)
 			}
 
 			field.Set(reflect.ValueOf(fieldVal))
@@ -100,7 +102,7 @@ func (r *ExcelDataReader) readHeader(clazz any, cells []*xlsx.Cell) ([]CellHeade
 
 	for _, cell := range cells {
 		cellValue := getCellValue(cell)
-		if cellValue == "HEADER" {
+		if utils.EqualsIgnoreCase(cellValue, "HEADER") {
 			continue
 		}
 
@@ -150,12 +152,18 @@ func convertValue(value string, fieldType reflect.Type) (any, error) {
 	case reflect.String:
 		return value, nil
 	case reflect.Int8, reflect.Int16, reflect.Int32:
+		if value == "" {
+			return nil, fmt.Errorf("empty value for integer field type %v", fieldType.Kind())
+		}
 		num, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse int: %v", err)
+			return nil, fmt.Errorf("failed to parse int: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
 		}
 		return int32(num), nil
 	case reflect.Int, reflect.Int64:
+		if value == "" {
+			return nil, fmt.Errorf("empty value for integer field type %v", fieldType.Kind())
+		}
 		return strconv.ParseInt(value, 10, 64)
 	case reflect.Float32, reflect.Float64:
 		return strconv.ParseFloat(value, 64)

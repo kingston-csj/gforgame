@@ -25,7 +25,7 @@ func (w *worker) run() {
 func (w *worker) addToQueue(entity Entity) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	w.data[entity.GetId()] = entity
+	w.data[entity.GetID()] = entity
 	atomic.AddInt32(&w.size, 1)
 }
 
@@ -56,6 +56,6 @@ func (w *worker) shutDown() {
 	atomic.StoreInt32(&w.running, 0)
 }
 
-func (w *worker) queueSize() int {
+func (w *worker) QueueSize() int {
 	return int(atomic.LoadInt32(&w.size))
 }

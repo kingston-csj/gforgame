@@ -3,7 +3,8 @@ package item
 import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/utils"
+	"io/github/gforgame/examples/io"
+	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -18,6 +19,7 @@ func NewItemController() *ItemController {
 
 func (ps *ItemController) Init() {
 	network.RegisterMessage(protos.CmdItemResBackpackInfo, &protos.ResBackpackInfo{})
+	network.RegisterMessage(protos.CmdItemResPurseInfo, &protos.PushPurseInfo{})
 
 	context.EventBus.Subscribe("player_login", func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
@@ -25,9 +27,9 @@ func (ps *ItemController) Init() {
 }
 
 func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
+	// 发送背包信息
 	resBackpack := &protos.ResBackpackInfo{}
 	if player.Backpack != nil {
-		// 临时处理，后续采用事件驱动
 		for id, count := range player.Backpack.Items {
 			resBackpack.Items = append(resBackpack.Items, protos.ItemInfo{
 				Id:    int32(id),
@@ -35,5 +37,8 @@ func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
 			})
 		}
 	}
-	utils.NotifyPlayer(player, "item_backpack_info", resBackpack)
+	io.NotifyPlayer(player, resBackpack)
+
+	// 发送货币信息
+	playerService.GetPlayerService().NotifyPurseChange(player)
 }

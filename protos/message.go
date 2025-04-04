@@ -13,9 +13,14 @@ const (
 	CmdGmResAction = 3002
 
 	CmdItemResBackpackInfo = 4001
+	CmdItemResPurseInfo    = 4002
 
 	CmdHeroReqRecruit = 5001
 	CmdHeroResRecruit = 5002
+	CmdHeroResAllHero = 5003
+	CmdHeroReqLevelUp = 5004
+	CmdHeroResLevelUp = 5005
+	CmdHeroPushAdd    = 5006
 )
 
 type ReqPlayerLogin struct {
@@ -75,4 +80,33 @@ type ResHeroRecruit struct {
 type RewardInfo struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
+}
+
+type PushPurseInfo struct {
+	Diamond int32 `json:"diamond"`
+	Gold    int32 `json:"gold"`
+}
+
+type ResAllHeroInfo struct {
+	Heros []*HeroInfo `json:"heros"`
+}
+
+type HeroInfo struct {
+	Id       int32 `json:"id"`
+	Level    int32 `json:"level"`
+	Position int32 `json:"position"`
+	Stage    int32 `json:"stage"`
+}
+
+type ReqHeroLevelUp struct {
+	HeroId  int32 `json:"heroId"`
+	ToLevel int32 `json:"toLevel"`
+}
+
+type ResHeroLevelUp struct {
+	Code int32 `json:"code"`
+}
+
+type PushHeroAdd struct {
+	HeroId int32 `json:"heroId"`
 }

@@ -1,48 +1,92 @@
-import { _decorator, Node } from 'cc';
+import { _decorator } from 'cc';
 
-import { BaseUiView } from '../../ui/BaseUiView';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
-import { BagPanelController } from '../item/BagPanelController';
 
-import { RecruitPaneController } from '../recruit/RecruitPaneController';
+import { BaseController } from '../../ui/BaseController';
 
+import { MainPaneView } from './MainPaneView';
+import { PurseModel } from './PurseModel';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneController')
-export class MainPaneController extends BaseUiView {
-  @property(Node)
-  bagPane: Node;
-
-  @property(Node)
-  recruitePane: Node;
-
+export class MainPaneController extends BaseController {
+  purseModel: PurseModel = PurseModel.getInstance();
   private static instance: MainPaneController;
 
-  public static openUi() {
-    if (MainPaneController.instance) {
-      MainPaneController.instance.display();
-    } else {
-      MainPaneController.instance = new MainPaneController();
+  @property(MainPaneView)
+  private mainView: MainPaneView;
 
-      UiViewFactory.createUi(R.Prefabs.MainPane, LayerIdx.layer1, (ui: MainPaneController) => {
-        MainPaneController.instance = ui;
-        ui.display();
-      });
-    }
+  private static creatingPromise: Promise<MainPaneController> | null = null;
+
+  public static openUi() {
+    this.getInstance().then((controller) => {
+      if (controller.mainView) {
+        controller.mainView.display();
+      }
+    });
   }
 
   protected start(): void {
-    this.registerClickEvent(this.bagPane, this.onBagClick, this);
-    this.registerClickEvent(this.recruitePane, this.onRecruiteClick, this);
+    this.initView(this.mainView);
+    this.bindViewToModel();
   }
 
-  onBagClick() {
-    BagPanelController.openUi();
+  private bindViewToModel() {
+    if (!this.view) return;
+
+    // 绑定钻石数据
+    this.purseModel.onDiamondChange((value) => {
+      if (this.view?.diamondLabel) {
+        this.view.diamondLabel.string = value.toString();
+      }
+    });
+
+    // 绑定金币数据
+    this.purseModel.onGoldChange((value) => {
+      if (this.view?.goldLabel) {
+        this.view.goldLabel.string = value.toString();
+      }
+    });
+
+    // 初始化显示
+    this.view.diamondLabel.string = this.purseModel.diamond.toString();
+    this.view.goldLabel.string = this.purseModel.gold.toString();
   }
 
-  onRecruiteClick() {
-    RecruitPaneController.openUi();
+  // 更新数据的方法
+  public updateDiamond(value: number) {
+    this.purseModel.diamond = value;
+  }
+
+  public updateGold(value: number) {
+    this.purseModel.gold = value;
+  }
+
+  // 获取数据的方法
+  public getDiamond(): number {
+    return this.purseModel.diamond;
+  }
+
+  public getGold(): number {
+    return this.purseModel.gold;
+  }
+
+  private static getInstance(): Promise<MainPaneController> {
+    if (this.instance) {
+      return Promise.resolve(this.instance);
+    }
+    if (this.creatingPromise) {
+      return this.creatingPromise;
+    }
+    this.creatingPromise = new Promise((resolve) => {
+      UiViewFactory.createUi(R.Prefabs.MainPane, LayerIdx.layer1, (ui: MainPaneController) => {
+        this.instance = ui;
+        this.creatingPromise = null;
+        resolve(ui);
+      });
+    });
+    return this.creatingPromise;
   }
 }

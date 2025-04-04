@@ -2,17 +2,24 @@ package player
 
 import (
 	"errors"
+	"sync"
+
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/io"
 	"io/github/gforgame/network"
-	"sync"
+	"io/github/gforgame/protos"
 )
 
-var ErrNotFound = errors.New("record not found")
-var ErrCast = errors.New("cast exception")
+var (
+	ErrNotFound = errors.New("record not found")
+	ErrCast     = errors.New("cast exception")
+)
 
-var instance *PlayerService
-var once sync.Once
+var (
+	instance *PlayerService
+	once     sync.Once
+)
 
 type PlayerService struct {
 	network.Base
@@ -52,6 +59,13 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	cache, _ := context.CacheManager.GetCache("player")
-	cache.Set(player.GetId(), player)
+	cache.Set(player.GetID(), player)
 	context.DbService.SaveToDb(player)
+}
+
+func (ps *PlayerService) NotifyPurseChange(player *playerdomain.Player) {
+	resPurse := &protos.PushPurseInfo{}
+	resPurse.Diamond = player.Purse.Diamond
+	resPurse.Gold = player.Purse.Gold
+	io.NotifyPlayer(player, resPurse)
 }

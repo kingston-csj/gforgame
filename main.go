@@ -2,6 +2,12 @@ package main
 
 import (
 	"fmt"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"reflect"
+	"time"
+
 	"io/github/gforgame/codec/json"
 	"io/github/gforgame/config"
 	"io/github/gforgame/examples/api"
@@ -15,11 +21,6 @@ import (
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
-	_ "net/http/pprof"
-	"os"
-	"os/signal"
-	"reflect"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

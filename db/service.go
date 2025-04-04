@@ -37,7 +37,7 @@ func (s *AsyncDbService) SaveToDb(entity Entity) {
 	if entity == nil {
 		return
 	}
-	num, err := strconv.ParseInt((entity).GetId(), 10, 64)
+	num, err := strconv.ParseInt(entity.GetID(), 10, 64)
 	if err != nil {
 		logger.Error(err)
 		return
