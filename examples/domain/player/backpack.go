@@ -22,5 +22,8 @@ func (b *Backpack) RemoveItem(itemId int32, count int32) bool {
 }
 
 func (b *Backpack) GetItemCount(itemId int32) int32 {
-	return b.Items[itemId]
+	if count, ok := b.Items[itemId]; ok {	
+		return count
+	}
+	return 0
 }

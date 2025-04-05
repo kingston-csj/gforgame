@@ -22,16 +22,21 @@ export default class BagpackModel {
     return this._items.get(itemId);
   }
 
-  public addItem(item: Item): void {
-    this._items.set(item.id, item);
-  }
-
   public removeItem(item: Item): void {
     this._items.delete(item.id);
   }
 
   public getItemCount(itemId: number): number {
     return this._items.get(itemId)?.count || 0;
+  }
+
+  public addItemByModelId(itemId: number, count: number): void {
+    const item = this._items.get(itemId);
+    if (item) {
+      item.count += count;
+    } else {
+      this._items.set(itemId, { id: itemId, count });
+    }
   }
 }
 

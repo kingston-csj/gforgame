@@ -14,6 +14,7 @@ const (
 
 	CmdItemResBackpackInfo = 4001
 	CmdItemResPurseInfo    = 4002
+	CmdItemPushChanged     = 4003
 
 	CmdHeroReqRecruit = 5001
 	CmdHeroResRecruit = 5002
@@ -109,4 +110,9 @@ type ResHeroLevelUp struct {
 
 type PushHeroAdd struct {
 	HeroId int32 `json:"heroId"`
+}
+
+type PushItemChanged struct {
+	ItemId int32 `json:"itemId"`
+	Count  int32 `json:"count"`
 }

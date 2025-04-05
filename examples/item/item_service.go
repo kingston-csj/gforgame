@@ -4,9 +4,11 @@ import (
 	"sync"
 
 	"io/github/gforgame/common"
+	"io/github/gforgame/protos"
 
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/player"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
@@ -57,6 +59,11 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 	p.Backpack.AddItem(itemId, count)
 
 	player.GetPlayerService().SavePlayer(p)
+
+	io.NotifyPlayer(p, &protos.PushItemChanged{
+		ItemId: itemId,
+		Count:  count,
+	})
 
 	return nil
 }

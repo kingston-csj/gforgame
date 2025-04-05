@@ -2,9 +2,11 @@ package player
 
 import (
 	"fmt"
+
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/session"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -55,7 +57,7 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 添加session
-	context.SessionManager.AddSession(s, player)
+	session.AddSession(s, player)
 
 	s.Send(&protos.ResPlayerLogin{Succ: true}, index)
 

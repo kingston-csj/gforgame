@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"strconv"
 
+	"io/github/gforgame/common"
 	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/player"
+	"io/github/gforgame/examples/session"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -53,7 +56,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
 	rewardInfos := make([]*protos.RewardInfo, 0)
 
-	p := context.SessionManager.GetPlayerBySession(s).(*playerdomain.Player)
+	p := session.GetPlayerBySession(s).(*playerdomain.Player)
 	if p.Backpack.GetItemCount(item.RecruitItemId) < int32(msg.Times) {
 		return &protos.ResHeroRecruit{
 			Code: constants.ITEM_NOT_ENOUGH,
@@ -96,7 +99,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 }
 
 func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
-	p := context.SessionManager.GetPlayerBySession(s).(*playerdomain.Player)
+	p := session.GetPlayerBySession(s).(*playerdomain.Player)
 
 	hero := p.HeroBox.GetHero(msg.HeroId)
 	if hero == nil {
@@ -105,18 +108,25 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	consume := GetHeroService().calcTotalUpLevelConsume(hero.Level, msg.ToLevel)
-	if !p.Purse.IsEnoughGold(consume) {
+	costGold := GetHeroService().calcTotalUpLevelConsume(hero.Level, msg.ToLevel)
+	if !p.Purse.IsEnoughGold(costGold) {
 		return &protos.ResHeroLevelUp{
 			Code: constants.Gold_NOT_ENOUGH,
 		}
 	}
 
-	p.Purse.SubGold(consume)
-	io.NotifyPlayer(p, &protos.PushPurseInfo{
-		Gold:    p.Purse.Gold,
-		Diamond: p.Purse.Diamond,
-	})
+	consume := consume.CurrencyConsume{
+		Kind:   "gold",
+		Amount: costGold,
+	}
+	err := consume.Verify(p)
+	if err != nil {
+		return &protos.ResHeroLevelUp{
+			Code: int32(err.(*common.BusinessRequestException).Code()),
+		}
+	}
+	consume.Consume(p)
+
 	hero.Level = msg.ToLevel
 
 	player.GetPlayerService().SavePlayer(p)

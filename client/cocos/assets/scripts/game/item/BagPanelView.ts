@@ -86,6 +86,6 @@ export class BagPanelView extends BaseUiView {
         }
       }
     }
-    return filterItems;
+    return filterItems.filter((item) => item.count > 0);
   }
 }

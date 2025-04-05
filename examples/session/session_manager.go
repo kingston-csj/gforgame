@@ -1,9 +1,10 @@
 package session
 
 import (
+	"sync"
+
 	"io/github/gforgame/examples/types"
 	"io/github/gforgame/network"
-	"sync"
 )
 
 var (
@@ -16,8 +17,7 @@ var (
 	player2SessionMap = make(map[string]*network.Session)
 )
 
-type SessionManager struct {
-}
+type SessionManager struct{}
 
 func NewSessionManager() *SessionManager {
 	return &SessionManager{}
@@ -30,21 +30,21 @@ func GetSessionManager() *SessionManager {
 	return sessionManager
 }
 
-func (s *SessionManager) AddSession(session *network.Session, player types.Player) {
+func AddSession(session *network.Session, player types.Player) {
 	session2PlayerMap[session] = player
 	player2SessionMap[player.GetID()] = session
 }
 
-func (s *SessionManager) RemoveSession(session *network.Session) {
+func RemoveSession(session *network.Session) {
 	player := session2PlayerMap[session]
 	delete(session2PlayerMap, session)
 	delete(player2SessionMap, player.GetID())
 }
 
-func (s *SessionManager) GetPlayerBySession(session *network.Session) types.Player {
+func GetPlayerBySession(session *network.Session) types.Player {
 	return session2PlayerMap[session]
 }
 
-func (s *SessionManager) GetSessionByPlayerId(playerId string) *network.Session {
+func GetSessionByPlayerId(playerId string) *network.Session {
 	return player2SessionMap[playerId]
 }

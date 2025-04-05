@@ -3,6 +3,7 @@ import BagpackModel from './game/item/BagpackModel';
 import { PurseModel } from './game/main/PurseModel';
 import { HeroVo } from './net/MsgItems/HeroVo';
 import PushHeroAdd from './net/PushHeroAdd';
+import { PushItemChanged } from './net/PushItemChanged';
 import PushPurseInfo from './net/PushPurseInfo';
 import { ResAllHeroInfo } from './net/ResAllHeroInfo';
 import ResBackpackInfo from './net/ResBackpackInfo';
@@ -36,6 +37,10 @@ export class MessageDispatch {
 
     MessageDispatch.register(PushHeroAdd.cmd, (msg: PushHeroAdd) => {
       HeroBoxModel.getInstance().addHero(new HeroVo(msg.heroId));
+    });
+
+    MessageDispatch.register(PushItemChanged.cmd, (msg: PushItemChanged) => {
+      BagpackModel.getInstance().addItemByModelId(msg.itemId, msg.count);
     });
   }
 

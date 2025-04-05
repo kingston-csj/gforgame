@@ -22,7 +22,6 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 服务器入口： main.go
 
 go 客户端入口：client/go/client.go  
-h5 客户端入口：client/h5/welcome.html  
 cocos 客户端工程(推荐)：client/cocos
 
 ### 私有协议栈

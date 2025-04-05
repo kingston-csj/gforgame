@@ -29,7 +29,7 @@ export class BagItem extends BaseUiView {
   }
 
   showItemDetail() {
-    let root = this.node.parent.parent.parent.children[2];
+    let root = this.node.parent.parent.parent.parent.children[2];
     if (root) {
       root.active = true;
       let itemInfo = root.getComponent(BagItemInfo);
