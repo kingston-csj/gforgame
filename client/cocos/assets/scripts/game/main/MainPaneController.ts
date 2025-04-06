@@ -6,6 +6,8 @@ import UiViewFactory from '../../ui/UiViewFactory';
 
 import { BaseController } from '../../ui/BaseController';
 
+import GameContext from '../../GameContext';
+import { ReqLoadingFinish } from '../../net/ReqLoadingFinish';
 import { MainPaneView } from './MainPaneView';
 import { PurseModel } from './PurseModel';
 const { ccclass, property } = _decorator;
@@ -24,16 +26,16 @@ export class MainPaneController extends BaseController {
     this.getInstance().then((controller) => {
       if (controller.mainView) {
         controller.mainView.display();
+        GameContext.instance.WebSocketClient.sendMessage(ReqLoadingFinish.cmd, {});
       }
     });
   }
 
   protected start(): void {
     this.initView(this.mainView);
-    this.bindViewToModel();
   }
 
-  private bindViewToModel() {
+  protected bindViewToModel() {
     if (!this.view) return;
 
     // 绑定钻石数据

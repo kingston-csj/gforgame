@@ -2,6 +2,7 @@ package player
 
 import (
 	"encoding/json"
+
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/utils"
 
@@ -19,6 +20,7 @@ type Player struct {
 	HeroBoxJson  string    `gorm:"herobox"`
 	Purse        *Purse    `gorm:"-"`
 	PurseJson    string    `gorm:"purse"`
+	Fight        int32     `gorm:"player's fight"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {

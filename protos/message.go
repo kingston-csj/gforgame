@@ -4,10 +4,11 @@ const (
 	CmdChatReqJoin = 1001
 	CmdChatReqChat = 1002
 
-	CmdPlayerReqLogin  = 2001
-	CmdPlayerResLogin  = 2002
-	CmdPlayerReqCreate = 2003
-	CmdPlayerResCreate = 2004
+	CmdPlayerReqLogin         = 2001
+	CmdPlayerResLogin         = 2002
+	CmdPlayerReqCreate        = 2003
+	CmdPlayerResCreate        = 2004
+	CmdPlayerReqLoadingFinish = 2005
 
 	CmdGmReqAction = 3001
 	CmdGmResAction = 3002
@@ -16,17 +17,21 @@ const (
 	CmdItemResPurseInfo    = 4002
 	CmdItemPushChanged     = 4003
 
-	CmdHeroReqRecruit = 5001
-	CmdHeroResRecruit = 5002
-	CmdHeroResAllHero = 5003
-	CmdHeroReqLevelUp = 5004
-	CmdHeroResLevelUp = 5005
-	CmdHeroPushAdd    = 5006
+	CmdHeroReqRecruit     = 5001
+	CmdHeroResRecruit     = 5002
+	CmdHeroResAllHero     = 5003
+	CmdHeroReqLevelUp     = 5004
+	CmdHeroResLevelUp     = 5005
+	CmdHeroPushAdd        = 5006
+	CmdHeroPushAttrChange = 5007
 )
 
 type ReqPlayerLogin struct {
 	Id  string
 	Pwd string
+}
+
+type ReqPlayerLoadingFinish struct {
 }
 
 type ResPlayerLogin struct {
@@ -93,10 +98,14 @@ type ResAllHeroInfo struct {
 }
 
 type HeroInfo struct {
-	Id       int32 `json:"id"`
-	Level    int32 `json:"level"`
-	Position int32 `json:"position"`
-	Stage    int32 `json:"stage"`
+	Id       int32      `json:"id"`
+	Level    int32      `json:"level"`
+	Position int32      `json:"position"`
+	Stage    int32      `json:"stage"`
+	Exp      int32      `json:"exp"`
+	Hp       int32      `json:"hp"`
+	Attrs    []AttrInfo `json:"attrs"`
+	Fight    int32      `json:"fight"`
 }
 
 type ReqHeroLevelUp struct {
@@ -115,4 +124,15 @@ type PushHeroAdd struct {
 type PushItemChanged struct {
 	ItemId int32 `json:"itemId"`
 	Count  int32 `json:"count"`
+}
+
+type AttrInfo struct {
+	AttrType string  `json:"attrType"`
+	Value    float32 `json:"value"`
+}
+
+type PushHeroAttrChange struct {
+	HeroId int32      `json:"heroId"`
+	Attrs  []AttrInfo `json:"attrs"`
+	Fight  int32      `json:"fight"`
 }

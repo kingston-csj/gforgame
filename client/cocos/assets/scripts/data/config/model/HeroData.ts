@@ -25,6 +25,21 @@
             private _item: number;
             public get item():number {return this._item;}
             
+            private _skills: string;
+            public get skills():string {return this._skills;}
+            
+            private _hp: number;
+            public get hp():number {return this._hp;}
+            
+            private _attack: number;
+            public get attack():number {return this._attack;}
+            
+            private _defense: number;
+            public get defense():number {return this._defense;}
+            
+            private _speed: number;
+            public get speed():number {return this._speed;}
+            
         public constructor(data:any) {
             super(data);
                 this._name = data['name']
@@ -34,5 +49,10 @@
         this._prob = data['prob']
         this._shard = data['shard']
         this._item = data['item']
+        this._skills = data['skills']
+        this._hp = data['hp']
+        this._attack = data['attack']
+        this._defense = data['defense']
+        this._speed = data['speed']
     }
 }

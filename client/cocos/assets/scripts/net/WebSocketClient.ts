@@ -10,7 +10,7 @@ export class WebSocketClient {
    * 向服务器发送消息
    * @param msg 消息
    */
-  public sendMessage(msgId: number, msg: any, callback: Function): void {
+  public sendMessage(msgId: number, msg: any, callback: Function | null = null): void {
     this._index++;
 
     if (callback) {

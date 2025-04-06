@@ -5,6 +5,7 @@ import { BagPanelController } from '../item/BagPanelController';
 
 import { HeroMainPaneController } from '../hero/HeroMainPaneController';
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
+import { PurseModel } from './PurseModel';
 
 const { ccclass, property } = _decorator;
 
@@ -33,6 +34,12 @@ export class MainPaneView extends BaseUiView {
     this.registerClickEvent(this.recruitePane, this.onRecruiteClick, this);
     this.registerClickEvent(this.heroPane, this.onHeroClick, this);
     this.registerClickEvent(this.mainPane, this.onMainClick, this);
+    PurseModel.getInstance().onGoldChange((value) => {
+      this.goldLabel.string = value.toString();
+    });
+    PurseModel.getInstance().onDiamondChange((value) => {
+      this.diamondLabel.string = value.toString();
+    });
   }
 
   onBagClick() {

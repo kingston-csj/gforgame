@@ -1,13 +1,12 @@
+import { AttributeBox } from '../../game/attribute/attributebox';
+import { Attribute } from './Attribute';
 export class HeroVo {
   public id: number;
   public level: number;
   public position: number;
   public stage: number;
+  public attrs: Attribute[];
+  public fight: number;
 
-  constructor(heroId: number) {
-    this.id = heroId;
-    this.level = 1;
-    this.position = 0;
-    this.stage = 0;
-  }
+  public attrBox: AttributeBox;
 }

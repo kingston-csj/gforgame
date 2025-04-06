@@ -3,15 +3,11 @@ import GameContext from '../GameContext';
 
 import { LayerIdx } from '../ui/LayerIds';
 
-import ConfigHeroContainer from '../data/config/container/ConfigHeroContainer';
-import ConfigHeroLevelContainer from '../data/config/container/ConfigHeroLevelContainer';
-import { ConfigI18nContainer } from '../data/config/container/ConfigI18nContainer';
-import ConfigItemContainer from '../data/config/container/ConfigItemContainer';
+import { ConfigContext } from '../data/config/container/ConfigContext';
 import { MessageDispatch } from '../MessageDispatch';
 import R from '../ui/R';
 import UiContext from '../ui/UiContext';
 import UiViewFactory from '../ui/UiViewFactory';
-
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -36,10 +32,7 @@ export class LoginScene extends Component {
     UiContext.init(this.layer1, this.layer2, this.layer3, this.layer4, this.layer5);
 
     // 加载所有的配置数据
-    ConfigItemContainer.getInstance();
-    ConfigHeroContainer.getInstance();
-    ConfigI18nContainer.getInstance();
-    ConfigHeroLevelContainer.getInstance();
+    ConfigContext.init();
 
     // 初始化消息监听
     MessageDispatch.init();

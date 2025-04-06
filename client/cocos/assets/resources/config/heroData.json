@@ -2,82 +2,122 @@
     {
         "id": 1001,
         "name": "刘备",
-        "quality": 1,
+        "quality": 2,
         "tips": "心怀匡复汉室宏志，以仁德广纳贤才，深得民心",
         "icon": 1001,
         "prob": 500,
         "shard": 10,
-        "item": 1001
+        "item": 1001,
+        "skills": "100101;100102;100103;100104",
+        "hp": 500,
+        "attack": 100,
+        "defense": 100,
+        "speed": 10
     },
     {
         "id": 1002,
         "name": "关羽",
-        "quality": 2,
+        "quality": 1,
         "tips": "面如重枣威风凛凛，武艺超群，忠肝义胆，威震华夏",
         "icon": 1002,
         "prob": 500,
         "shard": 11,
-        "item": 1002
+        "item": 1002,
+        "skills": "100201;100202;100203;100204",
+        "hp": 1000,
+        "attack": 200,
+        "defense": 200,
+        "speed": 10
     },
     {
         "id": 1003,
         "name": "诸葛亮",
-        "quality": 3,
+        "quality": 1,
         "tips": "羽扇纶巾智谋卓绝，未出茅庐已知天下三分",
         "icon": 1003,
         "prob": 500,
         "shard": 12,
-        "item": 1003
+        "item": 1003,
+        "skills": "100301;100302;100303;100304",
+        "hp": 500,
+        "attack": 80,
+        "defense": 80,
+        "speed": 10
     },
     {
         "id": 1004,
         "name": "赵云",
-        "quality": 4,
+        "quality": 2,
         "tips": "白马银枪身姿矫健，长坂坡单骑救主，勇冠三军",
         "icon": 1004,
         "prob": 500,
         "shard": 13,
-        "item": 1004
+        "item": 1004,
+        "skills": "100401;100402;100403;100404",
+        "hp": 800,
+        "attack": 180,
+        "defense": 180,
+        "speed": 10
     },
     {
         "id": 1005,
         "name": "吕布",
-        "quality": 5,
+        "quality": 1,
         "tips": "头戴三叉束发紫金冠，武艺高强，却反复无常",
         "icon": 1005,
         "prob": 500,
         "shard": 14,
-        "item": 1005
+        "item": 1005,
+        "skills": "100501;100502;100503;100504",
+        "hp": 1000,
+        "attack": 250,
+        "defense": 250,
+        "speed": 10
     },
     {
         "id": 1006,
         "name": "许禇",
-        "quality": 1,
+        "quality": 3,
         "tips": "虎背熊腰力大无穷，赤膊斗马超，忠勇护主",
         "icon": 1006,
         "prob": 500,
         "shard": 15,
-        "item": 1006
+        "item": 1006,
+        "skills": "100601;100602;100603;100604",
+        "hp": 1000,
+        "attack": 180,
+        "defense": 180,
+        "speed": 10
     },
     {
         "id": 1007,
         "name": "曹操",
-        "quality": 2,
+        "quality": 1,
         "tips": "乱世枭雄谋略过人，挟天子以令诸侯，野心勃勃",
         "icon": 1007,
         "prob": 500,
         "shard": 16,
-        "item": 1007
+        "item": 1007,
+        "skills": "100701;100702;100703;100704",
+        "hp": 500,
+        "attack": 100,
+        "defense": 100,
+        "speed": 10
     },
     {
         "id": 1008,
         "name": "张飞",
-        "quality": 3,
+        "quality": 2,
         "tips": "豹头环眼声若巨雷，勇猛直率，当阳桥喝退曹军",
         "icon": 1008,
         "prob": 500,
         "shard": 17,
-        "item": 1008
+        "item": 1008,
+        "skills": "100801;100802;100803;100804",
+        "hp": 800,
+        "attack": 180,
+        "defense": 180,
+        "speed": 10
     },
     {
         "id": 1009,
@@ -87,26 +127,41 @@
         "icon": 1009,
         "prob": 500,
         "shard": 18,
-        "item": 1009
+        "item": 1009,
+        "skills": "100901;100902;100903;100904",
+        "hp": 400,
+        "attack": 70,
+        "defense": 70,
+        "speed": 10
     },
     {
         "id": 1010,
         "name": "黄忠",
-        "quality": 5,
+        "quality": 3,
         "tips": "老将黄忠箭术绝伦，定军山一战，老当益壮显威名",
         "icon": 1010,
         "prob": 500,
         "shard": 19,
-        "item": 1010
+        "item": 1010,
+        "skills": "101001;101002;101003;101004",
+        "hp": 800,
+        "attack": 170,
+        "defense": 170,
+        "speed": 10
     },
     {
         "id": 1011,
         "name": "陆逊",
-        "quality": 1,
+        "quality": 2,
         "tips": "白面书生智谋深藏，火烧连营大破蜀军，一战成名",
         "icon": 1011,
         "prob": 500,
         "shard": 20,
-        "item": 1011
+        "item": 1011,
+        "skills": "101101;101102;101103;101104",
+        "hp": 500,
+        "attack": 100,
+        "defense": 100,
+        "speed": 10
     }
 ]

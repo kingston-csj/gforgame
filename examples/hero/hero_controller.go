@@ -9,9 +9,11 @@ import (
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/events"
+
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/item"
-	"io/github/gforgame/examples/player"
+
 	"io/github/gforgame/examples/session"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -33,7 +35,9 @@ func (ps *HeroController) Init() {
 	network.RegisterMessage(protos.CmdHeroReqLevelUp, &protos.ReqHeroLevelUp{})
 	network.RegisterMessage(protos.CmdHeroResLevelUp, &protos.ResHeroLevelUp{})
 	network.RegisterMessage(protos.CmdHeroPushAdd, &protos.PushHeroAdd{})
-	context.EventBus.Subscribe("player_login", func(data interface{}) {
+	network.RegisterMessage(protos.CmdHeroPushAttrChange, &protos.PushHeroAttrChange{})
+
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }
@@ -41,12 +45,22 @@ func (ps *HeroController) Init() {
 func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 	resAllHeroInfo := &protos.ResAllHeroInfo{}
 
-	for _, hero := range player.HeroBox.Heros {
+	for _, h := range player.HeroBox.Heros {
+		GetHeroService().RecalculateHeroAttr(player, h, false)
+		attrInfos := make([]protos.AttrInfo, 0)
+		for _, attr := range h.AttrBox.GetAttrs() {
+			attrInfos = append(attrInfos, protos.AttrInfo{
+				AttrType: string(attr.AttrType),
+				Value:    attr.Value,
+			})
+		}
 		resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
-			Id:       hero.ModelId,
-			Level:    hero.Level,
+			Id:       h.ModelId,
+			Level:    h.Level,
 			Position: 0,
 			Stage:    0,
+			Attrs:    attrInfos,
+			Fight:    h.Fight,
 		})
 	}
 
@@ -83,14 +97,13 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 				ModelId: heroData.Id,
 				Level:   1,
 			})
-			io.NotifyPlayer(p, &protos.PushHeroAdd{
-				HeroId: heroData.Id,
-			})
+
+			GetHeroService().RecalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
 		}
 
 	}
 
-	player.GetPlayerService().SavePlayer(p)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroRecruit{
 		Code:        0,
@@ -101,14 +114,14 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
 	p := session.GetPlayerBySession(s).(*playerdomain.Player)
 
-	hero := p.HeroBox.GetHero(msg.HeroId)
-	if hero == nil {
+	h := p.HeroBox.GetHero(msg.HeroId)
+	if h == nil {
 		return &protos.ResHeroLevelUp{
 			Code: constants.COMMON_NOT_FOUND,
 		}
 	}
 
-	costGold := GetHeroService().calcTotalUpLevelConsume(hero.Level, msg.ToLevel)
+	costGold := GetHeroService().calcTotalUpLevelConsume(h.Level, msg.ToLevel)
 	if !p.Purse.IsEnoughGold(costGold) {
 		return &protos.ResHeroLevelUp{
 			Code: constants.Gold_NOT_ENOUGH,
@@ -127,9 +140,9 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 	}
 	consume.Consume(p)
 
-	hero.Level = msg.ToLevel
-
-	player.GetPlayerService().SavePlayer(p)
+	h.Level = msg.ToLevel
+	GetHeroService().RecalculateHeroAttr(p, h, true)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroLevelUp{
 		Code: 0,

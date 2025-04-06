@@ -39,6 +39,10 @@ export default class R {
       name: 'heroMainPane',
       path: 'prefabs/HeroMainPane',
     },
+    HeroDetailPane: {
+      name: 'heroDetailPane',
+      path: 'prefabs/HeroDetailPane',
+    },
   };
 
   // 图片纹理图集枚举

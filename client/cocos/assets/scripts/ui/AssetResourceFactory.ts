@@ -15,9 +15,6 @@ export default class AssetResourceFactory extends Component {
   public configs: Array<JsonAsset> = [];
 
   public static get instance() {
-    if (!this._instance) {
-      this._instance = new AssetResourceFactory();
-    }
     return this._instance;
   }
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"io/github/gforgame/examples/attribute"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
@@ -68,4 +69,14 @@ func (ps *PlayerService) NotifyPurseChange(player *playerdomain.Player) {
 	resPurse.Diamond = player.Purse.Diamond
 	resPurse.Gold = player.Purse.Gold
 	io.NotifyPlayer(player, resPurse)
+}
+
+func (ps *PlayerService) RecCalculatePlayerAttr(player *playerdomain.Player) {
+	// 主公本身属性+所有上阵英雄属性
+	attrContainer := attribute.NewAttrBox()
+
+	for _, hero := range player.HeroBox.Heros {
+		attrContainer.AddAttrs(hero.AttrBox.GetAttrs())
+	}
+
 }

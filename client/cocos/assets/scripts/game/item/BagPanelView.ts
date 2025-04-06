@@ -1,4 +1,5 @@
 import { _decorator, instantiate, Node, Prefab, Toggle } from 'cc';
+import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import ItemData from '../../data/config/model/ItemData';
 import { BaseUiView } from '../../ui/BaseUiView';
@@ -73,7 +74,7 @@ export class BagPanelView extends BaseUiView {
   }
 
   private getAllItems(): Array<Item> {
-    let itemContianer: ConfigItemContainer = ConfigItemContainer.getInstance();
+    let itemContianer: ConfigItemContainer = ConfigContext.configItemContainer;
     let items: Array<Item> = BagpackModel.getInstance().getItems();
     let filterItems: Array<Item> = [];
     if (this.selectedType === 0) {

@@ -3,6 +3,7 @@ package item
 import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
 	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
@@ -22,7 +23,7 @@ func (ps *ItemController) Init() {
 	network.RegisterMessage(protos.CmdItemResPurseInfo, &protos.PushPurseInfo{})
 	network.RegisterMessage(protos.CmdItemPushChanged, &protos.PushItemChanged{})
 
-	context.EventBus.Subscribe("player_login", func(data interface{}) {
+	context.EventBus.Subscribe(events.PlayerLoadingFinish, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }

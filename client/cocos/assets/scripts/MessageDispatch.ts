@@ -2,7 +2,7 @@ import { HeroBoxModel } from './game/hero/HeroBoxModel';
 import BagpackModel from './game/item/BagpackModel';
 import { PurseModel } from './game/main/PurseModel';
 import { HeroVo } from './net/MsgItems/HeroVo';
-import PushHeroAdd from './net/PushHeroAdd';
+import PushHeroAttrChanged from './net/PushHeroAttrChanged';
 import { PushItemChanged } from './net/PushItemChanged';
 import PushPurseInfo from './net/PushPurseInfo';
 import { ResAllHeroInfo } from './net/ResAllHeroInfo';
@@ -31,16 +31,28 @@ export class MessageDispatch {
     MessageDispatch.register(ResAllHeroInfo.cmd, (msg: ResAllHeroInfo) => {
       if (msg.heros) {
         HeroBoxModel.getInstance().reset(new Map(msg.heros.map((hero) => [hero.id, hero])));
-        console.log('HeroBoxModel.getInstance().reset', HeroBoxModel.getInstance().getHero(1001));
       }
-    });
-
-    MessageDispatch.register(PushHeroAdd.cmd, (msg: PushHeroAdd) => {
-      HeroBoxModel.getInstance().addHero(new HeroVo(msg.heroId));
     });
 
     MessageDispatch.register(PushItemChanged.cmd, (msg: PushItemChanged) => {
       BagpackModel.getInstance().addItemByModelId(msg.itemId, msg.count);
+    });
+
+    MessageDispatch.register(PushHeroAttrChanged.cmd, (msg: PushHeroAttrChanged) => {
+      const hero = HeroBoxModel.getInstance().getHero(msg.heroId);
+      if (hero) {
+        // 更新英雄属性
+        hero.attrs = msg.attrs;
+        hero.fight = msg.fight;
+        HeroBoxModel.getInstance().addHero(hero);
+      } else {
+        // 添加英雄
+        const hero = new HeroVo();
+        hero.id = msg.heroId;
+        hero.level = 1;
+        hero.fight = msg.fight;
+        HeroBoxModel.getInstance().addHero(hero);
+      }
     });
   }
 

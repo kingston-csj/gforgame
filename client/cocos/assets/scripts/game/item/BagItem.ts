@@ -1,9 +1,11 @@
-import { _decorator, Label, Node, Sprite, UITransform } from 'cc';
+import { _decorator, Label, Node, Sprite } from 'cc';
+import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import ItemData from '../../data/config/model/ItemData';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
+import { UiUtil } from '../../ui/UiUtil';
 import { BagItemInfo } from './BagItemInfo';
 import { Item } from './BagpackModel';
 const { ccclass, property } = _decorator;
@@ -38,29 +40,12 @@ export class BagItem extends BaseUiView {
   }
 
   public fillData(item: Item) {
-    let itemContianer: ConfigItemContainer = ConfigItemContainer.getInstance();
+    let itemContianer: ConfigItemContainer = ConfigContext.configItemContainer;
     this.itemData = itemContianer.getRecord(item.id);
     this.itemName.string = this.itemData.name;
     this.amout.string = 'X' + item.count;
 
-    const iconTransform = this.icon.getComponent(UITransform);
-    if (!iconTransform) {
-      console.warn('Icon node has no UITransform component');
-      return;
-    }
-    // 保存节点当前的尺寸，用于调整图像
-    const originalIconWidth = iconTransform.width;
-    const originalIconHeight = iconTransform.height;
-
     let spriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Item);
-    this.icon.getComponent(Sprite).spriteFrame = spriteAtlas.getSpriteFrame(this.itemData.icon);
-    // 获取当前SpriteFrame
-    const sprite = this.icon.getComponent(Sprite);
-    if (!sprite || !sprite.spriteFrame) {
-      console.warn('Icon has no valid sprite frame');
-      return;
-    }
-    // 设置UITransform的contentSize为原始图片尺寸
-    iconTransform.setContentSize(originalIconWidth, originalIconHeight);
+    UiUtil.fillSpriteContent(this.icon, spriteAtlas.getSpriteFrame(this.itemData.icon));
   }
 }
