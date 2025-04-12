@@ -1,6 +1,6 @@
 import { _decorator } from 'cc';
 
-import { ResHeroRecruit } from '../../net/ResHeroRecruit';
+import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 
 import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';

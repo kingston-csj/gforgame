@@ -1,19 +1,22 @@
 import { _decorator, Button, instantiate, Label, Node, Prefab, ScrollView } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import { HeroVo } from '../../net/MsgItems/HeroVo';
+import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
 import { BaseUiView } from '../../ui/BaseUiView';
+import { GameConstants } from '../GameConstants';
+import BagpackModel from '../item/BagpackModel';
 import { PurseModel } from '../main/PurseModel';
 import { HeroBoxModel } from './HeroBoxModel';
 import { HeroDetailController } from './HeroDetailController';
 import { HeroItem } from './HeroItemView';
-
 const { ccclass, property } = _decorator;
 
 @ccclass('HeroMainView')
 export class HeroMainView extends BaseUiView {
   @property(Label)
   goldLabel: Label;
+  @property(Label)
+  itemLabel: Label;
   @property(Node)
   heroContainer: Node;
   @property(Prefab)
@@ -21,14 +24,7 @@ export class HeroMainView extends BaseUiView {
 
   private children: Map<number, HeroItem> = new Map();
 
-  protected start(): void {
-    // 绑定金币数据
-    PurseModel.getInstance().onGoldChange((value) => {
-      if (this.goldLabel) {
-        this.goldLabel.string = value.toString();
-      }
-    });
-  }
+  protected start(): void {}
 
   protected onDisplay(): void {
     this.heroContainer.children.forEach((child) => {
@@ -58,6 +54,9 @@ export class HeroMainView extends BaseUiView {
     // 自动滑动到最顶部的item
     this.scrollToTop();
     this.goldLabel.string = PurseModel.getInstance().gold.toString();
+    this.itemLabel.string = BagpackModel.getInstance()
+      .getItemCount(GameConstants.ITEM_UPSTAGE_ID)
+      .toString();
   }
 
   private scrollToTop() {
@@ -69,7 +68,7 @@ export class HeroMainView extends BaseUiView {
 
   public updataAllHeroItems() {
     for (let item of this.children.values()) {
-      item.updateUpLevelBtn(HeroBoxModel.getInstance().calcUpLevel(item.hero));
+      item.refreshButtonStatus();
     }
   }
 }

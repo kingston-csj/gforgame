@@ -9,6 +9,11 @@ const (
 	CmdPlayerReqCreate        = 2003
 	CmdPlayerResCreate        = 2004
 	CmdPlayerReqLoadingFinish = 2005
+	CmdPlayerReqUpLevel       = 2006
+	CmdPlayerResUpLevel       = 2007
+	CmdPlayerPushFightChange  = 2008
+	CmdPlayerReqUpStage       = 2009
+	CmdPlayerResUpStage       = 2010
 
 	CmdGmReqAction = 3001
 	CmdGmResAction = 3002
@@ -145,4 +150,23 @@ type PushHeroAttrChange struct {
 	HeroId int32      `json:"heroId"`
 	Attrs  []AttrInfo `json:"attrs"`
 	Fight  int32      `json:"fight"`
+}
+
+type ReqPlayerUpLevel struct {
+	ToLevel int32 `json:"toLevel"`
+}
+
+type ResPlayerUpLevel struct {
+	Code int32 `json:"code"`
+}
+
+type PushPlayerFightChange struct {
+	Fight int32 `json:"fight"`
+}
+
+type ReqPlayerUpStage struct {
+}
+
+type ResPlayerUpStage struct {
+	Code int32 `json:"code"`
 }

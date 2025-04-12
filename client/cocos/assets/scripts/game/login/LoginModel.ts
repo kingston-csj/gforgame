@@ -1,6 +1,6 @@
 import GameContext from '../../GameContext';
-import ReqLogin from '../../net/ReqLogin';
-import RespLogin from '../../net/RespLogin';
+import ReqLogin from '../../net/protocol/ReqLogin';
+import RespLogin from '../../net/protocol/RespLogin';
 
 export class LoginModel {
   private static _instance: LoginModel;

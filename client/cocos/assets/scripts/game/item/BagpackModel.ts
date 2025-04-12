@@ -1,4 +1,6 @@
-export default class BagpackModel {
+import { BaseModel } from '../../ui/BaseModel';
+
+export default class BagpackModel extends BaseModel {
   private static instance: BagpackModel;
 
   public static getInstance(): BagpackModel {
@@ -12,6 +14,7 @@ export default class BagpackModel {
 
   public reset(data: Map<number, Item>) {
     this._items = data;
+    this.notifyChange('item', this._items);
   }
 
   public getItems(): Array<Item> {
@@ -40,6 +43,7 @@ export default class BagpackModel {
     if (item.count <= 0) {
       this._items.delete(itemId);
     }
+    this.notifyChange('item', this._items);
   }
 }
 

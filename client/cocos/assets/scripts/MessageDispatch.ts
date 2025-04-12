@@ -1,12 +1,12 @@
 import { HeroBoxModel } from './game/hero/HeroBoxModel';
 import BagpackModel from './game/item/BagpackModel';
 import { PurseModel } from './game/main/PurseModel';
-import { HeroVo } from './net/MsgItems/HeroVo';
-import PushHeroAttrChanged from './net/PushHeroAttrChanged';
-import { PushItemChanged } from './net/PushItemChanged';
-import PushPurseInfo from './net/PushPurseInfo';
-import { ResAllHeroInfo } from './net/ResAllHeroInfo';
-import ResBackpackInfo from './net/ResBackpackInfo';
+import { HeroVo } from './net/protocol/MsgItems/HeroVo';
+import PushHeroAttrChanged from './net/protocol/PushHeroAttrChanged';
+import { PushItemChanged } from './net/protocol/PushItemChanged';
+import PushPurseInfo from './net/protocol/PushPurseInfo';
+import { ResAllHeroInfo } from './net/protocol/ResAllHeroInfo';
+import ResBackpackInfo from './net/protocol/ResBackpackInfo';
 
 export class MessageDispatch {
   // 绑定cmd与对应的handler
@@ -51,6 +51,8 @@ export class MessageDispatch {
         hero.id = msg.heroId;
         hero.level = 1;
         hero.fight = msg.fight;
+        hero.stage = 0;
+        hero.attrs = msg.attrs;
         HeroBoxModel.getInstance().addHero(hero);
       }
     });

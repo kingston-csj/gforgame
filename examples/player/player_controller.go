@@ -3,10 +3,14 @@ package player
 import (
 	"fmt"
 
+	"io/github/gforgame/common"
 	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/session"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
@@ -31,6 +35,10 @@ func (ps *PlayerController) Init() {
 	network.RegisterMessage(protos.CmdPlayerReqCreate, &protos.ReqPlayerCreate{})
 	network.RegisterMessage(protos.CmdPlayerResCreate, &protos.ResPlayerCreate{})
 	network.RegisterMessage(protos.CmdPlayerReqLoadingFinish, &protos.ReqPlayerLoadingFinish{})
+	network.RegisterMessage(protos.CmdPlayerReqUpLevel, &protos.ReqPlayerUpLevel{})
+	network.RegisterMessage(protos.CmdPlayerResUpLevel, &protos.ResPlayerUpLevel{})
+	network.RegisterMessage(protos.CmdPlayerReqUpStage, &protos.ReqPlayerUpStage{})
+	network.RegisterMessage(protos.CmdPlayerResUpStage, &protos.ResPlayerUpStage{})
 
 	// 自动建表
 	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
@@ -93,4 +101,98 @@ func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerC
 
 	logger.Log(logger.Player, "Id", player.Id, "name", player.Name)
 	fmt.Printf(player.Name)
+}
+
+func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
+	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	toLevel := msg.ToLevel
+	stageData, ok := hero.GetHeroService().GetHeroStageData(p.Stage)
+	if !ok {
+		return &protos.ResPlayerUpLevel{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
+	if p.Level >= stageData.MaxLevel {
+		return &protos.ResPlayerUpLevel{
+			Code: constants.I18N_HERO_TIP2,
+		}
+	}
+
+	if toLevel <= p.Level {
+		return &protos.ResPlayerUpLevel{
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
+		}
+	}
+
+	costGold := hero.GetHeroService().CalcTotalUpLevelConsume(p.Level, toLevel)
+	if !p.Purse.IsEnoughGold(costGold) {
+		return &protos.ResPlayerUpLevel{
+			Code: constants.I18N_GOLD_NOT_ENOUGH,
+		}
+	}
+
+	consume := consume.CurrencyConsume{
+		Kind:   "gold",
+		Amount: costGold,
+	}
+	err := consume.Verify(p)
+	if err != nil {
+		return &protos.ResPlayerUpLevel{
+			Code: int32(err.(*common.BusinessRequestException).Code()),
+		}
+	}
+	consume.Consume(p)
+
+	p.Level = toLevel
+	GetPlayerService().refreshFighting(p)
+	GetPlayerService().SavePlayer(p)
+
+	return &protos.ResPlayerUpLevel{
+		Code: 0,
+	}
+}
+
+func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
+	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+
+	stageData, ok := hero.GetHeroService().GetHeroStageData(p.Stage)
+	if !ok {
+		return &protos.ResHeroUpStage{
+			Code: constants.I18N_HERO_TIP4,
+		}
+	}
+
+	if p.Level < stageData.MaxLevel {
+		return &protos.ResHeroUpStage{
+			Code: constants.I18N_HERO_TIP3,
+		}
+	}
+
+	_, ok = hero.GetHeroService().GetHeroStageData(p.Stage + 1)
+	if !ok {
+		return &protos.ResHeroUpStage{
+			Code: constants.I18N_HERO_TIP4,
+		}
+	}
+
+	costItem := consume.ItemConsume{
+		ItemId: constants.GAME_UPSTAGE_ITEM_ID,
+		Amount: stageData.Cost,
+	}
+	err := costItem.Verify(p)
+	if err != nil {
+		return &protos.ResHeroUpStage{
+			Code: int32(err.(*common.BusinessRequestException).Code()),
+		}
+	}
+	costItem.Consume(p)
+
+	p.Stage = p.Stage + 1
+
+	GetPlayerService().refreshFighting(p)
+	GetPlayerService().SavePlayer(p)
+
+	return &protos.ResHeroUpStage{
+		Code: 0,
+	}
 }

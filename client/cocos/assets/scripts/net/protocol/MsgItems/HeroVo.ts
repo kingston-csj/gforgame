@@ -1,4 +1,4 @@
-import { AttributeBox } from '../../game/attribute/attributebox';
+import { AttributeBox } from '../../../game/attribute/attributebox';
 import { Attribute } from './Attribute';
 export class HeroVo {
   public id: number;

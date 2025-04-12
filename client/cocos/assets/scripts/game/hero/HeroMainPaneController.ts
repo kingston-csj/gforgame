@@ -3,6 +3,8 @@ import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
+import BagpackModel, { Item } from '../item/BagpackModel';
+import { PurseModel } from '../main/PurseModel';
 import { HeroMainView } from './HeroMainView';
 
 const { ccclass, property } = _decorator;
@@ -14,7 +16,7 @@ export class HeroMainPaneController extends BaseController {
   private static creatingPromise: Promise<HeroMainPaneController> | null = null;
 
   @property(HeroMainView)
-  private mainView: HeroMainView | null = null;
+  private mainView: HeroMainView = null;
 
   private constructor() {
     super();
@@ -41,6 +43,21 @@ export class HeroMainPaneController extends BaseController {
 
   protected start(): void {
     this.initView(this.mainView);
+
+    // 监听道具变化
+    BagpackModel.getInstance().onChange('item', (items: Map<number, Item>) => {
+      let itemCount = items.get(2003);
+      if (this.mainView.itemLabel) {
+        this.mainView.itemLabel.string = itemCount?.count.toString() || '0';
+      }
+    });
+
+    // 监听金币变化
+    PurseModel.getInstance().onChange('gold', (value) => {
+      if (this.mainView.goldLabel) {
+        this.mainView.goldLabel.string = value.toString();
+      }
+    });
   }
 
   private static getInstance(): Promise<HeroMainPaneController> {

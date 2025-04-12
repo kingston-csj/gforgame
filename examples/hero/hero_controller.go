@@ -11,9 +11,9 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/item"
 
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/item"
 
 	"io/github/gforgame/examples/session"
 	"io/github/gforgame/network"
@@ -76,7 +76,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 		Id:       masterId,
 		Level:    player.Level,
 		Position: 0,
-		Stage:    0,
+		Stage:    player.Stage,
 		Attrs:    masterAttrInfos,
 		Fight:    0,
 	})
@@ -130,7 +130,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 
 func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
 	p := session.GetPlayerBySession(s).(*playerdomain.Player)
-
+	toLevel := msg.ToLevel
 	h := p.HeroBox.GetHero(msg.HeroId)
 	if h == nil {
 		return &protos.ResHeroLevelUp{
@@ -138,20 +138,25 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	if h.Level >= p.Level {
+	if toLevel >= p.Level {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_HERO_TIP1,
 		}
 	}
 
-	stageData := GetHeroService().GetHeroStageData(h.Stage)
+	stageData, ok := GetHeroService().GetHeroStageData(h.Stage)
+	if !ok {
+		return &protos.ResHeroLevelUp{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
 	if h.Level >= stageData.MaxLevel {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_HERO_TIP2,
 		}
 	}
 
-	costGold := GetHeroService().calcTotalUpLevelConsume(h.Level, msg.ToLevel)
+	costGold := GetHeroService().CalcTotalUpLevelConsume(h.Level, toLevel)
 	if !p.Purse.IsEnoughGold(costGold) {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_GOLD_NOT_ENOUGH,
@@ -170,7 +175,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 	}
 	consume.Consume(p)
 
-	h.Level = msg.ToLevel
+	h.Level = toLevel
 	GetHeroService().ReCalculateHeroAttr(p, h, true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
@@ -189,7 +194,12 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 		}
 	}
 
-	stageData := GetHeroService().GetHeroStageData(h.Stage)
+	stageData, ok := GetHeroService().GetHeroStageData(h.Stage)
+	if !ok {
+		return &protos.ResHeroUpStage{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
 	if h.Level < stageData.MaxLevel {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_HERO_TIP3,

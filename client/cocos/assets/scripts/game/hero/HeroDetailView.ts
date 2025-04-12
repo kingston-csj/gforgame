@@ -1,12 +1,7 @@
 import { _decorator, Button, Color, Label, Node, Sprite } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import GameContext from '../../GameContext';
-import { HeroVo } from '../../net/MsgItems/HeroVo';
-import { ReqHeroUpLevel } from '../../net/ReqHeroUpLevel';
-import { ReqHeroUpStage } from '../../net/ReqHeroUpStage';
-import { ResHeroUpLevel } from '../../net/ResHeroUpLevel';
-import { ResHeroUpStage } from '../../net/ResHeroUpStage';
+import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
@@ -119,9 +114,9 @@ export class HeroDetailView extends BaseUiView {
     this.skillNameGroup = [this.skill1Name, this.skill2Name, this.skill3Name, this.skill4Name];
     this.skillBtnGroup = [this.skill1Btn, this.skill2Btn, this.skill3Btn, this.skill4Btn];
 
-    PurseModel.getInstance().onGoldChange((value) => {
+    PurseModel.getInstance().onChange('gold', (value) => {
       this.goldNum.string = value.toString();
-      this.updateUpLevelBtn(HeroBoxModel.getInstance().calcUpLevel(this.hero));
+      this.updateLevelOrStageBtn();
     });
   }
 
@@ -187,67 +182,61 @@ export class HeroDetailView extends BaseUiView {
     this.upLevelBtn.off(Button.EventType.CLICK);
     this.upLevelBtn.on(Button.EventType.CLICK, () => {
       let canUpLevel = HeroBoxModel.getInstance().calcUpLevel(this.hero);
-      GameContext.instance.WebSocketClient.sendMessage(
-        ReqHeroUpLevel.cmd,
-        {
-          heroId: this.hero.id,
-          toLevel: this.hero.level + canUpLevel,
-        },
-        (msg: ResHeroUpLevel) => {
-          if (msg.code > 0) {
-            TipsPaneController.openUi(msg.code);
-          } else {
+
+      HeroBoxModel.getInstance()
+        .requestUpLevel(this.hero.id, this.hero.level + canUpLevel)
+        .then((code) => {
+          if (code === 0) {
             // 数据模型会触发界面更新
             this.levelNum.string = (this.hero.level + canUpLevel).toString();
             this.updateLevelOrStageBtn();
+          } else {
+            TipsPaneController.openUi(code);
           }
-        }
-      );
+        });
     });
-    this.updateUpLevelBtn(HeroBoxModel.getInstance().calcUpLevel(this.hero));
+
     this.goldNum.string = PurseModel.getInstance().gold.toString();
 
     this.upStageBtn.off(Button.EventType.CLICK);
     this.upStageBtn.on(Button.EventType.CLICK, () => {
-      GameContext.instance.WebSocketClient.sendMessage(
-        ReqHeroUpStage.cmd,
-        { heroId: this.hero.id },
-        (msg: ResHeroUpStage) => {
-          if (msg.code > 0) {
-            TipsPaneController.openUi(msg.code);
-          } else {
+      HeroBoxModel.getInstance()
+        .requestUpStage(this.hero.id)
+        .then((code) => {
+          if (code === 0) {
             this.updateLevelOrStageBtn();
+          } else {
+            TipsPaneController.openUi(code);
           }
-        }
-      );
+        });
     });
 
     this.updateLevelOrStageBtn();
   }
 
   private updateLevelOrStageBtn() {
+    this.upLevelGroup.active = false;
+    this.upStageGroup.active = false;
     let heroStageData = ConfigContext.configHeroStageContainer.getRecordByStage(this.hero.stage);
-    if (this.hero.level >= heroStageData.max_level) {
-      this.upLevelGroup.active = false;
+    let nextStageData = ConfigContext.configHeroStageContainer.getRecordByStage(
+      this.hero.stage + 1
+    );
+    if (this.hero.level == heroStageData.max_level && nextStageData) {
       this.upStageGroup.active = true;
     } else {
-      this.upLevelGroup.active = true;
-      this.upStageGroup.active = false;
+      if (this.hero.level < ConfigContext.configHeroLevelContainer.getMaxLevel()) {
+        this.upLevelGroup.active = true;
+        let times = HeroBoxModel.getInstance().calcUpLevel(this.hero);
+        if (times > 1) {
+          this.upLevelInfo.string = `升${times}级`;
+        } else {
+          this.upLevelInfo.string = `升级`;
+        }
+        this.levelNum.string = this.hero.level.toString();
+      }
     }
   }
   public onHide(): void {
     this.skillDescPanel.active = false;
-  }
-
-  private updateUpLevelBtn(times: number) {
-    if (!this.hero) {
-      return;
-    }
-
-    if (times > 1) {
-      this.upLevelInfo.string = `升${times}级`;
-    } else {
-      this.upLevelInfo.string = `升级`;
-    }
   }
 }

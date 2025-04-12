@@ -1,10 +1,7 @@
 import { _decorator, Label, Node, Sprite } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import GameContext from '../../GameContext';
-import { HeroVo } from '../../net/MsgItems/HeroVo';
-import { ReqHeroUpLevel } from '../../net/ReqHeroUpLevel';
-import { ResHeroUpLevel } from '../../net/ResHeroUpLevel';
+import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
@@ -25,7 +22,9 @@ export class HeroItem extends BaseUiView {
   public icon: Node;
 
   @property(Node)
-  public btn: Node;
+  public upLevelBtn: Node;
+  @property(Node)
+  public upStageBtn: Node;
 
   @property(Label)
   public upLevel: Label;
@@ -35,26 +34,37 @@ export class HeroItem extends BaseUiView {
   @property(Label)
   public fighting: Label;
 
+  @property(Node)
+  public fightGroup: Node;
+
   public hero: HeroVo;
 
   protected start(): void {
-    this.registerClickEvent(this.btn, () => {
+    this.registerClickEvent(this.upLevelBtn, () => {
       let canUpLevel = HeroBoxModel.getInstance().calcUpLevel(this.hero);
-      GameContext.instance.WebSocketClient.sendMessage(
-        ReqHeroUpLevel.cmd,
-        {
-          heroId: this.hero.id,
-          toLevel: this.hero.level + canUpLevel,
-        },
-        (msg: ResHeroUpLevel) => {
-          if (msg.code === 0) {
+      HeroBoxModel.getInstance()
+        .requestUpLevel(this.hero.id, this.hero.level + canUpLevel)
+        .then((code) => {
+          if (code === 0) {
             this.hero.level += canUpLevel;
             this.fillData(this.hero);
           } else {
-            TipsPaneController.openUi(msg.code);
+            TipsPaneController.openUi(code);
           }
-        }
-      );
+        });
+    });
+
+    this.registerClickEvent(this.upStageBtn, () => {
+      HeroBoxModel.getInstance()
+        .requestUpStage(this.hero.id)
+        .then((code) => {
+          if (code === 0) {
+            this.hero.stage += 1;
+            this.fillData(this.hero);
+          } else {
+            TipsPaneController.openUi(code);
+          }
+        });
     });
   }
 
@@ -71,18 +81,38 @@ export class HeroItem extends BaseUiView {
     let qualitySpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Quality);
 
     this.kuang.getComponent(Sprite).spriteFrame = qualitySpriteAtlas.getSpriteFrame(qualityPicture);
+
+    this.refreshButtonStatus();
+
+    if (heroData.quality === 0) {
+      this.fightGroup.active = false;
+    }
   }
 
-  public updateUpLevelBtn(times: number) {
+  public refreshButtonStatus() {
     if (!this.hero) {
       return;
     }
+    this.upStageBtn.active = false;
+    this.upLevelBtn.active = false;
 
-    if (times > 1) {
-      this.upLevel.string = `升${times}级`;
+    let heroStageData = ConfigContext.configHeroStageContainer.getRecordByStage(this.hero.stage);
+    let nextStageData = ConfigContext.configHeroStageContainer.getRecordByStage(
+      this.hero.stage + 1
+    );
+    if (this.hero.level == heroStageData.max_level && nextStageData) {
+      this.upStageBtn.active = true;
     } else {
-      this.upLevel.string = `升级`;
+      if (this.hero.level < ConfigContext.configHeroLevelContainer.getMaxLevel()) {
+        this.upLevelBtn.active = true;
+        let times = HeroBoxModel.getInstance().calcUpLevel(this.hero);
+        if (times > 1) {
+          this.upLevel.string = `升${times}级`;
+        } else {
+          this.upLevel.string = `升级`;
+        }
+        this.level.string = this.hero.level.toString();
+      }
     }
-    this.level.string = this.hero.level.toString();
   }
 }

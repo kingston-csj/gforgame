@@ -8,8 +8,8 @@ import (
 
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/player"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/network"
@@ -58,7 +58,7 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 
 	p.Backpack.AddItem(itemId, count)
 
-	player.GetPlayerService().SavePlayer(p)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	io.NotifyPlayer(p, &protos.PushItemChanged{
 		ItemId: itemId,

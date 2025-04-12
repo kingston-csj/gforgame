@@ -5,7 +5,6 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
-	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -42,5 +41,5 @@ func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
 	io.NotifyPlayer(player, resBackpack)
 
 	// 发送货币信息
-	playerService.GetPlayerService().NotifyPurseChange(player)
+	player.NotifyPurseChange()
 }

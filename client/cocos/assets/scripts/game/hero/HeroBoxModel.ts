@@ -1,6 +1,16 @@
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import HeroLevelData from '../../data/config/model/HeroLevelData';
-import { HeroVo } from '../../net/MsgItems/HeroVo';
+import HerostageData from '../../data/config/model/HerostageData';
+import GameContext from '../../GameContext';
+import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
+import { ReqHeroUpLevel } from '../../net/protocol/ReqHeroUpLevel';
+import { ReqHeroUpStage } from '../../net/protocol/ReqHeroUpStage';
+import { ReqPlayerUpLevel } from '../../net/protocol/ReqPlayerUpLevel';
+import { ReqPlayerUpStage } from '../../net/protocol/ReqPlayerUpStage';
+import { ResHeroUpLevel } from '../../net/protocol/ResHeroUpLevel';
+import { ResHeroUpStage } from '../../net/protocol/ResHeroUpStage';
+import { ResPlayerUpLevel } from '../../net/protocol/ResPlayerUpLevel';
+import { ResPlayerUpStage } from '../../net/protocol/ResPlayerUpStage';
 import { AttributeBox } from '../attribute/attributebox';
 import { PurseModel } from '../main/PurseModel';
 
@@ -42,8 +52,8 @@ export class HeroBoxModel {
 
   public addHero(hero: HeroVo) {
     this.heros.set(hero.id, hero);
-    hero.attrBox = new AttributeBox(hero.attrs);  
-    
+    hero.attrBox = new AttributeBox(hero.attrs);
+
     this.notifyHeroAttrChanged();
   }
 
@@ -64,7 +74,11 @@ export class HeroBoxModel {
   }
 
   public calcUpLevel(hero: HeroVo): number {
-    let heroLevelData: HeroLevelData = ConfigContext.configHeroLevelContainer.getRecord(hero.level);
+    let currLevel = hero.level;
+    let heroLevelData: HeroLevelData = ConfigContext.configHeroLevelContainer.getRecord(currLevel);
+    let heroStageData: HerostageData = ConfigContext.configHeroStageContainer.getRecordByStage(
+      hero.stage
+    );
     let myGold = PurseModel.getInstance().gold;
 
     let canUpLevel = 0;
@@ -73,17 +87,81 @@ export class HeroBoxModel {
       canUpLevel++;
       myGold -= cost;
       cost += heroLevelData.cost;
+      currLevel++;
       if (canUpLevel >= 10) {
         break;
       }
+      if (currLevel >= ConfigContext.configHeroLevelContainer.getMaxLevel()) {
+        break;
+      }
+      if (currLevel >= heroStageData.max_level) {
+        break;
+      }
+      heroLevelData = ConfigContext.configHeroLevelContainer.getRecord(currLevel);
     }
 
     if (canUpLevel >= 10) {
       return 10;
     } else if (canUpLevel >= 5) {
       return 5;
-    } else {
+    } else if (canUpLevel >= 1) {
       return 1;
+    } else {
+      return 0;
     }
+  }
+
+  public requestUpLevel(heroId: number, toLevel: number): Promise<number> {
+    let heroData = ConfigContext.configHeroContainer.getRecord(heroId);
+
+    return new Promise<number>((resolve, reject) => {
+      if (heroData.quality == 0) {
+        GameContext.instance.WebSocketClient.sendMessage(
+          ReqPlayerUpLevel.cmd,
+          {
+            heroId: heroId,
+            toLevel: toLevel,
+          },
+          (msg: ResPlayerUpLevel) => {
+            resolve(msg.code);
+          }
+        );
+      } else {
+        GameContext.instance.WebSocketClient.sendMessage(
+          ReqHeroUpLevel.cmd,
+          {
+            heroId: heroId,
+            toLevel: toLevel,
+          },
+          (msg: ResHeroUpLevel) => {
+            resolve(msg.code);
+          }
+        );
+      }
+    });
+  }
+
+  public requestUpStage(heroId: number): Promise<number> {
+    let heroData = ConfigContext.configHeroContainer.getRecord(heroId);
+
+    return new Promise<number>((resolve, reject) => {
+      if (heroData.quality === 0) {
+        GameContext.instance.WebSocketClient.sendMessage(
+          ReqPlayerUpStage.cmd,
+          {},
+          (msg: ResPlayerUpStage) => {
+            resolve(msg.code);
+          }
+        );
+      } else {
+        GameContext.instance.WebSocketClient.sendMessage(
+          ReqHeroUpStage.cmd,
+          { heroId: heroId },
+          (msg: ResHeroUpStage) => {
+            resolve(msg.code);
+          }
+        );
+      }
+    });
   }
 }

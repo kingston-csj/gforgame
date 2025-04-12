@@ -3,7 +3,7 @@ import { _decorator } from 'cc';
 import { LayerIdx } from '../../ui/LayerIds';
 import UiViewFactory from '../../ui/UiViewFactory';
 
-import { ResHeroRecruit } from '../../net/ResHeroRecruit';
+import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 import R from '../../ui/R';
 import { RecruitSettleModel } from './RecruitSettleModel';
 

@@ -27,7 +27,7 @@ func GetHeroService() *HeroService {
 		stageDatas := context.GetDataManager().GetRecords("herostage")
 		for _, stageData := range stageDatas {
 			stageData := stageData.(config.HeroStageData)
-			stageDataMapper[stageData.Id] = stageData
+			stageDataMapper[stageData.Stage] = stageData
 		}
 	})
 	return instance
@@ -114,7 +114,7 @@ func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, 
 	}
 }
 
-func (ps *HeroService) calcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {
+func (ps *HeroService) CalcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {
 	totle := int32(0)
 	for i := fromLevel; i < toLevel; i++ {
 		record := context.GetDataManager().GetRecord("herolevel", int64(i))
@@ -125,6 +125,7 @@ func (ps *HeroService) calcTotalUpLevelConsume(fromLevel int32, toLevel int32) i
 	return totle
 }
 
-func (ps *HeroService) GetHeroStageData(stage int32) config.HeroStageData {
-	return stageDataMapper[stage]
+func (ps *HeroService) GetHeroStageData(stage int32) (config.HeroStageData, bool) {
+	stageData, ok := stageDataMapper[stage]
+	return stageData, ok
 }

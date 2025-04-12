@@ -4,24 +4,29 @@ import (
 	"encoding/json"
 
 	"io/github/gforgame/db"
+	"io/github/gforgame/examples/attribute"
+	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/utils"
+	"io/github/gforgame/protos"
 
 	"gorm.io/gorm"
 )
 
 type Player struct {
 	db.BaseEntity
-	ID           string    `gorm:"player's ID"`
-	Name         string    `gorm:"player's name"`
-	Level        int32     `gorm:"player's' level"`
-	Backpack     *Backpack `gorm:"-"`
-	BackpackJson string    `gorm:"backpack"`
-	HeroBox      *HeroBox  `gorm:"-"`
-	HeroBoxJson  string    `gorm:"herobox"`
-	Purse        *Purse    `gorm:"-"`
-	PurseJson    string    `gorm:"purse"`
-	Fight        int32     `gorm:"player's fight"`
-	Camp         int32     `gorm:"player's camp"`
+	ID           string             `gorm:"player's ID"`
+	Name         string             `gorm:"player's name"`
+	Level        int32              `gorm:"player's' level"`
+	Stage        int32              `gorm:"player's stage"`
+	Backpack     *Backpack          `gorm:"-"`
+	BackpackJson string             `gorm:"backpack"`
+	HeroBox      *HeroBox           `gorm:"-"`
+	HeroBoxJson  string             `gorm:"herobox"`
+	Purse        *Purse             `gorm:"-"`
+	AttrBox      *attribute.AttrBox `gorm:"-"`
+	PurseJson    string             `gorm:"purse"`
+	Fight        int32              `gorm:"player's fight"`
+	Camp         int32              `gorm:"player's camp"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -78,9 +83,17 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	} else {
 		json.Unmarshal([]byte(p.PurseJson), &p.Purse)
 	}
+	p.AttrBox = attribute.NewAttrBox()
 	return nil
 }
 
 func (p *Player) GetID() string {
 	return p.ID
+}
+
+func (p *Player) NotifyPurseChange() {
+	resPurse := &protos.PushPurseInfo{}
+	resPurse.Diamond = p.Purse.Diamond
+	resPurse.Gold = p.Purse.Gold
+	io.NotifyPlayer(p, resPurse)
 }

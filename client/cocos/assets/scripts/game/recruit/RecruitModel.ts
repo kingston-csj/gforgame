@@ -1,6 +1,6 @@
 import GameContext from '../../GameContext';
-import { ReqHeroRecruit } from '../../net/ReqHeroRecruit';
-import { ResHeroRecruit } from '../../net/ResHeroRecruit';
+import { ReqHeroRecruit } from '../../net/protocol/ReqHeroRecruit';
+import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 
 export class RecruitModel {
   private static _instance: RecruitModel;

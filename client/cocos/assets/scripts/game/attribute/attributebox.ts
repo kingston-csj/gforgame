@@ -1,4 +1,4 @@
-import { Attribute } from '../../net/MsgItems/Attribute';
+import { Attribute } from '../../net/protocol/MsgItems/Attribute';
 import { AttributeTypes } from './attributetypes';
 
 export class AttributeBox {

@@ -1,4 +1,6 @@
-export class PurseModel {
+import { BaseModel } from '../../ui/BaseModel';
+
+export class PurseModel extends BaseModel {
   private static instance: PurseModel;
 
   private _diamond: number = 0;
@@ -19,7 +21,7 @@ export class PurseModel {
   set diamond(value: number) {
     if (this._diamond !== value) {
       this._diamond = value;
-      this.notifyDiamondChange();
+      this.notifyChange('diamond', value);
     }
   }
 
@@ -30,41 +32,7 @@ export class PurseModel {
   set gold(value: number) {
     if (this._gold !== value) {
       this._gold = value;
-      this.notifyGoldChange();
+      this.notifyChange('gold', value);
     }
-  }
-
-  // 数据变化时的回调函数
-  private diamondChangeCallbacks: ((value: number) => void)[] = [];
-  private goldChangeCallbacks: ((value: number) => void)[] = [];
-
-  // 注册数据变化监听
-  onDiamondChange(callback: (value: number) => void) {
-    this.diamondChangeCallbacks.push(callback);
-    return () => {
-      const index = this.diamondChangeCallbacks.indexOf(callback);
-      if (index > -1) {
-        this.diamondChangeCallbacks.splice(index, 1);
-      }
-    };
-  }
-
-  onGoldChange(callback: (value: number) => void) {
-    this.goldChangeCallbacks.push(callback);
-    return () => {
-      const index = this.goldChangeCallbacks.indexOf(callback);
-      if (index > -1) {
-        this.goldChangeCallbacks.splice(index, 1);
-      }
-    };
-  }
-
-  // 通知数据变化
-  private notifyDiamondChange() {
-    this.diamondChangeCallbacks.forEach((callback) => callback(this._diamond));
-  }
-
-  private notifyGoldChange() {
-    this.goldChangeCallbacks.forEach((callback) => callback(this._gold));
   }
 }

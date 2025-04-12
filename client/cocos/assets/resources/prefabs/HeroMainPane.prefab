@@ -2614,6 +2614,9 @@
     "goldLabel": {
       "__id__": 80
     },
+    "itemLabel": {
+      "__id__": 42
+    },
     "heroContainer": {
       "__id__": 88
     },

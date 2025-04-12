@@ -1,7 +1,7 @@
 import { _decorator, EditBox, Node } from 'cc';
 import GameContext from '../../GameContext';
-import ReqGmAction from '../../net/ReqGmAction';
-import ResGmAction from '../../net/ResGmAction';
+import ReqGmAction from '../../net/protocol/ReqGmAction';
+import ResGmAction from '../../net/protocol/ResGmAction';
 import { BaseUiView } from '../../ui/BaseUiView';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';

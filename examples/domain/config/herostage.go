@@ -4,6 +4,7 @@ import "io/github/gforgame/examples/attribute"
 
 type HeroStageData struct {
 	Id       int32 `json:"id" excel:"id"`
+	Stage    int32 `json:"stage" excel:"stage"`
 	MaxLevel int32 `json:"max_level" excel:"max_level"`
 	Cost     int32 `json:"cost" excel:"cost"`
 	Hp       int32 `json:"hp" excel:"hp"`
