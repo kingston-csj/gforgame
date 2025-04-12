@@ -315,7 +315,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Diamond",
+    "_name": "Item",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -335,7 +335,7 @@
         "__id__": 39
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 45
@@ -801,7 +801,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "9f86d527-ffe5-4cf0-b423-406b8bbadc04@f9941",
+      "__uuid__": "4b638616-2ea3-46d1-a033-8bcb78f05270@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,

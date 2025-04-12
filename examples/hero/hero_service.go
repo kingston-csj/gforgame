@@ -16,34 +16,37 @@ import (
 type HeroService struct{}
 
 var (
-	instance *HeroService
-	once     sync.Once
+	instance        *HeroService
+	once            sync.Once
+	stageDataMapper map[int32]config.HeroStageData = make(map[int32]config.HeroStageData)
 )
 
 func GetHeroService() *HeroService {
 	once.Do(func() {
 		instance = &HeroService{}
+		stageDatas := context.GetDataManager().GetRecords("herostage")
+		for _, stageData := range stageDatas {
+			stageData := stageData.(config.HeroStageData)
+			stageDataMapper[stageData.Id] = stageData
+		}
 	})
 	return instance
 }
 
 func (ps *HeroService) GetRandomHero() config.HeroData {
-	heroDatas := context.GetDataManager().GetRecords("hero")
+	heroDatas := ps.filterNormalHeros()
 	// 根据HeroData的Prob进行抽奖
 	var totalProb int32 = 0
-	for _, data := range heroDatas {
-		heroData := data.(config.HeroData)
+	for _, heroData := range heroDatas {
+
 		totalProb += heroData.Prob
 	}
 
-	// Generate random number between 0 and total probability
 	randProb := rand.Int31n(totalProb)
 	var currentProb int32 = 0
 	var selectedHero config.HeroData
 
-	// Find the hero based on probability ranges
-	for _, data := range heroDatas {
-		heroData := data.(config.HeroData)
+	for _, heroData := range heroDatas {
 		currentProb += heroData.Prob
 		if randProb < currentProb {
 			selectedHero = heroData
@@ -54,7 +57,22 @@ func (ps *HeroService) GetRandomHero() config.HeroData {
 	return selectedHero
 }
 
-func (ps *HeroService) RecalculateHeroAttr(p *player.Player, hero *player.Hero, notify bool) {
+// 过滤掉主公
+func (ps *HeroService) filterNormalHeros() []config.HeroData {
+	heroDatas := context.GetDataManager().GetRecords("hero")
+	var result []config.HeroData
+	for _, heroDataRecord := range heroDatas {
+		heroData := heroDataRecord.(config.HeroData)
+		// 主公概率为0
+		if heroData.Prob > 0 {
+			result = append(result, heroData)
+		}
+	}
+	return result
+}
+
+// 重新计算武将属性
+func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, notify bool) {
 	// 英雄本身属性
 	heroDataRecord := context.GetDataManager().GetRecord("hero", int64(hero.ModelId))
 	heroData := heroDataRecord.(config.HeroData)
@@ -65,6 +83,13 @@ func (ps *HeroService) RecalculateHeroAttr(p *player.Player, hero *player.Hero, 
 	heroLevelDataRecord := context.GetDataManager().GetRecord("herolevel", int64(hero.Level))
 	heroLevelData := heroLevelDataRecord.(config.HeroLevelData)
 	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
+
+	// 英雄突破属性
+	heroStageDataRecord := context.GetDataManager().GetRecord("herostage", int64(hero.Stage))
+	if heroStageDataRecord != nil {
+		heroStageData := heroStageDataRecord.(config.HeroStageData)
+		attrContainer.AddAttrs(heroStageData.Attrs)
+	}
 
 	context.EventBus.Publish(events.PlayerAttrChange, p)
 
@@ -98,4 +123,8 @@ func (ps *HeroService) calcTotalUpLevelConsume(fromLevel int32, toLevel int32) i
 		totle += heroLevelData.Cost
 	}
 	return totle
+}
+
+func (ps *HeroService) GetHeroStageData(stage int32) config.HeroStageData {
+	return stageDataMapper[stage]
 }

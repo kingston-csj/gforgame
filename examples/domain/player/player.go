@@ -13,7 +13,7 @@ type Player struct {
 	db.BaseEntity
 	ID           string    `gorm:"player's ID"`
 	Name         string    `gorm:"player's name"`
-	Level        uint      `gorm:"player's' level"`
+	Level        int32     `gorm:"player's' level"`
 	Backpack     *Backpack `gorm:"-"`
 	BackpackJson string    `gorm:"backpack"`
 	HeroBox      *HeroBox  `gorm:"-"`
@@ -21,6 +21,7 @@ type Player struct {
 	Purse        *Purse    `gorm:"-"`
 	PurseJson    string    `gorm:"purse"`
 	Fight        int32     `gorm:"player's fight"`
+	Camp         int32     `gorm:"player's camp"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {

@@ -33,7 +33,7 @@ func (eb *EventBus) Publish(event string, data interface{}) {
 
 	if exists {
 		for _, handler := range handlers {
-			go handler(data)
+			handler(data)
 		}
 	}
 }

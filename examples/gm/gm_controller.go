@@ -37,11 +37,11 @@ func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.Req
 		itemParams := strings.Split(params, "=")
 		itemId, err := utils.StringToInt32(itemParams[0])
 		if err != nil {
-			return &protos.ResGmAction{Code: constants.COMMON_ILLEGAL_PARAMS}
+			return &protos.ResGmAction{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}
 		}
 		itemNum, err := utils.StringToInt32(itemParams[1])
 		if err != nil {
-			return &protos.ResGmAction{Code: constants.COMMON_ILLEGAL_PARAMS}
+			return &protos.ResGmAction{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}
 		}
 
 		item.GetItemService().AddByModelId(player.(*playerdomain.Player), itemId, itemNum)

@@ -30,12 +30,15 @@ export default class BagpackModel {
     return this._items.get(itemId)?.count || 0;
   }
 
-  public addItemByModelId(itemId: number, count: number): void {
+  public changeItemByModelId(itemId: number, count: number): void {
     const item = this._items.get(itemId);
     if (item) {
       item.count += count;
     } else {
       this._items.set(itemId, { id: itemId, count });
+    }
+    if (item.count <= 0) {
+      this._items.delete(itemId);
     }
   }
 }

@@ -1,10 +1,12 @@
-import { _decorator, Button, Label, Node } from 'cc';
+import { _decorator, Button, Color, Label, Node, Sprite } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import GameContext from '../../GameContext';
 import { HeroVo } from '../../net/MsgItems/HeroVo';
 import { ReqHeroUpLevel } from '../../net/ReqHeroUpLevel';
+import { ReqHeroUpStage } from '../../net/ReqHeroUpStage';
 import { ResHeroUpLevel } from '../../net/ResHeroUpLevel';
+import { ResHeroUpStage } from '../../net/ResHeroUpStage';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
@@ -54,6 +56,12 @@ export class HeroDetailView extends BaseUiView {
 
   private skillBtnGroup: Node[];
 
+  @property(Node)
+  public fightArea: Node;
+
+  @property(Node)
+  public attrGroup: Node;
+
   @property(Label)
   public attr1Label: Label;
 
@@ -75,6 +83,15 @@ export class HeroDetailView extends BaseUiView {
   @property(Node)
   public upLevelBtn: Node;
 
+  @property(Node)
+  public upLevelGroup: Node;
+
+  @property(Node)
+  public upStageGroup: Node;
+
+  @property(Node)
+  public upStageBtn: Node;
+
   @property(Label)
   public upLevelInfo: Label;
 
@@ -82,10 +99,16 @@ export class HeroDetailView extends BaseUiView {
   public goldNum: Label;
 
   @property(Label)
+  public upstageItemNum: Label;
+
+  @property(Label)
   public fightNum: Label;
 
   @property(Label)
   public levelNum: Label;
+
+  @property(Label)
+  public description: Label;
 
   private hero: HeroVo;
 
@@ -117,10 +140,9 @@ export class HeroDetailView extends BaseUiView {
     let heroSpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Hero);
     // 设置UITransform的contentSize为原始图片尺寸
     UiUtil.fillSpriteContent(this.heroIcon, heroSpriteAtlas.getSpriteFrame(heroData.icon));
-
+    let skills = heroData.skills.split(';');
     // 技能组
     this.skillNameGroup.forEach((label, index) => {
-      let skills = heroData.skills.split(';');
       let skillData = ConfigContext.configSkillContainer.getSkill(Number(skills[index]));
       label.string = skillData.name;
     });
@@ -135,12 +157,29 @@ export class HeroDetailView extends BaseUiView {
         let skillData = ConfigContext.configSkillContainer.getSkill(Number(skills[index]));
         this.skillDesc.string = skillData.tips;
       });
+
+      let skillData = ConfigContext.configSkillContainer.getSkill(Number(skills[index]));
+      if (hero.stage < skillData.stage) {
+        // 设置按钮为灰色
+        btn.getComponent(Sprite).color = Color.GRAY;
+      }
     });
 
-    this.attr1Label.string = hero.attrBox.getHp().toString();
-    this.attr2Label.string = hero.attrBox.getAttack().toString();
-    this.attr3Label.string = hero.attrBox.getDefense().toString();
-    this.attr4Label.string = hero.attrBox.getSpeed().toString();
+    // 主公不显示战斗力和属性面板
+    if (heroData.quality === 0) {
+      this.fightArea.active = false;
+      this.attrGroup.active = false;
+      this.description.string = heroData.tips;
+      this.description.node.active = true;
+    } else {
+      this.description.node.active = false;
+      this.fightArea.active = true;
+      this.attrGroup.active = true;
+      this.attr1Label.string = hero.attrBox.getHp().toString();
+      this.attr2Label.string = hero.attrBox.getAttack().toString();
+      this.attr3Label.string = hero.attrBox.getDefense().toString();
+      this.attr4Label.string = hero.attrBox.getSpeed().toString();
+    }
 
     this.fightNum.string = hero.fight.toString();
     this.levelNum.string = hero.level.toString();
@@ -160,14 +199,42 @@ export class HeroDetailView extends BaseUiView {
           } else {
             // 数据模型会触发界面更新
             this.levelNum.string = (this.hero.level + canUpLevel).toString();
+            this.updateLevelOrStageBtn();
           }
         }
       );
     });
     this.updateUpLevelBtn(HeroBoxModel.getInstance().calcUpLevel(this.hero));
     this.goldNum.string = PurseModel.getInstance().gold.toString();
+
+    this.upStageBtn.off(Button.EventType.CLICK);
+    this.upStageBtn.on(Button.EventType.CLICK, () => {
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqHeroUpStage.cmd,
+        { heroId: this.hero.id },
+        (msg: ResHeroUpStage) => {
+          if (msg.code > 0) {
+            TipsPaneController.openUi(msg.code);
+          } else {
+            this.updateLevelOrStageBtn();
+          }
+        }
+      );
+    });
+
+    this.updateLevelOrStageBtn();
   }
 
+  private updateLevelOrStageBtn() {
+    let heroStageData = ConfigContext.configHeroStageContainer.getRecordByStage(this.hero.stage);
+    if (this.hero.level >= heroStageData.max_level) {
+      this.upLevelGroup.active = false;
+      this.upStageGroup.active = true;
+    } else {
+      this.upLevelGroup.active = true;
+      this.upStageGroup.active = false;
+    }
+  }
   public onHide(): void {
     this.skillDescPanel.active = false;
   }

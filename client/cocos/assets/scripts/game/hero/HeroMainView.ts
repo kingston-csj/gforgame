@@ -1,5 +1,6 @@
 import { _decorator, Button, instantiate, Label, Node, Prefab, ScrollView } from 'cc';
 
+import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { HeroVo } from '../../net/MsgItems/HeroVo';
 import { BaseUiView } from '../../ui/BaseUiView';
 import { PurseModel } from '../main/PurseModel';
@@ -20,12 +21,28 @@ export class HeroMainView extends BaseUiView {
 
   private children: Map<number, HeroItem> = new Map();
 
+  protected start(): void {
+    // 绑定金币数据
+    PurseModel.getInstance().onGoldChange((value) => {
+      if (this.goldLabel) {
+        this.goldLabel.string = value.toString();
+      }
+    });
+  }
+
   protected onDisplay(): void {
     this.heroContainer.children.forEach((child) => {
       child.destroy();
     });
     this.children.clear();
     let items: Array<HeroVo> = HeroBoxModel.getInstance().getHeroes();
+    // 根据品质排序
+    items.sort((a, b) => {
+      const config1 = ConfigContext.configHeroContainer.getRecord(a.id);
+      const config2 = ConfigContext.configHeroContainer.getRecord(b.id);
+
+      return config1.quality - config2.quality;
+    });
     for (let i = 0; i < items.length; i++) {
       let item = instantiate(this.heroPrefab);
       item.setParent(this.heroContainer);
@@ -41,13 +58,6 @@ export class HeroMainView extends BaseUiView {
     // 自动滑动到最顶部的item
     this.scrollToTop();
     this.goldLabel.string = PurseModel.getInstance().gold.toString();
-
-    // 绑定金币数据
-    PurseModel.getInstance().onGoldChange((value) => {
-      if (this.goldLabel) {
-        this.goldLabel.string = value.toString();
-      }
-    });
   }
 
   private scrollToTop() {

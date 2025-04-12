@@ -45,6 +45,12 @@ func GetDataManager() *DataManager {
 				IDField:    "Id",
 				RecordType: reflect.TypeOf(domain.HeroLevelData{}),
 			},
+			// 英雄阶段表
+			{
+				TableName:  "herostage",
+				IDField:    "Id",
+				RecordType: reflect.TypeOf(domain.HeroStageData{}),
+			},
 		}
 
 		// 处理每张表

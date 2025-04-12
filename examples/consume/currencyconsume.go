@@ -17,11 +17,11 @@ func (c *CurrencyConsume) Verify(player *player.Player) error {
 	purse := player.Purse
 	if c.Kind == "gold" {
 		if !purse.IsEnoughGold(c.Amount) {
-			return common.NewBusinessRequestException(constants.Gold_NOT_ENOUGH)
+			return common.NewBusinessRequestException(constants.I18N_GOLD_NOT_ENOUGH)
 		}
 	} else if c.Kind == "diamond" {
 		if !purse.IsEnoughDiamond(c.Amount) {
-			return common.NewBusinessRequestException(constants.Diamond_NOT_ENOUGH)
+			return common.NewBusinessRequestException(constants.I18N_DIAMOND_NOT_ENOUGH)
 		}
 	}
 

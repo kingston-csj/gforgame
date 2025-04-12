@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "max_level": 20,
+        "stage": 0,
+        "cost": 100,
+        "hp": 100,
+        "attack": 100,
+        "defense": 50,
+        "speed": 0
+    },
+    {
+        "id": 2,
+        "max_level": 40,
+        "stage": 1,
+        "cost": 101,
+        "hp": 101,
+        "attack": 101,
+        "defense": 51,
+        "speed": 0
+    },
+    {
+        "id": 3,
+        "max_level": 60,
+        "stage": 2,
+        "cost": 102,
+        "hp": 102,
+        "attack": 102,
+        "defense": 52,
+        "speed": 0
+    },
+    {
+        "id": 4,
+        "max_level": 80,
+        "stage": 3,
+        "cost": 103,
+        "hp": 103,
+        "attack": 103,
+        "defense": 53,
+        "speed": 0
+    }
+]

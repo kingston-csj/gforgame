@@ -22,7 +22,7 @@ type ItemService struct {
 var (
 	instance           *ItemService
 	once               sync.Once
-	errorIllegalParams = common.NewBusinessRequestException(constants.COMMON_ILLEGAL_PARAMS)
+	errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 )
 
 var RecruitItemId int32 = 2002

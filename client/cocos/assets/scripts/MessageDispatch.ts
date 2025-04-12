@@ -35,7 +35,7 @@ export class MessageDispatch {
     });
 
     MessageDispatch.register(PushItemChanged.cmd, (msg: PushItemChanged) => {
-      BagpackModel.getInstance().addItemByModelId(msg.itemId, msg.count);
+      BagpackModel.getInstance().changeItemByModelId(msg.itemId, msg.count);
     });
 
     MessageDispatch.register(PushHeroAttrChanged.cmd, (msg: PushHeroAttrChanged) => {

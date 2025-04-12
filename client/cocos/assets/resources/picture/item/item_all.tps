@@ -185,7 +185,13 @@
             <key type="filename">1004.png</key>
             <key type="filename">1005.png</key>
             <key type="filename">1006.png</key>
+            <key type="filename">1007.png</key>
+            <key type="filename">1008.png</key>
             <key type="filename">1009.png</key>
+            <key type="filename">1010.png</key>
+            <key type="filename">1011.png</key>
+            <key type="filename">1012.png</key>
+            <key type="filename">2001.png</key>
             <key type="filename">2002.png</key>
             <key type="filename">2003.png</key>
             <key type="filename">2004.png</key>
@@ -200,25 +206,6 @@
                 <rect>50,50,100,100</rect>
                 <key>scale9Paddings</key>
                 <rect>50,50,100,100</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">1007.png</key>
-            <key type="filename">1008.png</key>
-            <key type="filename">1010.png</key>
-            <key type="filename">1011.png</key>
-            <key type="filename">2001.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>128,128,256,256</rect>
-                <key>scale9Paddings</key>
-                <rect>128,128,256,256</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -240,6 +227,7 @@
                     <filename>1009.png</filename>
                     <filename>1010.png</filename>
                     <filename>1011.png</filename>
+                    <filename>1012.png</filename>
                     <filename>2001.png</filename>
                     <filename>2002.png</filename>
                     <filename>2003.png</filename>

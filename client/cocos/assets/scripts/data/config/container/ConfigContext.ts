@@ -1,6 +1,7 @@
 import ConfigContainer from '../ConfigContainer';
 import ConfigHeroContainer from './ConfigHeroContainer';
 import ConfigHeroLevelContainer from './ConfigHeroLevelContainer';
+import ConfigHeroStageContainer from './ConfigHeroStageContainer';
 import { ConfigI18nContainer } from './ConfigI18nContainer';
 import ConfigItemContainer from './ConfigItemContainer';
 import ConfigSkillContainer from './ConfigSkillContainer';
@@ -11,11 +12,13 @@ export class ConfigContext {
   public static configHeroLevelContainer: ConfigHeroLevelContainer;
   public static configSkillContainer: ConfigSkillContainer;
   public static configI18nContainer: ConfigI18nContainer;
+  public static configHeroStageContainer: ConfigHeroStageContainer;
 
   private static readonly containerTypes = [
     ConfigItemContainer,
     ConfigHeroContainer,
     ConfigHeroLevelContainer,
+    ConfigHeroStageContainer,
     ConfigSkillContainer,
     ConfigI18nContainer,
   ];

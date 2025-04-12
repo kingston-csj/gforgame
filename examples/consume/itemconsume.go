@@ -16,7 +16,7 @@ type ItemConsume struct {
 func (c *ItemConsume) Verify(player *player.Player) error {
 	count := player.Backpack.GetItemCount(c.ItemId)
 	if count < c.Amount {
-		return common.NewBusinessRequestException(constants.ITEM_NOT_ENOUGH)
+		return common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
 	}
 	return nil
 }
@@ -29,6 +29,6 @@ func (c *ItemConsume) Consume(player *player.Player) {
 	player.Backpack.RemoveItem(c.ItemId, c.Amount)
 	io.NotifyPlayer(player, &protos.PushItemChanged{
 		ItemId: c.ItemId,
-		Count:  c.Amount,
+		Count:  -c.Amount,
 	})
 }

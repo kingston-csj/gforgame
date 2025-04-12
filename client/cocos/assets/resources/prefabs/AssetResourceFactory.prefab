@@ -106,6 +106,10 @@
       {
         "__uuid__": "6dedab90-323e-4312-b295-d5f29cc462ee",
         "__expectedType__": "cc.JsonAsset"
+      },
+      {
+        "__uuid__": "193f35f1-c944-41de-90dd-182b16565c53",
+        "__expectedType__": "cc.JsonAsset"
       }
     ],
     "_id": ""

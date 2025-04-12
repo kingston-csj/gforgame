@@ -24,6 +24,8 @@ const (
 	CmdHeroResLevelUp     = 5005
 	CmdHeroPushAdd        = 5006
 	CmdHeroPushAttrChange = 5007
+	CmdHeroReqUpStage     = 5008
+	CmdHeroResUpStage     = 5009
 )
 
 type ReqPlayerLogin struct {
@@ -114,6 +116,14 @@ type ReqHeroLevelUp struct {
 }
 
 type ResHeroLevelUp struct {
+	Code int32 `json:"code"`
+}
+
+type ReqHeroUpStage struct {
+	HeroId int32 `json:"heroId"`
+}
+
+type ResHeroUpStage struct {
 	Code int32 `json:"code"`
 }
 
