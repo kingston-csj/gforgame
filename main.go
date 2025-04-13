@@ -17,6 +17,7 @@ import (
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/player"
+	"io/github/gforgame/examples/system"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
@@ -36,6 +37,9 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			logger.Error(r.(error))
 		}
 	}()
+
+	fmt.Println("接收消息: ", frame.Header.Cmd, " 内容：", frame.Msg)
+
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	var args []reflect.Value
 	if msgHandler.Indindexed {
@@ -122,6 +126,17 @@ func main() {
 	// }()
 
 	context.GetDataManager()
+
+	system.StartSystemTask()
+
+	// dailyReset := system.GetDailyReset()
+	// // 获取每日重置时间戳
+	// resetTimestamp := dailyReset.GetValue().(int64)
+	// fmt.Printf("当前每日重置时间戳: %d\n", resetTimestamp)
+
+	// // 更新每日重置时间戳
+	// newResetTimestamp := int64(1630492800) // 假设的新时间戳
+	// dailyReset.Save(newResetTimestamp)
 
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())

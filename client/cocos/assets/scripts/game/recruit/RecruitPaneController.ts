@@ -36,7 +36,7 @@ export class RecruitPaneController extends BaseController {
   }
 
   onRecruitBtnClick(times: number) {
-    let ownItem = BagpackModel.getInstance().getItemByModelId(GameConstants.ITEM_RECRUIT_ID);
+    let ownItem = BagpackModel.getInstance().getItemByModelId(GameConstants.Item.RECRUIT_ID);
     // if (!ownItem || ownItem.count < times) {
     //   return;
     // }

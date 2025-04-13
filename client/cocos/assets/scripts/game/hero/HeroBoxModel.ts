@@ -1,4 +1,5 @@
 import { ConfigContext } from '../../data/config/container/ConfigContext';
+import HeroData from '../../data/config/model/HeroData';
 import HeroLevelData from '../../data/config/model/HeroLevelData';
 import HerostageData from '../../data/config/model/HerostageData';
 import GameContext from '../../GameContext';
@@ -74,15 +75,17 @@ export class HeroBoxModel {
   }
 
   public calcUpLevel(hero: HeroVo): number {
+    let heroData: HeroData = ConfigContext.configHeroContainer.getRecord(hero.id);
     let currLevel = hero.level;
     let heroLevelData: HeroLevelData = ConfigContext.configHeroLevelContainer.getRecord(currLevel);
     let heroStageData: HerostageData = ConfigContext.configHeroStageContainer.getRecordByStage(
       hero.stage
     );
     let myGold = PurseModel.getInstance().gold;
-
     let canUpLevel = 0;
     let cost = heroLevelData.cost;
+
+    let master = this.getMaster();
     while (myGold >= cost) {
       canUpLevel++;
       myGold -= cost;
@@ -97,6 +100,12 @@ export class HeroBoxModel {
       if (currLevel >= heroStageData.max_level) {
         break;
       }
+      if (heroData.quality !== 0) {
+        // 普通英雄等级不能超过主公
+        if (currLevel >= master.level) {
+          break;
+        }
+      }
       heroLevelData = ConfigContext.configHeroLevelContainer.getRecord(currLevel);
     }
 
@@ -109,6 +118,16 @@ export class HeroBoxModel {
     } else {
       return 0;
     }
+  }
+
+  public getMaster(): HeroVo {
+    for (const hero of this.heros.values()) {
+      let heroData: HeroData = ConfigContext.configHeroContainer.getRecord(hero.id);
+      if (heroData.quality === 0) {
+        return hero;
+      }
+    }
+    return null;
   }
 
   public requestUpLevel(heroId: number, toLevel: number): Promise<number> {

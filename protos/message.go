@@ -38,8 +38,7 @@ type ReqPlayerLogin struct {
 	Pwd string
 }
 
-type ReqPlayerLoadingFinish struct {
-}
+type ReqPlayerLoadingFinish struct{}
 
 type ResPlayerLogin struct {
 	Succ bool
@@ -164,8 +163,7 @@ type PushPlayerFightChange struct {
 	Fight int32 `json:"fight"`
 }
 
-type ReqPlayerUpStage struct {
-}
+type ReqPlayerUpStage struct{}
 
 type ResPlayerUpStage struct {
 	Code int32 `json:"code"`

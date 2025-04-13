@@ -39,6 +39,7 @@ func (ps *PlayerController) Init() {
 	network.RegisterMessage(protos.CmdPlayerResUpLevel, &protos.ResPlayerUpLevel{})
 	network.RegisterMessage(protos.CmdPlayerReqUpStage, &protos.ReqPlayerUpStage{})
 	network.RegisterMessage(protos.CmdPlayerResUpStage, &protos.ResPlayerUpStage{})
+	network.RegisterMessage(protos.CmdPlayerPushFightChange, &protos.PushPlayerFightChange{})
 
 	// 自动建表
 	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
@@ -66,12 +67,7 @@ func (ps *PlayerController) Init() {
 	})
 
 	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
-		fight := int32(0)
-		for _, h := range data.(*playerdomain.Player).HeroBox.Heros {
-			fight += h.Fight
-		}
-		data.(*playerdomain.Player).Fight = fight
-		GetPlayerService().SavePlayer(data.(*playerdomain.Player))
+		GetPlayerService().refreshFighting(data.(*playerdomain.Player))
 	})
 }
 

@@ -28,6 +28,8 @@ type Session struct {
 	localAddr string
 	// 当前链接的远程地址
 	remoteAddr string
+	// 异步任务
+	AsynTasks chan func()
 }
 
 func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
@@ -39,6 +41,7 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 		Attrs:         map[string]interface{}{},
 		localAddr:     conn.LocalAddr().String(),
 		remoteAddr:    conn.RemoteAddr().String(),
+		AsynTasks:     make(chan func(), 16),
 	}
 }
 

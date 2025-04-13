@@ -138,7 +138,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	if toLevel >= p.Level {
+	if toLevel > p.Level {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_HERO_TIP1,
 		}

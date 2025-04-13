@@ -1,13 +1,15 @@
+import PlayerData from './data/user/PlayerData';
+import { FightingUpTipsView } from './game/common/FightingUpTipsView';
 import { HeroBoxModel } from './game/hero/HeroBoxModel';
 import BagpackModel from './game/item/BagpackModel';
 import { PurseModel } from './game/main/PurseModel';
 import { HeroVo } from './net/protocol/MsgItems/HeroVo';
 import PushHeroAttrChanged from './net/protocol/PushHeroAttrChanged';
 import { PushItemChanged } from './net/protocol/PushItemChanged';
+import { PushPlayerFightChange } from './net/protocol/PushPlayerFightChange';
 import PushPurseInfo from './net/protocol/PushPurseInfo';
 import { ResAllHeroInfo } from './net/protocol/ResAllHeroInfo';
 import ResBackpackInfo from './net/protocol/ResBackpackInfo';
-
 export class MessageDispatch {
   // 绑定cmd与对应的handler
   private static handlers: Map<number, Function> = new Map();
@@ -55,6 +57,15 @@ export class MessageDispatch {
         hero.attrs = msg.attrs;
         HeroBoxModel.getInstance().addHero(hero);
       }
+    });
+
+    MessageDispatch.register(PushPlayerFightChange.cmd, (msg: PushPlayerFightChange) => {
+      let from = PlayerData.instance.Fighting;
+      let add = msg.fight - from;
+      if (add > 0 && from > 0) {
+        FightingUpTipsView.display(from, add);
+      }
+      PlayerData.instance.Fighting = msg.fight;
     });
   }
 

@@ -48,3 +48,11 @@ func GetPlayerBySession(session *network.Session) types.Player {
 func GetSessionByPlayerId(playerId string) *network.Session {
 	return player2SessionMap[playerId]
 }
+
+func GetAllSessions() []*network.Session {
+	allSessions := make([]*network.Session, 0, len(session2PlayerMap))
+	for session := range session2PlayerMap {
+		allSessions = append(allSessions, session)
+	}
+	return allSessions
+}

@@ -38,7 +38,6 @@ func (ps *HeroService) GetRandomHero() config.HeroData {
 	// 根据HeroData的Prob进行抽奖
 	var totalProb int32 = 0
 	for _, heroData := range heroDatas {
-
 		totalProb += heroData.Prob
 	}
 
@@ -91,8 +90,6 @@ func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, 
 		attrContainer.AddAttrs(heroStageData.Attrs)
 	}
 
-	context.EventBus.Publish(events.PlayerAttrChange, p)
-
 	hero.AttrBox = attrContainer
 
 	hero.Fight = attribute.CalculateFightingPower(attrContainer)
@@ -112,6 +109,8 @@ func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, 
 			Fight:  attribute.CalculateFightingPower(attrContainer),
 		})
 	}
+
+	context.EventBus.Publish(events.PlayerAttrChange, p)
 }
 
 func (ps *HeroService) CalcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {

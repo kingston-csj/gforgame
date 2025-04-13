@@ -1,10 +1,7 @@
-import PlayerData from './data/user/PlayerData';
 import { WebSocketClient } from './net/WebSocketClient';
 
 export default class GameContext {
   protected static _instance: GameContext = new GameContext();
-
-  private _playerData: PlayerData = new PlayerData();
 
   private _wsClient: WebSocketClient = new WebSocketClient();
 
@@ -14,9 +11,5 @@ export default class GameContext {
 
   public get WebSocketClient(): WebSocketClient {
     return this._wsClient;
-  }
-
-  public get playerData(): PlayerData {
-    return this._playerData;
   }
 }

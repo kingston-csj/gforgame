@@ -14,19 +14,21 @@ import (
 
 type Player struct {
 	db.BaseEntity
-	ID           string             `gorm:"player's ID"`
-	Name         string             `gorm:"player's name"`
-	Level        int32              `gorm:"player's' level"`
-	Stage        int32              `gorm:"player's stage"`
-	Backpack     *Backpack          `gorm:"-"`
-	BackpackJson string             `gorm:"backpack"`
-	HeroBox      *HeroBox           `gorm:"-"`
-	HeroBoxJson  string             `gorm:"herobox"`
-	Purse        *Purse             `gorm:"-"`
-	AttrBox      *attribute.AttrBox `gorm:"-"`
-	PurseJson    string             `gorm:"purse"`
-	Fight        int32              `gorm:"player's fight"`
-	Camp         int32              `gorm:"player's camp"`
+	ID             string             `gorm:"player's ID"`
+	Name           string             `gorm:"player's name"`
+	Level          int32              `gorm:"player's' level"`
+	Stage          int32              `gorm:"player's stage"`
+	Backpack       *Backpack          `gorm:"-"`
+	BackpackJson   string             `gorm:"backpack"`
+	HeroBox        *HeroBox           `gorm:"-"`
+	HeroBoxJson    string             `gorm:"herobox"`
+	Purse          *Purse             `gorm:"-"`
+	AttrBox        *attribute.AttrBox `gorm:"-"`
+	PurseJson      string             `gorm:"purse"`
+	DailyReset     *DailyReset        `gorm:"-"`
+	DailyResetJson string             `gorm:"dailyreset"`
+	Fight          int32              `gorm:"player's fight"`
+	Camp           int32              `gorm:"player's camp"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -57,9 +59,17 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.PurseJson = string(jsonData)
 	}
+	if p.DailyReset == nil {
+		p.DailyResetJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.DailyReset)
+		if err != nil {
+			return err
+		}
+		p.DailyResetJson = string(jsonData)
+	}
 	return nil
 }
-
 func (p *Player) AfterFind(tx *gorm.DB) error {
 	if utils.IsEmpty(p.BackpackJson) {
 		p.Backpack = &Backpack{
@@ -84,6 +94,12 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		json.Unmarshal([]byte(p.PurseJson), &p.Purse)
 	}
 	p.AttrBox = attribute.NewAttrBox()
+	if utils.IsEmpty(p.DailyResetJson) {
+		p.DailyReset = &DailyReset{
+			LastDailyReset:  0,
+			DailyQuestScore: 0,
+		}
+	}
 	return nil
 }
 

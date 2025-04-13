@@ -7,6 +7,7 @@ import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
 import { UiUtil } from '../../ui/UiUtil';
 import { TipsPaneController } from '../common/TipsPaneController';
+import { GameConstants } from '../GameConstants';
 import { PurseModel } from '../main/PurseModel';
 import { HeroBoxModel } from './HeroBoxModel';
 import { HeroDetailController } from './HeroDetailController';
@@ -182,6 +183,10 @@ export class HeroDetailView extends BaseUiView {
     this.upLevelBtn.off(Button.EventType.CLICK);
     this.upLevelBtn.on(Button.EventType.CLICK, () => {
       let canUpLevel = HeroBoxModel.getInstance().calcUpLevel(this.hero);
+      if (canUpLevel <= 0) {
+        TipsPaneController.openUi(GameConstants.I18N.TIPS_2001);
+        return;
+      }
 
       HeroBoxModel.getInstance()
         .requestUpLevel(this.hero.id, this.hero.level + canUpLevel)

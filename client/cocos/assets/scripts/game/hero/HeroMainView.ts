@@ -55,7 +55,7 @@ export class HeroMainView extends BaseUiView {
     this.scrollToTop();
     this.goldLabel.string = PurseModel.getInstance().gold.toString();
     this.itemLabel.string = BagpackModel.getInstance()
-      .getItemCount(GameConstants.ITEM_UPSTAGE_ID)
+      .getItemCount(GameConstants.Item.UPSTAGE_ID)
       .toString();
   }
 
