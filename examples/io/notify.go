@@ -6,7 +6,7 @@ import (
 )
 
 func NotifyPlayer(player types.Player, data any) {
-	s := session.GetSessionByPlayerId(player.GetID())
+	s := session.GetSessionByPlayerId(player.GetId())
 	if s == nil {
 		return
 	}

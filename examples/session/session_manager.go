@@ -32,13 +32,13 @@ func GetSessionManager() *SessionManager {
 
 func AddSession(session *network.Session, player types.Player) {
 	session2PlayerMap[session] = player
-	player2SessionMap[player.GetID()] = session
+	player2SessionMap[player.GetId()] = session
 }
 
 func RemoveSession(session *network.Session) {
 	player := session2PlayerMap[session]
 	delete(session2PlayerMap, session)
-	delete(player2SessionMap, player.GetID())
+	delete(player2SessionMap, player.GetId())
 }
 
 func GetPlayerBySession(session *network.Session) types.Player {

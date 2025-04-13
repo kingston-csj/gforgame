@@ -19,7 +19,7 @@ func (s *SystemParameterEnt) SetData(data string) {
 	s.Data = data
 }
 
-func (s *SystemParameterEnt) GetID() string {
+func (s *SystemParameterEnt) GetId() string {
 	return s.Id
 }
 

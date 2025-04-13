@@ -1,6 +1,7 @@
 import GameContext from '../../GameContext';
 import ReqLogin from '../../net/protocol/ReqLogin';
 import RespLogin from '../../net/protocol/RespLogin';
+import { StringUtils } from '../../utils/StringUtils';
 
 export class LoginModel {
   private static _instance: LoginModel;
@@ -33,6 +34,9 @@ export class LoginModel {
   }
 
   public login(): Promise<RespLogin> {
+    if (StringUtils.isBlank(this.userId) || StringUtils.isBlank(this.userPwd)) {
+      return Promise.reject(new Error('用户名或密码不能为空'));
+    }
     return new Promise<RespLogin>((resolve, reject) => {
       GameContext.instance.WebSocketClient.sendMessage(
         ReqLogin.cmd,

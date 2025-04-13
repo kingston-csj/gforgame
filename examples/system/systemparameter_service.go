@@ -35,13 +35,9 @@ func (s *SystemParameterService) init() {
 }
 
 var once sync.Once
-var instance *SystemParameterService
+var instance *SystemParameterService = &SystemParameterService{}
 
 func GetSystemParameterService() *SystemParameterService {
-	once.Do(func() {
-		instance = &SystemParameterService{}
-		instance.init()
-	})
 	return instance
 }
 

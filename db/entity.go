@@ -3,7 +3,7 @@ package db
 import "gorm.io/gorm"
 
 type Entity interface {
-	GetID() string
+	GetId() string
 	IsDeleted() bool
 	SetDeleted()
 
@@ -15,10 +15,10 @@ type Entity interface {
 
 type BaseEntity struct {
 	Id     string `json:"id"`
-	Delete bool
+	Delete bool   `json:"delete"`
 }
 
-func (s *BaseEntity) GetID() string {
+func (s *BaseEntity) GetId() string {
 	return s.Id
 }
 

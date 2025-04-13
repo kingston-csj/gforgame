@@ -14,7 +14,6 @@ import (
 
 type Player struct {
 	db.BaseEntity
-	ID             string             `gorm:"player's ID"`
 	Name           string             `gorm:"player's name"`
 	Level          int32              `gorm:"player's' level"`
 	Stage          int32              `gorm:"player's stage"`
@@ -70,6 +69,7 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 	}
 	return nil
 }
+
 func (p *Player) AfterFind(tx *gorm.DB) error {
 	if utils.IsEmpty(p.BackpackJson) {
 		p.Backpack = &Backpack{
@@ -103,8 +103,8 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	return nil
 }
 
-func (p *Player) GetID() string {
-	return p.ID
+func (p *Player) GetId() string {
+	return p.Id
 }
 
 func (p *Player) NotifyPurseChange() {

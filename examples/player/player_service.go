@@ -54,6 +54,7 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 		player.Id = playerId
 		player.Name = ""
 		player.Level = 1
+		player.AfterFind(nil)
 		ps.SavePlayer(player)
 	}
 	return player
@@ -61,7 +62,7 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	cache, _ := context.CacheManager.GetCache("player")
-	cache.Set(player.GetID(), player)
+	cache.Set(player.GetId(), player)
 	context.DbService.SaveToDb(player)
 }
 

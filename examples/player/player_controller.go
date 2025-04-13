@@ -12,6 +12,7 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/session"
+	"io/github/gforgame/examples/utils"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -72,13 +73,17 @@ func (ps *PlayerController) Init() {
 }
 
 func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
+	if utils.IsBlank(msg.Id) {
+		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
+		return
+	}
 	player := GetPlayerService().GetOrCreatePlayer(msg.Id)
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 添加session
 	session.AddSession(s, player)
 
-	s.Send(&protos.ResPlayerLogin{Succ: true}, index)
+	s.Send(&protos.ResPlayerLogin{Code: 0}, index)
 
 	context.EventBus.Publish(events.PlayerLogin, player)
 }

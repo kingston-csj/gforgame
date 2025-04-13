@@ -1,9 +1,8 @@
 package db
 
 import (
-	"io/github/gforgame/logger"
+	"hash/fnv"
 	"runtime"
-	"strconv"
 )
 
 type AsyncDbService struct {
@@ -37,12 +36,14 @@ func (s *AsyncDbService) SaveToDb(entity Entity) {
 	if entity == nil {
 		return
 	}
-	num, err := strconv.ParseInt(entity.GetID(), 10, 64)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	index := num % int64(s.workerCapacity)
+
+	// 使用 fnv hash 计算字符串的哈希值
+	h := fnv.New64a()
+	h.Write([]byte(entity.GetId()))
+	hash := h.Sum64()
+
+	// 使用哈希值对worker容量取模来确定worker索引
+	index := hash % uint64(s.workerCapacity)
 	s.workers[index].addToQueue(entity)
 }
 

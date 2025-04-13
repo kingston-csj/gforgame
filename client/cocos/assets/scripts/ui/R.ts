@@ -47,6 +47,10 @@ export default class R {
       name: 'fightingUpTipsPane',
       path: 'prefabs/fightingUpTipsPane',
     },
+    HeroLibPane: {
+      name: 'heroLibPane',
+      path: 'prefabs/HeroLibPane',
+    },
   };
 
   // 图片纹理图集枚举

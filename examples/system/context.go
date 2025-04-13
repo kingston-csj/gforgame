@@ -6,6 +6,8 @@ var (
 
 func init() {
 	once.Do(func() {
+		GetSystemParameterService().init()
+
 		dailyReset = &DailyReset{
 			ID: "1001",
 		}

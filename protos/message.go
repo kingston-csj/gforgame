@@ -41,7 +41,7 @@ type ReqPlayerLogin struct {
 type ReqPlayerLoadingFinish struct{}
 
 type ResPlayerLogin struct {
-	Succ bool
+	Code int32 `json:"code"`
 }
 
 type ReqPlayerCreate struct {

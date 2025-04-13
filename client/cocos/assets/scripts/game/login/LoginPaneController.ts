@@ -1,5 +1,7 @@
 import { _decorator } from 'cc';
 import { BaseController } from '../../ui/BaseController';
+import { TipsPaneController } from '../common/TipsPaneController';
+import GameConstants from '../constants/GameConstants';
 import { MainPaneController } from '../main/MainPaneController';
 import { LoginModel } from './LoginModel';
 import { LoginPaneView } from './LoginPaneView';
@@ -31,13 +33,19 @@ export class LoginPaneController extends BaseController {
 
       try {
         const response = await this.loginModel.login();
-        console.log('登录成功');
-        MainPaneController.openUi();
+        if (response.code === 0) {
+          console.log('登录成功');
+          MainPaneController.openUi();
+        } else {
+          TipsPaneController.openUi(response.code);
+        }
       } catch (error) {
         console.error('登录失败:', error);
+        TipsPaneController.openUi(GameConstants.I18N.ILLEGAL_PARAMS);
       }
     } else {
       console.log('请输入用户名和密码');
+      TipsPaneController.openUi(GameConstants.I18N.CONTENT_NOT_ENOUGH);
     }
   }
 }

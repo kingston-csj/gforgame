@@ -17,6 +17,10 @@ func IsEmpty(s string) bool {
 	return s == "" || s == "null"
 }
 
+func IsBlank(s string) bool {
+	return s == "" || s == "null" || strings.TrimSpace(s) == ""
+}
+
 func EqualsIgnoreCase(s1, s2 string) bool {
 	if s1 == "" && s2 == "" {
 		return true
