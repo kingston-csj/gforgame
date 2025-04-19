@@ -9,6 +9,7 @@ import { PurseModel } from '../main/PurseModel';
 import { HeroBoxModel } from './HeroBoxModel';
 import { HeroDetailController } from './HeroDetailController';
 import { HeroItem } from './HeroItemView';
+import { HeroLibPaneController } from './HeroLibPaneController';
 const { ccclass, property } = _decorator;
 
 @ccclass('HeroMainView')
@@ -21,10 +22,20 @@ export class HeroMainView extends BaseUiView {
   heroContainer: Node;
   @property(Prefab)
   heroPrefab: Prefab;
+  @property(Node)
+  heroLibBtn: Node;
 
   private children: Map<number, HeroItem> = new Map();
 
-  protected start(): void {}
+  protected start(): void {
+    this.registerClickEvent(
+      this.heroLibBtn,
+      () => {
+        HeroLibPaneController.openUi();
+      },
+      this
+    );
+  }
 
   protected onDisplay(): void {
     this.heroContainer.children.forEach((child) => {

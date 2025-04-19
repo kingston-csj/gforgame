@@ -58,5 +58,6 @@ export default class R {
     Hero: 'hero_all',
     Item: 'item_all',
     Quality: 'quality_all',
+    Camp: 'camp_all',
   };
 }

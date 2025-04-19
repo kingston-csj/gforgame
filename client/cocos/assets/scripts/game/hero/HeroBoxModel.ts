@@ -4,6 +4,7 @@ import HeroLevelData from '../../data/config/model/HeroLevelData';
 import HerostageData from '../../data/config/model/HerostageData';
 import GameContext from '../../GameContext';
 import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
+import ReqHeroCombine from '../../net/protocol/ReqHeroCombine';
 import { ReqHeroUpLevel } from '../../net/protocol/ReqHeroUpLevel';
 import { ReqHeroUpStage } from '../../net/protocol/ReqHeroUpStage';
 import { ReqPlayerUpLevel } from '../../net/protocol/ReqPlayerUpLevel';
@@ -12,6 +13,7 @@ import { ResHeroUpLevel } from '../../net/protocol/ResHeroUpLevel';
 import { ResHeroUpStage } from '../../net/protocol/ResHeroUpStage';
 import { ResPlayerUpLevel } from '../../net/protocol/ResPlayerUpLevel';
 import { ResPlayerUpStage } from '../../net/protocol/ResPlayerUpStage';
+import ResHeroCombine from '../../net/ResHeroCombine';
 import { AttributeBox } from '../attribute/attributebox';
 import { PurseModel } from '../main/PurseModel';
 
@@ -56,6 +58,10 @@ export class HeroBoxModel {
     hero.attrBox = new AttributeBox(hero.attrs);
 
     this.notifyHeroAttrChanged();
+  }
+
+  public hasHero(id: number): boolean {
+    return this.heros.has(id);
   }
 
   public getHeroes(): Array<HeroVo> {
@@ -181,6 +187,18 @@ export class HeroBoxModel {
           }
         );
       }
+    });
+  }
+
+  public requestCombine(heroId: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqHeroCombine.cmd,
+        { heroId: heroId },
+        (msg: ResHeroCombine) => {
+          resolve(msg.code);
+        }
+      );
     });
   }
 }

@@ -9,6 +9,7 @@ import (
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/item"
@@ -40,6 +41,9 @@ func (ps *HeroController) Init() {
 
 	network.RegisterMessage(protos.CmdHeroReqUpStage, &protos.ReqHeroUpStage{})
 	network.RegisterMessage(protos.CmdHeroResUpStage, &protos.ResHeroUpStage{})
+
+	network.RegisterMessage(protos.CmdHeroReqCombine, &protos.ReqHeroCombine{})
+	network.RegisterMessage(protos.CmdHeroResCombine, &protos.ResHeroCombine{})
 
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
@@ -224,6 +228,42 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroUpStage{
+		Code: 0,
+	}
+}
+
+func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *protos.ReqHeroCombine) *protos.ResHeroCombine {
+	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+
+	h := p.HeroBox.GetHero(msg.HeroId)
+	if h != nil {
+		return &protos.ResHeroCombine{
+			Code: constants.I18N_HERO_TIP5,
+		}
+	}
+	heroDataRecord := context.GetDataManager().GetRecord("hero", int64(msg.HeroId))
+	heroData := heroDataRecord.(config.HeroData)
+	itemConsume := consume.ItemConsume{
+		ItemId: heroData.Item,
+		Amount: heroData.Shard,
+	}
+	err := itemConsume.Verify(p)
+	if err != nil {
+		return &protos.ResHeroCombine{
+			Code: int32(err.(*common.BusinessRequestException).Code()),
+		}
+	}
+	itemConsume.Consume(p)
+
+	p.HeroBox.AddHero(&playerdomain.Hero{
+		ModelId: heroData.Id,
+		Level:   1,
+	})
+
+	GetHeroService().ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
+
+	return &protos.ResHeroCombine{
 		Code: 0,
 	}
 }

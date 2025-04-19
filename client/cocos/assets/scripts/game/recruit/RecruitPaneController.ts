@@ -45,7 +45,7 @@ export class RecruitPaneController extends BaseController {
         RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
         RecruitSettlePaneController.openUi();
       } else {
-        TipsPaneController.openUi(msg.code);
+        TipsPaneController.showI18nContent(msg.code);
       }
     });
   }

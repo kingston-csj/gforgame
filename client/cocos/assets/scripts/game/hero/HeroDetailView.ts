@@ -106,6 +106,9 @@ export class HeroDetailView extends BaseUiView {
   @property(Label)
   public description: Label;
 
+  @property(Node)
+  camp: Node;
+
   private hero: HeroVo;
 
   protected start(): void {
@@ -136,6 +139,10 @@ export class HeroDetailView extends BaseUiView {
     let heroSpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Hero);
     // 设置UITransform的contentSize为原始图片尺寸
     UiUtil.fillSpriteContent(this.heroIcon, heroSpriteAtlas.getSpriteFrame(heroData.icon));
+
+    let campSpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Camp);
+    UiUtil.fillSpriteContent(this.camp, campSpriteAtlas.getSpriteFrame('camp_' + heroData.camp));
+
     let skills = heroData.skills.split(';');
     // 技能组
     this.skillNameGroup.forEach((label, index) => {
@@ -184,7 +191,7 @@ export class HeroDetailView extends BaseUiView {
     this.upLevelBtn.on(Button.EventType.CLICK, () => {
       let canUpLevel = HeroBoxModel.getInstance().calcUpLevel(this.hero);
       if (canUpLevel <= 0) {
-        TipsPaneController.openUi(GameConstants.I18N.TIPS_2001);
+        TipsPaneController.showI18nContent(GameConstants.I18N.TIPS_2001);
         return;
       }
 
@@ -196,7 +203,7 @@ export class HeroDetailView extends BaseUiView {
             this.levelNum.string = (this.hero.level + canUpLevel).toString();
             this.updateLevelOrStageBtn();
           } else {
-            TipsPaneController.openUi(code);
+            TipsPaneController.showI18nContent(code);
           }
         });
     });
@@ -211,7 +218,7 @@ export class HeroDetailView extends BaseUiView {
           if (code === 0) {
             this.updateLevelOrStageBtn();
           } else {
-            TipsPaneController.openUi(code);
+            TipsPaneController.showI18nContent(code);
           }
         });
     });

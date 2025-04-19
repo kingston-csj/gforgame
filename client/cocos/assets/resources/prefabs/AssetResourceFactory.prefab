@@ -80,6 +80,10 @@
       {
         "__uuid__": "b95784ec-9154-4664-a0dc-19b82b56cd6c",
         "__expectedType__": "cc.SpriteAtlas"
+      },
+      {
+        "__uuid__": "9be08083-2a6f-445d-b545-099a139424c4",
+        "__expectedType__": "cc.SpriteAtlas"
       }
     ],
     "configs": [

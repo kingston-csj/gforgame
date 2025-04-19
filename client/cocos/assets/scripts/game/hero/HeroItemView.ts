@@ -13,31 +13,36 @@ const { ccclass, property } = _decorator;
 @ccclass('HeroItem')
 export class HeroItem extends BaseUiView {
   @property(Sprite)
-  public kuang: Sprite;
+  private kuang: Sprite;
 
   @property(Label)
-  public heroName: Label;
+  private heroName: Label;
 
   @property(Node)
-  public icon: Node;
+  private icon: Node;
 
   @property(Node)
-  public upLevelBtn: Node;
+  private camp: Node;
+
   @property(Node)
-  public upStageBtn: Node;
+  private upLevelBtn: Node;
+
+  @property(Node)
+  private upStageBtn: Node;
 
   @property(Label)
-  public upLevel: Label;
+  private upLevel: Label;
 
   @property(Label)
-  public level: Label;
+  private level: Label;
+
   @property(Label)
-  public fighting: Label;
+  private fighting: Label;
 
   @property(Node)
-  public fightGroup: Node;
+  private fightGroup: Node;
 
-  public hero: HeroVo;
+  private hero: HeroVo;
 
   protected start(): void {
     this.registerClickEvent(this.upLevelBtn, () => {
@@ -49,7 +54,7 @@ export class HeroItem extends BaseUiView {
             this.hero.level += canUpLevel;
             this.fillData(this.hero);
           } else {
-            TipsPaneController.openUi(code);
+            TipsPaneController.showI18nContent(code);
           }
         });
     });
@@ -62,7 +67,7 @@ export class HeroItem extends BaseUiView {
             this.hero.stage += 1;
             this.fillData(this.hero);
           } else {
-            TipsPaneController.openUi(code);
+            TipsPaneController.showI18nContent(code);
           }
         });
     });
@@ -81,6 +86,9 @@ export class HeroItem extends BaseUiView {
     let qualitySpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Quality);
 
     this.kuang.getComponent(Sprite).spriteFrame = qualitySpriteAtlas.getSpriteFrame(qualityPicture);
+
+    let campSpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Camp);
+    UiUtil.fillSpriteContent(this.camp, campSpriteAtlas.getSpriteFrame('camp_' + heroData.camp));
 
     this.refreshButtonStatus();
 

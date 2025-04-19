@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"io/github/gforgame/examples/attribute"
+	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
@@ -54,6 +55,7 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 		player.Id = playerId
 		player.Name = ""
 		player.Level = 1
+		player.Camp = camp.Camp_Hao
 		player.AfterFind(nil)
 		ps.SavePlayer(player)
 	}

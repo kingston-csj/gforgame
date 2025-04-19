@@ -31,6 +31,8 @@ const (
 	CmdHeroPushAttrChange = 5007
 	CmdHeroReqUpStage     = 5008
 	CmdHeroResUpStage     = 5009
+	CmdHeroReqCombine     = 5010
+	CmdHeroResCombine     = 5011
 )
 
 type ReqPlayerLogin struct {
@@ -166,5 +168,13 @@ type PushPlayerFightChange struct {
 type ReqPlayerUpStage struct{}
 
 type ResPlayerUpStage struct {
+	Code int32 `json:"code"`
+}
+
+type ReqHeroCombine struct {
+	HeroId int32 `json:"heroId"`
+}
+
+type ResHeroCombine struct {
 	Code int32 `json:"code"`
 }

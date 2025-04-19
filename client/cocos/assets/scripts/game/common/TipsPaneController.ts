@@ -1,11 +1,10 @@
 import { _decorator } from 'cc';
-import { ConfigI18nContainer } from '../../data/config/container/ConfigI18nContainer';
+import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
 import { TipsView } from './TipsView';
-import { ConfigContext } from '../../data/config/container/ConfigContext';
 const { ccclass, property } = _decorator;
 
 @ccclass('TipsPaneController')
@@ -21,11 +20,24 @@ export class TipsPaneController extends BaseController {
     this.initView(this.tipsView);
   }
 
-  public static openUi(code: number) {
+  public static showI18nContent(code: number) {
     this.getInstance().then((controller) => {
       if (controller.tipsView) {
         let tips = ConfigContext.configI18nContainer.getRecord(code).content;
         controller.tipsView.setTips(tips);
+        controller.tipsView.display();
+        // 显示后多等X秒
+        setTimeout(() => {
+          controller.tipsView.hide();
+        }, 2000);
+      }
+    });
+  }
+
+  public static showStringContent(content: string) {
+    this.getInstance().then((controller) => {
+      if (controller.tipsView) {
+        controller.tipsView.setTips(content);
         controller.tipsView.display();
         // 显示后多等X秒
         setTimeout(() => {

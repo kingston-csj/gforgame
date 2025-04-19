@@ -3,16 +3,6 @@
         "id": 1,
         "max_level": 20,
         "stage": 0,
-        "cost": 0,
-        "hp": 0,
-        "attack": 0,
-        "defense": 0,
-        "speed": 0
-    },
-    {
-        "id": 2,
-        "max_level": 40,
-        "stage": 1,
         "cost": 100,
         "hp": 100,
         "attack": 100,
@@ -20,13 +10,23 @@
         "speed": 0
     },
     {
+        "id": 2,
+        "max_level": 40,
+        "stage": 1,
+        "cost": 100,
+        "hp": 200,
+        "attack": 150,
+        "defense": 80,
+        "speed": 0
+    },
+    {
         "id": 3,
         "max_level": 60,
         "stage": 2,
         "cost": 101,
-        "hp": 101,
-        "attack": 101,
-        "defense": 51,
+        "hp": 300,
+        "attack": 200,
+        "defense": 110,
         "speed": 0
     },
     {
@@ -34,9 +34,9 @@
         "max_level": 80,
         "stage": 3,
         "cost": 102,
-        "hp": 102,
-        "attack": 102,
-        "defense": 52,
+        "hp": 400,
+        "attack": 250,
+        "defense": 140,
         "speed": 0
     },
     {
@@ -44,9 +44,9 @@
         "max_level": 99,
         "stage": 4,
         "cost": 103,
-        "hp": 103,
-        "attack": 103,
-        "defense": 53,
+        "hp": 500,
+        "attack": 300,
+        "defense": 170,
         "speed": 0
     }
 ]

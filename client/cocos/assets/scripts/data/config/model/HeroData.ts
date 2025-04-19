@@ -10,6 +10,9 @@
             private _quality: number;
             public get quality():number {return this._quality;}
             
+            private _camp: number;
+            public get camp():number {return this._camp;}
+            
             private _tips: string;
             public get tips():string {return this._tips;}
             
@@ -44,6 +47,7 @@
             super(data);
                 this._name = data['name']
         this._quality = data['quality']
+        this._camp = data['camp']
         this._tips = data['tips']
         this._icon = data['icon']
         this._prob = data['prob']

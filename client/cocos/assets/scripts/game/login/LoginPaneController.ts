@@ -37,15 +37,15 @@ export class LoginPaneController extends BaseController {
           console.log('登录成功');
           MainPaneController.openUi();
         } else {
-          TipsPaneController.openUi(response.code);
+          TipsPaneController.showI18nContent(response.code);
         }
       } catch (error) {
         console.error('登录失败:', error);
-        TipsPaneController.openUi(GameConstants.I18N.ILLEGAL_PARAMS);
+        TipsPaneController.showI18nContent(GameConstants.I18N.ILLEGAL_PARAMS);
       }
     } else {
       console.log('请输入用户名和密码');
-      TipsPaneController.openUi(GameConstants.I18N.CONTENT_NOT_ENOUGH);
+      TipsPaneController.showI18nContent(GameConstants.I18N.CONTENT_NOT_ENOUGH);
     }
   }
 }
