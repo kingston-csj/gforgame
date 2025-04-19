@@ -1,7 +1,7 @@
 import { _decorator, Button, instantiate, Label, Node, Prefab, ScrollView } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
+import { HeroVo } from '../../net/protocol/items/HeroVo';
 import { BaseUiView } from '../../ui/BaseUiView';
 import { GameConstants } from '../GameConstants';
 import BagpackModel from '../item/BagpackModel';

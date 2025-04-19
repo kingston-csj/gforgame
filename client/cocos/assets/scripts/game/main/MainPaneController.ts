@@ -8,6 +8,7 @@ import { BaseController } from '../../ui/BaseController';
 
 import GameContext from '../../GameContext';
 import { ReqLoadingFinish } from '../../net/protocol/ReqLoadingFinish';
+import { NumberUtils } from '../../utils/NumberUtils';
 import { MainPaneView } from './MainPaneView';
 import { PurseModel } from './PurseModel';
 const { ccclass, property } = _decorator;
@@ -42,14 +43,14 @@ export class MainPaneController extends BaseController {
     // 绑定钻石数据
     this.purseModel.onChange('diamond', (value) => {
       if (this.view?.diamondLabel) {
-        this.view.diamondLabel.string = value.toString();
+        this.view.diamondLabel.string = NumberUtils.formatNumber(value);
       }
     });
 
     // 绑定金币数据
     this.purseModel.onChange('gold', (value) => {
       if (this.view?.goldLabel) {
-        this.view.goldLabel.string = value.toString();
+        this.view.goldLabel.string = NumberUtils.formatNumber(value);
       }
     });
 

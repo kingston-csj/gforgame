@@ -1,84 +1,49 @@
-import { _decorator, EditBox, Node } from 'cc';
-import GameContext from '../../GameContext';
-import ReqGmAction from '../../net/protocol/ReqGmAction';
-import ResGmAction from '../../net/protocol/ResGmAction';
-import { BaseUiView } from '../../ui/BaseUiView';
+import { _decorator } from 'cc';
+import { BaseController } from '../../ui/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
+import { GmPaneView } from './GmPaneView';
 
 const { ccclass, property } = _decorator;
 
 @ccclass('GmPaneController')
-export class GmPaneController extends BaseUiView {
+export class GmPaneController extends BaseController {
   private static instance: GmPaneController;
 
-  @property(Node)
-  container: Node = null!;
+  @property(GmPaneView)
+  private gmPaneView: GmPaneView = null!;
 
-  @property(EditBox)
-  public itemIdBox: EditBox = null!;
+  private static creatingPromise: Promise<GmPaneController> | null = null;
 
-  @property(EditBox)
-  public itemNumBox: EditBox = null!;
+  protected start(): void {
+    this.initView(this.gmPaneView);
+  }
 
-  @property(EditBox)
-  public goldBox: EditBox = null!;
-
-  @property(EditBox)
-  public diamondBox: EditBox = null!;
-
-  public static display() {
-    if (GmPaneController.instance) {
-      GmPaneController.instance.display();
-    } else {
-      GmPaneController.instance = new GmPaneController();
-
-      UiViewFactory.createUi(R.Prefabs.GmPane, LayerIdx.layer2, () => {});
+  private static getInstance(): Promise<GmPaneController> {
+    if (this.instance) {
+      return Promise.resolve(this.instance);
     }
+    if (this.creatingPromise) {
+      return this.creatingPromise;
+    }
+    this.creatingPromise = new Promise((resolve) => {
+      UiViewFactory.createUi(R.Prefabs.GmPane, LayerIdx.layer2, (ui: GmPaneController) => {
+        this.instance = ui;
+        this.creatingPromise = null;
+        resolve(ui);
+      });
+    });
+    return this.creatingPromise;
   }
 
-  public onShowBtnToggle(event: Event, customEventData: string) {
-    this.container.active = !this.container.active;
-  }
-
-  public onAddBtnClick() {
-    const itemId = this.itemIdBox.string;
-    const itemNum = this.itemNumBox.string;
-
-    GameContext.instance.WebSocketClient.sendMessage(
-      ReqGmAction.cmd,
-      {
-        topic: 'add_item',
-        params: itemId + '=' + itemNum,
-      },
-      (msg: ResGmAction) => {}
-    );
-  }
-
-  public onAddGoldBtnClick() {
-    const gold = this.goldBox.string;
-
-    GameContext.instance.WebSocketClient.sendMessage(
-      ReqGmAction.cmd,
-      {
-        topic: 'add_gold',
-        params: gold,
-      },
-      (msg: ResGmAction) => {}
-    );
-  }
-
-  public onAddDiamondBtnClick() {
-    const diamond = this.diamondBox.string;
-
-    GameContext.instance.WebSocketClient.sendMessage(
-      ReqGmAction.cmd,
-      {
-        topic: 'add_diamond',
-        params: diamond,
-      },
-      (msg: ResGmAction) => {}
-    );
+  public static switchDisplay() {
+    GmPaneController.getInstance().then((controller) => {
+      if (controller.gmPaneView.isShow()) {
+        controller.gmPaneView.hide();
+      } else {
+        controller.gmPaneView.display();
+      }
+    });
   }
 }

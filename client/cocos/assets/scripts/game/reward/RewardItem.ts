@@ -3,7 +3,7 @@ import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import HeroData from '../../data/config/model/HeroData';
 import ItemData from '../../data/config/model/ItemData';
-import RewardInfo from '../../net/protocol/MsgItems/RewardInfo';
+import RewardInfo from '../../net/protocol/items/RewardInfo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';

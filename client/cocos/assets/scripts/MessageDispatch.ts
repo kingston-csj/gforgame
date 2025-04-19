@@ -3,7 +3,7 @@ import { FightingUpTipsView } from './game/common/FightingUpTipsView';
 import { HeroBoxModel } from './game/hero/HeroBoxModel';
 import BagpackModel from './game/item/BagpackModel';
 import { PurseModel } from './game/main/PurseModel';
-import { HeroVo } from './net/protocol/MsgItems/HeroVo';
+import { HeroVo } from './net/protocol/items/HeroVo';
 import PushHeroAttrChanged from './net/protocol/PushHeroAttrChanged';
 import { PushItemChanged } from './net/protocol/PushItemChanged';
 import { PushPlayerFightChange } from './net/protocol/PushPlayerFightChange';

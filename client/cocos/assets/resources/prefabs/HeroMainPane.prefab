@@ -2372,7 +2372,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 690,
-      "height": 800
+      "height": 730
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2481,7 +2481,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 680,
-      "height": 800
+      "height": 730
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2598,8 +2598,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": -422.77,
+      "x": -2.503,
+      "y": -437.79,
       "z": 0
     },
     "_lrot": {
@@ -2945,7 +2945,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
+      "width": 70,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -2984,8 +2984,8 @@
     "_string": "图鉴",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 40,
-    "_fontSize": 40,
+    "_actualFontSize": 35,
+    "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -3449,7 +3449,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
+      "width": 70,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -3488,8 +3488,8 @@
     "_string": "布阵",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 40,
-    "_fontSize": 40,
+    "_actualFontSize": 35,
+    "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -3953,7 +3953,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
+      "width": 70,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -3992,8 +3992,8 @@
     "_string": "阵法",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 40,
-    "_fontSize": 40,
+    "_actualFontSize": 35,
+    "_fontSize": 35,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -4292,6 +4292,8 @@
       "__id__": 0
     },
     "fileId": "cfMchxFg5HYLV0t/FP56DO",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -4331,6 +4333,8 @@
       "__id__": 0
     },
     "fileId": "97x7Jm861CJaCaHyjCOkai",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {

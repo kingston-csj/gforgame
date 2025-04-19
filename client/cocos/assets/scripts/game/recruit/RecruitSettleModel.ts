@@ -1,5 +1,5 @@
 import GameContext from '../../GameContext';
-import RewardInfo from '../../net/protocol/MsgItems/RewardInfo';
+import RewardInfo from '../../net/protocol/items/RewardInfo';
 import { ReqHeroRecruit } from '../../net/protocol/ReqHeroRecruit';
 import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 

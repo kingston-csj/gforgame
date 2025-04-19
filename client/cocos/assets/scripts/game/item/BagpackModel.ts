@@ -34,11 +34,12 @@ export default class BagpackModel extends BaseModel {
   }
 
   public changeItemByModelId(itemId: number, count: number): void {
-    const item = this._items.get(itemId);
+    let item = this._items.get(itemId);
     if (item) {
       item.count += count;
     } else {
-      this._items.set(itemId, { id: itemId, count });
+      item = { id: itemId, count };
+      this._items.set(itemId, item);
     }
     if (item.count <= 0) {
       this._items.delete(itemId);

@@ -11,20 +11,33 @@ export default class PlayerData extends BaseModel {
   private _id: string;
   private _name: string;
   private _fighting: number;
+  private _camp: number;
 
   public get Id(): string {
     return this._id;
   }
 
-  public get Name(): string {
+  public get name(): string {
     return this._name;
   }
 
-  public get Fighting(): number {
+  public set name(value: string) {
+    this._name = value;
+  }
+
+  public get fighting(): number {
     return this._fighting;
   }
 
-  public set Fighting(value: number) {
+  public set fighting(value: number) {
     this._fighting = value;
+  }
+
+  public get camp(): number {
+    return this._camp;
+  }
+
+  public set camp(value: number) {
+    this._camp = value;
   }
 }

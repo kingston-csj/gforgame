@@ -16,6 +16,10 @@ export class BaseUiView extends Component {
 
   protected onHide() {}
 
+  public isShow(): boolean {
+    return this.node.active;
+  }
+
   /**
    * 为节点注册点击事件
    * @param node 需要注册点击事件的节点

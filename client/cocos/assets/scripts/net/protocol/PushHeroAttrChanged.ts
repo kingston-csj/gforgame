@@ -1,4 +1,4 @@
-import { Attribute } from './MsgItems/Attribute';
+import { Attribute } from './items/Attribute';
 
 export default class PushHeroAttrChanged {
   public static cmd: number = 5007;

@@ -3,7 +3,7 @@ import HeroData from '../../data/config/model/HeroData';
 import HeroLevelData from '../../data/config/model/HeroLevelData';
 import HerostageData from '../../data/config/model/HerostageData';
 import GameContext from '../../GameContext';
-import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
+import { HeroVo } from '../../net/protocol/items/HeroVo';
 import ReqHeroCombine from '../../net/protocol/ReqHeroCombine';
 import { ReqHeroUpLevel } from '../../net/protocol/ReqHeroUpLevel';
 import { ReqHeroUpStage } from '../../net/protocol/ReqHeroUpStage';

@@ -116,7 +116,7 @@ example/cocos 为 ws 的客户端程序
     client.Callback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
 ```
 
-## 已实现功能
+## 框架功能
 
 - tcp 网关，消息路由，消息分发链
 - 客户端支持三种消息处理：异步回调/同步请求/消息路由
@@ -131,10 +131,14 @@ example/cocos 为 ws 的客户端程序
 - grpc 跨服通信接入
 - excel 配置文件读取, jforgame-data 实现
 
-## 近期功能
+## 业务功能(cocos 交互界面)
 
-- 游戏业务代码示例 cocos 交互界面
-- 代码热更新机制
+同时按下键盘 alt+g+m 组合键可切换 gm 控制台
+大部分资源素材由百度 AI 生成+PS 后期 --> ![](https://image.baidu.com/front/aigc '百度画一画')
+
+- 账号登录
+- 英雄招募、升级、突破、合成、图鉴
+- 背包
 
 ## 部分 cocos 客户端运行效果
 
@@ -142,7 +146,7 @@ example/cocos 为 ws 的客户端程序
 ![](/screenshots/login.png '登录界面')
 
 主界面  
-![](/screenshots/main.png '主界面')
+![](/screenshots/main.jpg '主界面')
 
 背包界面  
 ![](/screenshots/bag.jpg '背包界面')
@@ -151,7 +155,7 @@ example/cocos 为 ws 的客户端程序
 ![](/screenshots/recruit.jpg '招募界面')
 
 英雄主界面  
-![](/screenshots/hero.png '英雄主界面')
+![](/screenshots/hero.jpg '英雄主界面')
 
 图鉴界面  
 ![](/screenshots/tujian.jpg '图鉴界面')

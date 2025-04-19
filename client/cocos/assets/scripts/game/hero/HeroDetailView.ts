@@ -1,7 +1,7 @@
 import { _decorator, Button, Color, Label, Node, Sprite } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import { HeroVo } from '../../net/protocol/MsgItems/HeroVo';
+import { HeroVo } from '../../net/protocol/items/HeroVo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';

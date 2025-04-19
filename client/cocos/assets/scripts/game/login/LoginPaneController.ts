@@ -1,4 +1,5 @@
 import { _decorator } from 'cc';
+import PlayerData from '../../data/user/PlayerData';
 import { BaseController } from '../../ui/BaseController';
 import { TipsPaneController } from '../common/TipsPaneController';
 import GameConstants from '../constants/GameConstants';
@@ -35,6 +36,9 @@ export class LoginPaneController extends BaseController {
         const response = await this.loginModel.login();
         if (response.code === 0) {
           console.log('登录成功');
+          PlayerData.instance.name = response.name;
+          PlayerData.instance.fighting = response.fighting;
+          PlayerData.instance.camp = response.camp;
           MainPaneController.openUi();
         } else {
           TipsPaneController.showI18nContent(response.code);
