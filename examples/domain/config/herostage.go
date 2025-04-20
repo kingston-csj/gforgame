@@ -1,6 +1,6 @@
 package config
 
-import "io/github/gforgame/examples/attribute"
+import "io/github/gforgame/examples/fight/attribute"
 
 type HeroStageData struct {
 	Id       int32 `json:"id" excel:"id"`
@@ -20,19 +20,19 @@ func (h *HeroLevelData) GetHeroStageAttrs() []attribute.Attribute {
 		h.Attrs = make([]attribute.Attribute, 4)
 		h.Attrs[0] = attribute.Attribute{
 			AttrType: attribute.Hp,
-			Value:    float32(h.Hp),
+			Value:    int32(h.Hp),
 		}
 		h.Attrs[1] = attribute.Attribute{
 			AttrType: attribute.Attack,
-			Value:    float32(h.Attack),
+			Value:    int32(h.Attack),
 		}
 		h.Attrs[2] = attribute.Attribute{
 			AttrType: attribute.Defense,
-			Value:    float32(h.Defense),
+			Value:    int32(h.Defense),
 		}
 		h.Attrs[3] = attribute.Attribute{
 			AttrType: attribute.Speed,
-			Value:    float32(h.Speed),
+			Value:    int32(h.Speed),
 		}
 	}
 	return h.Attrs

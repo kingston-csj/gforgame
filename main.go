@@ -129,17 +129,10 @@ func main() {
 
 	system.StartSystemTask()
 
-	dailyReset := system.GetDailyReset()
-	// 获取每日重置时间戳
-	resetTimestamp := dailyReset.GetValue().(int64)
-	fmt.Printf("当前每日重置时间戳: %d\n", resetTimestamp)
-
-	// 更新每日重置时间戳
-	newResetTimestamp := int64(1630492800) // 假设的新时间戳
-	dailyReset.Save(newResetTimestamp)
-
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
+
+	// fight.GetFightService().Test()
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)

@@ -56,3 +56,19 @@ func GetAllSessions() []*network.Session {
 	}
 	return allSessions
 }
+
+func GetAllOnlinePlayers() []types.Player {
+	allPlayers := make([]types.Player, 0, len(session2PlayerMap))
+	for _, player := range session2PlayerMap {
+		allPlayers = append(allPlayers, player)
+	}
+	return allPlayers
+}
+
+func GetAllOnlinePlayerSessions() []*network.Session {
+	allSessions := make([]*network.Session, 0, len(session2PlayerMap))
+	for session := range session2PlayerMap {
+		allSessions = append(allSessions, session)
+	}
+	return allSessions
+}

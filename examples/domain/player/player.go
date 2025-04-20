@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 
 	"io/github/gforgame/db"
-	"io/github/gforgame/examples/attribute"
+	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/utils"
 	"io/github/gforgame/protos"
+	"io/github/gforgame/util"
 
 	"gorm.io/gorm"
 )
@@ -71,21 +71,21 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 }
 
 func (p *Player) AfterFind(tx *gorm.DB) error {
-	if utils.IsEmpty(p.BackpackJson) {
+	if util.IsEmptyString(p.BackpackJson) {
 		p.Backpack = &Backpack{
 			Items: make(map[int32]int32),
 		}
 	} else {
 		json.Unmarshal([]byte(p.BackpackJson), &p.Backpack)
 	}
-	if utils.IsEmpty(p.HeroBoxJson) {
+	if util.IsEmptyString(p.HeroBoxJson) {
 		p.HeroBox = &HeroBox{
 			Heros: make(map[int32]*Hero),
 		}
 	} else {
 		json.Unmarshal([]byte(p.HeroBoxJson), &p.HeroBox)
 	}
-	if utils.IsEmpty(p.PurseJson) {
+	if util.IsEmptyString(p.PurseJson) {
 		p.Purse = &Purse{
 			Diamond: 0,
 			Gold:    0,
@@ -94,12 +94,17 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		json.Unmarshal([]byte(p.PurseJson), &p.Purse)
 	}
 	p.AttrBox = attribute.NewAttrBox()
-	if utils.IsEmpty(p.DailyResetJson) {
+	if util.IsEmptyString(p.DailyResetJson) {
 		p.DailyReset = &DailyReset{
 			LastDailyReset:  0,
 			DailyQuestScore: 0,
 		}
 	}
+
+	for _, hero := range p.HeroBox.Heros {
+		hero.AttrBox = attribute.NewAttrBox()
+	}
+
 	return nil
 }
 

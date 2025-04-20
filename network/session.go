@@ -58,7 +58,8 @@ func (s *Session) Send(msg any, index int) error {
 	if e2 != nil {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
-	fmt.Println("发送消息:", cmd)
+
+	fmt.Println("发送消息: ", cmd, " 内容：", msg)
 	frame, _ := s.ProtocolCodec.Encode(cmd, index, msgData)
 	s.dataToSend <- frame
 	return nil

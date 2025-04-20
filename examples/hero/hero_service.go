@@ -4,11 +4,11 @@ import (
 	"math/rand"
 	"sync"
 
-	"io/github/gforgame/examples/attribute"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/protos"
 )
@@ -73,20 +73,19 @@ func (ps *HeroService) filterNormalHeros() []config.HeroData {
 // 重新计算武将属性
 func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, notify bool) {
 	// 英雄本身属性
-	heroDataRecord := context.GetDataManager().GetRecord("hero", int64(hero.ModelId))
-	heroData := heroDataRecord.(config.HeroData)
+	heroData := context.GetConfigRecordAs[config.HeroData]("hero", int64(hero.ModelId))
 	attrContainer := attribute.NewAttrBox()
 	attrContainer.AddAttrs(heroData.GetHeroAttrs())
 
 	// 英雄等级属性
-	heroLevelDataRecord := context.GetDataManager().GetRecord("herolevel", int64(hero.Level))
-	heroLevelData := heroLevelDataRecord.(config.HeroLevelData)
-	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
+	heroLevelData := context.GetConfigRecordAs[config.HeroLevelData]("herolevel", int64(hero.Level))
+	if heroLevelData != nil {
+		attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
+	}
 
 	// 英雄突破属性
-	heroStageDataRecord := context.GetDataManager().GetRecord("herostage", int64(hero.Stage))
-	if heroStageDataRecord != nil {
-		heroStageData := heroStageDataRecord.(config.HeroStageData)
+	heroStageData := context.GetConfigRecordAs[config.HeroStageData]("herostage", int64(hero.Stage))
+	if heroStageData != nil {
 		attrContainer.AddAttrs(heroStageData.Attrs)
 	}
 

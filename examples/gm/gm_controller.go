@@ -9,8 +9,8 @@ import (
 	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/examples/session"
+	"io/github/gforgame/util"
 
-	"io/github/gforgame/examples/utils"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -35,25 +35,25 @@ func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.Req
 	switch topic {
 	case "add_item":
 		itemParams := strings.Split(params, "=")
-		itemId, err := utils.StringToInt32(itemParams[0])
+		itemId, err := util.StringToInt32(itemParams[0])
 		if err != nil {
 			return &protos.ResGmAction{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}
 		}
-		itemNum, err := utils.StringToInt32(itemParams[1])
+		itemNum, err := util.StringToInt32(itemParams[1])
 		if err != nil {
 			return &protos.ResGmAction{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}
 		}
 
 		item.GetItemService().AddByModelId(player.(*playerdomain.Player), itemId, itemNum)
 	case "add_diamond":
-		count, _ := utils.StringToInt32(params)
+		count, _ := util.StringToInt32(params)
 		reward := &reward.CurrencyReward{
 			Kind:   "diamond",
 			Amount: count,
 		}
 		reward.Reward(player.(*playerdomain.Player))
 	case "add_gold":
-		count, _ := utils.StringToInt32(params)
+		count, _ := util.StringToInt32(params)
 		reward := &reward.CurrencyReward{
 			Kind:   "gold",
 			Amount: count,

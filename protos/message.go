@@ -43,7 +43,10 @@ type ReqPlayerLogin struct {
 type ReqPlayerLoadingFinish struct{}
 
 type ResPlayerLogin struct {
-	Code int32 `json:"code"`
+	Code     int32  `json:"code"`
+	Name     string `json:"name"`
+	Fighting int32  `json:"fighting"`
+	Camp     int32  `json:"camp"`
 }
 
 type ReqPlayerCreate struct {
@@ -143,8 +146,8 @@ type PushItemChanged struct {
 }
 
 type AttrInfo struct {
-	AttrType string  `json:"attrType"`
-	Value    float32 `json:"value"`
+	AttrType string `json:"attrType"`
+	Value    int32  `json:"value"`
 }
 
 type PushHeroAttrChange struct {

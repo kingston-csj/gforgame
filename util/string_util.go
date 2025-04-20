@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"strconv"
@@ -13,11 +13,19 @@ func StringToInt32(s string) (int32, error) {
 	return int32(num), nil
 }
 
-func IsEmpty(s string) bool {
+func StringToFloat32(s string) (float32, error) {
+	num, err := strconv.ParseFloat(s, 32)
+	if err != nil {
+		return 0, err
+	}
+	return float32(num), nil
+}
+
+func IsEmptyString(s string) bool {
 	return s == "" || s == "null"
 }
 
-func IsBlank(s string) bool {
+func IsBlankString(s string) bool {
 	return s == "" || s == "null" || strings.TrimSpace(s) == ""
 }
 

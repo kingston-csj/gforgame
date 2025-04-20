@@ -48,6 +48,13 @@ func (ps *HeroController) Init() {
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
+
+	context.EventBus.Subscribe(events.PlayerAfterLoad, func(data interface{}) {
+		p := data.(*playerdomain.Player)
+		for _, h := range p.HeroBox.Heros {
+			GetHeroService().ReCalculateHeroAttr(p, h, false)
+		}
+	})
 }
 
 func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
@@ -60,7 +67,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 		for _, attr := range h.AttrBox.GetAttrs() {
 			attrInfos = append(attrInfos, protos.AttrInfo{
 				AttrType: string(attr.AttrType),
-				Value:    attr.Value,
+				Value:    int32(attr.Value),
 			})
 		}
 		resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
@@ -241,8 +248,7 @@ func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *pro
 			Code: constants.I18N_HERO_TIP5,
 		}
 	}
-	heroDataRecord := context.GetDataManager().GetRecord("hero", int64(msg.HeroId))
-	heroData := heroDataRecord.(config.HeroData)
+	heroData := context.GetConfigRecordAs[config.HeroData]("hero", int64(msg.HeroId))
 	itemConsume := consume.ItemConsume{
 		ItemId: heroData.Item,
 		Amount: heroData.Shard,

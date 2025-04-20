@@ -1,12 +1,12 @@
 package attribute
 
 type AttrBox struct {
-	Attrs map[AttrType]float32 `json:"-"`
+	Attrs map[AttrType]int32 `json:"-"`
 }
 
 func NewAttrBox() *AttrBox {
 	return &AttrBox{
-		Attrs: make(map[AttrType]float32),
+		Attrs: make(map[AttrType]int32),
 	}
 }
 
@@ -17,13 +17,13 @@ func (a *AttrBox) GetAttr(attrType AttrType) Attribute {
 	}
 }
 
-func (a *AttrBox) AddAttr(attrType AttrType, value float32) {
+func (a *AttrBox) AddAttr(attrType AttrType, value int32) {
 	a.Attrs[attrType] += value
 }
 
 func (a *AttrBox) AddAttrs(attrs []Attribute) {
 	for _, attr := range attrs {
-		a.AddAttr(attr.AttrType, attr.Value)
+		a.AddAttr(attr.AttrType, int32(attr.Value))
 	}
 }
 
@@ -36,4 +36,12 @@ func (a *AttrBox) GetAttrs() []Attribute {
 		})
 	}
 	return attrs
+}
+
+func (a *AttrBox) GetAttrValue(attrType AttrType) int32 {
+	v, ok := a.Attrs[attrType]
+	if !ok {
+		return 0
+	}
+	return int32(v)
 }

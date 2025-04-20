@@ -9,18 +9,33 @@ import (
 	domain "io/github/gforgame/examples/domain/config"
 )
 
-type DataManager struct {
-	containers map[string]*data.Container[int64, any]
+// GetConfigRecordAs returns a record of specific type
+func GetConfigRecordAs[T any](name string, id int64) *T {
+	record := GetDataManager().GetRecord(name, id)
+	if record == nil {
+		return nil
+	}
+	if result, ok := record.(*T); ok {
+		return result
+	}
+	result := new(T)
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(record))
+	return result
+}
+
+// DataManager[T any] is a generic data manager that can handle records of type T
+type DataManager[T any] struct {
+	containers map[string]*data.Container[int64, T]
 }
 
 var (
-	instance *DataManager
+	instance *DataManager[any]
 	once     sync.Once
 )
 
-func GetDataManager() *DataManager {
+func GetDataManager() *DataManager[any] {
 	once.Do(func() {
-		instance = &DataManager{}
+		instance = &DataManager[any]{}
 
 		// 创建 ExcelDataReader
 		reader := data.NewExcelDataReader(true)
@@ -51,6 +66,18 @@ func GetDataManager() *DataManager {
 				IDField:    "Id",
 				RecordType: reflect.TypeOf(domain.HeroStageData{}),
 			},
+			// 技能表
+			{
+				TableName:  "skill",
+				IDField:    "Id",
+				RecordType: reflect.TypeOf(domain.SkillData{}),
+			},
+			// buff表
+			{
+				TableName:  "buff",
+				IDField:    "Id",
+				RecordType: reflect.TypeOf(domain.BuffData{}),
+			},
 		}
 
 		// 处理每张表
@@ -69,7 +96,7 @@ func GetDataManager() *DataManager {
 	return instance
 }
 
-func (dm *DataManager) GetRecord(name string, id int64) any {
+func (dm *DataManager[T]) GetRecord(name string, id int64) any {
 	container := dm.containers[name]
 	if container == nil {
 		return nil
@@ -81,10 +108,28 @@ func (dm *DataManager) GetRecord(name string, id int64) any {
 	return record
 }
 
-func (dm *DataManager) GetRecords(name string) []any {
+func (dm *DataManager[T]) GetRecords(name string) []any {
 	container := dm.containers[name]
 	if container == nil {
 		return nil
 	}
-	return container.GetAllRecords()
+	records := container.GetAllRecords()
+	result := make([]any, len(records))
+	for i, record := range records {
+		result[i] = record
+	}
+	return result
+}
+
+func (dm *DataManager[T]) GetRecordsByIndex(configName string, indexName string, indexValue any) []any {
+	container := dm.containers[configName]
+	if container == nil {
+		return nil
+	}
+	records := container.GetRecordsBy(indexName, indexValue)
+	result := make([]any, len(records))
+	for i, record := range records {
+		result[i] = record
+	}
+	return result
 }

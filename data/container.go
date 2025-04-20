@@ -47,7 +47,7 @@ func (c *Container[K, V]) GetAllRecords() []V {
 }
 
 // GetRecordsBy 根据索引名称和索引值获取记录
-func (c *Container[K, V]) GetRecordsBy(name string, index interface{}) []V {
+func (c *Container[K, V]) GetRecordsBy(name string, index any) []V {
 	key := indexKey(name, index)
 	return c.indexMapper[key]
 }

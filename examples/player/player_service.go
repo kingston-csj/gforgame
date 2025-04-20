@@ -4,11 +4,11 @@ import (
 	"errors"
 	"sync"
 
-	"io/github/gforgame/examples/attribute"
 	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"

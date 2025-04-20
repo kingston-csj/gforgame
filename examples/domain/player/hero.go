@@ -1,6 +1,6 @@
 package player
 
-import "io/github/gforgame/examples/attribute"
+import "io/github/gforgame/examples/fight/attribute"
 
 type Hero struct {
 	// 模型ID

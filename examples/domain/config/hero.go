@@ -1,7 +1,7 @@
 package config
 
 import (
-	"io/github/gforgame/examples/attribute"
+	"io/github/gforgame/examples/fight/attribute"
 )
 
 type HeroData struct {
@@ -10,6 +10,8 @@ type HeroData struct {
 	Quality int32  `json:"quality" excel:"quality"`
 	Tips    string `json:"tips" excel:"tips"`
 	Icon    string `json:"icon" excel:"icon"`
+	// 技能
+	Skills []int32 `json:"skills" excel:"skills"`
 	// 抽奖概率
 	Prob int32 `json:"prob" excel:"prob"`
 	// 对应的碎片数量
@@ -33,19 +35,19 @@ func (h *HeroData) GetHeroAttrs() []attribute.Attribute {
 		h.Attrs = make([]attribute.Attribute, 4)
 		h.Attrs[0] = attribute.Attribute{
 			AttrType: attribute.Hp,
-			Value:    float32(h.Hp),
+			Value:    int32(h.Hp),
 		}
 		h.Attrs[1] = attribute.Attribute{
 			AttrType: attribute.Attack,
-			Value:    float32(h.Attack),
+			Value:    int32(h.Attack),
 		}
 		h.Attrs[2] = attribute.Attribute{
 			AttrType: attribute.Defense,
-			Value:    float32(h.Defense),
+			Value:    int32(h.Defense),
 		}
 		h.Attrs[3] = attribute.Attribute{
 			AttrType: attribute.Speed,
-			Value:    float32(h.Speed),
+			Value:    int32(h.Speed),
 		}
 	}
 	return h.Attrs

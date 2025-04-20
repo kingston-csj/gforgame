@@ -12,7 +12,8 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/session"
-	"io/github/gforgame/examples/utils"
+	"io/github/gforgame/examples/system"
+
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -59,6 +60,7 @@ func (ps *PlayerController) Init() {
 			}
 		}
 		p.AfterFind(nil)
+		context.EventBus.Publish(events.PlayerAfterLoad, &p)
 		return &p, nil
 	}
 	context.CacheManager.Register("player", dbLoader)
@@ -70,20 +72,38 @@ func (ps *PlayerController) Init() {
 	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
 		GetPlayerService().refreshFighting(data.(*playerdomain.Player))
 	})
+
+	// 在线玩家每日重置
+	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
+		allSessions := session.GetAllOnlinePlayerSessions()
+		for _, s := range allSessions {
+			s.AsynTasks <- func() {
+				player := session.GetPlayerBySession(s).(*playerdomain.Player)
+				player.DailyReset.Reset(data.(int64))
+				GetPlayerService().SavePlayer(player)
+			}
+		}
+	})
 }
 
 func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
-	if utils.IsBlank(msg.Id) {
+	if util.IsBlankString(msg.Id) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return
 	}
 	player := GetPlayerService().GetOrCreatePlayer(msg.Id)
 	fmt.Println("登录成功，id为：", player.Id)
 
+	// 离线，登录触发每日重置检测
+	dailyReset := system.GetDailyReset().GetValue().(int64)
+	if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
+		player.DailyReset.Reset(dailyReset)
+		GetPlayerService().SavePlayer(player)
+	}
 	// 添加session
 	session.AddSession(s, player)
 
-	s.Send(&protos.ResPlayerLogin{Code: 0}, index)
+	s.Send(&protos.ResPlayerLogin{Code: 0, Name: player.Name, Fighting: player.Fight, Camp: player.Camp}, index)
 
 	context.EventBus.Publish(events.PlayerLogin, player)
 }
