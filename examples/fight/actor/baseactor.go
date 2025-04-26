@@ -1,8 +1,8 @@
 package actor
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/fight/buff"
 	"io/github/gforgame/examples/fight/state"
@@ -73,8 +73,7 @@ func (a *baseActor) NextSkill() int32 {
 	tmpSkillIds := make([]int32, 0)
 
 	for _, skillId := range skillIds {
-		skillDataRecord := context.GetDataManager().GetRecord("skill", int64(skillId))
-		skillData := skillDataRecord.(config.SkillData)
+		skillData := config.QueryById[configdomain.SkillData](skillId)
 		if skillData.Type == 1 {
 			tmpSkillIds = append(tmpSkillIds, skillId)
 		}

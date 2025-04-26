@@ -1,8 +1,9 @@
 package skill
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
+
 	"io/github/gforgame/examples/fight/actor"
 )
 
@@ -20,7 +21,7 @@ type Skill interface {
 	CalculateDamage(attacker actor.Actor, target actor.Actor) int32
 
 	// 技能原型
-	Prototype() config.SkillData
+	Prototype() configdomain.SkillData
 }
 
 type baseSkill struct {
@@ -37,6 +38,6 @@ func (s *baseSkill) GetSkillId() int32 {
 	return s.SkillId
 }
 
-func (s *baseSkill) Prototype() config.SkillData {
-	return *context.GetConfigRecordAs[config.SkillData]("skill", int64(s.GetSkillId()))
+func (s *baseSkill) Prototype() configdomain.SkillData {
+	return *config.QueryById[configdomain.SkillData](s.GetSkillId())
 }

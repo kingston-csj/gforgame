@@ -6,17 +6,18 @@ import (
 
 	"io/github/gforgame/common"
 	"io/github/gforgame/examples/camp"
+	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/item"
 
 	"io/github/gforgame/examples/io"
 
-	"io/github/gforgame/examples/session"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -98,7 +99,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
 	rewardInfos := make([]*protos.RewardInfo, 0)
 
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	if p.Backpack.GetItemCount(item.RecruitItemId) < int32(msg.Times) {
 		return &protos.ResHeroRecruit{
 			Code: constants.I18N_ITEM_NOT_ENOUGH,
@@ -140,7 +141,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 }
 
 func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	toLevel := msg.ToLevel
 	h := p.HeroBox.GetHero(msg.HeroId)
 	if h == nil {
@@ -155,8 +156,10 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	stageData, ok := GetHeroService().GetHeroStageData(h.Stage)
-	if !ok {
+	stageContainer := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage")
+
+	stageData := stageContainer.GetRecordByStage(h.Stage)
+	if stageData == nil {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_COMMON_NOT_FOUND,
 		}
@@ -196,7 +199,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 }
 
 func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqHeroUpStage) *protos.ResHeroUpStage {
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 
 	h := p.HeroBox.GetHero(msg.HeroId)
 	if h == nil {
@@ -205,8 +208,9 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 		}
 	}
 
-	stageData, ok := GetHeroService().GetHeroStageData(h.Stage)
-	if !ok {
+	stageContainer := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage")
+	stageData := stageContainer.GetRecordByStage(h.Stage)
+	if stageData == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_COMMON_NOT_FOUND,
 		}
@@ -240,7 +244,7 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 }
 
 func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *protos.ReqHeroCombine) *protos.ResHeroCombine {
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 
 	h := p.HeroBox.GetHero(msg.HeroId)
 	if h != nil {
@@ -248,7 +252,7 @@ func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *pro
 			Code: constants.I18N_HERO_TIP5,
 		}
 	}
-	heroData := context.GetConfigRecordAs[config.HeroData]("hero", int64(msg.HeroId))
+	heroData := config.QueryById[configdomain.HeroData](msg.HeroId)
 	itemConsume := consume.ItemConsume{
 		ItemId: heroData.Item,
 		Amount: heroData.Shard,

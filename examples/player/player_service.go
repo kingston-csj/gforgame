@@ -5,8 +5,10 @@ import (
 	"sync"
 
 	"io/github/gforgame/examples/camp"
+	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
@@ -83,21 +85,19 @@ func (ps *PlayerService) refreshFighting(player *playerdomain.Player) {
 func (ps *PlayerService) recomputeAttribute(player *playerdomain.Player) {
 	attrContainer := attribute.NewAttrBox()
 	// 主公等级属性
-	heroLevelDataRecord := context.GetDataManager().GetRecord("herolevel", int64(player.Level))
-	heroLevelData := heroLevelDataRecord.(config.HeroLevelData)
+
+	heroLevelData := config.QueryById[configdomain.HeroLevelData](player.Level)
 	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
 
 	// 主公突破属性
-	heroStageDataRecord := context.GetDataManager().GetRecord("herostage", int64(player.Stage))
-	if heroStageDataRecord != nil {
-		heroStageData := heroStageDataRecord.(config.HeroStageData)
-		attrContainer.AddAttrs(heroStageData.Attrs)
-	}
+	stageContainer := config.QueryContainer[configdomain.HeroStageData, *container.HeroStageContainer]()
+	stageData := stageContainer.GetRecordByStage(player.Stage)
+	attrContainer.AddAttrs(stageData.GetHeroStageAttrs())
 
 	player.AttrBox = attrContainer
 }
 
-func (ps *PlayerService) getHeroIdByCamp(camp int32) int32 {
+func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 	if camp == 1001 {
 		return 1001
 	}

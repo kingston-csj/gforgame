@@ -9,10 +9,13 @@ import (
 	"time"
 
 	"io/github/gforgame/codec/json"
-	"io/github/gforgame/config"
+	serverconfig "io/github/gforgame/config"
+
 	"io/github/gforgame/examples/api"
 	"io/github/gforgame/examples/chat"
+	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/fight"
 	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/item"
@@ -76,7 +79,7 @@ func NewHttpServer() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	err := router.Run(config.ServerConfig.HttpUrl)
+	err := router.Run(serverconfig.ServerConfig.HttpUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -93,10 +96,10 @@ func main() {
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
-	// node := tcp.NewServer(tcp.WithAddress(config.ServerConfig.ServerUrl), tcp.WithRouter(router),
+	// node := tcp.NewServer(tcp.WithAddress(serverconfig.ServerConfig.ServerUrl), tcp.WithRouter(router),
 	// 	tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
 
-	node := ws.NewServer(ws.WithAddress(config.ServerConfig.ServerUrl), ws.WithRouter(router),
+	node := ws.NewServer(ws.WithAddress(serverconfig.ServerConfig.ServerUrl), ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(),
 			gm.NewGmController(), item.NewItemController(), hero.NewHeroController()))
 	context.WsServer = node
@@ -107,9 +110,9 @@ func main() {
 	}
 
 	// 启动rpc服务器
-	// if len(config.ServerConfig.RpcServerUrl) > 0 {
+	// if len(serverconfig.ServerConfig.RpcServerUrl) > 0 {
 	// 	go func() {
-	// 		NewRpcServer(config.ServerConfig.RpcServerUrl)
+	// 		NewRpcServer(serverconfig.ServerConfig.RpcServerUrl)
 	// 	}()
 	// }
 
@@ -122,17 +125,21 @@ func main() {
 	// go func() {
 	// 	mux := NewHttpServeMux()
 	// 	// 监听并在 0.0.0.0:6060 上启动服务器
-	// 	http.ListenAndServe(config.ServerConfig.PprofAddr, mux)
+	// 	http.ListenAndServe(serverconfig.ServerConfig.PprofAddr, mux)
 	// }()
 
-	context.GetDataManager()
+	dataconfig.GetDataManager()
 
 	system.StartSystemTask()
 
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
 
-	// fight.GetFightService().Test()
+	fight.GetFightService().Test()
+
+	// obj1 := dataconfig.QueryById[configdomain.HeroStageData](1)
+	// obj2 := dataconfig.QueryById[configdomain.HeroStageData](1)
+	// fmt.Println(obj1 == obj2)
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)

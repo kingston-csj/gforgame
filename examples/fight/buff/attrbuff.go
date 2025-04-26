@@ -1,8 +1,8 @@
 package buff
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/util"
 	"strings"
@@ -15,7 +15,7 @@ type AttrBuff struct {
 
 // NewAttrBuff creates a new attribute buff
 func NewAttrBuff(modelId int32) *AttrBuff {
-	buffData := context.GetConfigRecordAs[config.BuffData]("buff", int64(modelId))
+	buffData := config.QueryById[configdomain.BuffData](modelId)
 
 	attr_map := make(map[attribute.AttrType]int32)
 	// attack_10;defense_11
@@ -28,7 +28,7 @@ func NewAttrBuff(modelId int32) *AttrBuff {
 	return &AttrBuff{
 		Buff: Buff{
 			ModelId:  modelId,
-			Id:       util.GetNextId(),
+			Id:       util.GetNextID(),
 			Duration: buffData.Duration,
 		},
 		Attrs: attr_map,

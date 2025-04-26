@@ -134,7 +134,6 @@ example/cocos 为 ws 的客户端程序
 ## 业务功能(cocos 交互界面)
 
 同时按下键盘 alt+g+m 组合键可切换 gm 控制台
-大部分资源素材由百度 AI 生成+PS 后期 --> ![](https://image.baidu.com/front/aigc '百度画一画')
 
 - 账号登录
 - 英雄招募、升级、突破、合成、图鉴

@@ -1,12 +1,12 @@
 package io
 
 import (
-	"io/github/gforgame/examples/session"
-	"io/github/gforgame/examples/types"
+	"io/github/gforgame/domain"
+	"io/github/gforgame/network"
 )
 
-func NotifyPlayer(player types.Player, data any) {
-	s := session.GetSessionByPlayerId(player.GetId())
+func NotifyPlayer(player domain.Player, data any) {
+	s := network.GetSessionByPlayerId(player.GetId())
 	if s == nil {
 		return
 	}

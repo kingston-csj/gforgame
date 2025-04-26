@@ -1,8 +1,8 @@
 package actor
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/fight/buff"
@@ -17,7 +17,7 @@ type Hero struct {
 func NewHero(modelId int32, camp int32, attrBox *attribute.AttrBox, skills []int32) *Hero {
 	return &Hero{
 		baseActor: baseActor{
-			id:       util.GetNextId(),
+			id:       util.GetNextID(),
 			modelId:  modelId,
 			attrBox:  attrBox,
 			hp:       int32(attrBox.GetAttr(attribute.Hp).Value),
@@ -30,11 +30,10 @@ func NewHero(modelId int32, camp int32, attrBox *attribute.AttrBox, skills []int
 }
 
 func NewHero2(hero *playerdomain.Hero) *Hero {
-	heroData := context.GetConfigRecordAs[config.HeroData]("hero", int64(hero.ModelId))
-
+	heroData := config.QueryById[configdomain.HeroData](hero.ModelId)
 	return &Hero{
 		baseActor: baseActor{
-			id:       util.GetNextId(),
+			id:       util.GetNextID(),
 			modelId:  hero.ModelId,
 			attrBox:  hero.AttrBox,
 			hp:       hero.AttrBox.GetAttr(attribute.Hp).Value,

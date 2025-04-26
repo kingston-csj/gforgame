@@ -1,8 +1,8 @@
 package buff
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/fight/attribute"
 	"unsafe"
 )
@@ -20,7 +20,7 @@ func NewBuffBox() *BuffBox {
 }
 
 func (b *BuffBox) AddBuff(modelId int32) bool {
-	buffData := context.GetConfigRecordAs[config.BuffData]("buff", int64(modelId))
+	buffData := config.QueryById[configdomain.BuffData](modelId)
 
 	if buffData.Relation == 1 {
 		// 可以叠加
@@ -43,7 +43,7 @@ func (b *BuffBox) RefreshAttrs() {
 
 	for _, group := range b.buffs {
 		for _, buff := range group {
-			buffData := context.GetConfigRecordAs[config.BuffData]("buff", int64(buff.ModelId))
+			buffData := config.QueryById[configdomain.BuffData](buff.ModelId)
 			if buffData.Type == 1 {
 				// 将基类指针转换为派生类指针
 				attrBuff := (*AttrBuff)(unsafe.Pointer(buff))
@@ -56,7 +56,7 @@ func (b *BuffBox) RefreshAttrs() {
 }
 
 func NewBuff(modelId int32) *Buff {
-	buffData := context.GetConfigRecordAs[config.BuffData]("buff", int64(modelId))
+	buffData := config.QueryById[configdomain.BuffData](modelId)
 	if buffData.Type == 1 {
 		// 属性buff
 		attrBuff := NewAttrBuff(modelId)

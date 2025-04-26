@@ -1,10 +1,9 @@
-package session
+package network
 
 import (
 	"sync"
 
-	"io/github/gforgame/examples/types"
-	"io/github/gforgame/network"
+	"io/github/gforgame/domain"
 )
 
 var (
@@ -13,8 +12,8 @@ var (
 )
 
 var (
-	session2PlayerMap = make(map[*network.Session]types.Player)
-	player2SessionMap = make(map[string]*network.Session)
+	session2PlayerMap = make(map[*Session]domain.Player)
+	player2SessionMap = make(map[string]*Session)
 )
 
 type SessionManager struct{}
@@ -30,43 +29,43 @@ func GetSessionManager() *SessionManager {
 	return sessionManager
 }
 
-func AddSession(session *network.Session, player types.Player) {
+func AddSession(session *Session, player domain.Player) {
 	session2PlayerMap[session] = player
 	player2SessionMap[player.GetId()] = session
 }
 
-func RemoveSession(session *network.Session) {
+func RemoveSession(session *Session) {
 	player := session2PlayerMap[session]
 	delete(session2PlayerMap, session)
 	delete(player2SessionMap, player.GetId())
 }
 
-func GetPlayerBySession(session *network.Session) types.Player {
+func GetPlayerBySession(session *Session) domain.Player {
 	return session2PlayerMap[session]
 }
 
-func GetSessionByPlayerId(playerId string) *network.Session {
+func GetSessionByPlayerId(playerId string) *Session {
 	return player2SessionMap[playerId]
 }
 
-func GetAllSessions() []*network.Session {
-	allSessions := make([]*network.Session, 0, len(session2PlayerMap))
+func GetAllSessions() []*Session {
+	allSessions := make([]*Session, 0, len(session2PlayerMap))
 	for session := range session2PlayerMap {
 		allSessions = append(allSessions, session)
 	}
 	return allSessions
 }
 
-func GetAllOnlinePlayers() []types.Player {
-	allPlayers := make([]types.Player, 0, len(session2PlayerMap))
+func GetAllOnlinePlayers() []domain.Player {
+	allPlayers := make([]domain.Player, 0, len(session2PlayerMap))
 	for _, player := range session2PlayerMap {
 		allPlayers = append(allPlayers, player)
 	}
 	return allPlayers
 }
 
-func GetAllOnlinePlayerSessions() []*network.Session {
-	allSessions := make([]*network.Session, 0, len(session2PlayerMap))
+func GetAllOnlinePlayerSessions() []*Session {
+	allSessions := make([]*Session, 0, len(session2PlayerMap))
 	for session := range session2PlayerMap {
 		allSessions = append(allSessions, session)
 	}

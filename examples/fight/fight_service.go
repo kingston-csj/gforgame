@@ -1,8 +1,8 @@
 package fight
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/fight/actor"
 	"io/github/gforgame/examples/fight/match"
@@ -34,7 +34,7 @@ func (s *FightService) StartFight(match *match.Match) {
 	for _, actor := range allActors {
 		skillIds := actor.GetSkills()
 		for _, skillId := range skillIds {
-			skillData := context.GetConfigRecordAs[config.SkillData]("skill", int64(skillId))
+			skillData := config.QueryById[configdomain.SkillData](skillId)
 			if skillData.BuffId > 0 {
 				actor.GetBuffBox().AddBuff(skillData.BuffId)
 			}
@@ -80,7 +80,7 @@ func (s *FightService) RoundBegin(match *match.Match, round int32) {
 
 		skillReport := report.NewSkillReport(actor.GetId(), skillId)
 
-		skillData := context.GetConfigRecordAs[config.SkillData]("skill", int64(skillId))
+		skillData := config.QueryById[configdomain.SkillData](skillId)
 		// 选择目标
 		selector := skillservice.GetSelector(skillData.Selector)
 		targets := selector.Select(match, skillData, actor)

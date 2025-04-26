@@ -33,7 +33,6 @@ type Item struct {
 }
 
 func TestDataContainer(t *testing.T) {
-
 	// 创建 ExcelDataReader
 	reader := NewExcelDataReader(true)
 
@@ -48,21 +47,22 @@ func TestDataContainer(t *testing.T) {
 	container := NewContainer[int64, Mall]()
 
 	// 定义 ID 获取函数和索引函数
-	getIdFunc := func(record Mall) int64 {
+	getIdFunc := func(record *Mall) int64 {
 		return record.Id
 	}
-	indexFuncs := map[string]func(Mall) interface{}{
-		"type": func(record Mall) interface{} {
+	indexFuncs := map[string]func(*Mall) any{
+		"type": func(record *Mall) any {
 			return record.Type
 		},
 	}
 
 	// 将记录注入容器
-	nameRecords := make([]Mall, len(records))
+	ptrRecords := make([]*Mall, len(records))
 	for i, record := range records {
-		nameRecords[i] = record.(Mall)
+		mall := record.(Mall)
+		ptrRecords[i] = &mall
 	}
-	container.Inject(nameRecords, getIdFunc, indexFuncs)
+	container.Inject(ptrRecords, getIdFunc, indexFuncs)
 
 	// 查询记录
 	fmt.Println("All records:", container.GetAllRecords())
@@ -86,33 +86,35 @@ func TestMultiDataContainer(t *testing.T) {
 		},
 		// 道具表
 		{
-			TableName:  "item",
+			TableName:  "Id",
 			IDField:    "Id",
 			RecordType: reflect.TypeOf(Item{}),
 		},
 	}
 
 	// 处理每张表
-	containers := make(map[string]*Container[int64, interface{}])
+	containers := make(map[string]IContainer)
 	for _, config := range tableConfigs {
 		container, err := ProcessTable(reader, config.TableName+".xlsx", config)
 		if err != nil {
 			fmt.Printf("Failed to process table %s: %v\n", config.TableName, err)
 			continue
 		}
-		containers[config.TableName] = container
+		containers[config.TableName] = container.(IContainer)
 	}
 
 	// 查询商城记录
-	mallContainer := containers["mall"]
-	fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
-	target, _ := mallContainer.GetRecord(1)
-	fmt.Println("Record with ID 1:", target)
-	fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsBy("type", 2))
+	if mallContainer, ok := containers["mall"].(*Container[int64, Mall]); ok {
+		fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
+		target, _ := mallContainer.GetRecord(1)
+		fmt.Println("Record with ID 1:", target)
+		fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsBy("type", 2))
+	}
 
-	// 查询商城记录
-	itemContainer := containers["item"]
-	fmt.Println("All records in Mall table:", itemContainer.GetAllRecords())
-	target2, _ := itemContainer.GetRecord(1)
-	fmt.Println("Record with ID 1:", target2)
+	// 查询道具记录
+	if itemContainer, ok := containers["item"].(*Container[int64, Item]); ok {
+		fmt.Println("All records in Item table:", itemContainer.GetAllRecords())
+		target, _ := itemContainer.GetRecord(1)
+		fmt.Println("Record with ID 1:", target)
+	}
 }

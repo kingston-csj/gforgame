@@ -5,13 +5,15 @@ import (
 
 	"io/github/gforgame/common"
 	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/hero"
-	"io/github/gforgame/examples/session"
 	"io/github/gforgame/examples/system"
 
 	"io/github/gforgame/logger"
@@ -75,10 +77,10 @@ func (ps *PlayerController) Init() {
 
 	// 在线玩家每日重置
 	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
-		allSessions := session.GetAllOnlinePlayerSessions()
+		allSessions := network.GetAllOnlinePlayerSessions()
 		for _, s := range allSessions {
 			s.AsynTasks <- func() {
-				player := session.GetPlayerBySession(s).(*playerdomain.Player)
+				player := network.GetPlayerBySession(s).(*playerdomain.Player)
 				player.DailyReset.Reset(data.(int64))
 				GetPlayerService().SavePlayer(player)
 			}
@@ -101,7 +103,7 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 		GetPlayerService().SavePlayer(player)
 	}
 	// 添加session
-	session.AddSession(s, player)
+	network.AddSession(s, player)
 
 	s.Send(&protos.ResPlayerLogin{Code: 0, Name: player.Name, Fighting: player.Fight, Camp: player.Camp}, index)
 
@@ -109,12 +111,12 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 }
 
 func (ps *PlayerController) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
-	player := session.GetPlayerBySession(s).(*playerdomain.Player)
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
 	context.EventBus.Publish(events.PlayerLoadingFinish, player)
 }
 
 func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
-	id := util.GetNextId()
+	id := util.GetNextID()
 	player := &playerdomain.Player{}
 	player.Id = id
 	player.Name = msg.Name
@@ -125,10 +127,10 @@ func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerC
 }
 
 func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	toLevel := msg.ToLevel
-	stageData, ok := hero.GetHeroService().GetHeroStageData(p.Stage)
-	if !ok {
+	stageData := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	if stageData == nil {
 		return &protos.ResPlayerUpLevel{
 			Code: constants.I18N_COMMON_NOT_FOUND,
 		}
@@ -174,10 +176,10 @@ func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg 
 }
 
 func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
-	p := session.GetPlayerBySession(s).(*playerdomain.Player)
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 
-	stageData, ok := hero.GetHeroService().GetHeroStageData(p.Stage)
-	if !ok {
+	stageData := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	if stageData == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_HERO_TIP4,
 		}
@@ -189,8 +191,8 @@ func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *p
 		}
 	}
 
-	_, ok = hero.GetHeroService().GetHeroStageData(p.Stage + 1)
-	if !ok {
+	stageData = config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage + 1)
+	if stageData == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_HERO_TIP4,
 		}

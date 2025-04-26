@@ -23,7 +23,7 @@ func NewExcelDataReader(ignoreUnknownFields bool) *ExcelDataReader {
 
 func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 使用 xlsx.OpenFile 打开 Excel 文件
-	xlFile, err := xlsx.OpenFile("data/" + filePath)
+	xlFile, err := xlsx.OpenFile("config/excel/" + filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Excel file: %v", err)
 	}

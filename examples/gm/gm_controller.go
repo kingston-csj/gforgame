@@ -8,7 +8,7 @@ import (
 	"io/github/gforgame/examples/item"
 	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/examples/reward"
-	"io/github/gforgame/examples/session"
+
 	"io/github/gforgame/util"
 
 	"io/github/gforgame/network"
@@ -31,7 +31,7 @@ func (ps *GmController) Init() {
 func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.ReqGmAction) interface{} {
 	topic := msg.Topic
 	params := msg.Params
-	player := session.GetPlayerBySession(s)
+	player := network.GetPlayerBySession(s)
 	switch topic {
 	case "add_item":
 		itemParams := strings.Split(params, "=")

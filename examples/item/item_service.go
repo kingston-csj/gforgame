@@ -6,8 +6,10 @@ import (
 	"io/github/gforgame/common"
 	"io/github/gforgame/protos"
 
+	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
 
@@ -51,7 +53,7 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 		return errorIllegalParams
 	}
 
-	itemData := context.GetDataManager().GetRecord("item", int64(itemId))
+	itemData := config.QueryById[configdomain.ItemData](int64(itemId))
 	if itemData == nil {
 		return errorIllegalParams
 	}

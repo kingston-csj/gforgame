@@ -19,7 +19,7 @@ type Match struct {
 }
 
 func NewMatch(redTeam *Team, blueTeam *Team) *Match {
-	return &Match{Id: util.GetNextId(), RedTeam: redTeam, BlueTeam: blueTeam, Report: report.NewBattleReport()}
+	return &Match{Id: util.GetNextID(), RedTeam: redTeam, BlueTeam: blueTeam, Report: report.NewBattleReport()}
 }
 
 func (m *Match) GetMyTeam(actor actor.Actor) *Team {

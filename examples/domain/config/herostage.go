@@ -15,7 +15,7 @@ type HeroStageData struct {
 	Attrs []attribute.Attribute `json:"-" excel:"-"`
 }
 
-func (h *HeroLevelData) GetHeroStageAttrs() []attribute.Attribute {
+func (h *HeroStageData) GetHeroStageAttrs() []attribute.Attribute {
 	if h.Attrs == nil {
 		h.Attrs = make([]attribute.Attribute, 4)
 		h.Attrs[0] = attribute.Attribute{
