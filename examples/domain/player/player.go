@@ -99,6 +99,8 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 			LastDailyReset:  0,
 			DailyQuestScore: 0,
 		}
+	} else {
+		json.Unmarshal([]byte(p.DailyResetJson), &p.DailyReset)
 	}
 
 	for _, hero := range p.HeroBox.Heros {

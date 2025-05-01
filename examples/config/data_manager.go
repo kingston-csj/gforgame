@@ -35,9 +35,10 @@ func init() {
 		},
 		// 英雄表
 		{
-			TableName:  "hero",
-			IDField:    "Id",
-			RecordType: reflect.TypeOf(domain.HeroData{}),
+			TableName:     "hero",
+			IDField:       "Id",
+			RecordType:    reflect.TypeOf(domain.HeroData{}),
+			ContainerType: reflect.TypeOf(&data.Container[int32, domain.HeroData]{}),
 		},
 		// 英雄等级表
 		{
@@ -55,15 +56,17 @@ func init() {
 		},
 		// 技能表
 		{
-			TableName:  "skill",
-			IDField:    "Id",
-			RecordType: reflect.TypeOf(domain.SkillData{}),
+			TableName:     "skill",
+			IDField:       "Id",
+			RecordType:    reflect.TypeOf(domain.SkillData{}),
+			ContainerType: reflect.TypeOf(&data.Container[int32, domain.SkillData]{}),
 		},
 		// buff表
 		{
-			TableName:  "buff",
-			IDField:    "Id",
-			RecordType: reflect.TypeOf(domain.BuffData{}),
+			TableName:     "buff",
+			IDField:       "Id",
+			RecordType:    reflect.TypeOf(domain.BuffData{}),
+			ContainerType: reflect.TypeOf(&data.Container[int32, domain.BuffData]{}),
 		},
 	}
 
@@ -157,7 +160,7 @@ func QueryById[V any](id any) *V {
 		}
 
 		results := method.Call([]reflect.Value{convertedValue})
-		if len(results) == 2 && results[1].Bool() {
+		if len(results) > 0 && !results[0].IsNil() {
 			if record := results[0].Interface(); record != nil {
 				// 如果record是*any类型，需要先获取其指向的值
 				recordValue := reflect.ValueOf(record)

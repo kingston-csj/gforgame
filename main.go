@@ -15,7 +15,6 @@ import (
 	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/fight"
 	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/item"
@@ -135,11 +134,7 @@ func main() {
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
 
-	fight.GetFightService().Test()
-
-	// obj1 := dataconfig.QueryById[configdomain.HeroStageData](1)
-	// obj2 := dataconfig.QueryById[configdomain.HeroStageData](1)
-	// fmt.Println(obj1 == obj2)
+	// fight.GetFightService().Test()
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)

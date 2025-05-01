@@ -4369,7 +4369,6 @@
     "__type__": "b3a48/I0TlFOJDRFQjjj4ra",
     "_name": "",
     "_objFlags": 0,
-    "__editorExtras__": {},
     "node": {
       "__id__": 2
     },
@@ -4393,7 +4392,10 @@
     "heroLibBtn": {
       "__id__": 115
     },
-    "_id": ""
+    "buZhenBtn": {
+      "__id__": 135
+    },
+    "_id": "acGzTdS4pPS5dBpSzAwC3V"
   },
   {
     "__type__": "cc.CompPrefabInfo",
@@ -4444,7 +4446,6 @@
     "__type__": "80ab2IaU5tG1JDvAMtrlA5b",
     "_name": "",
     "_objFlags": 0,
-    "__editorExtras__": {},
     "node": {
       "__id__": 1
     },
@@ -4455,7 +4456,7 @@
     "mainView": {
       "__id__": 187
     },
-    "_id": ""
+    "_id": "85qZ5N/KhEEK4Fnlvux+wk"
   },
   {
     "__type__": "cc.CompPrefabInfo",

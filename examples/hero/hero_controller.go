@@ -2,6 +2,7 @@ package hero
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"io/github/gforgame/common"
@@ -46,6 +47,15 @@ func (ps *HeroController) Init() {
 	network.RegisterMessage(protos.CmdHeroReqCombine, &protos.ReqHeroCombine{})
 	network.RegisterMessage(protos.CmdHeroResCombine, &protos.ResHeroCombine{})
 
+	network.RegisterMessage(protos.CmdHeroReqUpFight, &protos.ReqHeroUpFight{})
+	network.RegisterMessage(protos.CmdHeroResUpFight, &protos.ResHeroUpFight{})
+
+	network.RegisterMessage(protos.CmdHeroReqOffFight, &protos.ReqHeroOffFight{})
+	network.RegisterMessage(protos.CmdHeroResOffFight, &protos.ResHeroOffFight{})
+
+	network.RegisterMessage(protos.CmdHeroReqChangePosition, &protos.ReqHeroChangePosition{})
+	network.RegisterMessage(protos.CmdHeroResChangePosition, &protos.ResHeroChangePosition{})
+
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
@@ -74,7 +84,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 		resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
 			Id:       h.ModelId,
 			Level:    h.Level,
-			Position: 0,
+			Position: h.Position,
 			Stage:    h.Stage,
 			Attrs:    attrInfos,
 			Fight:    h.Fight,
@@ -275,5 +285,111 @@ func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *pro
 
 	return &protos.ResHeroCombine{
 		Code: 0,
+	}
+}
+
+func (ps *HeroController) ReqHeroUpFight(s *network.Session, index int, msg *protos.ReqHeroUpFight) *protos.ResHeroUpFight {
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+
+	h := p.HeroBox.GetHero(msg.HeroId)
+	if h == nil {
+		return &protos.ResHeroUpFight{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
+
+	pos := p.HeroBox.GetEmpostPos()
+	if len(pos) == 0 {
+		return &protos.ResHeroUpFight{
+			Code: constants.I18N_HERO_TIP6,
+		}
+	}
+	// 判断位置是否为空闲位置
+	if !slices.Contains(pos, msg.Position) {
+		return &protos.ResHeroUpFight{
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
+		}
+	}
+
+	h.Position = msg.Position
+	GetHeroService().ReCalculateHeroAttr(p, h, true)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
+
+	return &protos.ResHeroUpFight{
+		Code: 0,
+	}
+}
+
+func (ps *HeroController) ReqHeroOffFight(s *network.Session, index int, msg *protos.ReqHeroOffFight) *protos.ResHeroOffFight {
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+
+	h := p.HeroBox.GetHero(msg.HeroId)
+	if h == nil {
+		return &protos.ResHeroOffFight{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
+
+	if h.Position == 0 {
+		return &protos.ResHeroOffFight{
+			Code: constants.I18N_HERO_TIP7,
+		}
+	}
+
+	if len(p.HeroBox.GetUpFightHeros()) == 1 {
+		return &protos.ResHeroOffFight{
+			Code: constants.I18N_HERO_TIP8,
+		}
+	}
+
+	h.Position = 0
+	GetHeroService().ReCalculateHeroAttr(p, h, true)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
+
+	return &protos.ResHeroOffFight{
+		Code: 0,
+	}
+}
+
+func (ps *HeroController) ReqHeroChangePosition(s *network.Session, index int, msg *protos.ReqHeroChangePosition) *protos.ResHeroChangePosition {
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+
+	h := p.HeroBox.GetHero(msg.HeroId)
+	if h == nil {
+		return &protos.ResHeroChangePosition{
+			Code: constants.I18N_COMMON_NOT_FOUND,
+		}
+	}
+
+	if h.Position == msg.Position || h.Position == 0 {
+		return &protos.ResHeroChangePosition{
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
+		}
+	}
+
+	// 如果目标位置有英雄，则表示交换
+	prevHero := p.HeroBox.GetHeroByPosition(msg.Position)
+	if prevHero != nil {
+		prevPos := prevHero.Position
+		prevHero.Position = h.Position
+		h.Position = prevPos
+		context.EventBus.Publish(events.PlayerEntityChange, p)
+		return &protos.ResHeroChangePosition{
+			Code:  0,
+			PosA:  h.Position,
+			HeroA: h.ModelId,
+			PosB:  prevHero.Position,
+			HeroB: prevHero.ModelId,
+		}
+	} else {
+		h.Position = msg.Position
+		context.EventBus.Publish(events.PlayerEntityChange, p)
+		return &protos.ResHeroChangePosition{
+			Code:  0,
+			PosA:  h.Position,
+			HeroA: h.ModelId,
+			PosB:  0,
+			HeroB: 0,
+		}
 	}
 }

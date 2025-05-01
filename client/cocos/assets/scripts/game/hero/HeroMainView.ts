@@ -3,6 +3,7 @@ import { _decorator, Button, instantiate, Label, Node, Prefab, ScrollView } from
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
 import { BaseUiView } from '../../ui/BaseUiView';
+import { BuZhenPaneController } from '../buzhen/BuZhenPaneController';
 import { GameConstants } from '../GameConstants';
 import BagpackModel from '../item/BagpackModel';
 import { PurseModel } from '../main/PurseModel';
@@ -24,6 +25,8 @@ export class HeroMainView extends BaseUiView {
   heroPrefab: Prefab;
   @property(Node)
   heroLibBtn: Node;
+  @property(Node)
+  buZhenBtn: Node;
 
   private children: Map<number, HeroItem> = new Map();
 
@@ -32,6 +35,13 @@ export class HeroMainView extends BaseUiView {
       this.heroLibBtn,
       () => {
         HeroLibPaneController.openUi();
+      },
+      this
+    );
+    this.registerClickEvent(
+      this.buZhenBtn,
+      () => {
+        BuZhenPaneController.openUi();
       },
       this
     );

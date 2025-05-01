@@ -4,16 +4,23 @@ import HeroLevelData from '../../data/config/model/HeroLevelData';
 import HerostageData from '../../data/config/model/HerostageData';
 import GameContext from '../../GameContext';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
+import { ReqHeroChangePosition } from '../../net/protocol/ReqHeroChangePosition';
 import ReqHeroCombine from '../../net/protocol/ReqHeroCombine';
+import { ReqHeroOffFight } from '../../net/protocol/ReqHeroOffFight';
+import { ReqHeroUpFight } from '../../net/protocol/ReqHeroUpFight';
 import { ReqHeroUpLevel } from '../../net/protocol/ReqHeroUpLevel';
 import { ReqHeroUpStage } from '../../net/protocol/ReqHeroUpStage';
 import { ReqPlayerUpLevel } from '../../net/protocol/ReqPlayerUpLevel';
 import { ReqPlayerUpStage } from '../../net/protocol/ReqPlayerUpStage';
+import { ResHeroCombine } from '../../net/protocol/ResHeroCombine';
+import { ResHeroOffFight } from '../../net/protocol/ResHeroOffFight';
+import { ResHeroUpFight } from '../../net/protocol/ResHeroUpFight';
 import { ResHeroUpLevel } from '../../net/protocol/ResHeroUpLevel';
 import { ResHeroUpStage } from '../../net/protocol/ResHeroUpStage';
 import { ResPlayerUpLevel } from '../../net/protocol/ResPlayerUpLevel';
 import { ResPlayerUpStage } from '../../net/protocol/ResPlayerUpStage';
-import ResHeroCombine from '../../net/ResHeroCombine';
+import { ResHeroChangePosition } from '../../net/ResHeroChangePosition';
+
 import { AttributeBox } from '../attribute/attributebox';
 import { PurseModel } from '../main/PurseModel';
 
@@ -200,5 +207,62 @@ export class HeroBoxModel {
         }
       );
     });
+  }
+
+  public requestUpFight(heroId: number, position: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqHeroUpFight.cmd,
+        { heroId: heroId, position: position },
+        (msg: ResHeroUpFight) => {
+          resolve(msg.code);
+        }
+      );
+    });
+  }
+
+  public requestOffFight(heroId: number): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqHeroOffFight.cmd,
+        { heroId: heroId },
+        (msg: ResHeroOffFight) => {
+          resolve(msg.code);
+        }
+      );
+    });
+  }
+
+  public requestChangePostion(heroId: number, position: number): Promise<ResHeroChangePosition> {
+    return new Promise<ResHeroChangePosition>((resolve, reject) => {
+      GameContext.instance.WebSocketClient.sendMessage(
+        ReqHeroChangePosition.cmd,
+        { heroId: heroId, position: position },
+        (msg: ResHeroChangePosition) => {
+          resolve(msg);
+        }
+      );
+    });
+  }
+
+  public getEmptyPostion(): number {
+    let used = new Set<number>();
+    this.heros.forEach((e) => {
+      used.add(e.position);
+    });
+    for (let i = 1; i <= 5; i++) {
+      if (!used.has(i)) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  public getFightPower(): number {
+    let power = 0;
+    this.heros.forEach((e) => {
+      power += e.fight;
+    });
+    return power;
   }
 }

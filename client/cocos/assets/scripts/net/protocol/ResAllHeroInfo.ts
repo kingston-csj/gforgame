@@ -1,4 +1,4 @@
-import { HeroVo } from '../MsgItems/HeroVo';
+import { HeroVo } from './items/HeroVo';
 
 export class ResAllHeroInfo {
   public static cmd = 5003;

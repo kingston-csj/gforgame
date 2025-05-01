@@ -60,12 +60,12 @@ export class MessageDispatch {
     });
 
     MessageDispatch.register(PushPlayerFightChange.cmd, (msg: PushPlayerFightChange) => {
-      let from = PlayerData.instance.Fighting;
+      let from = PlayerData.instance.fighting;
       let add = msg.fight - from;
       if (add > 0 && from > 0) {
         FightingUpTipsView.display(from, add);
       }
-      PlayerData.instance.Fighting = msg.fight;
+      PlayerData.instance.fighting = msg.fight;
     });
   }
 

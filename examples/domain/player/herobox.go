@@ -23,7 +23,42 @@ func (h *HeroBox) GetAllHeros() []*Hero {
 	return heros
 }
 
+func (h *HeroBox) GetUpFightHeros() []*Hero {
+	heros := make([]*Hero, 0, len(h.Heros))
+	for _, hero := range h.Heros {
+		if hero.Position > 0 {
+			heros = append(heros, hero)
+		}
+	}
+	return heros
+}
+
 func (h *HeroBox) HasHero(modelId int32) bool {
-	_, ok := h.Heros[modelId]	
+	_, ok := h.Heros[modelId]
 	return ok
+}
+
+func (h *HeroBox) GetEmpostPos() []int32 {
+	pos := make([]int32, 0, 5)
+	used := make(map[int32]bool)
+	for _, hero := range h.Heros {
+		if hero.Position > 0 {
+			used[hero.ModelId] = true
+		}
+	}
+	for i := int32(1); i <= 5; i++ {
+		if !used[i] {
+			pos = append(pos, i)
+		}
+	}
+	return pos
+}
+
+func (h *HeroBox) GetHeroByPosition(position int32) *Hero {
+	for _, hero := range h.Heros {
+		if hero.Position == position {
+			return hero
+		}
+	}
+	return nil
 }

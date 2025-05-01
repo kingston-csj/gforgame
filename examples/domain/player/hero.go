@@ -13,4 +13,6 @@ type Hero struct {
 	AttrBox *attribute.AttrBox `json:"-"` // 该字段不参与序列化
 	// 战斗力
 	Fight int32
+	// 位置 1-5 0为空闲位置
+	Position int32
 }

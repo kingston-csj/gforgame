@@ -66,7 +66,7 @@ func TestDataContainer(t *testing.T) {
 
 	// 查询记录
 	fmt.Println("All records:", container.GetAllRecords())
-	target, _ := container.GetRecord(1)
+	target := container.GetRecord(1)
 	fmt.Println("Record with ID 1:", target)
 	fmt.Println("Records with type 2:", container.GetRecordsBy("type", 2))
 }
@@ -106,7 +106,7 @@ func TestMultiDataContainer(t *testing.T) {
 	// 查询商城记录
 	if mallContainer, ok := containers["mall"].(*Container[int64, Mall]); ok {
 		fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
-		target, _ := mallContainer.GetRecord(1)
+		target := mallContainer.GetRecord(1)
 		fmt.Println("Record with ID 1:", target)
 		fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsBy("type", 2))
 	}
@@ -114,7 +114,9 @@ func TestMultiDataContainer(t *testing.T) {
 	// 查询道具记录
 	if itemContainer, ok := containers["item"].(*Container[int64, Item]); ok {
 		fmt.Println("All records in Item table:", itemContainer.GetAllRecords())
-		target, _ := itemContainer.GetRecord(1)
+		target := itemContainer.GetRecord(1)
+		target2 := itemContainer.GetRecord(1)
+		fmt.Println(target == target2)
 		fmt.Println("Record with ID 1:", target)
 	}
 }

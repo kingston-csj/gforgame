@@ -1,4 +1,4 @@
-import { _decorator, Label, Node, Sprite } from 'cc';
+import { _decorator, Label, Node } from 'cc';
 
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
@@ -12,8 +12,8 @@ const { ccclass, property } = _decorator;
 
 @ccclass('HeroItem')
 export class HeroItem extends BaseUiView {
-  @property(Sprite)
-  private kuang: Sprite;
+  @property(Node)
+  private kuang: Node;
 
   @property(Label)
   private heroName: Label;
@@ -85,7 +85,7 @@ export class HeroItem extends BaseUiView {
     let qualityPicture = HeroBoxModel.getInstance().getQualityPicture(heroData.quality);
     let qualitySpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Quality);
 
-    this.kuang.getComponent(Sprite).spriteFrame = qualitySpriteAtlas.getSpriteFrame(qualityPicture);
+    UiUtil.fillSpriteContent(this.kuang, qualitySpriteAtlas.getSpriteFrame(qualityPicture));
 
     let campSpriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Camp);
     UiUtil.fillSpriteContent(this.camp, campSpriteAtlas.getSpriteFrame('camp_' + heroData.camp));

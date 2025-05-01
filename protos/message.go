@@ -22,17 +22,23 @@ const (
 	CmdItemResPurseInfo    = 4002
 	CmdItemPushChanged     = 4003
 
-	CmdHeroReqRecruit     = 5001
-	CmdHeroResRecruit     = 5002
-	CmdHeroResAllHero     = 5003
-	CmdHeroReqLevelUp     = 5004
-	CmdHeroResLevelUp     = 5005
-	CmdHeroPushAdd        = 5006
-	CmdHeroPushAttrChange = 5007
-	CmdHeroReqUpStage     = 5008
-	CmdHeroResUpStage     = 5009
-	CmdHeroReqCombine     = 5010
-	CmdHeroResCombine     = 5011
+	CmdHeroReqRecruit        = 5001
+	CmdHeroResRecruit        = 5002
+	CmdHeroResAllHero        = 5003
+	CmdHeroReqLevelUp        = 5004
+	CmdHeroResLevelUp        = 5005
+	CmdHeroPushAdd           = 5006
+	CmdHeroPushAttrChange    = 5007
+	CmdHeroReqUpStage        = 5008
+	CmdHeroResUpStage        = 5009
+	CmdHeroReqCombine        = 5010
+	CmdHeroResCombine        = 5011
+	CmdHeroReqUpFight        = 5012
+	CmdHeroResUpFight        = 5013
+	CmdHeroReqOffFight       = 5014
+	CmdHeroResOffFight       = 5015
+	CmdHeroReqChangePosition = 5016
+	CmdHeroResChangePosition = 5017
 )
 
 type ReqPlayerLogin struct {
@@ -180,4 +186,34 @@ type ReqHeroCombine struct {
 
 type ResHeroCombine struct {
 	Code int32 `json:"code"`
+}
+
+type ReqHeroUpFight struct {
+	HeroId   int32 `json:"heroId"`
+	Position int32 `json:"position"`
+}
+
+type ResHeroUpFight struct {
+	Code int32 `json:"code"`
+}
+
+type ReqHeroOffFight struct {
+	HeroId int32 `json:"heroId"`
+}
+
+type ResHeroOffFight struct {
+	Code int32 `json:"code"`
+}
+
+type ReqHeroChangePosition struct {
+	HeroId   int32 `json:"heroId"`
+	Position int32 `json:"position"`
+}
+
+type ResHeroChangePosition struct {
+	Code  int32 `json:"code"`
+	PosA  int32 `json:"posA"`
+	HeroA int32 `json:"heroA"`
+	PosB  int32 `json:"posB"`
+	HeroB int32 `json:"heroB"`
 }

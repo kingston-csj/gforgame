@@ -51,6 +51,14 @@ export default class R {
       name: 'heroLibPane',
       path: 'prefabs/HeroLibPane',
     },
+    BuZhenPane: {
+      name: 'buZhenPane',
+      path: 'prefabs/BuZhenPane',
+    },
+    ComfirmPane: {
+      name: 'comfirmPane',
+      path: 'prefabs/ComfirmPane',
+    },
   };
 
   // 图片纹理图集枚举

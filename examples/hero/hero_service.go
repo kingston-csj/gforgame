@@ -56,6 +56,7 @@ func (ps *HeroService) GetRandomHero() configdomain.HeroData {
 // 过滤掉主公
 func (ps *HeroService) filterNormalHeros() []*configdomain.HeroData {
 	container := config.QueryContainer[configdomain.HeroData, *data.Container[int32, configdomain.HeroData]]()
+
 	var result []*configdomain.HeroData
 	for _, heroData := range container.GetAllRecords() {
 		// 主公概率为0

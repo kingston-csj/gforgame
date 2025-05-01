@@ -40,9 +40,12 @@ func (c *Container[K, V]) AfterLoad() {
 }
 
 // GetRecord 根据 ID 获取单个记录
-func (c *Container[K, V]) GetRecord(id K) (*V, bool) {
+func (c *Container[K, V]) GetRecord(id K) *V {
 	record, exists := c.data[id]
-	return record, exists
+	if !exists {
+		return nil
+	}
+	return record
 }
 
 // GetAllRecords 获取所有记录
