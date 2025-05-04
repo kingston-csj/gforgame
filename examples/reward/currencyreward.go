@@ -11,6 +11,13 @@ type CurrencyReward struct {
 	Amount int32
 }
 
+func NewCurrencyReward(kind string, amount int32) *CurrencyReward {
+	return &CurrencyReward{
+		Kind:   kind,
+		Amount: amount,
+	}
+}
+
 func (r *CurrencyReward) Verify(player *player.Player) error {
 	return nil
 }

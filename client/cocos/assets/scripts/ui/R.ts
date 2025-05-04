@@ -59,6 +59,14 @@ export default class R {
       name: 'comfirmPane',
       path: 'prefabs/ComfirmPane',
     },
+    MailPane: {
+      name: 'mailPane',
+      path: 'prefabs/MailPane',
+    },
+    MailDetailPane: {
+      name: 'mailDetailPane',
+      path: 'prefabs/MailDetailPane',
+    },
   };
 
   // 图片纹理图集枚举

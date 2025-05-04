@@ -1,4 +1,4 @@
-import { _decorator, Label, Node, Sprite } from 'cc';
+import { _decorator, Label, Node, Sprite, UITransform } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import HeroData from '../../data/config/model/HeroData';
@@ -29,14 +29,25 @@ export class RewardItem extends BaseUiView {
 
   private heroData: HeroData;
 
-  public fillData(item: RewardInfo) {
+  public fillData(item: RewardInfo, size?: { width: number; height: number }) {
+    const uiTrans = this.node.getComponent(UITransform);
+    if (uiTrans && size) {
+      // 计算缩放比例
+      const scaleX = size.width / uiTrans.width;
+      const scaleY = size.height / uiTrans.height;
+      // 设置父节点尺寸
+      uiTrans.setContentSize(size.width, size.height);
+      // 设置所有子节点等比缩放
+      for (const child of this.node.children) {
+        child.setScale(scaleX, scaleY, 1);
+      }
+    }
     if (item.type == 'item') {
       let itemContianer: ConfigItemContainer = ConfigContext.configItemContainer;
-      let [id, count] = item.value.split(',');
+      let [id, count] = item.value.split('=');
       this.itemData = itemContianer.getRecord(parseInt(id));
       this.itemName.string = this.itemData.name;
       this.amout.string = 'X' + parseInt(count);
-
       let spriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Item);
       UiUtil.fillSpriteContent(this.icon, spriteAtlas.getSpriteFrame(this.itemData.icon));
     } else if (item.type == 'hero') {
@@ -44,6 +55,18 @@ export class RewardItem extends BaseUiView {
       this.itemName.string = this.heroData.name;
       let spriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Hero);
       UiUtil.fillSpriteContent(this.icon, spriteAtlas.getSpriteFrame(this.heroData.icon));
+    } else if (item.type == 'currency') {
+      // 在道具表，配置特殊货币道具，纯展示
+      let [kind, count] = item.value.split('=');
+      this.itemName.string = kind;
+      this.amout.string = 'X' + parseInt(count);
+      if (kind == 'gold') {
+        let spriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Item);
+        UiUtil.fillSpriteContent(this.icon, spriteAtlas.getSpriteFrame('9998'));
+      } else if (kind == 'diamond') {
+        let spriteAtlas = AssetResourceFactory.instance.getSpriteAtlas(R.Sprites.Item);
+        UiUtil.fillSpriteContent(this.icon, spriteAtlas.getSpriteFrame('9999'));
+      }
     }
   }
 }

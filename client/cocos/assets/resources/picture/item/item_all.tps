@@ -195,6 +195,8 @@
             <key type="filename">2002.png</key>
             <key type="filename">2003.png</key>
             <key type="filename">2004.png</key>
+            <key type="filename">9998.png</key>
+            <key type="filename">9999.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -232,6 +234,8 @@
                     <filename>2002.png</filename>
                     <filename>2003.png</filename>
                     <filename>2004.png</filename>
+                    <filename>9998.png</filename>
+                    <filename>9999.png</filename>
                 </array>
             </struct>
         </map>

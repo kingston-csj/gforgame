@@ -28,6 +28,8 @@ type Player struct {
 	DailyResetJson string             `gorm:"dailyreset"`
 	Fight          int32              `gorm:"player's fight"`
 	Camp           int32              `gorm:"player's camp"`
+	Mailbox        *Mailbox           `gorm:"-"`
+	MailboxJson    string             `gorm:"mailbox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -67,9 +69,17 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.DailyResetJson = string(jsonData)
 	}
+	if p.Mailbox == nil {
+		p.MailboxJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.Mailbox)
+		if err != nil {
+			return err
+		}
+		p.MailboxJson = string(jsonData)
+	}
 	return nil
 }
-
 func (p *Player) AfterFind(tx *gorm.DB) error {
 	if util.IsEmptyString(p.BackpackJson) {
 		p.Backpack = &Backpack{
@@ -102,7 +112,13 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	} else {
 		json.Unmarshal([]byte(p.DailyResetJson), &p.DailyReset)
 	}
-
+	if util.IsEmptyString(p.MailboxJson) {
+		p.Mailbox = &Mailbox{
+			Mails: make(map[int64]*Mail),
+		}
+	} else {
+		json.Unmarshal([]byte(p.MailboxJson), &p.Mailbox)
+	}
 	for _, hero := range p.HeroBox.Heros {
 		hero.AttrBox = attribute.NewAttrBox()
 	}

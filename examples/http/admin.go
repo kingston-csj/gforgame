@@ -1,4 +1,4 @@
-package api
+package http
 
 import (
 	"io/github/gforgame/examples/context"

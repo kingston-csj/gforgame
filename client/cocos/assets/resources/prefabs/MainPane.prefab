@@ -7365,6 +7365,9 @@
     "recruitePane": {
       "__id__": 209
     },
+    "mailPane": {
+      "__id__": 223
+    },
     "heroPane": {
       "__id__": 115
     },

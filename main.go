@@ -11,13 +11,14 @@ import (
 	"io/github/gforgame/codec/json"
 	serverconfig "io/github/gforgame/config"
 
-	"io/github/gforgame/examples/api"
 	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/hero"
+	"io/github/gforgame/examples/http"
 	"io/github/gforgame/examples/item"
+	"io/github/gforgame/examples/mail"
 	"io/github/gforgame/examples/player"
 	"io/github/gforgame/examples/system"
 	"io/github/gforgame/logger"
@@ -66,7 +67,7 @@ func NewHttpServer() *gin.Engine {
 	router := gin.Default()
 	// 关闭游戏服务器进程
 	router.POST("/admin/stop", func(c *gin.Context) {
-		api.StopServer(c)
+		http.StopServer(c)
 	})
 	// 配置 CORS 中间件
 	router.Use(cors.New(cors.Config{
@@ -100,7 +101,7 @@ func main() {
 
 	node := ws.NewServer(ws.WithAddress(serverconfig.ServerConfig.ServerUrl), ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(),
-			gm.NewGmController(), item.NewItemController(), hero.NewHeroController()))
+			gm.NewGmController(), item.NewItemController(), hero.NewHeroController(), mail.NewMailController()))
 	context.WsServer = node
 
 	err := node.Start()

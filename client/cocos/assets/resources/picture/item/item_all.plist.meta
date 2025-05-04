@@ -742,6 +742,98 @@
         ".json"
       ],
       "subMetas": {}
+    },
+    "b4291": {
+      "importer": "sprite-frame",
+      "uuid": "3c0155c3-7454-4358-862a-ada9076bf79b@b4291",
+      "displayName": "",
+      "id": "b4291",
+      "name": "9998",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 0,
+        "trimY": 1600,
+        "width": 200,
+        "height": 200,
+        "rawWidth": 200,
+        "rawHeight": 200,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "ad48caa4-d96c-46e9-a20a-8e7073a2b79f@6c48a",
+        "atlasUuid": "3c0155c3-7454-4358-862a-ada9076bf79b"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f012d": {
+      "importer": "sprite-frame",
+      "uuid": "3c0155c3-7454-4358-862a-ada9076bf79b@f012d",
+      "displayName": "",
+      "id": "f012d",
+      "name": "9999",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 200,
+        "trimY": 1600,
+        "width": 200,
+        "height": 200,
+        "rawWidth": 200,
+        "rawHeight": 200,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "ad48caa4-d96c-46e9-a20a-8e7073a2b79f@6c48a",
+        "atlasUuid": "3c0155c3-7454-4358-862a-ada9076bf79b"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
     }
   },
   "userData": {

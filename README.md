@@ -136,8 +136,9 @@ example/cocos 为 ws 的客户端程序
 同时按下键盘 alt+g+m 组合键可切换 gm 控制台
 
 - 账号登录
-- 英雄招募、升级、突破、合成、图鉴
+- 英雄招募、升级、突破、合成、图鉴、布阵
 - 背包
+- 邮件
 
 ## 部分 cocos 客户端运行效果
 
@@ -158,3 +159,6 @@ example/cocos 为 ws 的客户端程序
 
 图鉴界面  
 ![](/screenshots/tujian.jpg '图鉴界面')
+
+邮件界面  
+![](/screenshots/mail.jpg '邮件界面')
