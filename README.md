@@ -49,7 +49,7 @@ cocos 客户端工程(推荐)：client/cocos
 ```
 
 ```golang
-    // 消息处理器格式2： 方法第一个参数要求是session,第二个参数是一个index; 第个参数要求是已注册的消息
+    // 消息处理器格式2： 方法第一个参数要求是session,第二个参数是一个index; 第三个参数要求是已注册的消息
     // 索引用于异步给客户端发送请求(例如另起协程)，如果是同步的话，直接通过格式1即可
     func (rs PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin)  {
 
@@ -139,6 +139,7 @@ example/cocos 为 ws 的客户端程序
 - 英雄招募、升级、突破、合成、图鉴、布阵
 - 背包
 - 邮件
+- 排行榜
 
 ## 部分 cocos 客户端运行效果
 
@@ -162,3 +163,6 @@ example/cocos 为 ws 的客户端程序
 
 邮件界面  
 ![](/screenshots/mail.jpg '邮件界面')
+
+排行榜界面  
+![](/screenshots/rank.jpg '排行榜界面')

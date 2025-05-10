@@ -11,6 +11,7 @@ import { NumberUtils } from '../../utils/NumberUtils';
 import { GmPaneController } from '../gm/GmPaneController';
 import { HeroMainPaneController } from '../hero/HeroMainPaneController';
 import { MailPaneController } from '../mail/MailPaneController';
+import { RankPanelController } from '../rank/RankPanelController';
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
 const { ccclass, property } = _decorator;
 
@@ -24,6 +25,9 @@ export class MainPaneView extends BaseUiView {
 
   @property(Node)
   mailPane: Node;
+
+  @property(Node)
+  rankPane: Node;
 
   @property(Node)
   heroPane: Node;
@@ -56,6 +60,7 @@ export class MainPaneView extends BaseUiView {
     this.registerClickEvent(this.heroPane, this.onHeroClick, this);
     this.registerClickEvent(this.mainPane, this.onMainClick, this);
     this.registerClickEvent(this.mailPane, this.onMailClick, this);
+    this.registerClickEvent(this.rankPane, this.onRankClick, this);
 
     this.nameLabel.string = PlayerData.instance.name;
     this.fightingLabel.string = '战力：' + NumberUtils.formatNumber(PlayerData.instance.fighting);
@@ -129,5 +134,9 @@ export class MainPaneView extends BaseUiView {
 
   onMailClick() {
     MailPaneController.openUi();
+  }
+
+  onRankClick() {
+    RankPanelController.openUi();
   }
 }

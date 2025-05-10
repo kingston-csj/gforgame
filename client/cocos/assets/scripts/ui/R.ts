@@ -67,6 +67,10 @@ export default class R {
       name: 'mailDetailPane',
       path: 'prefabs/MailDetailPane',
     },
+    RankPane: {
+      name: 'rankPane',
+      path: 'prefabs/RankPane',
+    },
   };
 
   // 图片纹理图集枚举

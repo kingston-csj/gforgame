@@ -20,6 +20,7 @@ import (
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/mail"
 	"io/github/gforgame/examples/player"
+	"io/github/gforgame/examples/rank"
 	"io/github/gforgame/examples/system"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
@@ -96,12 +97,24 @@ func main() {
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
-	// node := tcp.NewServer(tcp.WithAddress(serverconfig.ServerConfig.ServerUrl), tcp.WithRouter(router),
-	// 	tcp.WithIoDispatch(ioDispatcher), tcp.WithCodec(codec), tcp.WithModules(chat.NewRoomService(), player.NewPlayerService()))
+	// 在这里，添加你的模块消息路由
+	modules := []network.Module{
+		chat.NewRoomService(),
+		player.NewPlayerController(),
+		gm.NewGmController(),
+		item.NewItemController(),
+		hero.NewHeroController(),
+		mail.NewMailController(),
+		rank.NewRankController(),
+	}
 
-	node := ws.NewServer(ws.WithAddress(serverconfig.ServerConfig.ServerUrl), ws.WithRouter(router),
-		ws.WithIoDispatch(ioDispatcher), ws.WithCodec(codec), ws.WithModules(chat.NewRoomService(), player.NewPlayerController(),
-			gm.NewGmController(), item.NewItemController(), hero.NewHeroController(), mail.NewMailController()))
+	node := ws.NewServer(
+		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
+		ws.WithRouter(router),
+		ws.WithIoDispatch(ioDispatcher),
+		ws.WithCodec(codec),
+		ws.WithModules(modules...),
+	)
 	context.WsServer = node
 
 	err := node.Start()
@@ -135,7 +148,12 @@ func main() {
 	endTime := time.Now()
 	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
 
+	// rank.GetRankService().QueryRank(rank.PlayerLevelRank, 0, 10)
+
 	// fight.GetFightService().Test()
+
+	// 各自业务初始化
+	player.GetPlayerService().LoadPlayerProfile()
 
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)

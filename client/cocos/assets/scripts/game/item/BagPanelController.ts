@@ -15,14 +15,14 @@ export class BagPanelController extends BaseController {
   private static creatingPromise: Promise<BagPanelController> | null = null;
 
   @property(BagPanelView)
-  recruitPaneView: BagPanelView | null = null;
+  bagPaneView: BagPanelView | null = null;
 
   recruitModel: RecruitModel = RecruitModel.instance;
 
   public static openUi() {
     this.getInstance().then((controller) => {
-      if (controller.recruitPaneView) {
-        controller.recruitPaneView.display();
+      if (controller.bagPaneView) {
+        controller.bagPaneView.display();
       }
     });
   }
@@ -32,8 +32,8 @@ export class BagPanelController extends BaseController {
       return Promise.resolve();
     }
     return this.getInstance().then((controller) => {
-      if (controller.recruitPaneView) {
-        controller.recruitPaneView.hide();
+      if (controller.bagPaneView) {
+        controller.bagPaneView.hide();
       }
     });
   }

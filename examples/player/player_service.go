@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync"
 
+	"io/github/gforgame/db"
 	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
@@ -17,13 +18,11 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("record not found")
-	ErrCast     = errors.New("cast exception")
-)
-
-var (
-	instance *PlayerService
-	once     sync.Once
+	ErrNotFound    = errors.New("record not found")
+	ErrCast        = errors.New("cast exception")
+	instance       *PlayerService
+	once           sync.Once
+	playerProfiles map[string]*playerdomain.PlayerProfile = make(map[string]*playerdomain.PlayerProfile)
 )
 
 type PlayerService struct {
@@ -35,6 +34,23 @@ func GetPlayerService() *PlayerService {
 		instance = &PlayerService{}
 	})
 	return instance
+}
+
+func (ps *PlayerService) LoadPlayerProfile() {
+	var profiles []*playerdomain.PlayerProfile
+	err := db.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
+	if err != nil {
+		panic(err)
+	}
+
+	// 输出查询结果
+	for _, profile := range profiles {
+		playerProfiles[profile.Id] = profile
+	}
+}
+
+func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.PlayerProfile {
+	return playerProfiles[playerId]
 }
 
 func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {

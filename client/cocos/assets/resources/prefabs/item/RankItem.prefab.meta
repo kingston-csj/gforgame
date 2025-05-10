@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "941998eb-97f1-4b8f-8b81-aeb208548ec4",
+  "uuid": "1580eee0-8329-4ebf-9b07-f1ddf9b80310",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "MailItem"
+    "syncNodeName": "RankItem"
   }
 }
