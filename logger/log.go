@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -19,12 +20,16 @@ const (
 	Admin Type = iota
 	Application
 	Player
+	Mail
+	Item
 )
 
 var logName = map[Type]string{
 	Admin:       "admin",
 	Application: "application",
 	Player:      "player",
+	Mail:        "mail",
+	Item:        "item",
 }
 
 var (
@@ -68,7 +73,9 @@ func createConsoleLog() *logrus.Logger {
 		"logs/app/"+"app.%Y%m%d",
 		rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
 	)
-	logger.Out = writer
+	// 创建多输出目标：同时输出到文件和控制台
+	multiWriter := io.MultiWriter(writer, os.Stdout)
+	logger.Out = multiWriter
 	// 设置Logger的日志级别
 	logger.Level = logrus.InfoLevel
 	return logger
@@ -133,6 +140,9 @@ func createErrorLog() *logrus.Logger {
 		logrus.Fatalf("Failed to create rotatelogs: %v", err)
 	}
 
+	// 创建多输出目标：同时输出到文件和控制台
+	multiWriter := io.MultiWriter(writer, os.Stdout)
+
 	// 自定义日志格式
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableTimestamp: true, // 禁用默认时间戳
@@ -140,7 +150,7 @@ func createErrorLog() *logrus.Logger {
 	})
 
 	// 设置日志输出
-	logger.Out = writer
+	logger.Out = multiWriter
 
 	// 设置日志级别
 	logger.Level = logrus.ErrorLevel

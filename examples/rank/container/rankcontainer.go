@@ -10,9 +10,9 @@ import (
 // ConcurrentRankContainer 并发排行榜容器
 // 只通过channel和内部goroutine并发安全
 type ConcurrentRankContainer struct {
-	ranks    *treemap.Map
-	capacity int
-	cmdChan  chan any
+	ranks    *treemap.Map  // 红黑树数据结构
+	capacity int          // 容量
+	cmdChan  chan any     // 命令通道
 }
 
 type addCmd struct {
@@ -58,7 +58,7 @@ type closeCmd struct {
 func NewConcurrentRankContainer(capacity int) *ConcurrentRankContainer {
 	c := &ConcurrentRankContainer{
 		ranks:    treemap.NewWith(model.CompareRank),
-		capacity: capacity,
+		capacity: capacity, 
 		cmdChan:  make(chan any, 1000),
 	}
 	go c.run()

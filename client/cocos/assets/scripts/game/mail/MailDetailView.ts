@@ -1,8 +1,9 @@
 import { _decorator, Button, instantiate, Label, Node, Prefab } from 'cc';
 
 import GameContext from '../../GameContext';
-import { ReqMailGetReward } from '../../net/ReqMailGetReward';
-import { ResMailGetReward } from '../../net/ResMailGetReward';
+
+import { ReqMailGetReward } from '../../net/protocol/ReqMailGetReward';
+import { ResMailGetReward } from '../../net/protocol/ResMailGetReward';
 import { BaseUiView } from '../../ui/BaseUiView';
 import { TimeUtils } from '../../utils/TimeUtils';
 import { RewardItem } from '../reward/RewardItem';

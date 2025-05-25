@@ -130,6 +130,10 @@ func (p *Player) GetId() string {
 	return p.Id
 }
 
+func (p *Player) GetName() string {
+	return p.Name
+}
+
 func (p *Player) NotifyPurseChange() {
 	resPurse := &protos.PushPurseInfo{}
 	resPurse.Diamond = p.Purse.Diamond
