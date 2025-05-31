@@ -105,9 +105,10 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 	// 添加session
 	network.AddSession(s, player)
 
-	s.Send(&protos.ResPlayerLogin{Code: 0, Name: player.Name, Fighting: player.Fight, Camp: player.Camp}, index)
-
+	//客户端红点系统，要求服务器先下发所有基础数据后，客户端再切到主界面
 	context.EventBus.Publish(events.PlayerLogin, player)
+
+	s.Send(&protos.ResPlayerLogin{Code: 0, Name: player.Name, Fighting: player.Fight, Camp: player.Camp}, index)
 }
 
 func (ps *PlayerController) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {

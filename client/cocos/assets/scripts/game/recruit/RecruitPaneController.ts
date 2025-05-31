@@ -2,12 +2,13 @@ import { _decorator } from 'cc';
 
 import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
 import { TipsPaneController } from '../common/TipsPaneController';
-import { GameConstants } from '../GameConstants';
+
+import GameConstants from '../constants/GameConstants';
 import BagpackModel from '../item/BagpackModel';
 import { RecruitModel } from './RecruitModel';
 import { RecruitPaneView } from './RecruitPaneView';

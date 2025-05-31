@@ -1,6 +1,6 @@
 import { _decorator } from 'cc';
 import PlayerData from '../../data/user/PlayerData';
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 import { TipsPaneController } from '../common/TipsPaneController';
 import GameConstants from '../constants/GameConstants';
 import { MainPaneController } from '../main/MainPaneController';

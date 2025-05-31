@@ -1,6 +1,6 @@
 import { _decorator, Component, instantiate } from 'cc';
+import { BaseController } from '../frame/mvc/BaseController';
 import AssetLoader from './AssertLoader';
-import { BaseController } from './BaseController';
 import { LayerIdx } from './LayerIds';
 import ResourceItem from './ResourceItem';
 import UiContext from './UiContext';

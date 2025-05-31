@@ -1,5 +1,5 @@
 import { _decorator, Label } from 'cc';
-import { BaseUiView } from '../../ui/BaseUiView';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 
 const { ccclass, property } = _decorator;
 

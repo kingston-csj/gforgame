@@ -4,72 +4,72 @@ export default class R {
   static readonly Prefabs = {
     AssetResourceFactory: {
       name: 'assetResourceFactory',
-      path: 'prefabs/AssetResourceFactory',
+      path: 'prefabs/panel/common/AssetResourceFactory',
     },
 
     LoginPane: {
       name: 'loginPane',
-      path: 'prefabs/LoginPane',
+      path: 'prefabs/panel/login/LoginPane',
     },
     MainPane: {
       name: 'mainPane',
-      path: 'prefabs/MainPane',
+      path: 'prefabs/panel/main/MainPane',
     },
     GmPane: {
       name: 'gmPane',
-      path: 'prefabs/GmPane',
+      path: 'prefabs/panel/gm/GmPane',
     },
     BagPane: {
       name: 'bagPane',
-      path: 'prefabs/BagPane',
+      path: 'prefabs/panel/bag/BagPane',
     },
     RecruitPane: {
       name: 'recruitPane',
-      path: 'prefabs/RecruitPane',
+      path: 'prefabs/panel/recruit/RecruitPane',
     },
     RecruitSettlePane: {
       name: 'recruitSettlePane',
-      path: 'prefabs/RecruitSettlePane',
+      path: 'prefabs/panel/recruit/RecruitSettlePane',
     },
     TipsPane: {
       name: 'tipsPane',
-      path: 'prefabs/TipsPane',
+      path: 'prefabs/panel/common/TipsPane',
     },
     HeroMainPane: {
       name: 'heroMainPane',
-      path: 'prefabs/HeroMainPane',
+      path: 'prefabs/panel/hero/HeroMainPane',
     },
     HeroDetailPane: {
       name: 'heroDetailPane',
-      path: 'prefabs/HeroDetailPane',
+      path: 'prefabs/panel/hero/HeroDetailPane',
     },
     FightingUpTipsPane: {
       name: 'fightingUpTipsPane',
-      path: 'prefabs/fightingUpTipsPane',
+      path: 'prefabs/panel/common/FightingUpTipsPane',
     },
     HeroLibPane: {
       name: 'heroLibPane',
-      path: 'prefabs/HeroLibPane',
+      path: 'prefabs/panel/hero/HeroLibPane',
     },
     BuZhenPane: {
       name: 'buZhenPane',
-      path: 'prefabs/BuZhenPane',
+      path: 'prefabs/panel/hero/BuZhenPane',
     },
     ComfirmPane: {
       name: 'comfirmPane',
-      path: 'prefabs/ComfirmPane',
+      path: 'prefabs/panel/common/ComfirmPane',
     },
     MailPane: {
       name: 'mailPane',
-      path: 'prefabs/MailPane',
+      path: 'prefabs/panel/mail/MailPane',
     },
     MailDetailPane: {
       name: 'mailDetailPane',
-      path: 'prefabs/MailDetailPane',
+      path: 'prefabs/panel/mail/MailDetailPane',
     },
     RankPane: {
       name: 'rankPane',
-      path: 'prefabs/RankPane',
+      path: 'prefabs/panel/rank/RankPane',
     },
   };
 

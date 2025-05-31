@@ -1,6 +1,6 @@
 import { _decorator, Label } from 'cc';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { RankInfo } from '../../net/protocol/items/RankInfo';
-import { BaseUiView } from '../../ui/BaseUiView';
 const { ccclass, property } = _decorator;
 
 @ccclass('RankItem')

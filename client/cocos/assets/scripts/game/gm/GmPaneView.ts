@@ -1,8 +1,8 @@
 import { _decorator, EditBox } from 'cc';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import GameContext from '../../GameContext';
 import ReqGmAction from '../../net/protocol/ReqGmAction';
 import ResGmAction from '../../net/protocol/ResGmAction';
-import { BaseUiView } from '../../ui/BaseUiView';
 
 const { ccclass, property } = _decorator;
 

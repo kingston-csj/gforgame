@@ -1,6 +1,6 @@
 import { _decorator, instantiate, Label, Node, Prefab, Toggle } from 'cc';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { RankInfo } from '../../net/protocol/items/RankInfo';
-import { BaseUiView } from '../../ui/BaseUiView';
 import { RankItem } from './RankItem';
 import { RankModel } from './RankModel';
 const { ccclass, property } = _decorator;

@@ -1,10 +1,10 @@
 import { _decorator, EventTouch, Label, Node, Vec2, Vec3 } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
-import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
-import { UiUtil } from '../../ui/UiUtil';
+import { UiUtil } from '../../utils/UiUtil';
 import { TipsPaneController } from '../common/TipsPaneController';
 import { HeroBoxModel } from '../hero/HeroBoxModel';
 import { BuZhenPaneController } from './BuZhenPaneController';

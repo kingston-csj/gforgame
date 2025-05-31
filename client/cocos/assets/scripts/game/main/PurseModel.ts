@@ -1,4 +1,4 @@
-import { BaseModel } from '../../ui/BaseModel';
+import { BaseModel } from '../../frame/mvc/BaseModel';
 
 export class PurseModel extends BaseModel {
   private static instance: PurseModel;

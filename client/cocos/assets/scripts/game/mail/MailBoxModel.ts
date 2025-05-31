@@ -1,5 +1,5 @@
+import { BaseModel } from '../../frame/mvc/BaseModel';
 import { MailVo } from '../../net/protocol/items/MailVo';
-import { BaseModel } from '../../ui/BaseModel';
 
 export class MailBoxModel extends BaseModel {
   private static instance: MailBoxModel = new MailBoxModel();

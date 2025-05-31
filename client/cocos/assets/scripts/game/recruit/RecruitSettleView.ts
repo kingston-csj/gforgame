@@ -1,6 +1,6 @@
 import { _decorator, instantiate, Node, Prefab } from 'cc';
 
-import { BaseUiView } from '../../ui/BaseUiView';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 
 import { RewardItem } from '../reward/RewardItem';
 import { RecruitSettleModel } from './RecruitSettleModel';

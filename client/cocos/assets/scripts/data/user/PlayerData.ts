@@ -1,4 +1,4 @@
-import { BaseModel } from '../../ui/BaseModel';
+import { BaseModel } from '../../frame/mvc/BaseModel';
 
 // 玩家基本信息
 export default class PlayerData extends BaseModel {

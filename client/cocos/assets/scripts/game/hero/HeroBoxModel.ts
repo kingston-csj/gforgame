@@ -5,13 +5,15 @@ import HerostageData from '../../data/config/model/HerostageData';
 import GameContext from '../../GameContext';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
 import { ReqHeroChangePosition } from '../../net/protocol/ReqHeroChangePosition';
-import ReqHeroCombine from '../../net/protocol/ReqHeroCombine';
+import { ReqHeroCombine } from '../../net/protocol/ReqHeroCombine';
+
 import { ReqHeroOffFight } from '../../net/protocol/ReqHeroOffFight';
 import { ReqHeroUpFight } from '../../net/protocol/ReqHeroUpFight';
 import { ReqHeroUpLevel } from '../../net/protocol/ReqHeroUpLevel';
 import { ReqHeroUpStage } from '../../net/protocol/ReqHeroUpStage';
 import { ReqPlayerUpLevel } from '../../net/protocol/ReqPlayerUpLevel';
 import { ReqPlayerUpStage } from '../../net/protocol/ReqPlayerUpStage';
+import { ResHeroChangePosition } from '../../net/protocol/ResHeroChangePosition';
 import { ResHeroCombine } from '../../net/protocol/ResHeroCombine';
 import { ResHeroOffFight } from '../../net/protocol/ResHeroOffFight';
 import { ResHeroUpFight } from '../../net/protocol/ResHeroUpFight';
@@ -19,9 +21,10 @@ import { ResHeroUpLevel } from '../../net/protocol/ResHeroUpLevel';
 import { ResHeroUpStage } from '../../net/protocol/ResHeroUpStage';
 import { ResPlayerUpLevel } from '../../net/protocol/ResPlayerUpLevel';
 import { ResPlayerUpStage } from '../../net/protocol/ResPlayerUpStage';
-import { ResHeroChangePosition } from '../../net/ResHeroChangePosition';
 
 import { AttributeBox } from '../attribute/attributebox';
+import GameConstants from '../constants/GameConstants';
+import BagpackModel from '../item/BagpackModel';
 import { PurseModel } from '../main/PurseModel';
 
 export class HeroBoxModel {
@@ -87,6 +90,20 @@ export class HeroBoxModel {
     this.heroAttrChangedCallbacks.forEach((callback) => callback());
   }
 
+  public checkCanUpStage(hero: HeroVo): boolean {
+    let heroStageData = ConfigContext.configHeroStageContainer.getRecordByStage(hero.stage);
+    let nextStageData = ConfigContext.configHeroStageContainer.getRecordByStage(hero.stage + 1);
+    return hero.level == heroStageData.max_level && nextStageData != null;
+  }
+
+  public checkUpStageItem(hero: HeroVo): boolean {
+    let heroStageData = ConfigContext.configHeroStageContainer.getRecordByStage(hero.stage);
+    let nextStageData = ConfigContext.configHeroStageContainer.getRecordByStage(hero.stage + 1);
+    let costItemId = GameConstants.Item.UpStage;
+    let ownItem = BagpackModel.getInstance().getItemByModelId(costItemId);
+    return ownItem && ownItem.count >= nextStageData.cost;
+  }
+
   public calcUpLevel(hero: HeroVo): number {
     let heroData: HeroData = ConfigContext.configHeroContainer.getRecord(hero.id);
     let currLevel = hero.level;
@@ -100,13 +117,6 @@ export class HeroBoxModel {
 
     let master = this.getMaster();
     while (myGold >= cost) {
-      canUpLevel++;
-      myGold -= cost;
-      cost += heroLevelData.cost;
-      currLevel++;
-      if (canUpLevel >= 10) {
-        break;
-      }
       if (currLevel >= ConfigContext.configHeroLevelContainer.getMaxLevel()) {
         break;
       }
@@ -118,6 +128,13 @@ export class HeroBoxModel {
         if (currLevel >= master.level) {
           break;
         }
+      }
+      canUpLevel++;
+      myGold -= cost;
+      cost += heroLevelData.cost;
+      currLevel++;
+      if (canUpLevel >= 10) {
+        break;
       }
       heroLevelData = ConfigContext.configHeroLevelContainer.getRecord(currLevel);
     }

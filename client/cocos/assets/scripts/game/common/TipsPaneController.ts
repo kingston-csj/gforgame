@@ -1,6 +1,6 @@
 import { _decorator } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';

@@ -2,12 +2,14 @@ import { _decorator, Button, instantiate, Label, Node, Prefab } from 'cc';
 
 import GameContext from '../../GameContext';
 
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
+import { RedDotManager } from '../../frame/reddot/RedDotManager';
 import { ReqMailGetReward } from '../../net/protocol/ReqMailGetReward';
 import { ResMailGetReward } from '../../net/protocol/ResMailGetReward';
-import { BaseUiView } from '../../ui/BaseUiView';
 import { TimeUtils } from '../../utils/TimeUtils';
 import { RewardItem } from '../reward/RewardItem';
 import { MailBoxModel } from './MailBoxModel';
+import { MailManager } from './MailManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('MailDetailView')
@@ -53,6 +55,9 @@ export class MailDetailView extends BaseUiView {
           MailBoxModel.getInstance().getMail(this.selectedMailId).status =
             MailBoxModel.STATUS_RECEIVED;
           this.rewardBtn.getComponent(Button).interactable = false;
+          RedDotManager.instance.updateScore(`mail/${this.selectedMailId}`, 0);
+          // 刷新红点
+          MailManager.getInstance().refreshRedDots();
         }
       }
     );

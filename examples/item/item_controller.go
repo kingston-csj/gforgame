@@ -22,7 +22,7 @@ func (ps *ItemController) Init() {
 	network.RegisterMessage(protos.CmdItemResPurseInfo, &protos.PushPurseInfo{})
 	network.RegisterMessage(protos.CmdItemPushChanged, &protos.PushItemChanged{})
 
-	context.EventBus.Subscribe(events.PlayerLoadingFinish, func(data interface{}) {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }

@@ -7,7 +7,7 @@ import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
 import R from '../../ui/R';
 import { RecruitSettleModel } from './RecruitSettleModel';
 
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 import { TipsPaneController } from '../common/TipsPaneController';
 import { RecruitSettleView } from './RecruitSettleView';
 const { ccclass, property } = _decorator;

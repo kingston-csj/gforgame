@@ -1,15 +1,17 @@
 import { _decorator, EventKeyboard, Input, input, KeyCode, Label, Node } from 'cc';
 
-import { BaseUiView } from '../../ui/BaseUiView';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { BagPanelController } from '../item/BagPanelController';
 
 import PlayerData from '../../data/user/PlayerData';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import R from '../../ui/R';
-import { UiUtil } from '../../ui/UiUtil';
 import { NumberUtils } from '../../utils/NumberUtils';
+import { UiUtil } from '../../utils/UiUtil';
 import { GmPaneController } from '../gm/GmPaneController';
-import { HeroMainPaneController } from '../hero/HeroMainPaneController';
+import { HeroMainPaneController } from '../hero/controller/HeroMainPaneController';
+import { HeroManager } from '../hero/HeroManager';
+import { MailManager } from '../mail/MailManager';
 import { MailPaneController } from '../mail/MailPaneController';
 import { RankPanelController } from '../rank/RankPanelController';
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
@@ -53,6 +55,12 @@ export class MainPaneView extends BaseUiView {
   private _isAltPressed: boolean = false;
   private _isGPressed: boolean = false;
   private _isMPressed: boolean = false;
+
+  protected onDisplay(): void {
+    // 临时处理
+    MailManager.getInstance().refreshRedDots();
+    HeroManager.getInstance().refreshRedDots();
+  }
 
   protected start(): void {
     this.registerClickEvent(this.bagPane, this.onBagClick, this);

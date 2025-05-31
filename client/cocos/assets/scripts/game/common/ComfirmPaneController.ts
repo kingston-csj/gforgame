@@ -1,5 +1,5 @@
 import { _decorator, Button } from 'cc';
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';

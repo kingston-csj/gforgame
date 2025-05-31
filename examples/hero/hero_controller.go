@@ -165,6 +165,11 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 			Code: constants.I18N_HERO_TIP1,
 		}
 	}
+	if toLevel <= h.Level {
+		return &protos.ResHeroLevelUp{
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
+		}
+	}
 
 	stageContainer := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage")
 

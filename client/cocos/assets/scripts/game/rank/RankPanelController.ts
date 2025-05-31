@@ -1,5 +1,5 @@
 import { _decorator } from 'cc';
-import { BaseController } from '../../ui/BaseController';
+import { BaseController } from '../../frame/mvc/BaseController';
 
 import R from '../../ui/R';
 

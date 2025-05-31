@@ -1,5 +1,8 @@
 export default class GameConstants {
   static readonly Item = {
+    // 招募令道具id
+    RECRUIT_ID: 2001,
+    // 英雄突破材料
     UpStage: 2003,
   };
 

@@ -1,6 +1,8 @@
 import { _decorator, instantiate, Label, Node, Prefab } from 'cc';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
+import { RedDotComponent } from '../../frame/reddot/RedDotCompoent';
+import { RedDotManager } from '../../frame/reddot/RedDotManager';
 import { MailVo } from '../../net/protocol/items/MailVo';
-import { BaseUiView } from '../../ui/BaseUiView';
 import { TimeUtils } from '../../utils/TimeUtils';
 import { RewardItem } from '../reward/RewardItem';
 import { MailDetailPaneController } from './MailDetailPaneController';
@@ -19,6 +21,9 @@ export class MailItemView extends BaseUiView {
 
   @property(Prefab)
   rewardItemPrefab: Prefab;
+
+  @property(Node)
+  redDot: Node;
 
   private mailId: number = 0;
 
@@ -44,5 +49,7 @@ export class MailItemView extends BaseUiView {
       rewardItem.setParent(this.rewardContainer);
       rewardItem.getComponent(RewardItem).fillData(reward, rewardItemSize);
     }
+    RedDotManager.instance.binding(`mail/${mail.id}`, this.redDot.getComponent(RedDotComponent));
+    RedDotManager.instance.updateScore(`mail/${mail.id}`, mail.hasNotReceivedRewards() ? 1 : 0);
   }
 }

@@ -3,11 +3,11 @@ import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import HeroData from '../../data/config/model/HeroData';
 import ItemData from '../../data/config/model/ItemData';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import RewardInfo from '../../net/protocol/items/RewardInfo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
-import { BaseUiView } from '../../ui/BaseUiView';
 import R from '../../ui/R';
-import { UiUtil } from '../../ui/UiUtil';
+import { UiUtil } from '../../utils/UiUtil';
 
 const { ccclass, property } = _decorator;
 

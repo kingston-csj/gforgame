@@ -2,7 +2,7 @@ import { _decorator, Component, Label, Node } from 'cc';
 import ItemData from '../../data/config/model/ItemData';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import R from '../../ui/R';
-import { UiUtil } from '../../ui/UiUtil';
+import { UiUtil } from '../../utils/UiUtil';
 const { ccclass, property } = _decorator;
 
 @ccclass('BagItemInfo')

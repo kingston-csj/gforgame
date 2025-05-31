@@ -5,6 +5,7 @@ import BagpackModel from './game/item/BagpackModel';
 import { MailBoxModel } from './game/mail/MailBoxModel';
 import { PurseModel } from './game/main/PurseModel';
 import { HeroVo } from './net/protocol/items/HeroVo';
+import { MailVo } from './net/protocol/items/MailVo';
 import PushHeroAttrChanged from './net/protocol/PushHeroAttrChanged';
 import { PushItemChanged } from './net/protocol/PushItemChanged';
 import { PushPlayerFightChange } from './net/protocol/PushPlayerFightChange';
@@ -98,7 +99,16 @@ export class MessageDispatch {
   @MessageHandler(PushMailAll.cmd)
   private static handleMailAll(msg: PushMailAll) {
     if (msg.mails) {
-      MailBoxModel.getInstance().reset(new Map(msg.mails.map((mail) => [mail.id, mail])));
+      MailBoxModel.getInstance().reset(
+        new Map(
+          msg.mails.map((mail) => {
+            //  转成MailVo实例
+            const mailVo = new MailVo();
+            Object.assign(mailVo, mail);
+            return [mail.id, mailVo];
+          })
+        )
+      );
     }
   }
 

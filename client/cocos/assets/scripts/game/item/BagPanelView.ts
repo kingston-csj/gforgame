@@ -2,7 +2,7 @@ import { _decorator, instantiate, Node, Prefab, Toggle } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import ConfigItemContainer from '../../data/config/container/ConfigItemContainer';
 import ItemData from '../../data/config/model/ItemData';
-import { BaseUiView } from '../../ui/BaseUiView';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { BagItem } from './BagItem';
 import BagpackModel, { Item } from './BagpackModel';
 const { ccclass, property } = _decorator;

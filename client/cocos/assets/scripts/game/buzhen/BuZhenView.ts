@@ -1,7 +1,7 @@
 import { _decorator, instantiate, Label, Node, Prefab, ScrollView, Toggle } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
+import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { HeroVo } from '../../net/protocol/items/HeroVo';
-import { BaseUiView } from '../../ui/BaseUiView';
 import { NumberUtils } from '../../utils/NumberUtils';
 import { HeroBoxModel } from '../hero/HeroBoxModel';
 import { BuZhenHeroDownItem } from './BuZhenHeroDownItem';
