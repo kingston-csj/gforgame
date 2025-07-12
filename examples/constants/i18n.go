@@ -17,4 +17,7 @@ const (
 	I18N_HERO_TIP6 = 3006 // 位置已满
 	I18N_HERO_TIP7 = 3007 // 英雄未上阵
 	I18N_HERO_TIP8 = 3008 // 至少上阵一名英雄
+
+	I18N_FRIEND_TIPS1 = 12001 // 已经是基友了
+	I18N_FRIEND_TIPS2 = 12002 // 已经在申请了
 )

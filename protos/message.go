@@ -52,6 +52,18 @@ const (
 	CmdMailResReadAll      = 6010
 	CmdMailPushAll         = 6011
 
+	CmdFriendReqSearchPlayers = 1902
+	CmdFriendReqQueryFriends  = 1903
+	CmdFriendReqApply         = 1904
+	CmdFriendReqDealApply     = 1905
+	CmdFriendReqDelete        = 1906
+	CmdFriendResSearchPlayers = 1952
+	CmdFriendResQueryFriends  = 1953
+	CmdFriendResApply         = 1954
+	CmdFriendResDealApply     = 1955
+	CmdFriendResDelete        = 1956
+	CmdFriendPushApplyList    = 1997
+
 	CmdRankReqQuery = 7001
 	CmdRankResQuery = 7002
 )

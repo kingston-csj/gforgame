@@ -2,6 +2,7 @@ package player
 
 import (
 	"errors"
+	"strings"
 	"sync"
 
 	"io/github/gforgame/db"
@@ -124,4 +125,15 @@ func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 		return 1003
 	}
 	return 1004
+}
+
+// 模糊搜索玩家(名字包含关键字)
+func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
+	playerIds := make([]string, 0)
+	for _, profile := range playerProfiles {
+		if strings.Contains(profile.Name, name) {
+			playerIds = append(playerIds, profile.Id)
+		}
+	}
+	return playerIds
 }

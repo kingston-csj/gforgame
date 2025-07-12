@@ -71,3 +71,8 @@ func GetAllOnlinePlayerSessions() []*Session {
 	}
 	return allSessions
 }
+
+func IsOnline(playerId string) bool {
+	return player2SessionMap[playerId] != nil
+}
+
