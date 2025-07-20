@@ -1,8 +1,7 @@
 package protos
 
 const (
-	CmdChatReqJoin = 1001
-	CmdChatReqChat = 1002
+
 
 	CmdPlayerReqLogin         = 2001
 	CmdPlayerResLogin         = 2002
@@ -51,6 +50,11 @@ const (
 	CmdMailReqReadAll      = 6009
 	CmdMailResReadAll      = 6010
 	CmdMailPushAll         = 6011
+
+	CmdChaJoinRoom = 1800
+	CmdChatReqChat = 1801
+	CmdChatResChat = 1851
+	CmdChatPushNew = 1899
 
 	CmdFriendReqSearchPlayers = 1902
 	CmdFriendReqQueryFriends  = 1903

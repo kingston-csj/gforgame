@@ -73,7 +73,7 @@ func main() {
 		Level:      999,
 	}
 	cross.PlayerLoginRemote(p, cross.Island)
-	network.RegisterMessage(protos.CmdChatReqJoin, &protos.ReqJoinRoom{})
+	network.RegisterMessage(protos.CmdChaJoinRoom, &protos.ReqJoinRoom{})
 	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
 	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})
 	network.RegisterMessage(protos.CmdPlayerResLogin, &protos.ResPlayerLogin{})

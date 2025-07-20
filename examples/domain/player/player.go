@@ -30,6 +30,8 @@ type Player struct {
 	Camp           int32              `gorm:"player's camp"`
 	Mailbox        *Mailbox           `gorm:"-"`
 	MailboxJson    string             `gorm:"mailbox"`
+	ExtendBox      *ExtendBox         `gorm:"-"`
+	ExtendBoxJson  string             `gorm:"extendbox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -78,6 +80,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.MailboxJson = string(jsonData)
 	}
+	if p.ExtendBox == nil {
+		p.ExtendBoxJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.ExtendBox)
+		if err != nil {
+			return err
+		}
+		p.ExtendBoxJson = string(jsonData)
+	}
 	return nil
 }
 func (p *Player) AfterFind(tx *gorm.DB) error {
@@ -118,6 +129,13 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		}
 	} else {
 		json.Unmarshal([]byte(p.MailboxJson), &p.Mailbox)
+	}
+	if util.IsEmptyString(p.ExtendBoxJson) {
+		p.ExtendBox = &ExtendBox{
+			PrivateChats: make(map[string][]ChatMessage),
+		}
+	} else {
+		json.Unmarshal([]byte(p.ExtendBoxJson), &p.ExtendBox)
 	}
 	for _, hero := range p.HeroBox.Heros {
 		hero.AttrBox = attribute.NewAttrBox()

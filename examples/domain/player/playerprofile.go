@@ -6,4 +6,5 @@ type PlayerProfile struct {
 	Level int
 	Camp  int
 	Fight int
+	Head  int
 }

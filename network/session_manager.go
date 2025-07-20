@@ -48,6 +48,14 @@ func GetSessionByPlayerId(playerId string) *Session {
 	return player2SessionMap[playerId]
 }
 
+func GetPlayerByPlayerId(playerId string) domain.Player {
+	session := player2SessionMap[playerId]
+	if session == nil {
+		return nil
+	}
+	return GetPlayerBySession(session)
+}
+
 func GetAllSessions() []*Session {
 	allSessions := make([]*Session, 0, len(session2PlayerMap))
 	for session := range session2PlayerMap {
@@ -64,6 +72,14 @@ func GetAllOnlinePlayers() []domain.Player {
 	return allPlayers
 }
 
+func GetAllOnlinePlayerIds() []string {
+	allPlayerIds := make([]string, 0, len(session2PlayerMap))
+	for playerId := range player2SessionMap {
+		allPlayerIds = append(allPlayerIds, playerId)
+	}
+	return allPlayerIds
+}
+
 func GetAllOnlinePlayerSessions() []*Session {
 	allSessions := make([]*Session, 0, len(session2PlayerMap))
 	for session := range session2PlayerMap {
@@ -75,4 +91,3 @@ func GetAllOnlinePlayerSessions() []*Session {
 func IsOnline(playerId string) bool {
 	return player2SessionMap[playerId] != nil
 }
-

@@ -28,10 +28,6 @@ type ReqJoinRoom struct {
 	PlayerId int64
 }
 
-type ReqChat struct {
-	Id string
-}
-
 type ReqPlayerUpLevel struct {
 	ToLevel int32 `json:"toLevel"`
 }

@@ -14,6 +14,7 @@ import (
 	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/friend"
 	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/http"
@@ -99,13 +100,14 @@ func main() {
 
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
-		chat.NewRoomService(),
 		player.NewPlayerController(),
 		gm.NewGmController(),
 		item.NewItemController(),
 		hero.NewHeroController(),
 		mail.NewMailController(),
 		rank.NewRankController(),
+		chat.NewChatController(),
+		friend.NewFriendController(),
 	}
 
 	node := ws.NewServer(
