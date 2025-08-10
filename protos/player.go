@@ -1,8 +1,8 @@
 package protos
 
 type ReqPlayerLogin struct {
-	Id  string
-	Pwd string
+	Pwd      string
+	PlayerId string
 }
 
 type ReqPlayerLoadingFinish struct{}

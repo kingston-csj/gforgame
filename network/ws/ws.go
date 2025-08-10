@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -12,44 +13,49 @@ type wsConn struct {
 	conn   *websocket.Conn
 	typ    int // message type
 	reader io.Reader
+	// 协议类型：二进制或文本
+	protocolType int
 }
 
 func newWSConn(conn *websocket.Conn) (*wsConn, error) {
 	c := &wsConn{conn: conn}
 
-	t, r, err := conn.NextReader()
-	if err != nil {
-		return nil, err
-	}
-
-	c.typ = t
-	c.reader = r
+	// 不在这里读取消息，让Session来处理
+	// 只设置默认的协议类型
+	c.protocolType = websocket.BinaryMessage // 默认二进制协议
 
 	return c, nil
 }
 
 func (c *wsConn) Read(b []byte) (int, error) {
-	n, err := c.reader.Read(b)
-	if err != nil && err != io.EOF {
-		return n, err
-	} else if err == io.EOF {
-		_, r, err := c.conn.NextReader()
-		if err != nil {
-			return 0, err
-		}
-		c.reader = r
-	}
-
-	return n, nil
+	// WebSocket连接不应该使用这个方法，应该使用ReadMessage
+	// 这里提供一个兼容的实现，但会返回错误
+	return 0, fmt.Errorf("WebSocket connection should use ReadMessage() instead of Read()")
 }
 
 func (c *wsConn) Write(b []byte) (int, error) {
-	err := c.conn.WriteMessage(websocket.BinaryMessage, b)
+	// 根据协议类型选择消息类型
+	messageType := websocket.BinaryMessage
+	if c.protocolType == websocket.TextMessage {
+		messageType = websocket.TextMessage
+	}
+
+	err := c.conn.WriteMessage(messageType, b)
 	if err != nil {
 		return 0, err
 	}
 
 	return len(b), nil
+}
+
+// ReadMessage 实现WebSocketConn接口
+func (c *wsConn) ReadMessage() (messageType int, p []byte, err error) {
+	return c.conn.ReadMessage()
+}
+
+// WriteMessage 实现WebSocketConn接口
+func (c *wsConn) WriteMessage(messageType int, data []byte) error {
+	return c.conn.WriteMessage(messageType, data)
 }
 
 // Close closes the connection.

@@ -41,7 +41,7 @@ export class LoginModel {
       GameContext.instance.WebSocketClient.sendMessage(
         ReqLogin.cmd,
         {
-          id: this.userId,
+          PlayerId: this.userId,
           pwd: this.userPwd,
         },
         (msg: RespLogin) => {

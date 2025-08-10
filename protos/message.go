@@ -1,8 +1,6 @@
 package protos
 
 const (
-
-
 	CmdPlayerReqLogin         = 2001
 	CmdPlayerResLogin         = 2002
 	CmdPlayerReqCreate        = 2003

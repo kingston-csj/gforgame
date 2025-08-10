@@ -122,6 +122,10 @@ func Info(v string) {
 	consoleLog.Info(v)
 }
 
+func Debugf(format string, args ...interface{}) {
+	consoleLog.Debugf(format, args...)
+}
+
 func createErrorLog() *logrus.Logger {
 	logger := logrus.New()
 

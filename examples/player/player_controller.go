@@ -89,11 +89,11 @@ func (ps *PlayerController) Init() {
 }
 
 func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
-	if util.IsBlankString(msg.Id) {
+	if util.IsBlankString(msg.PlayerId) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return
 	}
-	player := GetPlayerService().GetOrCreatePlayer(msg.Id)
+	player := GetPlayerService().GetOrCreatePlayer(msg.PlayerId)
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 离线，登录触发每日重置检测

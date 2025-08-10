@@ -8,14 +8,23 @@ import (
 	"log"
 	"net"
 	"reflect"
+
+	"github.com/gorilla/websocket"
 )
+
+// WebSocketConn WebSocket连接接口
+type WebSocketConn interface {
+	net.Conn
+	ReadMessage() (messageType int, p []byte, err error)
+	WriteMessage(messageType int, data []byte) error
+}
 
 type Session struct {
 	conn net.Conn
 	// 关闭标记（暂未使用）
 	die chan bool
 	// 私有协议栈编解码
-	ProtocolCodec *protocol.Protocol
+	ProtocolCodec protocol.ProtocolAdapter
 	// 消息编解码
 	MessageCodec codec.MessageCodec
 	// 准备发送的出队消息(带缓冲)
@@ -30,11 +39,13 @@ type Session struct {
 	remoteAddr string
 	// 异步任务
 	AsynTasks chan func()
+	// 协议类型
+	protocolType protocol.ProtocolType
 }
 
 func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	return &Session{conn: conn,
-		ProtocolCodec: protocol.NewDecoder(),
+		ProtocolCodec: protocol.NewBinaryProtocolAdapter(),
 		MessageCodec:  messageCodec,
 		dataToSend:    make(chan []byte, 128),
 		DataReceived:  make(chan *protocol.RequestDataFrame, 128),
@@ -42,6 +53,25 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 		localAddr:     conn.LocalAddr().String(),
 		remoteAddr:    conn.RemoteAddr().String(),
 		AsynTasks:     make(chan func(), 16),
+		protocolType:  protocol.ProtocolTypeBinary,
+	}
+}
+
+// NewSessionWithProtocol 创建指定协议类型的Session
+func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType) *Session {
+	factory := &protocol.ProtocolFactory{}
+	protocolAdapter := factory.NewProtocolAdapter(protocolType)
+
+	return &Session{conn: conn,
+		ProtocolCodec: protocolAdapter,
+		MessageCodec:  messageCodec,
+		dataToSend:    make(chan []byte, 128),
+		DataReceived:  make(chan *protocol.RequestDataFrame, 128),
+		Attrs:         map[string]interface{}{},
+		localAddr:     conn.LocalAddr().String(),
+		remoteAddr:    conn.RemoteAddr().String(),
+		AsynTasks:     make(chan func(), 16),
+		protocolType:  protocolType,
 	}
 }
 
@@ -85,13 +115,86 @@ func (s *Session) Write() {
 }
 
 func (s *Session) Read() {
-	buf := make([]byte, 2048)
-
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error(r.(error))
 		}
 	}()
+
+	// 检查是否是WebSocket连接
+	if wsConn, ok := s.conn.(WebSocketConn); ok {
+		// WebSocket连接，按消息处理
+		s.readWebSocketMessages(wsConn)
+	} else {
+		// TCP连接，按字节流处理
+		s.readTCPStream()
+	}
+}
+
+// readWebSocketMessages 处理WebSocket消息
+func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
+	protocolDetermined := false // 标记是否已经确定协议类型
+
+	for {
+		// 读取一条完整的WebSocket消息
+		messageType, messageData, err := wsConn.ReadMessage()
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		logger.Info(fmt.Sprintf("收到WebSocket消息，类型: %d, 长度: %d", messageType, len(messageData)))
+
+		// 第一次收到消息时确定协议类型并调整协议适配器
+		if !protocolDetermined {
+			var newProtocolType protocol.ProtocolType
+			if messageType == websocket.TextMessage {
+				newProtocolType = protocol.ProtocolTypeJSON
+				logger.Debugf("WebSocket客户端使用JSON协议")
+			} else {
+				newProtocolType = protocol.ProtocolTypeBinary
+				logger.Debugf("WebSocket客户端使用二进制协议")
+			}
+
+			// 如果协议类型发生变化，创建新的协议适配器
+			if s.protocolType != newProtocolType {
+				factory := &protocol.ProtocolFactory{}
+				s.ProtocolCodec = factory.NewProtocolAdapter(newProtocolType)
+				s.protocolType = newProtocolType
+				logger.Debugf("协议适配器已切换到: %v", newProtocolType)
+			}
+			protocolDetermined = true
+		}
+
+		// 使用对应的协议解码器处理消息
+		packets, err := s.ProtocolCodec.Decode(messageData)
+		if err != nil {
+			log.Println(fmt.Errorf("decode protocol failed %v", err))
+			continue // WebSocket消息错误时继续处理下一条消息
+		}
+
+		// 处理解码后的数据包
+		for _, p := range packets {
+			typ, _ := GetMessageType(p.Header.Cmd)
+			if typ == nil {
+				logger.Error(fmt.Errorf("message type not found %v", p.Header.Cmd))
+				continue
+			}
+			msg := reflect.New(typ.Elem()).Interface()
+			err := s.MessageCodec.Decode(p.Data, msg)
+			if err != nil {
+				logger.Error(fmt.Errorf("decode message failed %v", err))
+				continue
+			}
+			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
+			s.DataReceived <- ioFrame
+		}
+	}
+}
+
+// readTCPStream 处理TCP字节流
+func (s *Session) readTCPStream() {
+	buf := make([]byte, 10240)
 
 	for {
 		n, err := s.conn.Read(buf)
@@ -104,7 +207,7 @@ func (s *Session) Read() {
 		}
 		packets, err := s.ProtocolCodec.Decode(buf[:n])
 		if err != nil {
-			log.Println(fmt.Errorf("decode protocol  failed %v", err))
+			log.Println(fmt.Errorf("decode protocol failed %v", err))
 			return
 		}
 		// process packets decoded
@@ -117,7 +220,7 @@ func (s *Session) Read() {
 			msg := reflect.New(typ.Elem()).Interface()
 			err := s.MessageCodec.Decode(p.Data, msg)
 			if err != nil {
-				logger.Error(fmt.Errorf("decode message  failed %v", err))
+				logger.Error(fmt.Errorf("decode message failed %v", err))
 				continue
 			}
 			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
+	"io/github/gforgame/network/protocol"
 	"net"
 	"net/http"
 
@@ -107,7 +108,20 @@ func onClientConnected(node *WsServer, conn net.Conn) {
 		}
 	}()
 
-	ioSession := network.NewSession(conn, node.MessageCodec)
+	// 先创建默认的Session，协议类型会在第一次收到消息时确定
+	var protocolType protocol.ProtocolType
+	if _, ok := conn.(*wsConn); ok {
+		// WebSocket连接，先使用二进制协议，后续会根据消息类型调整
+		protocolType = protocol.ProtocolTypeBinary
+		logger.Debugf("WebSocket客户端连接，等待确定协议类型")
+	} else {
+		// TCP连接，默认使用二进制协议
+		protocolType = protocol.ProtocolTypeBinary
+		logger.Debugf("TCP客户端使用二进制协议")
+	}
+
+	// 创建Session
+	ioSession := network.NewSessionWithProtocol(conn, node.MessageCodec, protocolType)
 	network.RegisterSession(conn, ioSession)
 
 	// session created hook
