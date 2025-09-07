@@ -101,7 +101,7 @@ func main() {
 
 	// session.Send(&protos.ReqPlayerLogin{Id: "1001"}, 0)
 	// client.Callback(session, &protos.ReqPlayerLogin{Id: "1001"}, &commonCallback{})
-	r, err := client.Request(session, &protos.ReqPlayerLogin{Id: "1001"})
+	r, err := client.Request(session, &protos.ReqPlayerLogin{PlayerId: "1001"})
 	if err != nil {
 		fmt.Println(err)
 	}
