@@ -32,6 +32,8 @@ type Player struct {
 	MailboxJson    string             `gorm:"mailbox"`
 	ExtendBox      *ExtendBox         `gorm:"-"`
 	ExtendBoxJson  string             `gorm:"extendbox"`
+	QuestBox       *QuestBox          `gorm:"-"`
+	QuestBoxJson   string             `gorm:"questbox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -89,6 +91,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.ExtendBoxJson = string(jsonData)
 	}
+	if p.QuestBox == nil {
+		p.QuestBoxJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.QuestBox)
+		if err != nil {
+			return err
+		}
+		p.QuestBoxJson = string(jsonData)
+	}
 	return nil
 }
 func (p *Player) AfterFind(tx *gorm.DB) error {
@@ -139,6 +150,14 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	}
 	for _, hero := range p.HeroBox.Heros {
 		hero.AttrBox = attribute.NewAttrBox()
+	}
+	if util.IsEmptyString(p.QuestBoxJson) {
+		p.QuestBox = &QuestBox{
+			Doing:    make(map[int32]*Quest),
+			Finished: make(map[int32]bool),
+		}
+	} else {
+		json.Unmarshal([]byte(p.QuestBoxJson), &p.QuestBox)
 	}
 
 	return nil

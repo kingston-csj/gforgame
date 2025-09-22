@@ -22,7 +22,7 @@ func (h *WorldChannelHandler) Init() {
 		SenderId:   "",
 		SenderHead: 0,
 		Timestamp:  time.Now().Unix(),
-		Content:    "亲爱的玩家，欢迎回来！请友好交流，共建美好聊天环境！",
+		Content:    "亲爱的玩家，请友好交流，共建美好聊天环境！",
 	}
 
 	h.MsgQueue.Push(msg)

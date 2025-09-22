@@ -68,6 +68,13 @@ func init() {
 			RecordType:    reflect.TypeOf(domain.BuffData{}),
 			ContainerType: reflect.TypeOf(&data.Container[int32, domain.BuffData]{}),
 		},
+		// quest表
+		{
+			TableName:     "quest",
+			IDField:       "Id",
+			RecordType:    reflect.TypeOf(domain.QuestData{}),
+			ContainerType: reflect.TypeOf(&data.Container[int32, domain.QuestData]{}),
+		},
 	}
 
 	for _, config := range tableConfigs {

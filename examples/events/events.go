@@ -1,12 +1,8 @@
 package events
 
-const (
-	PlayerLogin        = "player_login"
-	PlayerAfterLoad    = "player_after_load"
-	PlayerEntityChange = "player_entity_change"
-	PlayerAttrChange   = "player_attr_change"
-	// 客户端加载完成
-	PlayerLoadingFinish = "player_loading_finish"
+import "io/github/gforgame/domain"
 
-	SystemDailyReset = "system_daily_reset"
-)
+type RecruitEvent struct {
+	Player domain.Player
+	Times int32
+}
