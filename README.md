@@ -11,7 +11,9 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 - 灵活兼容 Socket 和 WebSocket 接入，通过配置参数轻松切换，无需修改业务代码，完美适配手游、页游、H5 和小游戏的服务端架构。
 - 提供 protobuf 和 JSON 两种通信协议，满足不同客户端的需求，灵活选择最适合的协议进行通信。
 - 提供独立的 HTTP 管理后台网站，支持游戏运维和运营的各类管理需求，提升运维效率和运营支持能力。 --> [后台管理系统](https://github.com/kingston-csj/gamekeeper)
-- 可视化 cocos 游戏客户端，双端代码演示
+- 可视化 cocos 游戏客户端，功能演示
+- 可视化 unity 游戏客户端，功能演示
+- 支持玩家A使用cocos进行游戏，玩家B使用unity双端同时运行，互相交互，实现跨平台游戏体验。
 
 ## 快速入门
 
@@ -132,7 +134,7 @@ example/cocos 为 ws 的客户端程序
 - grpc 跨服通信接入
 - excel 配置文件读取, jforgame-data 实现
 
-## 业务功能(cocos 交互界面)
+## 业务功能(cocos 交互界面)(unity 交互界面逐步完善)
 
 同时按下键盘 alt+g+m 组合键可切换 gm 控制台
 
