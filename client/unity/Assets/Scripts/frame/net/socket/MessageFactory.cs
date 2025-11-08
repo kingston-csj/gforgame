@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UnitySocket
+namespace Nova.Net.Socket
 {
     public class MessageFactory
     {

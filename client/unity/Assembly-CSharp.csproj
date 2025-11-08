@@ -47,38 +47,80 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\WebGL\WebSocket.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\IWebSocket.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\data\Response.cs" />
-    <Compile Include="Assets\Scripts\frame\codec\MessageCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\WebGL\WebSocketManager.cs" />
-    <Compile Include="Assets\Scripts\frame\mvc\BaseModel.cs" />
-    <Compile Include="Assets\Scripts\frame\mvc\BaseController.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\CallbackMgr.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Dispatch\SocketIoDispatcher.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\LongCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\IndexAttribute.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Dispatch\DefaultSocketIoDispatcher.cs" />
+    <Compile Include="Assets\Scripts\frame\Ui\ResourceItem.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\MethodIndexMeta.cs" />
+    <Compile Include="Assets\Scripts\Game\Core\Engine.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\Settings.cs" />
+    <Compile Include="Assets\Scripts\frame\Commons\Util\ReflectUtil.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\MessageEventArgs.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\WebSocketClient.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\data\Message.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\MessageFactory.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Data\SocketDataFrame.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\SocketRuntimeEnvironment.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\NoWebGL\WebSocket.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\handler\MessageCallback.cs" />
+    <Compile Include="Assets\Scripts\frame\Mvc\BaseView.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Handler\MessageHandler.cs" />
+    <Compile Include="Assets\Scripts\frame\Assets\AssetResourceItem.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\BeanAutoCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\CloseStatusCode.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\ByteCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\Opcode.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\dispatch\DefaultSocketIoDispatcher.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\BeanCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Commons\Util\JsonUtil.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Domain\ConfigItemData.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\MapCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\NoWebGL\WebSocketManager.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\handler\MessageDispatcher.cs" />
-    <Compile Include="Assets\Scripts\frame\commons\util\ReflectUtil.cs" />
-    <Compile Include="Assets\Scripts\frame\codec\JsonCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\SocketClient.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\CollectionCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\FieldIndexMeta.cs" />
+    <Compile Include="Assets\Scripts\frame\Assets\AssetResourceFactory.cs" />
+    <Compile Include="Assets\Scripts\frame\Logger\LoggerUtil.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\FieldCodecMeta.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Container\ConfigItemContainer.cs" />
+    <Compile Include="Assets\Scripts\frame\Assets\AssetResourceGroup.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\MessageCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\IntCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Ui\UiLayer.cs" />
+    <Compile Include="Assets\Scripts\frame\Ui\LayerIds.cs" />
+    <Compile Include="Assets\Scripts\frame\Mvc\BaseModel.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\JsonCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Mvc\BaseController.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\CloseEventArgs.cs" />
-    <Compile Include="Assets\Scripts\frame\logger\LoggerUtil.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\data\SocketDataFrame.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\dispatch\SocketIoDispatcher.cs" />
-    <Compile Include="Assets\Scripts\frame\mvc\BaseView.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\SocketRuntimeEnvironment.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\SocketClient.cs" />
+    <Compile Include="Assets\Scripts\frame\Assets\AssetTextItem.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Handler\MessageCallback.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Data\Message.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Container\DataManager.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\MessageFactory.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\ShortCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\FloatCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\DoubleCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\Codec.cs" />
+    <Compile Include="Assets\Scripts\frame\Commons\Util\ByteBuff.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\WebSocketState.cs" />
-    <Compile Include="Assets\Scripts\frame\commons\util\ByteBuff.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Handler\MessageDispatcher.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\WebSocketClient.cs" />
+    <Compile Include="Assets\Scripts\Game\Core\AppContext.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\Data\Response.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\ArrayCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\StringCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\BoolCodec.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\ConfigContainer.cs" />
+    <Compile Include="Assets\Scripts\frame\Net\Socket\CallbackMgr.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\AbsConfigItem.cs" />
+    <Compile Include="Assets\Scripts\frame\Config\IIndexMeta.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\ErrorEventArgs.cs" />
-    <Compile Include="Assets\Scripts\frame\net\socket\handler\MessageHandler.cs" />
+    <Compile Include="Assets\Scripts\frame\Codec\Bean\FieldIgnore.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\OpenEventArgs.cs" />
+    <None Include="Assets\Resources\config\i18nData.json" />
+    <None Include="Assets\Resources\config\heroData.json" />
+    <None Include="Assets\Resources\config\mallData.json" />
+    <None Include="Assets\Resources\config\herostageData.json" />
+    <None Include="Assets\Resources\config\itemData.json" />
+    <None Include="Assets\Resources\config\herolevelData.json" />
+    <None Include="Assets\Resources\config\skillData.json" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Program Files\Tuanjie\Hub\Editor\2022.3.61t5\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -342,6 +384,9 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
       <HintPath>D:\go_projects\gforgame\client\unity\Library\PackageCache\com.unity.visualscripting@1.9.4\Runtime\VisualScripting.Flow\Dependencies\NCalc\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>D:\go_projects\gforgame\client\unity\Library\PackageCache\com.unity.nuget.newtonsoft-json@3.2.2\Runtime\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>D:\Program Files\Tuanjie\Hub\Editor\2022.3.61t5\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>

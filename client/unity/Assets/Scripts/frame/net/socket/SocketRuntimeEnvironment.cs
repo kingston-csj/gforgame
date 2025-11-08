@@ -1,6 +1,5 @@
 ﻿using Nova.Codec;
 using System;
-using UnitySocket;
 
 namespace Nova.Net.Socket
 {

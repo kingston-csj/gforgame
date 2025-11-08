@@ -1,5 +1,4 @@
 using System;
-using Object = UnityEngine.Object;
 
 namespace Nova.Net.Socket
 {

@@ -23,5 +23,4 @@ namespace Nova.Commons.Util
             return method.Invoke(null, args);
         }
     }
-    
 }

@@ -43,4 +43,5 @@ namespace Nova.Logger
             }
         }
     }
+    
 }

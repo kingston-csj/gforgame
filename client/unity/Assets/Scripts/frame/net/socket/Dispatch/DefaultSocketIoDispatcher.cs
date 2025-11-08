@@ -2,7 +2,7 @@
 using System.Reflection;
 using Nova.Commons.Util;
 
-namespace Nova.Net.Socket.dispatch
+namespace Nova.Net.Socket
 {
     public class DefaultSocketIoDispatcher : SocketIoDispatcher
     {

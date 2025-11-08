@@ -1,0 +1,104 @@
+[
+    {
+        "id": 1,
+        "name": "降龙十八掌",
+        "type": 1,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_100"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1001_1"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "九阴真经",
+        "type": 2,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_101"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1002_1"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "九阳神功",
+        "type": 2,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_102"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1003_1"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "name": "太玄经",
+        "type": 2,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_103"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1004_1"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "name": "小无相功",
+        "type": 2,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_104"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1005_1"
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "name": "葵花宝典",
+        "type": 2,
+        "consumes": [
+            {
+                "type": "Currency",
+                "value": "Diamond_105"
+            }
+        ],
+        "rewards": [
+            {
+                "type": "Item",
+                "value": "1006_1"
+            }
+        ]
+    }
+]

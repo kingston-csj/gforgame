@@ -1,7 +1,6 @@
 using System;
 using Nova.Commons.Util;
 using Nova.Logger;
-using Nova.Net.Socket.dispatch;
 using UnityEngine;
 using UnityWebSocket;
 using CloseEventArgs = UnityWebSocket.CloseEventArgs;

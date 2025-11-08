@@ -1,4 +1,4 @@
-﻿namespace Nova.Net.Socket.dispatch
+﻿namespace Nova.Net.Socket
 {
     public interface SocketIoDispatcher
     {

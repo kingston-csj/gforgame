@@ -1,0 +1,893 @@
+[
+    {
+        "id": 1,
+        "level": 1,
+        "cost": 100,
+        "hp": 100,
+        "attack": 100,
+        "defense": 50,
+        "speed": 0
+    },
+    {
+        "id": 2,
+        "level": 2,
+        "cost": 101,
+        "hp": 101,
+        "attack": 101,
+        "defense": 51,
+        "speed": 0
+    },
+    {
+        "id": 3,
+        "level": 3,
+        "cost": 102,
+        "hp": 102,
+        "attack": 102,
+        "defense": 52,
+        "speed": 0
+    },
+    {
+        "id": 4,
+        "level": 4,
+        "cost": 103,
+        "hp": 103,
+        "attack": 103,
+        "defense": 53,
+        "speed": 0
+    },
+    {
+        "id": 5,
+        "level": 5,
+        "cost": 104,
+        "hp": 104,
+        "attack": 104,
+        "defense": 54,
+        "speed": 0
+    },
+    {
+        "id": 6,
+        "level": 6,
+        "cost": 105,
+        "hp": 105,
+        "attack": 105,
+        "defense": 55,
+        "speed": 0
+    },
+    {
+        "id": 7,
+        "level": 7,
+        "cost": 106,
+        "hp": 106,
+        "attack": 106,
+        "defense": 56,
+        "speed": 0
+    },
+    {
+        "id": 8,
+        "level": 8,
+        "cost": 107,
+        "hp": 107,
+        "attack": 107,
+        "defense": 57,
+        "speed": 0
+    },
+    {
+        "id": 9,
+        "level": 9,
+        "cost": 108,
+        "hp": 108,
+        "attack": 108,
+        "defense": 58,
+        "speed": 0
+    },
+    {
+        "id": 10,
+        "level": 10,
+        "cost": 109,
+        "hp": 109,
+        "attack": 109,
+        "defense": 59,
+        "speed": 0
+    },
+    {
+        "id": 11,
+        "level": 11,
+        "cost": 110,
+        "hp": 110,
+        "attack": 110,
+        "defense": 60,
+        "speed": 0
+    },
+    {
+        "id": 12,
+        "level": 12,
+        "cost": 111,
+        "hp": 111,
+        "attack": 111,
+        "defense": 61,
+        "speed": 0
+    },
+    {
+        "id": 13,
+        "level": 13,
+        "cost": 112,
+        "hp": 112,
+        "attack": 112,
+        "defense": 62,
+        "speed": 0
+    },
+    {
+        "id": 14,
+        "level": 14,
+        "cost": 113,
+        "hp": 113,
+        "attack": 113,
+        "defense": 63,
+        "speed": 0
+    },
+    {
+        "id": 15,
+        "level": 15,
+        "cost": 114,
+        "hp": 114,
+        "attack": 114,
+        "defense": 64,
+        "speed": 0
+    },
+    {
+        "id": 16,
+        "level": 16,
+        "cost": 115,
+        "hp": 115,
+        "attack": 115,
+        "defense": 65,
+        "speed": 0
+    },
+    {
+        "id": 17,
+        "level": 17,
+        "cost": 116,
+        "hp": 116,
+        "attack": 116,
+        "defense": 66,
+        "speed": 0
+    },
+    {
+        "id": 18,
+        "level": 18,
+        "cost": 117,
+        "hp": 117,
+        "attack": 117,
+        "defense": 67,
+        "speed": 0
+    },
+    {
+        "id": 19,
+        "level": 19,
+        "cost": 118,
+        "hp": 118,
+        "attack": 118,
+        "defense": 68,
+        "speed": 0
+    },
+    {
+        "id": 20,
+        "level": 20,
+        "cost": 119,
+        "hp": 119,
+        "attack": 119,
+        "defense": 69,
+        "speed": 0
+    },
+    {
+        "id": 21,
+        "level": 21,
+        "cost": 120,
+        "hp": 120,
+        "attack": 120,
+        "defense": 70,
+        "speed": 0
+    },
+    {
+        "id": 22,
+        "level": 22,
+        "cost": 121,
+        "hp": 121,
+        "attack": 121,
+        "defense": 71,
+        "speed": 0
+    },
+    {
+        "id": 23,
+        "level": 23,
+        "cost": 122,
+        "hp": 122,
+        "attack": 122,
+        "defense": 72,
+        "speed": 0
+    },
+    {
+        "id": 24,
+        "level": 24,
+        "cost": 123,
+        "hp": 123,
+        "attack": 123,
+        "defense": 73,
+        "speed": 0
+    },
+    {
+        "id": 25,
+        "level": 25,
+        "cost": 124,
+        "hp": 124,
+        "attack": 124,
+        "defense": 74,
+        "speed": 0
+    },
+    {
+        "id": 26,
+        "level": 26,
+        "cost": 125,
+        "hp": 125,
+        "attack": 125,
+        "defense": 75,
+        "speed": 0
+    },
+    {
+        "id": 27,
+        "level": 27,
+        "cost": 126,
+        "hp": 126,
+        "attack": 126,
+        "defense": 76,
+        "speed": 0
+    },
+    {
+        "id": 28,
+        "level": 28,
+        "cost": 127,
+        "hp": 127,
+        "attack": 127,
+        "defense": 77,
+        "speed": 0
+    },
+    {
+        "id": 29,
+        "level": 29,
+        "cost": 128,
+        "hp": 128,
+        "attack": 128,
+        "defense": 78,
+        "speed": 0
+    },
+    {
+        "id": 30,
+        "level": 30,
+        "cost": 129,
+        "hp": 129,
+        "attack": 129,
+        "defense": 79,
+        "speed": 0
+    },
+    {
+        "id": 31,
+        "level": 31,
+        "cost": 130,
+        "hp": 130,
+        "attack": 130,
+        "defense": 80,
+        "speed": 0
+    },
+    {
+        "id": 32,
+        "level": 32,
+        "cost": 131,
+        "hp": 131,
+        "attack": 131,
+        "defense": 81,
+        "speed": 0
+    },
+    {
+        "id": 33,
+        "level": 33,
+        "cost": 132,
+        "hp": 132,
+        "attack": 132,
+        "defense": 82,
+        "speed": 0
+    },
+    {
+        "id": 34,
+        "level": 34,
+        "cost": 133,
+        "hp": 133,
+        "attack": 133,
+        "defense": 83,
+        "speed": 0
+    },
+    {
+        "id": 35,
+        "level": 35,
+        "cost": 134,
+        "hp": 134,
+        "attack": 134,
+        "defense": 84,
+        "speed": 0
+    },
+    {
+        "id": 36,
+        "level": 36,
+        "cost": 135,
+        "hp": 135,
+        "attack": 135,
+        "defense": 85,
+        "speed": 0
+    },
+    {
+        "id": 37,
+        "level": 37,
+        "cost": 136,
+        "hp": 136,
+        "attack": 136,
+        "defense": 86,
+        "speed": 0
+    },
+    {
+        "id": 38,
+        "level": 38,
+        "cost": 137,
+        "hp": 137,
+        "attack": 137,
+        "defense": 87,
+        "speed": 0
+    },
+    {
+        "id": 39,
+        "level": 39,
+        "cost": 138,
+        "hp": 138,
+        "attack": 138,
+        "defense": 88,
+        "speed": 0
+    },
+    {
+        "id": 40,
+        "level": 40,
+        "cost": 139,
+        "hp": 139,
+        "attack": 139,
+        "defense": 89,
+        "speed": 0
+    },
+    {
+        "id": 41,
+        "level": 41,
+        "cost": 140,
+        "hp": 140,
+        "attack": 140,
+        "defense": 90,
+        "speed": 0
+    },
+    {
+        "id": 42,
+        "level": 42,
+        "cost": 141,
+        "hp": 141,
+        "attack": 141,
+        "defense": 91,
+        "speed": 0
+    },
+    {
+        "id": 43,
+        "level": 43,
+        "cost": 142,
+        "hp": 142,
+        "attack": 142,
+        "defense": 92,
+        "speed": 0
+    },
+    {
+        "id": 44,
+        "level": 44,
+        "cost": 143,
+        "hp": 143,
+        "attack": 143,
+        "defense": 93,
+        "speed": 0
+    },
+    {
+        "id": 45,
+        "level": 45,
+        "cost": 144,
+        "hp": 144,
+        "attack": 144,
+        "defense": 94,
+        "speed": 0
+    },
+    {
+        "id": 46,
+        "level": 46,
+        "cost": 145,
+        "hp": 145,
+        "attack": 145,
+        "defense": 95,
+        "speed": 0
+    },
+    {
+        "id": 47,
+        "level": 47,
+        "cost": 146,
+        "hp": 146,
+        "attack": 146,
+        "defense": 96,
+        "speed": 0
+    },
+    {
+        "id": 48,
+        "level": 48,
+        "cost": 147,
+        "hp": 147,
+        "attack": 147,
+        "defense": 97,
+        "speed": 0
+    },
+    {
+        "id": 49,
+        "level": 49,
+        "cost": 148,
+        "hp": 148,
+        "attack": 148,
+        "defense": 98,
+        "speed": 0
+    },
+    {
+        "id": 50,
+        "level": 50,
+        "cost": 149,
+        "hp": 149,
+        "attack": 149,
+        "defense": 99,
+        "speed": 0
+    },
+    {
+        "id": 51,
+        "level": 51,
+        "cost": 600,
+        "hp": 150,
+        "attack": 150,
+        "defense": 100,
+        "speed": 10
+    },
+    {
+        "id": 52,
+        "level": 52,
+        "cost": 610,
+        "hp": 151,
+        "attack": 151,
+        "defense": 101,
+        "speed": 11
+    },
+    {
+        "id": 53,
+        "level": 53,
+        "cost": 620,
+        "hp": 152,
+        "attack": 152,
+        "defense": 102,
+        "speed": 12
+    },
+    {
+        "id": 54,
+        "level": 54,
+        "cost": 630,
+        "hp": 153,
+        "attack": 153,
+        "defense": 103,
+        "speed": 13
+    },
+    {
+        "id": 55,
+        "level": 55,
+        "cost": 640,
+        "hp": 154,
+        "attack": 154,
+        "defense": 104,
+        "speed": 14
+    },
+    {
+        "id": 56,
+        "level": 56,
+        "cost": 650,
+        "hp": 155,
+        "attack": 155,
+        "defense": 105,
+        "speed": 15
+    },
+    {
+        "id": 57,
+        "level": 57,
+        "cost": 660,
+        "hp": 156,
+        "attack": 156,
+        "defense": 106,
+        "speed": 16
+    },
+    {
+        "id": 58,
+        "level": 58,
+        "cost": 670,
+        "hp": 157,
+        "attack": 157,
+        "defense": 107,
+        "speed": 17
+    },
+    {
+        "id": 59,
+        "level": 59,
+        "cost": 680,
+        "hp": 158,
+        "attack": 158,
+        "defense": 108,
+        "speed": 18
+    },
+    {
+        "id": 60,
+        "level": 60,
+        "cost": 690,
+        "hp": 159,
+        "attack": 159,
+        "defense": 109,
+        "speed": 19
+    },
+    {
+        "id": 61,
+        "level": 61,
+        "cost": 700,
+        "hp": 160,
+        "attack": 160,
+        "defense": 110,
+        "speed": 20
+    },
+    {
+        "id": 62,
+        "level": 62,
+        "cost": 710,
+        "hp": 161,
+        "attack": 161,
+        "defense": 111,
+        "speed": 21
+    },
+    {
+        "id": 63,
+        "level": 63,
+        "cost": 720,
+        "hp": 162,
+        "attack": 162,
+        "defense": 112,
+        "speed": 22
+    },
+    {
+        "id": 64,
+        "level": 64,
+        "cost": 730,
+        "hp": 163,
+        "attack": 163,
+        "defense": 113,
+        "speed": 23
+    },
+    {
+        "id": 65,
+        "level": 65,
+        "cost": 740,
+        "hp": 164,
+        "attack": 164,
+        "defense": 114,
+        "speed": 24
+    },
+    {
+        "id": 66,
+        "level": 66,
+        "cost": 750,
+        "hp": 165,
+        "attack": 165,
+        "defense": 115,
+        "speed": 25
+    },
+    {
+        "id": 67,
+        "level": 67,
+        "cost": 760,
+        "hp": 166,
+        "attack": 166,
+        "defense": 116,
+        "speed": 26
+    },
+    {
+        "id": 68,
+        "level": 68,
+        "cost": 770,
+        "hp": 167,
+        "attack": 167,
+        "defense": 117,
+        "speed": 27
+    },
+    {
+        "id": 69,
+        "level": 69,
+        "cost": 780,
+        "hp": 168,
+        "attack": 168,
+        "defense": 118,
+        "speed": 28
+    },
+    {
+        "id": 70,
+        "level": 70,
+        "cost": 790,
+        "hp": 169,
+        "attack": 169,
+        "defense": 119,
+        "speed": 29
+    },
+    {
+        "id": 71,
+        "level": 71,
+        "cost": 800,
+        "hp": 170,
+        "attack": 170,
+        "defense": 120,
+        "speed": 30
+    },
+    {
+        "id": 72,
+        "level": 72,
+        "cost": 810,
+        "hp": 171,
+        "attack": 171,
+        "defense": 121,
+        "speed": 31
+    },
+    {
+        "id": 73,
+        "level": 73,
+        "cost": 820,
+        "hp": 172,
+        "attack": 172,
+        "defense": 122,
+        "speed": 32
+    },
+    {
+        "id": 74,
+        "level": 74,
+        "cost": 830,
+        "hp": 173,
+        "attack": 173,
+        "defense": 123,
+        "speed": 33
+    },
+    {
+        "id": 75,
+        "level": 75,
+        "cost": 840,
+        "hp": 174,
+        "attack": 174,
+        "defense": 124,
+        "speed": 34
+    },
+    {
+        "id": 76,
+        "level": 76,
+        "cost": 850,
+        "hp": 175,
+        "attack": 175,
+        "defense": 125,
+        "speed": 35
+    },
+    {
+        "id": 77,
+        "level": 77,
+        "cost": 860,
+        "hp": 176,
+        "attack": 176,
+        "defense": 126,
+        "speed": 36
+    },
+    {
+        "id": 78,
+        "level": 78,
+        "cost": 870,
+        "hp": 177,
+        "attack": 177,
+        "defense": 127,
+        "speed": 37
+    },
+    {
+        "id": 79,
+        "level": 79,
+        "cost": 880,
+        "hp": 178,
+        "attack": 178,
+        "defense": 128,
+        "speed": 38
+    },
+    {
+        "id": 80,
+        "level": 80,
+        "cost": 890,
+        "hp": 179,
+        "attack": 179,
+        "defense": 129,
+        "speed": 39
+    },
+    {
+        "id": 81,
+        "level": 81,
+        "cost": 900,
+        "hp": 180,
+        "attack": 180,
+        "defense": 130,
+        "speed": 40
+    },
+    {
+        "id": 82,
+        "level": 82,
+        "cost": 910,
+        "hp": 181,
+        "attack": 181,
+        "defense": 131,
+        "speed": 41
+    },
+    {
+        "id": 83,
+        "level": 83,
+        "cost": 920,
+        "hp": 182,
+        "attack": 182,
+        "defense": 132,
+        "speed": 42
+    },
+    {
+        "id": 84,
+        "level": 84,
+        "cost": 930,
+        "hp": 183,
+        "attack": 183,
+        "defense": 133,
+        "speed": 43
+    },
+    {
+        "id": 85,
+        "level": 85,
+        "cost": 940,
+        "hp": 184,
+        "attack": 184,
+        "defense": 134,
+        "speed": 44
+    },
+    {
+        "id": 86,
+        "level": 86,
+        "cost": 950,
+        "hp": 185,
+        "attack": 185,
+        "defense": 135,
+        "speed": 45
+    },
+    {
+        "id": 87,
+        "level": 87,
+        "cost": 960,
+        "hp": 186,
+        "attack": 186,
+        "defense": 136,
+        "speed": 46
+    },
+    {
+        "id": 88,
+        "level": 88,
+        "cost": 970,
+        "hp": 187,
+        "attack": 187,
+        "defense": 137,
+        "speed": 47
+    },
+    {
+        "id": 89,
+        "level": 89,
+        "cost": 980,
+        "hp": 188,
+        "attack": 188,
+        "defense": 138,
+        "speed": 48
+    },
+    {
+        "id": 90,
+        "level": 90,
+        "cost": 990,
+        "hp": 189,
+        "attack": 189,
+        "defense": 139,
+        "speed": 49
+    },
+    {
+        "id": 91,
+        "level": 91,
+        "cost": 1000,
+        "hp": 190,
+        "attack": 190,
+        "defense": 140,
+        "speed": 50
+    },
+    {
+        "id": 92,
+        "level": 92,
+        "cost": 1000,
+        "hp": 191,
+        "attack": 191,
+        "defense": 141,
+        "speed": 51
+    },
+    {
+        "id": 93,
+        "level": 93,
+        "cost": 1020,
+        "hp": 192,
+        "attack": 192,
+        "defense": 142,
+        "speed": 52
+    },
+    {
+        "id": 94,
+        "level": 94,
+        "cost": 1030,
+        "hp": 193,
+        "attack": 193,
+        "defense": 143,
+        "speed": 53
+    },
+    {
+        "id": 95,
+        "level": 95,
+        "cost": 1040,
+        "hp": 194,
+        "attack": 194,
+        "defense": 144,
+        "speed": 54
+    },
+    {
+        "id": 96,
+        "level": 96,
+        "cost": 1050,
+        "hp": 195,
+        "attack": 195,
+        "defense": 145,
+        "speed": 55
+    },
+    {
+        "id": 97,
+        "level": 97,
+        "cost": 1060,
+        "hp": 196,
+        "attack": 196,
+        "defense": 146,
+        "speed": 56
+    },
+    {
+        "id": 98,
+        "level": 98,
+        "cost": 1070,
+        "hp": 197,
+        "attack": 197,
+        "defense": 147,
+        "speed": 57
+    },
+    {
+        "id": 99,
+        "level": 99,
+        "cost": 1080,
+        "hp": 198,
+        "attack": 198,
+        "defense": 148,
+        "speed": 58
+    }
+]

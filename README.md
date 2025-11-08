@@ -12,8 +12,9 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 - 提供 protobuf 和 JSON 两种通信协议，满足不同客户端的需求，灵活选择最适合的协议进行通信。
 - 提供独立的 HTTP 管理后台网站，支持游戏运维和运营的各类管理需求，提升运维效率和运营支持能力。 --> [后台管理系统](https://github.com/kingston-csj/gamekeeper)
 - 可视化 cocos 游戏客户端，功能演示
-- 可视化 unity 游戏客户端，功能演示
-- 支持玩家A使用cocos进行游戏，玩家B使用unity双端同时运行，互相交互，网络实现跨平台游戏体验。
+- 可视化 unity  游戏客户端，功能演示
+- 玩家可自由选择 Cocos 或 Unity 端进入游戏，双端同步运行、实时互联，打造无缝跨平台交互玩法。
+- cocos/unity客户端，亦可作为jforgame的游戏客户端
 
 ## 快速入门
 

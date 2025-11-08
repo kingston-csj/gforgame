@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:yousandi.cn,2023:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb97a7001bad46cfaa8bafcb9dacf911, type: 3}
+  m_Name: AssetResourceBinding
+  m_EditorClassIdentifier: 
+  textItems:
+  - group: config
+    desc: "\u914D\u7F6Ejson\u6587\u4EF6\u96C6"
+    pool:
+    - {fileID: 4900000, guid: 65254138d07fa714789fd45db9e2b7dd, type: 3}
+    - {fileID: 4900000, guid: 1b6967c114a34db469766a001af485d6, type: 3}
+    - {fileID: 4900000, guid: 387189f4988d2eb459bdbd65b5720f09, type: 3}
+    - {fileID: 4900000, guid: e0546d34ec26c6c41b32747d9f24a3fa, type: 3}
+    - {fileID: 4900000, guid: d80877f4a11e4ca4bb1a58f4b95f7cc2, type: 3}
+    - {fileID: 4900000, guid: 26a3538805da4b849bbf10198cdff8cd, type: 3}
+    - {fileID: 4900000, guid: ad12394ada74000479ba4d4be753be9c, type: 3}
