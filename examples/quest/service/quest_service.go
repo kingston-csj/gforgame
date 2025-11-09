@@ -6,9 +6,12 @@ import (
 	"io/github/gforgame/common"
 
 	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/events"
 )
 
 type QuestService struct {
@@ -37,6 +40,17 @@ func GetQuestService() *QuestService {
 		}
 	})
 	return instance
+}
+
+func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
+	questBox := player.QuestBox
+	questBox.ClearQuestsByCategory(catalog)
+	c := config.GetSpecificContainer[ container.QuestContainer]("quest")
+	quests := c.GetRecordsBy("Category", catalog)
+	for _, quest := range quests {
+		s.AcceptQuest(player, quest.Id)
+	}
+	context.EventBus.Publish(events.PlayerEntityChange, player)
 }
 
 func (s *QuestService) AcceptQuest(player *playerdomain.Player, questId int32) (*playerdomain.Quest, error) {

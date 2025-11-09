@@ -6,6 +6,8 @@ import (
 	"io/github/gforgame/examples/constants"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/io"
+	"io/github/gforgame/protos"
 )
 type MainQuestDirector struct {
 }
@@ -17,24 +19,46 @@ func NewMainQuestDirector() *MainQuestDirector {
 /// 实现QuestDirector接口
 
 func (d *MainQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
-	firstMainQuestId := config.GetSpecificContainer[configdomain.QuestData, container.QuestContainer]("quest").FirstMainQuestId
+	firstMainQuestId := config.GetSpecificContainer[container.QuestContainer]("quest").FirstMainQuestId
 	if !player.QuestBox.HasReceivedQuest(firstMainQuestId) {
-		// player.QuestBox.AddQuest(firstMainQuestId)
+		GetQuestService().AcceptQuest(player, firstMainQuestId)
 	}
 }
 
 // 玩家完成任务后触发
 func (d *MainQuestDirector) AfterTakeReward(player *playerdomain.Player, quest *playerdomain.Quest) {
-	// 1. 从数据库加载玩家任务
-	// 2. 转换为vo
-	// 3. 下发给客户端
+	d.AcceptNextQuest(player, quest)
+	d.notifyMainQuest(player)
+}
+
+func (d *MainQuestDirector) AcceptNextQuest(player *playerdomain.Player, quest *playerdomain.Quest)  {
+	questData := config.QueryById[configdomain.QuestData](quest.Id)
+	player.QuestBox.AddFinishedQuest(quest.Id)
+	if questData.Next != 0 {
+		nextQuestData := config.QueryById[configdomain.QuestData](questData.Next)
+		GetQuestService().AcceptQuest(player, nextQuestData.Id)
+	}
 }
 
 // 任务进度变更触发
 func (d *MainQuestDirector) OnQuestProgressChanged(player *playerdomain.Player, quest *playerdomain.Quest) {
-	// 1. 从数据库加载玩家任务
-	// 2. 转换为vo
-	// 3. 下发给客户端
+	questData := config.QueryById[configdomain.QuestData](quest.Id)
+	 // 自动领奖
+	 if questData.Auto> 0 && quest.IsComplete() {
+		// 暂时不处理
+	 }
+}
+
+func (d *MainQuestDirector) notifyMainQuest(player *playerdomain.Player) {
+	quest := player.QuestBox.GetCurrentMainQuest()
+	if quest == nil {
+		return
+	}
+	questVo := quest.ToVo()
+	refresh := &protos.PushQuestRefreshVo{
+		Quest: questVo,
+	}
+	io.NotifyPlayer(player, refresh)
 }
 
 // 获取任务类型

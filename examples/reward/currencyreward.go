@@ -1,21 +1,31 @@
 package reward
 
 import (
+	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/protos"
+	"strconv"
 )
 
 type CurrencyReward struct {
-	Kind   string
+	Currency   string
 	Amount int32
 }
 
 func NewCurrencyReward(kind string, amount int32) *CurrencyReward {
 	return &CurrencyReward{
-		Kind:   kind,
+		Currency:   kind,
 		Amount: amount,
 	}
+}
+
+func (r *CurrencyReward) GetAmount() int {
+	return int(r.Amount)
+}
+
+func (r *CurrencyReward) AddAmount(amount int) {
+	r.Amount += int32(amount)
 }
 
 func (r *CurrencyReward) Verify(player *player.Player) error {
@@ -27,9 +37,9 @@ func (r *CurrencyReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *CurrencyReward) Reward(player *player.Player) {
-	if r.Kind == "gold" {
+	if r.Currency == "gold" {
 		player.Purse.AddGold(r.Amount)
-	} else if r.Kind == "diamond" {
+	} else if r.Currency == "diamond" {
 		player.Purse.AddDiamond(r.Amount)
 	}
 	io.NotifyPlayer(player, &protos.PushPurseInfo{
@@ -37,3 +47,13 @@ func (r *CurrencyReward) Reward(player *player.Player) {
 		Diamond: player.Purse.Diamond,
 	})
 }
+
+func (r *CurrencyReward) GetType() string {
+	return constants.RewardTypeCurrency
+}
+
+func (r *CurrencyReward) Serial() string {
+	return r.Currency + "_" + strconv.Itoa(int(r.Amount))
+}
+
+

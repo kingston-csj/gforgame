@@ -48,14 +48,14 @@ func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.Req
 	case "add_diamond":
 		count, _ := util.StringToInt32(params)
 		reward := &reward.CurrencyReward{
-			Kind:   "diamond",
+			Currency:   "diamond",
 			Amount: count,
 		}
 		reward.Reward(player.(*playerdomain.Player))
 	case "add_gold":
 		count, _ := util.StringToInt32(params)
 		reward := &reward.CurrencyReward{
-			Kind:   "gold",
+			Currency:   "gold",
 			Amount: count,
 		}
 		reward.Reward(player.(*playerdomain.Player))

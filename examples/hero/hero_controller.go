@@ -132,10 +132,7 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 				Type:  "hero",
 				Value: strconv.Itoa(int(heroData.Id)),
 			})
-			p.HeroBox.AddHero(&playerdomain.Hero{
-				ModelId: heroData.Id,
-				Level:   1,
-			})
+			ps.NewHero(p, heroData.Id)
 
 			GetHeroService().ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
 		}
@@ -148,6 +145,17 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 		Code:        0,
 		RewardInfos: rewardInfos,
 	}
+}
+
+func (ps *HeroController) NewHero(p *playerdomain.Player,heroId int32) {
+	p.HeroBox.AddHero(&playerdomain.Hero{
+				ModelId: heroId,
+				Level:   1,
+			})
+	context.EventBus.Publish(events.HeroGain, &events.HeroGainEvent{
+		Player: p,
+		HeroId: heroId,
+	})
 }
 
 func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
@@ -171,7 +179,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	stageContainer := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage")
+	stageContainer := config.GetSpecificContainer[ container.HeroStageContainer]("herostage")
 
 	stageData := stageContainer.GetRecordByStage(h.Stage)
 	if stageData == nil {
@@ -193,7 +201,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 	}
 
 	consume := consume.CurrencyConsume{
-		Kind:   "gold",
+		Currency:   "gold",
 		Amount: costGold,
 	}
 	err := consume.Verify(p)
@@ -223,7 +231,7 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 		}
 	}
 
-	stageContainer := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage")
+	stageContainer := config.GetSpecificContainer[container.HeroStageContainer]("herostage")
 	stageData := stageContainer.GetRecordByStage(h.Stage)
 	if stageData == nil {
 		return &protos.ResHeroUpStage{

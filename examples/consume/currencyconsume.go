@@ -9,17 +9,17 @@ import (
 )
 
 type CurrencyConsume struct {
-	Kind   string
-	Amount int32
+	Currency string
+	Amount   int32
 }
 
 func (c *CurrencyConsume) Verify(player *player.Player) error {
 	purse := player.Purse
-	if c.Kind == "gold" {
+	if c.Currency == "gold" {
 		if !purse.IsEnoughGold(c.Amount) {
 			return common.NewBusinessRequestException(constants.I18N_GOLD_NOT_ENOUGH)
 		}
-	} else if c.Kind == "diamond" {
+	} else if c.Currency == "diamond" {	
 		if !purse.IsEnoughDiamond(c.Amount) {
 			return common.NewBusinessRequestException(constants.I18N_DIAMOND_NOT_ENOUGH)
 		}
@@ -33,9 +33,9 @@ func (c *CurrencyConsume) VerifySliently(player *player.Player) bool {
 }
 
 func (c *CurrencyConsume) Consume(player *player.Player) {
-	if c.Kind == "gold" {
+	if c.Currency == "gold" {
 		player.Purse.SubGold(c.Amount)
-	} else if c.Kind == "diamond" {
+	} else if c.Currency == "diamond" {
 		player.Purse.SubDiamond(c.Amount)
 	}
 	io.NotifyPlayer(player, &protos.PushPurseInfo{

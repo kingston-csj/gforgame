@@ -4,6 +4,6 @@ package protos
 // Item id_count;
 // Hero id
 type RewardVo struct {
-	Type  int32 `json:"type"`
-	Value int32 `json:"value"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }

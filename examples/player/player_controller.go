@@ -10,7 +10,6 @@ import (
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
-	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/hero"
@@ -130,7 +129,7 @@ func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerC
 func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	toLevel := msg.ToLevel
-	stageData := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResPlayerUpLevel{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -156,8 +155,8 @@ func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg 
 	}
 
 	consume := consume.CurrencyConsume{
-		Kind:   "gold",
-		Amount: costGold,
+		Currency: "gold",
+		Amount:   costGold,
 	}
 	err := consume.Verify(p)
 	if err != nil {
@@ -179,7 +178,7 @@ func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg 
 func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 
-	stageData := config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_HERO_TIP4,
@@ -192,7 +191,7 @@ func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *p
 		}
 	}
 
-	stageData = config.GetSpecificContainer[configdomain.HeroStageData, container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage + 1)
+	stageData = config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage + 1)
 	if stageData == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_HERO_TIP4,

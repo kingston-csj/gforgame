@@ -73,7 +73,8 @@ func init() {
 			TableName:     "quest",
 			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.QuestData{}),
-			ContainerType: reflect.TypeOf(&data.Container[int32, domain.QuestData]{}),
+			ContainerType: reflect.TypeOf(&container.QuestContainer{}),
+			IndexFuncs:    map[string]string{"Category": "Category"},
 		},
 	}
 
@@ -111,7 +112,7 @@ func (dm *DataManager) GetContainer(name string) interface{} {
 }
 
 // GetSpecificContainer 获取特定类型的容器
-func GetSpecificContainer[D any, C any](name string) *C {
+func GetSpecificContainer[C any](name string) *C {
 	container := GetDataManager().GetContainer(name)
 	if container == nil {
 		return nil

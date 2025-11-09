@@ -22,8 +22,12 @@ func (q *Quest) AddProgress(progress int32) {
 	q.Progress += progress
 }
 
-func (q *Quest) ToVo() protos.QuestVo {
-	return protos.QuestVo{
+func (q *Quest) SetProgress(progress int32) {
+	q.Progress = progress
+}
+
+func (q *Quest) ToVo() *protos.QuestVo {
+	return &protos.QuestVo{
 		Id:       int32(q.Id),
 		Progress: int32(q.Progress),
 		Target:   int32(q.Target),

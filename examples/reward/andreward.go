@@ -58,16 +58,16 @@ func merge0(result map[string]Reward, r Reward) {
 			merge0(result, child)
 		}
 	case *CurrencyReward:
-		key := "currency:" + v.Kind
+		key := "currency:" + v.Currency
 		if prev, ok := result[key]; ok {
 			prevMoney := prev.(*CurrencyReward)
 			result[key] = &CurrencyReward{
-				Kind:   v.Kind,
+				Currency:   v.Currency,
 				Amount: prevMoney.Amount + v.Amount,
 			}
 		} else {
 			result[key] = &CurrencyReward{
-				Kind:   v.Kind,
+				Currency:   v.Currency,
 				Amount: v.Amount,
 			}
 		}
@@ -89,4 +89,23 @@ func merge0(result map[string]Reward, r Reward) {
 	default:
 		panic(fmt.Sprintf("cannot merge %T", r))
 	}
+}
+
+func (a *AndReward) GetType() string {
+	return ""
+}
+
+// 对andReward计算数量，没什么实际意义
+func (a *AndReward) GetAmount() int {
+	return -1;
+}
+
+func (a *AndReward) AddAmount(amount int) {
+	for _, reward := range a.Rewards {
+		reward.AddAmount(amount)
+	}
+}
+
+func (a *AndReward) Serial() string {
+	return ""
 }

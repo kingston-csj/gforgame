@@ -8,6 +8,8 @@ const (
 	// 客户端加载完成
 	PlayerLoadingFinish = "player_loading_finish"
 
+	HeroGain = "hero_gain"
+
 	SystemDailyReset = "system_daily_reset"
 
 	// 招募

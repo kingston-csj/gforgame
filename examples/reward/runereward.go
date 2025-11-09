@@ -7,35 +7,35 @@ import (
 	"strconv"
 )
 
-type ItemReward struct {
+type RuneReward struct {
 	ItemId int32
 	Amount int32
 }
 
-func (r *ItemReward) GetAmount() int {
+func (r *RuneReward) GetAmount() int {
 	return int(r.Amount)
 }
 
-func (r *ItemReward) AddAmount(amount int) {
+func (r *RuneReward) AddAmount(amount int) {
 	r.Amount += int32(amount)
 }
 // 背包不限容量，所以不需要验证
-func (r *ItemReward) Verify(player *player.Player) error {
+func (r *RuneReward) Verify(player *player.Player) error {
 	return nil
 }
 
-func (r *ItemReward) VerifySliently(player *player.Player) bool {
+func (r *RuneReward) VerifySliently(player *player.Player) bool {
 	return true
 }
 
-func (r *ItemReward) Reward(player *player.Player) {
+func (r *RuneReward) Reward(player *player.Player) {
 	item.GetItemService().AddByModelId(player, r.ItemId, r.Amount)
 }
 
-func (r *ItemReward) GetType() string {
-	return constants.RewardTypeItem
+func (r *RuneReward) GetType() string {
+	return constants.RewardTypeRune
 }
 
-func (r *ItemReward) Serial() string {
+func (r *RuneReward) Serial() string {
 	return strconv.Itoa(int(r.ItemId)) + "_" + strconv.Itoa(int(r.Amount))
 }

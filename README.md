@@ -24,8 +24,10 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 下载 cocos creator3.8 编辑器
 服务器入口： main.go
 
-go 客户端入口：client/go/client.go  
 cocos 客户端工程(推荐)：client/cocos
+unity 客户端工程：client/unity
+go 客户端入口：client/go/client.go  
+
 
 ### 私有协议栈
 

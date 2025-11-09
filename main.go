@@ -10,7 +10,6 @@ import (
 
 	"io/github/gforgame/codec/json"
 	serverconfig "io/github/gforgame/config"
-
 	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
