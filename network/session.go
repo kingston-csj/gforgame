@@ -21,8 +21,8 @@ type WebSocketConn interface {
 
 type Session struct {
 	conn net.Conn
-	// 关闭标记（暂未使用）
-	die chan bool
+	// 关闭标记
+	Die chan bool
 	// 私有协议栈编解码
 	ProtocolCodec protocol.ProtocolAdapter
 	// 消息编解码
@@ -99,6 +99,39 @@ func (s *Session) SendWithoutIndex(msg any) error {
 	return s.Send(msg, -1)
 }
 
+// SendAndClose 发送消息并关闭连接
+// 同步阻塞，消息发送完毕，随即关闭连接
+// 注意：执行完毕仅代表数据已写入本地内核缓冲区，并不保证客户端一定会收到
+// @param msg 要发送的消息
+// @return 发送是否成功
+func (s *Session) SendAndClose(msg any) error {
+	if msg == nil {
+		return nil
+	}
+	msgData, err := s.MessageCodec.Encode(msg)
+	if err != nil {
+		return fmt.Errorf("encode message %s cmd failed", msg)
+	}
+
+	cmd, e2 := GetMessageCmd(msg)
+	if e2 != nil {
+		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
+	}
+
+	fmt.Println("发送消息: ", cmd, " 内容：", msg)
+	frame, _ := s.ProtocolCodec.Encode(cmd, -1, msgData)
+	_, err = s.conn.Write(frame)
+	if err != nil {
+		return err
+	}
+	// 关闭连接
+	err = s.conn.Close()
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func (s *Session) Write() {
 	defer close(s.dataToSend)
 
@@ -108,11 +141,12 @@ func (s *Session) Write() {
 			if _, err := s.conn.Write(data); err != nil {
 				log.Println(err.Error())
 			}
-		case <-s.die:
+		case <-s.Die:
 			return
 		}
 	}
 }
+
 
 func (s *Session) Read() {
 	defer func() {

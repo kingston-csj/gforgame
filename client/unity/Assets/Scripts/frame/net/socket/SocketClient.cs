@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Reflection;
 using Nova.Commons.Util;
 using Nova.Logger;
 using UnityEngine;
 
 namespace Nova.Net.Socket
 {
-    public class SocketClient
+    /// <summary>
+    /// socket/websocket客户端基类
+    /// </summary>
+    public abstract class SocketClient
     {
         /// <summary>
         ///     是否输出日志
@@ -45,25 +49,23 @@ namespace Nova.Net.Socket
         }
 
         /// <summary>
-        ///     发送请求并等待响应
+        ///     发送请求，异步回调
         /// </summary>
-        /// <typeparam name="T">响应数据类型</typeparam>
-        /// <param name="req_cmd">请求命令ID</param>
-        /// <param name="body">请求体数据</param>
+        /// <typeparam name="RES">响应数据类型</typeparam>
+        /// <param name="request">请求体数据</param>
         /// <param name="resCallBack">响应回调函数</param>
-        public void Send<RES>(Message body, Action<RES> resCallBack)
+        public void Send<RES>(Message request, Action<RES> resCallBack)
             where RES : Response
         {
             //  获取协议类的cmd;
-            int reqCmd = (int)ReflectUtil.CallStaticMethod(body.GetType(), "cmd", null);
-
+            int reqCmd = request.GetType().GetCustomAttribute<MessageMeta>().Cmd;
             _sendData.index = idCounter++;
             _sendData.cmd = reqCmd;
-            _sendData.data = body;
+            _sendData.data = request;
 
             if (_socketLog)
             {
-                string className = body.GetType().Name;
+                string className = request.GetType().Name;
                 LoggerUtil.Info("发送消息: " + className + " >> " + JsonUtility.ToJson(_sendData.data));
             }
 

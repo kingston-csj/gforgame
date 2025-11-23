@@ -9,7 +9,7 @@ type ResHeroRecruit struct {
 	RewardInfos []*RewardInfo `json:"rewardInfos"`
 }
 
-type ResAllHeroInfo struct {
+type PushAllHeroInfo struct {
 	Heros []*HeroInfo `json:"heros"`
 }
 

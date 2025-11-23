@@ -60,8 +60,8 @@ type WebSocketJsonFrame struct {
 	Type  string      `json:"$type,omitempty"` // 消息类型标识
 	Cmd   int         `json:"cmd"`             // 消息类型
 	Index int         `json:"index"`           // 客户端消息索引
-	Msg   interface{} `json:"msg,omitempty"`   // 消息数据
-	Data  interface{} `json:"data,omitempty"`  // 兼容data字段
+	Msg   string 	  `json:"msg,omitempty"`   // 消息数据
+	Data  string `json:"data,omitempty"`  // 兼容data字段
 }
 
 // Decode 解码JSON格式的数据
@@ -76,9 +76,9 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 	var msgData interface{}
 
 	// 优先使用Msg字段，如果没有则使用Data字段
-	if jsonPacket.Msg != nil {
+	if len(jsonPacket.Msg) > 0 {
 		msgData = jsonPacket.Msg
-	} else if jsonPacket.Data != nil {
+	} else if len(jsonPacket.Data) > 0 {
 		msgData = jsonPacket.Data
 	}
 
@@ -114,12 +114,9 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 // Encode 编码为JSON格式
 func (j *JSONProtocolAdapter) Encode(cmd int, index int, data []byte) ([]byte, error) {
 	// 尝试将data解析为JSON对象
-	var dataObj interface{}
+	var dataObj = "" 
 	if len(data) > 0 {
-		if err := json.Unmarshal(data, &dataObj); err != nil {
-			// 如果不是JSON，则作为字符串处理
-			dataObj = string(data)
-		}
+		dataObj = string(data)
 	}
 
 	jsonPacket := WebSocketJsonFrame{

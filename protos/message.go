@@ -1,8 +1,8 @@
 package protos
 
 const (
-	CmdPlayerReqLogin         = 2001
-	CmdPlayerResLogin         = 2002
+	CmdPlayerReqLogin         = 103
+	CmdPlayerResLogin         = 154
 	CmdPlayerReqCreate        = 2003
 	CmdPlayerResCreate        = 2004
 	CmdPlayerReqLoadingFinish = 2005
@@ -21,7 +21,7 @@ const (
 
 	CmdHeroReqRecruit        = 5001
 	CmdHeroResRecruit        = 5002
-	CmdHeroResAllHero        = 5003
+	CmdHeroPushAllHero        = 5003
 	CmdHeroReqLevelUp        = 5004
 	CmdHeroResLevelUp        = 5005
 	CmdHeroPushAdd           = 5006

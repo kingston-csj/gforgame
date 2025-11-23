@@ -9,7 +9,7 @@ type Options struct {
 	Name         string // 服务器名称
 	ServiceAddr  string // current server service address (RPC)
 	MessageCodec codec.MessageCodec
-	IoDispatch   *network.BaseIoDispatch
+	IoDispatch   network.IoDispatch
 	wsPath       string
 	modules      []network.Module
 	Router       *network.MessageRoute
@@ -25,7 +25,7 @@ func WithAddress(addr string) Option {
 }
 
 // WithIoDispatch 消息处理链
-func WithIoDispatch(dispatch *network.BaseIoDispatch) Option {
+func WithIoDispatch(dispatch network.IoDispatch) Option {
 	return func(opt *Options) {
 		opt.IoDispatch = dispatch
 	}

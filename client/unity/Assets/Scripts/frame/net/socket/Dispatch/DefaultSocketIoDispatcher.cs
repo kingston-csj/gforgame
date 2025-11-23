@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Reflection;
-using Nova.Commons.Util;
 
 namespace Nova.Net.Socket
 {
     public class DefaultSocketIoDispatcher : SocketIoDispatcher
     {
-        
         private SocketRuntimeEnvironment _socketRuntimeEnvironment;
 
         /// <summary>
         ///     构造函数
         /// </summary>
-        /// <param name="messageRouterType"> 指定消息路由器类型 </param>
+        /// <param name="runtimeEnvironment"> 指定socket运行时环境 </param>
         public DefaultSocketIoDispatcher(SocketRuntimeEnvironment runtimeEnvironment)
         {
             this._socketRuntimeEnvironment = runtimeEnvironment;
@@ -32,9 +30,8 @@ namespace Nova.Net.Socket
                 currentType.GetMethod("RegisterCallbackDelegate", BindingFlags.Public | BindingFlags.Instance);
             foreach (MethodInfo method in methods)
             {
-                // 检查是否有 AutoRegisterReceiveResponseAttribute 特性
-                MessageHandler attr =
-                    method.GetCustomAttribute<MessageHandler>();
+                // 检查是否有 MessageHandler 特性
+                MessageHandler attr = method.GetCustomAttribute<MessageHandler>();
                 if (attr != null)
                 {
                     ParameterInfo[] parameters = method.GetParameters();
@@ -44,7 +41,8 @@ namespace Nova.Net.Socket
                     }
 
                     Type responseType = parameters[0].ParameterType;
-                    int responseCmd = (int)ReflectUtil.CallStaticMethod(responseType, "cmd", null);
+                    // 获得Message类的实例方法GetCmd()返回值
+                    int responseCmd = ((MessageMeta)responseType.GetCustomAttribute(typeof(MessageMeta))).Cmd;
                     // 绑定消息id与消息类型
                     _socketRuntimeEnvironment.MessageFactory.Register(responseCmd, responseType);
                     // 创建委托

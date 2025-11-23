@@ -22,6 +22,9 @@ type ResPlayerCreate struct {
 	Id int64
 }
 
+type PushReplacingLogin struct {
+}
+
 type ReqJoinRoom struct {
 	RoomId int64
 

@@ -88,11 +88,21 @@ func NewHttpServer() *gin.Engine {
 	return router
 }
 
+type MyMessageDispatch struct {
+	network.BaseIoDispatch
+}
+
+func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
+	logger.Info(fmt.Sprintf("session closed: %v", session))
+	// 关闭session
+	network.RemoveSession(session)
+}
+
 func main() {
 	startTime := time.Now()
 
 	router := &network.MessageRoute{Handlers: make(map[int]*network.Handler)}
-	ioDispatcher := &network.BaseIoDispatch{}
+	ioDispatcher := &MyMessageDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
@@ -147,7 +157,7 @@ func main() {
 	system.StartSystemTask()
 
 	endTime := time.Now()
-	logger.Info("game server is starting, cost " + endTime.Sub(startTime).String())
+	logger.Info("game server is starting at " + serverconfig.ServerConfig.ServerUrl + ", cost " + endTime.Sub(startTime).String())
 
 	// rank.GetRankService().QueryRank(rank.PlayerLevelRank, 0, 10)
 

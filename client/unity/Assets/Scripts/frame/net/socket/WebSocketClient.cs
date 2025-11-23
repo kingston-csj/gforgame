@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Nova.Commons.Util;
 using Nova.Logger;
 using UnityEngine;
@@ -85,7 +86,16 @@ namespace Nova.Net.Socket
                 SocketDataFrame dataFrame = null;
                 if (!_runtimeEnvironment.UsedBinaryFrame)
                 {
-                    dataFrame = JsonUtility.FromJson<SocketDataFrame>(e.Data);
+                    // 如果使用文本消息，封包，具体消息，均采用json进行解析
+                    dataFrame = JsonUtil.FromJson<SocketDataFrame>(e.Data);
+                    if (!_runtimeEnvironment.MessageFactory.Contains(dataFrame.cmd))
+                    {
+                        LoggerUtil.Error($"未注册的消息类型: {dataFrame.cmd}");
+                        return;
+                    }
+
+                    Type type = _runtimeEnvironment.MessageFactory.GetMessageType(dataFrame.cmd);
+                    dataFrame.data = (Message)_runtimeEnvironment.MessageCodec.Decode(type,  Encoding.UTF8.GetBytes(dataFrame.msg));
                 }
                 else
                 {

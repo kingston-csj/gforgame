@@ -76,7 +76,7 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 	defer func() {
 		// 处理客户端网络断开
 		s := network.GetSession(conn)
-		node.IoDispatch.OnSessionCreated(s)
+		node.IoDispatch.OnSessionClosed(s)
 		network.UnregisterSession(conn)
 		err := conn.Close()
 		if err != nil {
@@ -101,6 +101,8 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 		task()
 	case ioFrame := <-ioSession.DataReceived:
 		node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
+	case <-ioSession.Die:
+		// 关闭session，执行defer函数
 	}
 }
 

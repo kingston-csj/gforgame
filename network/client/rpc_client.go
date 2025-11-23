@@ -27,7 +27,7 @@ func Request(session *network.Session, request any) (any, error) {
 	future.waitResponse = make(chan any)
 	CallBackManager.Register(int(counter), future)
 	// 调用成功，获得消息返回值; 失败，获得错误（如超时）
-	// 这里的代码相对java来得优美
+	// 这里的代码相对java来得优雅
 	select {
 	case r := <-future.waitResponse:
 		return r, nil

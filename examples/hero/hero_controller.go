@@ -34,7 +34,7 @@ func NewHeroController() *HeroController {
 func (ps *HeroController) Init() {
 	network.RegisterMessage(protos.CmdHeroReqRecruit, &protos.ReqHeroRecruit{})
 	network.RegisterMessage(protos.CmdHeroResRecruit, &protos.ResHeroRecruit{})
-	network.RegisterMessage(protos.CmdHeroResAllHero, &protos.ResAllHeroInfo{})
+	network.RegisterMessage(protos.CmdHeroPushAllHero, &protos.PushAllHeroInfo{})
 
 	network.RegisterMessage(protos.CmdHeroReqLevelUp, &protos.ReqHeroLevelUp{})
 	network.RegisterMessage(protos.CmdHeroResLevelUp, &protos.ResHeroLevelUp{})
@@ -69,7 +69,7 @@ func (ps *HeroController) Init() {
 }
 
 func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
-	resAllHeroInfo := &protos.ResAllHeroInfo{}
+	resAllHeroInfo := &protos.PushAllHeroInfo{}
 
 	// 普通英雄
 	for _, h := range player.HeroBox.Heros {

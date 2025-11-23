@@ -1,5 +1,6 @@
 ﻿using frame.Assets;
 using Game.Configs;
+using Nova.Net.Socket;
 
 namespace Game.Core
 {
@@ -13,5 +14,15 @@ namespace Game.Core
 
         // 配置数据管理器
         public static DataManager dataManager;
+        
+        // 游戏配置
+        public static GameConfig gameConfig;
+        
+        /// <summary>
+        /// 网络socket客户端
+        /// </summary>
+        public static SocketClient socketClient;
+        
+        
     }
 }

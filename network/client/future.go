@@ -8,7 +8,7 @@ type RequestCallback interface {
 	OnError(error)
 }
 
-// RequestResponseFuture 定义了请求响应未来状态
+// RequestResponseFuture 定义了请求响应状态
 type RequestResponseFuture struct {
 	start           int
 	Cause           error

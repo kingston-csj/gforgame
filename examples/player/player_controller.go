@@ -92,7 +92,21 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return
 	}
+	// 是否是新角色
+	newCreated := GetPlayerService().GetPlayerProfileById(msg.PlayerId) == nil
 	player := GetPlayerService().GetOrCreatePlayer(msg.PlayerId)
+	if !newCreated {
+		oldSession := network.GetSessionByPlayerId(player.Id)
+		if oldSession != nil {
+			if oldSession == s {
+				logger.Info("玩家重复登录[" + player.Id + "]")
+			} else {
+				// 旧会话存在，关闭旧会话
+				logger.Info("玩家顶号登录[" + player.Id + "]")
+				oldSession.SendAndClose(&protos.PushReplacingLogin{})
+			}
+		}
+	}
 	fmt.Println("登录成功，id为：", player.Id)
 
 	// 离线，登录触发每日重置检测

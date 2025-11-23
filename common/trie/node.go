@@ -2,7 +2,6 @@ package trie
 
 // TrieNode Trie树节点
 // 每一个节点代表一个字符，节点下面包含多个子节点
-// @since 2.4.0
 type TrieNode struct {
 	val      rune           // 当前节点的字符值
 	children NodeContainer  // 所有孩子子节点
@@ -47,7 +46,6 @@ func (n *TrieNode) AddChild(cs string, index int) {
 // RemoveChild 删除子节点
 // @param character 要删除的字符
 // @return 被删除的节点，如果不存在则返回nil
-// @since 2.5.0
 func (n *TrieNode) RemoveChild(character rune) *TrieNode {
 	return n.children.Remove(character)
 }
@@ -85,7 +83,6 @@ func (n *TrieNode) HasPrefix(cs string, idx int) int {
 // @param cs 要检查的字符串
 // @param idx 当前处理的字符索引
 // @return 是否精确匹配
-// @since 2.5.0
 func (n *TrieNode) HasExactWord(cs string, idx int) bool {
 	if idx >= len(cs) {
 		return n.IsLeaf()

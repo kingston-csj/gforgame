@@ -9,7 +9,6 @@ import (
 // TrieDictionary Trie树（字典树/前缀树）
 // 主要用于解决通过前缀来联想完整单词的问题
 // 可用于脏词检测，好友模糊查询等场景
-// @since 2.4.0
 type TrieDictionary struct {
 	threshold int       // 阈值，当节点的孩子节点数量小于等于阈值时，将map容器转化为数组
 	root      *TrieNode // 前缀根节点
@@ -35,7 +34,6 @@ func (t *TrieDictionary) AddNode(word string) {
 // DeleteNode 删除单词节点
 // @param word 要删除的单词
 // @return 是否成功删除
-// @since 2.5.0
 func (t *TrieDictionary) DeleteNode(word string) bool {
 	word = t.normalize(word)
 	if word == "" {
@@ -97,7 +95,6 @@ func (t *TrieDictionary) ContainsWords(word string) bool {
 // 例如"张无"是敏感字，但是"张无忌"不是
 // @param word 要检查的单词
 // @return 是否精确匹配
-// @since 2.5.0
 func (t *TrieDictionary) ContainsExactWord(word string) bool {
 	word = t.normalize(word)
 	if word == "" {

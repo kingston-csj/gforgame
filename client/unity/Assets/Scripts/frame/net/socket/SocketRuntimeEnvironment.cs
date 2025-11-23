@@ -3,6 +3,9 @@ using System;
 
 namespace Nova.Net.Socket
 {
+    /// <summary>
+    /// socket运行时环境
+    /// </summary>
     public class SocketRuntimeEnvironment
     {
         private readonly Type _messageRouterType;
@@ -14,7 +17,7 @@ namespace Nova.Net.Socket
         /// <summary>
         /// 是否使用二进制帧
         /// </summary>
-        private bool _usedBinaryFrame = true;
+        private bool _usedBinaryFrame = false;
 
         public SocketRuntimeEnvironment(Type messageRouterType, MessageCodec messageCodec,
             MessageFactory messageFactory)

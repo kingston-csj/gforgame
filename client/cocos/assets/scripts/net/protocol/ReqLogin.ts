@@ -1,6 +1,5 @@
 export default class ReqLogin {
-  public static cmd: number = 2001;
-
+  public static cmd: number = 101;
 
   public playerId: string;
 
