@@ -178,7 +178,6 @@ func main() {
 	case <-node.Running:
 		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
 	}
-
 	// 执行所有关服逻辑
 	node.Stop()
 }
@@ -193,13 +192,16 @@ func TryExportProtocols() {
 		// generator := tools.NewTypeScriptGenerator(
 		// 	"D:\\go_projects\\gforgame\\protos",
 		// 	"tools\\protocol\\output\\typescript\\",
-		// 	"tools\\protocol\\typescript_template.tpl",
+		// 	"tools\\protocol\\tstemplate.tpl",
 		// )
 		generator := tools.NewCSharpGenerator(
 			"D:\\go_projects\\gforgame\\protos",
 			"tools\\protocol\\output\\csharp\\",
-			"tools\\protocol\\csharp_template.tpl",
+			"tools\\protocol\\csharptemplate.tpl",
 		)
-		generator.Generate(network.GetMsgName2IdMapper())	
+		error := generator.Generate(network.GetMsgName2IdMapper())	
+		if error != nil {
+			panic(error)
+		}
 	}
 }

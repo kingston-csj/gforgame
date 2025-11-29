@@ -1,6 +1,7 @@
-package json
+package json_test
 
 import (
+	"io/github/gforgame/codec/json"
 	"reflect"
 	"testing"
 )
@@ -12,7 +13,7 @@ type Message struct {
 
 func TestJsonCodec(t *testing.T) {
 	m := Message{1, "hello world"}
-	s := &Codec{}
+	s := &json.Codec{}
 	b, err := s.Encode(m)
 	if err != nil {
 		t.Fail()
@@ -30,7 +31,7 @@ func TestJsonCodec(t *testing.T) {
 func BenchmarkJsonCodec(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		m := Message{1, "hello world"}
-		s := &Codec{}
+		s := &json.Codec{}
 		body, err := s.Encode(m)
 		if err != nil {
 			b.Fail()

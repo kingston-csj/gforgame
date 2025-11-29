@@ -16,11 +16,14 @@ import (
 type ProtocolGenerator interface {
 	// 通用生成入口（基类实现）
 	Generate(msgIds map[string]int) error
-	// 以下为子类需实现的差异化方法
-	GetFileSuffix() string               // 返回文件后缀（.cs/.ts）
-	MapType(goType string) string        // Go类型 → 目标语言类型映射
-	BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} // 构建模板数据
-	GetTemplatePath() string             // 返回模板文件路径
+	// 返回文件后缀（.cs/.ts）
+	GetFileSuffix() string   
+	// Go类型 → 目标语言类型映射           
+	MapType(goType string) string
+	// 构建模板数据
+	BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} 
+	// 返回模板文件路径
+	GetTemplatePath() string             
 }
 
 // BaseGenerator 基类实现通用逻辑，子类嵌入该结构体复用
@@ -68,7 +71,7 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int) err
 			continue
 		}
 
-		// 通用AST解析（所有语言共享）
+		// 通用AST解析
 		filePath := b.GoDir + "\\" + file.Name()
 		structInfos, err := b.parseGoFile(filePath)
 		if err != nil {
@@ -107,7 +110,7 @@ func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si StructInfo, m
 	return nil
 }
 
-// parseGoFile 通用AST解析（所有语言共享，无修改）
+// parseGoFile 通用AST解析
 func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
@@ -205,7 +208,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 	return structInfos, nil
 }
 
-// -------------------------- 通用工具方法（基类实现，子类复用） --------------------------
+// -------------------------- 通用工具方法--------------------------
 func (b *BaseGenerator) getFieldTypeStr(expr ast.Expr) string {
 	if starExpr, ok := expr.(*ast.StarExpr); ok {
 		return b.getFieldTypeStr(starExpr.X)

@@ -1,13 +1,14 @@
-package trie
+package trie_test
 
 import (
 	"fmt"
+	"io/github/gforgame/common/trie"
 	"testing"
 )
 
 func TestLog(t *testing.T) {
 	// 创建Trie字典
-	dict :=  NewTrieDictionary()
+	dict :=  trie.NewTrieDictionary()
 
 	// 添加敏感词
 	dict.AddNode("敏感词1")

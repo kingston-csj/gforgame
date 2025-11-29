@@ -1,14 +1,15 @@
-package data
+package data_test
 
 import (
 	"fmt"
+	"io/github/gforgame/data"
 	"io/github/gforgame/logger"
 	"testing"
 )
 
 func TestExcelReader(t *testing.T) {
 	// 创建 ExcelDataReader 实例
-	reader := NewExcelDataReader(true)
+	reader := data.NewExcelDataReader(true)
 
 	type RewardDef struct {
 		Type  string `json:"type" excel:"type"`

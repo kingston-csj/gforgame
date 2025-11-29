@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// -------------------------- TypeScript 子类（仅实现差异化逻辑） --------------------------
+// -------------------------- TypeScript 子类
 // TypeScriptGenerator TS协议生成器
 type TypeScriptGenerator struct {
 	BaseGenerator // 嵌入基类复用通用逻辑
@@ -72,7 +72,7 @@ func (t *TypeScriptGenerator) MapType(goType string) string {
 	return mappedType
 }
 
-// TSTemplateData TS模板数据（子类专属）
+// TSTemplateData TS模板数据
 type TSTemplateData struct {
 	Cmd   int
 	ClassName     string
@@ -87,12 +87,19 @@ type TSField struct {
 	JsonTag  string
 }
 
+func ToLowerFirst(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	return strings.ToLower(s[:1]) + s[1:]
+}
 // BuildTemplateData 构建TS模板数据（子类差异化实现）
 func (t *TypeScriptGenerator) BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} {
 	var fields []TSField
 	for _, f := range si.Fields {
 		fields = append(fields, TSField{
-			Name:     f.Name,
+			// ts字段，一般首字母小写
+			Name:     ToLowerFirst(f.Name),
 			FieldType:   t.MapType(f.Type),
 			Comment:  f.Comment,
 			JsonTag:  f.JsonTag,

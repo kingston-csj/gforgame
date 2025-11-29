@@ -5,7 +5,6 @@ import (
 	"strings"
 )
 
-// -------------------------- C# 子类（仅实现差异化逻辑） --------------------------
 // CSharpGenerator C#协议生成器
 type CSharpGenerator struct {
 	BaseGenerator // 嵌入基类复用通用逻辑
@@ -44,7 +43,7 @@ func (c *CSharpGenerator) GetFileSuffix() string {
 	return ".cs"
 }
 
-// MapType Go类型 → C#类型映射（子类差异化实现）
+// MapType Go类型 → C#类型映射
 func (c *CSharpGenerator) MapType(goType string) string {
 	// 处理切片
 	if strings.HasPrefix(goType, "slice<") {
@@ -72,7 +71,7 @@ func (c *CSharpGenerator) MapType(goType string) string {
 	return mappedType
 }
 
-// CSharpTemplateData C#模板数据（子类专属）
+// CSharpTemplateData C#模板数
 type CSharpTemplateData struct {
 	StructName    string
 	StructComment string
@@ -86,7 +85,7 @@ type CSharpField struct {
 	Comment    string
 }
 
-// BuildTemplateData 构建C#模板数据（子类差异化实现）
+// BuildTemplateData 构建C#模板数据
 func (c *CSharpGenerator) BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} {
 	var fields []CSharpField
 	for _, f := range si.Fields {
@@ -107,7 +106,6 @@ func (c *CSharpGenerator) BuildTemplateData(si StructInfo, msgIds map[string]int
 	}
 	return data
 }
-
 
 // Generate 暴露给外部的生成入口
 func (c *CSharpGenerator) Generate(msgIds map[string]int) error {

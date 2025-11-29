@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"io/github/gforgame/ds/list"
+	"io/github/gforgame/container/list"
 	"io/github/gforgame/examples/constants"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	network "io/github/gforgame/network"

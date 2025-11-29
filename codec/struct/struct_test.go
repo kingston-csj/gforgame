@@ -1,6 +1,7 @@
-package structcodec
+package structcodec_test
 
 import (
+	structcodec "io/github/gforgame/codec/struct"
 	"reflect"
 	"testing"
 )
@@ -30,7 +31,7 @@ func TestStructRoundTripSimple(t *testing.T) {
 		Tags:   map[string]string{"role": "admin", "lang": "zh"},
 		Addr:   Address{City: "Shanghai", Zip: 200000},
 	}
-	ser := NewSerializer()
+	ser := structcodec.NewSerializer()
 	data, err := ser.Encode(in)
 	if err != nil {
 		t.Fatalf("encode error: %v", err)
@@ -46,7 +47,7 @@ func TestStructRoundTripSimple(t *testing.T) {
 }
 
 func TestStringCodecUtf8(t *testing.T) {
-	ser := NewSerializer()
+	ser := structcodec.NewSerializer()
 	in := struct{ S string }{S: "你好，世界🌍"}
 	data, err := ser.Encode(in)
 	if err != nil {

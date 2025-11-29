@@ -1,7 +1,8 @@
-package cache
+package cache_test
 
 import (
 	"fmt"
+	"io/github/gforgame/cache"
 	mysqldb "io/github/gforgame/db"
 	"testing"
 )
@@ -13,7 +14,7 @@ type Player struct {
 }
 
 func TestCache(t *testing.T) {
-	cm := NewCacheManager()
+	cm := cache.NewCacheManager()
 	dbLoader := func(key string) (interface{}, error) {
 		var p Player
 		mysqldb.Db.First(&p, "id=?", key)
