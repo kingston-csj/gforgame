@@ -90,10 +90,7 @@ func handleJSONMessage(conn *websocket.Conn, data []byte) {
 	response := protocol.WebSocketJsonFrame{
 		Cmd:   jsonPacket.Cmd,
 		Index: jsonPacket.Index,
-		Msg: map[string]interface{}{
-			"status": "ok",
-			"time":   time.Now().Unix(),
-		},
+		Msg: string(time.Now().Unix()),
 	}
 
 	responseData, _ := json.Marshal(response)
@@ -136,11 +133,7 @@ func testJSONProtocol() {
 	jsonPacket := protocol.WebSocketJsonFrame{
 		Cmd:   1001,
 		Index: 1,
-		Msg: TestMessage{
-			Type:    "test",
-			Content: "Hello JSON!",
-			Time:    time.Now().Unix(),
-		},
+		Msg: string(time.Now().Unix()),
 	}
 
 	jsonData, _ := json.Marshal(jsonPacket)

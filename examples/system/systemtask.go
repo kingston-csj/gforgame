@@ -27,16 +27,22 @@ func StartSystemTask() {
 		log.Printf("添加每日更新任务失败: %v", err)
 	}
 
-	// 添加每小时执行的任务示例
+	// 每小时执行的任务示例
 	_, err = scheduler.AddFunc("0 0 * * * *", performHourlyUpdate)
 	if err != nil {
 		log.Printf("添加每小时更新任务失败: %v", err)
 	}
 
-	// 添加每周一凌晨2点执行的任务示例
-	_, err = scheduler.AddFunc("0 0 2 * * 1", performWeeklyUpdate)
+	// 每周日晚上 11:59:59 执行的定时任务
+	_, err = scheduler.AddFunc("59 59 23 * * 0", performWeeklyUpdate)
 	if err != nil {
 		log.Printf("添加每周更新任务失败: %v", err)
+	}
+
+	// 每个月最后一天的 23:59:59 执行的定时任务(暂时无法工作)
+	_, err = scheduler.AddFunc("59 59 23 L * *", performMonthlyUpdate)
+	if err != nil {
+		log.Printf("添加每月更新任务失败: %v", err)
 	}
 
 	// 启动调度器
@@ -78,8 +84,26 @@ func performHourlyUpdate() {
 func performWeeklyUpdate() {
 	log.Println("执行每周更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
 
-	// 在这里添加需要每周更新的逻辑
-	// 例如：生成周报、重置周限制、更新周排行榜等
+	weeklyReset := GetWeeklyReset()
+
+	// 更新每周重置时间戳
+	newResetTimestamp := int64(time.Now().Unix())
+	weeklyReset.Save(newResetTimestamp)
+	fmt.Printf("当前每周重置时间戳: %d\n", newResetTimestamp)
+	context.EventBus.Publish(events.SystemWeeklyReset, newResetTimestamp)
+}
+
+// performMonthlyUpdate 执行每月更新操作
+func performMonthlyUpdate() {
+	log.Println("执行每月更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
+
+	monthlyReset := GetMonthlyReset()
+
+	// 更新每月重置时间戳
+	newResetTimestamp := int64(time.Now().Unix())
+	monthlyReset.Save(newResetTimestamp)
+	fmt.Printf("当前每月重置时间戳: %d\n", newResetTimestamp)
+	context.EventBus.Publish(events.SystemMonthlyReset, newResetTimestamp)
 }
 
 // AddCustomTask 添加自定义定时任务

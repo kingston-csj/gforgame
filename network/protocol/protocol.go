@@ -1,8 +1,8 @@
 package protocol
 
 import (
-	"bytes"
 	"errors"
+	"io/github/gforgame/common"
 )
 
 // Protocol constants.
@@ -21,18 +21,21 @@ type MessageHeader struct {
 var ErrPacketSizeExceed = errors.New("protocol: packet size exceed")
 
 type Protocol struct {
-	buf *bytes.Buffer
+	buf *common.ByteBuffer
 }
 
 // NewDecoder returns a new decoder that used for decode network bytes slice.
 func NewDecoder() *Protocol {
 	return &Protocol{
-		buf: bytes.NewBuffer(nil),
+		buf: common.NewByteBuffer(4096, MaxPacketSize),
 	}
 }
 
 func (c *Protocol) readHeader() (*MessageHeader, error) {
-	buff := c.buf.Next(HeadLength)
+	buff, err := c.buf.Next(HeadLength)
+	if err != nil {
+		return nil, err
+	}
 	id := bytesToInt(buff[0:4])
 	index := bytesToInt(buff[4:8])
 	size := bytesToInt(buff[8:HeadLength])
@@ -52,17 +55,23 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 	}
 	var packets []*Packet
 
-	for c.buf.Len() > 0 {
+	for c.buf.Len() > HeadLength {
+		// 保存读取索引
+		c.buf.MarkReadIndex()
 		header, err := c.readHeader()
 		if err != nil {
 			return packets, err
 		}
 
 		if header.Size <= c.buf.Len() {
-			body := c.buf.Next(header.Size)
+			body, err := c.buf.Next(header.Size)
+			if err != nil {
+				return packets, err
+			}
 			p := &Packet{Header: *header, Data: body}
 			packets = append(packets, p)
 		} else {
+			c.buf.ResetReadIndex()
 			break
 		}
 	}

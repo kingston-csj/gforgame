@@ -9,12 +9,13 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 - 最适合 java 转 go 的开发人员，在这里，你可以找到熟悉的感觉。
 - 融合 Java 游戏服务器思想，借鉴 Java 游戏服务器的设计理念，结合 Go 语言的特性进行优化和创新，充分发挥两者的优势。
 - 灵活兼容 Socket 和 WebSocket 接入，通过配置参数轻松切换，无需修改业务代码，完美适配手游、页游、H5 和小游戏的服务端架构。
-- 提供 protobuf 和 JSON 两种通信协议，满足不同客户端的需求，灵活选择最适合的协议进行通信。
+- 提供 protobuf /JSON/自动解析 struct 几种通信协议，满足不同客户端的需求，灵活选择最适合的协议进行通信。
 - 提供独立的 HTTP 管理后台网站，支持游戏运维和运营的各类管理需求，提升运维效率和运营支持能力。 --> [后台管理系统](https://github.com/kingston-csj/gamekeeper)
 - 可视化 cocos 游戏客户端，功能演示
-- 可视化 unity  游戏客户端，功能演示
+- 可视化 unity 游戏客户端，功能演示
+- 一键导出客户端协议（typescript/csharp）
 - 玩家可自由选择 Cocos 或 Unity 端进入游戏，双端同步运行、实时互联，打造无缝跨平台交互玩法。
-- cocos/unity客户端，亦可作为jforgame的游戏客户端
+- cocos/unity 客户端，亦可作为 jforgame 的游戏客户端
 
 ## 快速入门
 
@@ -26,8 +27,7 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 
 cocos 客户端工程(推荐)：client/cocos
 unity 客户端工程：client/unity
-go 客户端入口：client/go/client.go  
-
+go 客户端入口：client/go/client.go
 
 ### 私有协议栈
 

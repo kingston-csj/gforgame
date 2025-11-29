@@ -75,6 +75,10 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 	}
 }
 
+// Send 发送消息
+// @param msg 要发送的消息
+// @param index 消息索引
+// @return 发送过程遇到的异常
 func (s *Session) Send(msg any, index int) error {
 	if msg == nil {
 		return nil
@@ -103,7 +107,7 @@ func (s *Session) SendWithoutIndex(msg any) error {
 // 同步阻塞，消息发送完毕，随即关闭连接
 // 注意：执行完毕仅代表数据已写入本地内核缓冲区，并不保证客户端一定会收到
 // @param msg 要发送的消息
-// @return 发送是否成功
+// @return 发送过程遇到的异常
 func (s *Session) SendAndClose(msg any) error {
 	if msg == nil {
 		return nil
@@ -149,20 +153,19 @@ func (s *Session) Write() {
 
 
 func (s *Session) Read() {
-	defer func() {
-		if r := recover(); r != nil {
-			logger.Error(r.(error))
-		}
-	}()
-
-	// 检查是否是WebSocket连接
-	if wsConn, ok := s.conn.(WebSocketConn); ok {
-		// WebSocket连接，按消息处理
-		s.readWebSocketMessages(wsConn)
-	} else {
-		// TCP连接，按字节流处理
-		s.readTCPStream()
-	}
+    defer func() {
+        if r := recover(); r != nil {
+            logger.Error(r.(error))
+        }
+    }()
+    // 检查是否是WebSocket连接
+    if wsConn, ok := s.conn.(WebSocketConn); ok {
+        // WebSocket连接，按消息处理
+        s.readWebSocketMessages(wsConn)
+    } else {
+        // TCP连接，按字节流处理
+        s.readTCPStream()
+    }
 }
 
 // readWebSocketMessages 处理WebSocket消息
@@ -175,6 +178,13 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 		if err != nil {
 			log.Println(err.Error())
 			return
+		}
+
+		// 检查是否关闭，结束该goroutine
+		select {
+		case <-s.Die:
+			return
+		default:
 		}
 
 		logger.Info(fmt.Sprintf("收到WebSocket消息，类型: %d, 长度: %d", messageType, len(messageData)))
@@ -231,6 +241,13 @@ func (s *Session) readTCPStream() {
 	buf := make([]byte, 10240)
 
 	for {
+		// 检查是否关闭，结束该goroutine
+		select {
+		case <-s.Die:
+			return
+		default:
+		}
+
 		n, err := s.conn.Read(buf)
 		if err != nil {
 			log.Println(err.Error())

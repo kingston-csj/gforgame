@@ -5,7 +5,7 @@ using Nova.Net.Socket;
 namespace Game.Net
 {
     /// <summary>
-    ///     游戏Socket接收管理类
+    ///     服务器推送消息路由
     /// </summary>
     public class MessageRouter
     {

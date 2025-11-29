@@ -10,7 +10,9 @@ const (
 
 	HeroGain = "hero_gain"
 
-	SystemDailyReset = "system_daily_reset"
+	SystemDailyReset   = "system_daily_reset"
+	SystemWeeklyReset  = "system_weekly_reset"
+	SystemMonthlyReset = "system_monthly_reset"
 
 	// 招募
 	Recruit = "player_recruit"

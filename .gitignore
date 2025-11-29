@@ -39,3 +39,5 @@ coverage.*
 ~/.cache/go-build/
 
 **/logs/
+
+tools/protocol/output

@@ -1,7 +1,9 @@
 package system
 
 var (
-	dailyReset *DailyReset
+	dailyReset   *DailyReset
+	weeklyReset  *WeeklyReset
+	monthlyReset *MonthlyReset
 )
 
 func init() {
@@ -23,4 +25,12 @@ func loadParameterData(param string) {
 
 func GetDailyReset() *DailyReset {
 	return dailyReset
+}
+
+func GetWeeklyReset() *WeeklyReset {
+	return weeklyReset
+}
+
+func GetMonthlyReset() *MonthlyReset {
+	return monthlyReset
 }

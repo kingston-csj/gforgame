@@ -1,8 +1,10 @@
+// nothging
 package protos
 
-type ChatMessageVo struct {
-	Id         string `json:"id"`
-	Channel    int32  `json:"channel"`
+type ChatMessageVo struct  // 聊天消息vo
+{ 
+	Id         string `json:"id"` // 消息id
+	Channel    int32  `json:"channel"` // 发送频道：1个人 2世界
 	SenderId   string `json:"senderId"`
 	SenderName string `json:"senderName"`
 	SenderHead int    `json:"senderHead"`
@@ -11,18 +13,17 @@ type ChatMessageVo struct {
 	Content    string `json:"content"`
 }
 
+// / PushChatNewMessage 推送新聊天消息
 type PushChatNewMessage struct {
 	Code     int              `json:"code"`
 	Messages []*ChatMessageVo `json:"messages"`
 }
 
+// / ReqChat 发送聊天消息请求
 type ReqChat struct {
-	// 发送频道：1个人 2世界
-	Channel int `json:"channel"`
-	// 发送目标：个人id 世界id
-	Target string `json:"target"`
-	// 发送内容
-	Content string `json:"content"`
+	Channel int    `json:"channel"` // 发送频道：1个人 2世界
+	Target  string `json:"target"`  // 发送目标：个人id 世界id
+	Content string `json:"content"` // 发送内容
 }
 
 type ResChat struct {

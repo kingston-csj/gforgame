@@ -26,6 +26,7 @@ import (
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
+	tools "io/github/gforgame/tools/protocol"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -162,7 +163,10 @@ func main() {
 	// rank.GetRankService().QueryRank(rank.PlayerLevelRank, 0, 10)
 
 	// fight.GetFightService().Test()
-
+ 
+	// 开发环境，导出所有客户端协议
+	TryExportProtocols()
+	
 	// 各自业务初始化
 	player.GetPlayerService().LoadPlayerProfile()
 
@@ -177,4 +181,25 @@ func main() {
 
 	// 执行所有关服逻辑
 	node.Stop()
+}
+
+func TryExportProtocols() {
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
+	}
+	// 开发环境，导出所有客户端协议
+	if env == "dev" {
+		// generator := tools.NewTypeScriptGenerator(
+		// 	"D:\\go_projects\\gforgame\\protos",
+		// 	"tools\\protocol\\output\\typescript\\",
+		// 	"tools\\protocol\\typescript_template.tpl",
+		// )
+		generator := tools.NewCSharpGenerator(
+			"D:\\go_projects\\gforgame\\protos",
+			"tools\\protocol\\output\\csharp\\",
+			"tools\\protocol\\csharp_template.tpl",
+		)
+		generator.Generate(network.GetMsgName2IdMapper())	
+	}
 }
