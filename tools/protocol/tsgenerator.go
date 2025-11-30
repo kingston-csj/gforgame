@@ -1,4 +1,4 @@
-package tools
+package protocol
 
 import (
 	"fmt"
@@ -72,41 +72,41 @@ func (t *TypeScriptGenerator) MapType(goType string) string {
 	return mappedType
 }
 
-// TSTemplateData TS模板数据
-type TSTemplateData struct {
+// tSTemplateData TS模板数据
+type tSTemplateData struct {
 	Cmd   int
 	ClassName     string
 	ClassComment       string
-	Fields        []TSField
+	Fields        []tSField
 }
 
-type TSField struct {
+type tSField struct {
 	Name     string
 	FieldType   string
 	Comment  string
 	JsonTag  string
 }
 
-func ToLowerFirst(s string) string {
+func toLowerFirst(s string) string {
 	if len(s) == 0 {
 		return s
 	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
 // BuildTemplateData 构建TS模板数据（子类差异化实现）
-func (t *TypeScriptGenerator) BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} {
-	var fields []TSField
+func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string]int) interface{} {
+	var fields []tSField
 	for _, f := range si.Fields {
-		fields = append(fields, TSField{
+		fields = append(fields, tSField{
 			// ts字段，一般首字母小写
-			Name:     ToLowerFirst(f.Name),
+			Name:     toLowerFirst(f.Name),
 			FieldType:   t.MapType(f.Type),
 			Comment:  f.Comment,
 			JsonTag:  f.JsonTag,
 		})
 	}
 
-	return TSTemplateData{
+	return tSTemplateData{
 		Cmd:   msgIds[si.Name],
 		ClassName:     si.Name,
 		ClassComment:       si.Comment,

@@ -26,7 +26,7 @@ import (
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
-	tools "io/github/gforgame/tools/protocol"
+	protocolexporter "io/github/gforgame/tools/protocol"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -189,16 +189,17 @@ func TryExportProtocols() {
 	}
 	// 开发环境，导出所有客户端协议
 	if env == "dev" {
-		// generator := tools.NewTypeScriptGenerator(
-		// 	"D:\\go_projects\\gforgame\\protos",
+		// generator := protocolexporter.NewTypeScriptGenerator(
+		// 	"protos",
 		// 	"tools\\protocol\\output\\typescript\\",
-		// 	"tools\\protocol\\tstemplate.tpl",
+		// 	"tools\\protocol\\templates\\tstemplate.tpl",
 		// )
-		generator := tools.NewCSharpGenerator(
-			"D:\\go_projects\\gforgame\\protos",
+		generator := protocolexporter.NewCSharpGenerator(
+			"protos",
 			"tools\\protocol\\output\\csharp\\",
-			"tools\\protocol\\csharptemplate.tpl",
+			"tools\\protocol\\templates\\csharptemplate.tpl",
 		)
+		
 		error := generator.Generate(network.GetMsgName2IdMapper())	
 		if error != nil {
 			panic(error)

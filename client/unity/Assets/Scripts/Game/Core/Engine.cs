@@ -34,9 +34,12 @@ namespace Game.Core
             DataManager dataManager = new DataManager();
             dataManager.AutoInit();
             AppContext.dataManager = dataManager;
+            CommonValueMgr.Instance.AutoInject();
+            
             // 游戏配置
             GameConfig gameConfig = new GameConfig();
             AppContext.gameConfig = gameConfig;
+            
             // 网络连接
             _CreateSocketClient();
         }

@@ -61,16 +61,16 @@
     <Compile Include="Assets\Scripts\Frame\Mvc\BaseModel.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Handler\MessageCallback.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Data\Response.cs" />
-    <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\MessageEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\JsonCodec.cs" />
+    <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\MessageEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\FieldIgnore.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\NoWebGL\WebSocket.cs" />
     <Compile Include="Assets\Scripts\Game\Net\Message\Hero\PushAllHeroInfo.cs" />
     <Compile Include="Assets\Scripts\Game\Net\Message\Player\ResPlayerLogin.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Handler\MessageHandler.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\FieldCodecMeta.cs" />
-    <Compile Include="Assets\Scripts\Frame\Ui\UiLayer.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\MessageMeta.cs" />
+    <Compile Include="Assets\Scripts\Frame\Ui\UiLayer.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\CloseStatusCode.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\IntCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\Opcode.cs" />
@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Data\Message.cs" />
     <Compile Include="Assets\Scripts\Frame\Commons\Util\ClassScanner.cs" />
     <Compile Include="Assets\Scripts\Frame\Assets\AssetResourceItem.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Domain\ConfigCommonData.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\MapCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\MessageCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Dispatch\SocketIoDispatcher.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Assets\Scripts\Frame\Net\Socket\SocketRuntimeEnvironment.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\ByteCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\BoolCodec.cs" />
+    <Compile Include="Assets\Scripts\Game\Core\CommonValueMgr.cs" />
     <Compile Include="Assets\Scripts\Game\Net\Message\Hero\HeroInfo.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Handler\MessageDispatcher.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\CloseEventArgs.cs" />
@@ -100,6 +102,7 @@
     <Compile Include="Assets\Scripts\Frame\Mvc\BaseController.cs" />
     <Compile Include="Assets\Scripts\Frame\Logger\LoggerUtil.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\CallbackMgr.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Container\ConfigCommonContainer.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\DoubleCodec.cs" />
     <Compile Include="Assets\Scripts\Game\Net\MessageRouter.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\WebSocketClient.cs" />
@@ -117,8 +120,8 @@
     <Compile Include="Assets\Scripts\Frame\Assets\AssetTextItem.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\LongCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\ErrorEventArgs.cs" />
-    <Compile Include="Assets\Scripts\Frame\Config\AbsConfigItem.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\BeanCodec.cs" />
+    <Compile Include="Assets\Scripts\Frame\Config\AbsConfigItem.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\BeanAutoCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\OpenEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\ShortCodec.cs" />
@@ -127,6 +130,7 @@
     <None Include="Assets\Resources\config\mallData.json" />
     <None Include="Assets\Resources\config\herostageData.json" />
     <None Include="Assets\Resources\config\itemData.json" />
+    <None Include="Assets\Resources\config\commonData.json" />
     <None Include="Assets\Resources\config\herolevelData.json" />
     <None Include="Assets\Resources\config\skillData.json" />
     <Reference Include="UnityEngine">

@@ -75,6 +75,19 @@
                 return null;
             }
         }
+        
+        public static string ToJson<T>(T obj)
+        {
+            try
+            {
+                return JsonConvert.SerializeObject(obj, DefaultSettings);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"JsonUtil.ToJson 序列化失败（类型：{typeof(T).Name}）：{e.Message}\n{e.StackTrace}");
+                return null;
+            }
+        }
     }
     
 }

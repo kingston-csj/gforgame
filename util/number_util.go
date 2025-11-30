@@ -14,7 +14,6 @@ func BooleanValue(object any) bool {
 }
 
 // BooleanValueWithDefault 将 any 类型转换为 bool（支持自定义默认值）
-// 对应 Java：booleanValue(Object object, boolean defaultValue)
 func BooleanValueWithDefault(object any, defaultValue bool) bool {
 	if object == nil {
 		return defaultValue
@@ -40,13 +39,11 @@ func BooleanValueWithDefault(object any, defaultValue bool) bool {
 
 // -------------------------- Byte 转换（Go 中为 uint8） --------------------------
 // ByteValue 将 any 类型转换为 byte（默认值：0）
-// 对应 Java：byteValue(Object object)
 func ByteValue(object any) uint8 {
 	return ByteValueWithDefault(object, 0)
 }
 
 // ByteValueWithDefault 将 any 类型转换为 byte（支持自定义默认值）
-// 对应 Java：byteValue(Object object, byte defaultValue)
 func ByteValueWithDefault(object any, defaultValue uint8) uint8 {
 	if object == nil {
 		return defaultValue
@@ -90,13 +87,11 @@ func ByteValueWithDefault(object any, defaultValue uint8) uint8 {
 
 // -------------------------- Short 转换（Go 中为 int16） --------------------------
 // ShortValue 将 any 类型转换为 int16（默认值：0）
-// 对应 Java：shortValue(Object object)
 func ShortValue(object any) int16 {
 	return ShortValueWithDefault(object, 0)
 }
 
 // ShortValueWithDefault 将 any 类型转换为 int16（支持自定义默认值）
-// 对应 Java：shortValue(Object object, short defaultValue)
 func ShortValueWithDefault(object any, defaultValue int16) int16 {
 	if object == nil {
 		return defaultValue
@@ -136,13 +131,11 @@ func ShortValueWithDefault(object any, defaultValue int16) int16 {
 
 // -------------------------- Int 转换（Go 中为 int） --------------------------
 // IntValue 将 any 类型转换为 int（默认值：0）
-// 对应 Java：intValue(Object object)
 func IntValue(object any) int {
 	return IntValueWithDefault(object, 0)
 }
 
 // IntValueWithDefault 将 any 类型转换为 int（支持自定义默认值）
-// 对应 Java：intValue(Object object, int defaultValue)
 func IntValueWithDefault(object any, defaultValue int) int {
 	if object == nil {
 		return defaultValue
@@ -186,13 +179,11 @@ func IntValueWithDefault(object any, defaultValue int) int {
 
 // -------------------------- Long 转换（Go 中为 int64） --------------------------
 // LongValue 将 any 类型转换为 int64（默认值：0）
-// 对应 Java：longValue(Object object)
 func LongValue(object any) int64 {
 	return LongValueWithDefault(object, 0)
 }
 
 // LongValueWithDefault 将 any 类型转换为 int64（支持自定义默认值）
-// 对应 Java：longValue(Object object, long defaultValue)
 func LongValueWithDefault(object any, defaultValue int64) int64 {
 	if object == nil {
 		return defaultValue
@@ -236,14 +227,11 @@ func LongValueWithDefault(object any, defaultValue int64) int64 {
 
 // -------------------------- Double 转换（Go 中为 float64） --------------------------
 // DoubleValue 将 any 类型转换为 float64（默认值：0.0）
-// 对应 Java：doubleValue(Object object)
 func DoubleValue(object any) float64 {
 	return DoubleValueWithDefault(object, 0.0)
 }
 
 // DoubleValueWithDefault 将 any 类型转换为 float64（支持自定义默认值）
-// 对应 Java：doubleValue(Object object, double defaultValue)
-// 修正 Java 原代码 bug：原代码中 (double)(Long)object 是错误的，应为 (Double)object
 func DoubleValueWithDefault(object any, defaultValue float64) float64 {
 	if object == nil {
 		return defaultValue

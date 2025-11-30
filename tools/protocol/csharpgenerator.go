@@ -1,4 +1,4 @@
-package tools
+package protocol
 
 import (
 	"fmt"
@@ -71,32 +71,32 @@ func (c *CSharpGenerator) MapType(goType string) string {
 	return mappedType
 }
 
-// CSharpTemplateData C#模板数
-type CSharpTemplateData struct {
+// cSharpTemplateData C#模板数
+type cSharpTemplateData struct {
 	StructName    string
 	StructComment string
 	Cmd           interface{}
-	Fields        []CSharpField
+	Fields        []cSharpField
 }
 
-type CSharpField struct {
+type cSharpField struct {
 	Name       string
 	FieldType string
 	Comment    string
 }
 
 // BuildTemplateData 构建C#模板数据
-func (c *CSharpGenerator) BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} {
-	var fields []CSharpField
+func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int) interface{} {
+	var fields []cSharpField
 	for _, f := range si.Fields {
-		fields = append(fields, CSharpField{
+		fields = append(fields, cSharpField{
 			Name:       f.Name,
 			FieldType: c.MapType(f.Type),
 			Comment:    f.Comment,
 		})
 	}
 
-	data := CSharpTemplateData{
+	data := cSharpTemplateData{
 		StructName:    si.Name,
 		StructComment: si.Comment,
 		Fields:        fields,

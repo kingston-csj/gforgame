@@ -1,4 +1,4 @@
-package tools
+package protocol
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ type ProtocolGenerator interface {
 	// Go类型 → 目标语言类型映射           
 	MapType(goType string) string
 	// 构建模板数据
-	BuildTemplateData(si StructInfo, msgIds map[string]int) interface{} 
+	BuildTemplateData(si structInfo, msgIds map[string]int) interface{} 
 	// 返回模板文件路径
 	GetTemplatePath() string             
 }
@@ -94,7 +94,7 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int) err
 }
 
 // generateStructFile 生成单个结构体文件（通用逻辑）
-func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si StructInfo, msgIds map[string]int) error {
+func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si structInfo, msgIds map[string]int) error {
 	// 子类构建模板数据
 	data := g.BuildTemplateData(si, msgIds)
 	// 渲染模板
@@ -111,7 +111,7 @@ func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si StructInfo, m
 }
 
 // parseGoFile 通用AST解析
-func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
+func (b *BaseGenerator) parseGoFile(filePath string) ([]structInfo, error) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
 	if err != nil {
@@ -119,7 +119,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 	}
 
 	cm := ast.NewCommentMap(fset, node, node.Comments)
-	var structInfos []StructInfo
+	var structInfos []structInfo
 
 	ast.Inspect(node, func(n ast.Node) bool {
 		ts, ok := n.(*ast.TypeSpec)
@@ -134,7 +134,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 
 		structName := ts.Name.Name
 		structLine := fset.Position(ts.Pos()).Line
-		var fields []StructField
+		var fields []structField
 
 		if structType.Fields != nil {
 			for _, field := range structType.Fields.List {
@@ -153,7 +153,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 					jsonTag = b.extractJsonTag(tagStr)
 				}
 
-				fields = append(fields, StructField{
+				fields = append(fields, structField{
 					Name:    fieldName,
 					Type:    fieldType,
 					Comment: fieldComment,
@@ -196,7 +196,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]StructInfo, error) {
 			}
 		}
 
-		structInfos = append(structInfos, StructInfo{
+		structInfos = append(structInfos, structInfo{
 			Name:    structName,
 			Comment: structComment,
 			Fields:  fields,

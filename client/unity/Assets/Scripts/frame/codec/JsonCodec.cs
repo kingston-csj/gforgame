@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text;
-using UnityEngine;
+using Nova.Commons.Util;
 using Object = System.Object;
 
 namespace Nova.Codec
@@ -12,14 +12,12 @@ namespace Nova.Codec
     {
         public Object Decode(Type type, byte[] data)
         {
-            object instance = Activator.CreateInstance(type);
-            JsonUtility.FromJsonOverwrite(Encoding.UTF8.GetString(data), instance);
-            return instance;
+            return JsonUtil.FromJson(Encoding.UTF8.GetString(data), type);
         }
 
         public byte[] Encode(Object data)
         {
-            return Encoding.UTF8.GetBytes(JsonUtility.ToJson(data));
+            return Encoding.UTF8.GetBytes(JsonUtil.ToJson(data));
         }
     }
 }

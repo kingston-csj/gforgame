@@ -11,6 +11,7 @@ namespace Game.Configs
     public class DataManager
     {
         public ConfigItemContainer configItemContainer;
+        public ConfigCommonContainer configCommonContainer;
 
         private const string CONFIG_ROOT_PATH = "config/";
 
