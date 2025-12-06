@@ -3,7 +3,6 @@ package reward
 import (
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/item"
 	"strconv"
 )
 
@@ -29,7 +28,9 @@ func (r *ItemReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *ItemReward) Reward(player *player.Player) {
-	item.GetItemService().AddByModelId(player, r.ItemId, r.Amount)
+    if ops := getItemOps(); ops != nil {
+        ops.AddByModelId(player, r.ItemId, r.Amount)
+    }
 }
 
 func (r *ItemReward) GetType() string {

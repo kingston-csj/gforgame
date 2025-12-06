@@ -3,8 +3,8 @@ package mail
 import (
 	"time"
 
+	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/config/item"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
@@ -52,13 +52,13 @@ func (s *MailService) notifyMails(player *playerdomain.Player) {
 			Content: "测试邮件1内容",
 			Time:    time.Now().UnixMilli(),
 			Status:  constants.MailStatusUnread,
-			Rewards: []item.RewardDef{
-				{
-					Type:  "item",
-					Value: "2003=1",
-				},
-			},
-		})
+            Rewards: []domain.RewardDefLite{
+                {
+                    Type:  "item",
+                    Value: "2003=1",
+                },
+            },
+        })
 
 		player.Mailbox.AddMail(&playerdomain.Mail{
 			Id:      2,
@@ -66,13 +66,13 @@ func (s *MailService) notifyMails(player *playerdomain.Player) {
 			Content: "测试邮件2内容",
 			Time:    time.Now().UnixMilli(),
 			Status:  constants.MailStatusUnread,
-			Rewards: []item.RewardDef{
-				{
-					Type:  "currency",
-					Value: "gold=100",
-				},
-			},
-		})
+            Rewards: []domain.RewardDefLite{
+                {
+                    Type:  "currency",
+                    Value: "gold=100",
+                },
+            },
+        })
 
 	}
 

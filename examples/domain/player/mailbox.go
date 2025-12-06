@@ -1,8 +1,8 @@
 package player
 
 import (
+	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/config/item"
 	"time"
 )
 
@@ -17,10 +17,10 @@ func (m *Mailbox) AddSevMail(serverMail *ServerMail) {
 		Id:      serverMail.Id,
 		Title:   serverMail.Title,
 		Content: serverMail.Content,
-		Rewards: []item.RewardDef{},
-		Status:  constants.MailStatusUnread,
-		Time:    time.Now().Unix(),
-	}
+        Rewards: []domain.RewardDefLite{},
+        Status:  constants.MailStatusUnread,
+        Time:    time.Now().Unix(),
+    }
 	m.AddMail(mail)
 }
 

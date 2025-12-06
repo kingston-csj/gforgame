@@ -5,16 +5,16 @@ import (
 	"reflect"
 )
 
-// Container 是一个通用的数据容器，支持按 ID 查询、按索引查询和查询所有记录
-type Container[K comparable, V any] struct {
-	data        map[K]*V        // 存储 ID 到记录指针的映射
-	indexMapper map[string][]*V // 存储索引到记录指针的映射
-}
-
 // IContainer 定义容器的接口
 type IContainer interface {
 	AfterLoad()
 	Init()
+}
+
+// Container 是一个通用的数据容器，支持按 ID 查询、按索引查询和查询所有记录
+type Container[K comparable, V any] struct {
+	data        map[K]*V        // 存储 ID 到记录指针的映射
+	indexMapper map[string][]*V // 存储索引到记录指针的映射
 }
 
 // NewContainer 创建一个新的 Container 实例

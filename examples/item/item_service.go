@@ -14,6 +14,7 @@ import (
 	"io/github/gforgame/examples/io"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/network"
 )
 
@@ -38,6 +39,7 @@ func GetItemService() *ItemService {
 }
 
 func (s *ItemService) init() {
+	reward.SetItemOps( s)
 }
 
 func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count int32) error {
@@ -48,7 +50,7 @@ func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count i
 	return nil
 }
 
-func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count int32) any {
+func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count int32) error {
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
 	}

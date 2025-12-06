@@ -16,6 +16,8 @@ type Player struct {
 	db.BaseEntity
 	Name           string             `gorm:"player's name"`
 	Head           int32              `gorm:"player's head default:0"`
+	RechargeRmb    int32              `gorm:"player's recharge rmb"`
+	VipLevel       int32              `gorm:"player's vip level"`
 	CreateTime     int64              `gorm:"player's create time"`
 	Level          int32              `gorm:"player's' level"`
 	Stage          int32              `gorm:"player's stage"`

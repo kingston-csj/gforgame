@@ -1,10 +1,9 @@
 package reward
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/item"
-	"strconv"
+    "io/github/gforgame/examples/constants"
+    "io/github/gforgame/examples/domain/player"
+    "strconv"
 )
 
 type RuneReward struct {
@@ -29,7 +28,9 @@ func (r *RuneReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *RuneReward) Reward(player *player.Player) {
-	item.GetItemService().AddByModelId(player, r.ItemId, r.Amount)
+    if ops := getItemOps(); ops != nil {
+        ops.AddByModelId(player, r.ItemId, r.Amount)
+    }
 }
 
 func (r *RuneReward) GetType() string {

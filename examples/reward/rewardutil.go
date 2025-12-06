@@ -2,9 +2,9 @@ package reward
 
 import (
 	"errors"
+	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
-	"io/github/gforgame/examples/domain/config/item"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
 	"strings"
@@ -78,12 +78,14 @@ func ParseRewardList(config string) []Reward {
 	}
 	return result
 }
-func ParseRewards(rewards []item.RewardDef) *AndReward {
-	andReward := NewAndReward()
 
-	for _, rewardItem := range rewards {
-		split := strings.Split(rewardItem.Value, "=")
-		switch rewardItem.Type {
+
+func ParseRewards(rewards []domain.RewardDefLite) *AndReward {
+    andReward := NewAndReward()
+
+    for _, rewardItem := range rewards {
+        split := strings.Split(rewardItem.Value, "=")
+        switch rewardItem.Type {
 		case "item":
 			itemId, _ := util.StringToInt32(split[0])
 			amount, _ := util.StringToInt32(split[1])
@@ -94,13 +96,10 @@ func ParseRewards(rewards []item.RewardDef) *AndReward {
 		case "currency":
 			kind := split[0]
 			amount, _ := util.StringToInt32(split[1])
-			andReward.AddReward(&CurrencyReward{
-				Currency:   kind,
-				Amount: amount,
-			})
-		}
-	}
-	return andReward
+            andReward.AddReward(&CurrencyReward{Currency: kind, Amount: amount})
+        }
+    }
+    return andReward
 }
 
 func FromConsumes(consumes []consume.Consume) *AndReward {

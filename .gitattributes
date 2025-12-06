@@ -1,2 +1,3 @@
 #  让 TS/C# 相关的非核心文件不参与检测（降低其行数占比）
 client/cocos/resource linguist-detectable=false  # TS/C# 模板文件不统计
+client/unity/Assets/Scripts/plugins linguist-detectable=false 

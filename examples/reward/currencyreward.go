@@ -1,11 +1,11 @@
 package reward
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
-	"strconv"
+    "io/github/gforgame/examples/constants"
+    "io/github/gforgame/examples/domain/player"
+    "io/github/gforgame/examples/io"
+    "io/github/gforgame/protos"
+    "strconv"
 )
 
 type CurrencyReward struct {
@@ -37,15 +37,19 @@ func (r *CurrencyReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *CurrencyReward) Reward(player *player.Player) {
-	if r.Currency == "gold" {
-		player.Purse.AddGold(r.Amount)
-	} else if r.Currency == "diamond" {
-		player.Purse.AddDiamond(r.Amount)
-	}
-	io.NotifyPlayer(player, &protos.PushPurseInfo{
-		Gold:    player.Purse.Gold,
-		Diamond: player.Purse.Diamond,
-	})
+    if ops := getCurrencyOps(); ops != nil {
+        ops.Add(player, r.Currency, r.Amount)
+        return
+    }
+    if r.Currency == "gold" {
+        player.Purse.AddGold(r.Amount)
+    } else if r.Currency == "diamond" {
+        player.Purse.AddDiamond(r.Amount)
+    }
+    io.NotifyPlayer(player, &protos.PushPurseInfo{
+        Gold:    player.Purse.Gold,
+        Diamond: player.Purse.Diamond,
+    })
 }
 
 func (r *CurrencyReward) GetType() string {

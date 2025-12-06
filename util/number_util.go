@@ -8,7 +8,6 @@ import (
 
 // -------------------------- Boolean 转换 --------------------------
 // BooleanValue 将 any 类型转换为 bool（默认值：false）
-// 对应 Java：booleanValue(Object object)
 func BooleanValue(object any) bool {
 	return BooleanValueWithDefault(object, false)
 }

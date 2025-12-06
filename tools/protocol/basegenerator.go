@@ -85,7 +85,7 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int) err
 				fmt.Printf("生成结构体 %s 失败：%v\n", si.Name, err)
 				continue
 			}
-			fmt.Printf("已生成：%s%s\n", b.OutputDir, si.Name+g.GetFileSuffix())
+			// fmt.Printf("已生成：%s%s\n", b.OutputDir, si.Name+g.GetFileSuffix())
 		}
 	}
 
