@@ -20,51 +20,62 @@ type FriendApplyVo struct {
 }
 
 type PushFriendInfo struct {
-	ApplyItems  []*FriendApplyVo `json:"applyItems"`
-	FriendItems []*FriendVo      `json:"friendItems"`
-	FriendSum   int              `json:"friendSum"`
+    _           struct{} `cmd_ref:"CmdFriendPushApplyList" type:"push"`
+    ApplyItems  []*FriendApplyVo `json:"applyItems"`
+    FriendItems []*FriendVo      `json:"friendItems"`
+    FriendSum   int              `json:"friendSum"`
 }
 
 type ReqFriendSearchPlayers struct {
-	Key string `json:"key"`
+    _   struct{} `cmd_ref:"CmdFriendReqSearchPlayers" type:"req"`
+    Key string `json:"key"`
 }
 
 type ReqFriendApply struct {
-	FriendId string `json:"friendId"`
+    _        struct{} `cmd_ref:"CmdFriendReqApply" type:"req"`
+    FriendId string `json:"friendId"`
 }
 
 type ReqFriendDealApplyRecord struct {
-	ApplyId string `json:"applyId"`
-	Status  int    `json:"status"`
+    _       struct{} `cmd_ref:"CmdFriendReqDealApply" type:"req"`
+    ApplyId string `json:"applyId"`
+    Status  int    `json:"status"`
 }
 
 type ReqFriendDelete struct {
-	FriendId string `json:"friendId"`
+    _        struct{} `cmd_ref:"CmdFriendReqDelete" type:"req"`
+    FriendId string `json:"friendId"`
 }
 
 type ReqFriendQueryMyFriends struct {
+    _ struct{} `cmd_ref:"CmdFriendReqQueryFriends" type:"req"`
 }
 
 type ResFriendApply struct {
-	Code int `json:"code"`
+    _    struct{} `cmd_ref:"CmdFriendResApply" type:"res"`
+    Code int `json:"code"`
 }
 
 type ResFriendDealApplyRecord struct {
-	Code int `json:"code"`
+    _    struct{} `cmd_ref:"CmdFriendResDealApply" type:"res"`
+    Code int `json:"code"`
 }
 
 type ResFriendDelete struct {
-	Code int `json:"code"`
+    _    struct{} `cmd_ref:"CmdFriendResDelete" type:"res"`
+    Code int `json:"code"`
 }
 
 // 查询我的好友列表
 type ResFriendQueryMyFriends struct {
-	Code  int         `json:"code"`
-	Items []*FriendVo `json:"items"`
+    _     struct{} `cmd_ref:"CmdFriendResQueryFriends" type:"res"`
+    Code  int         `json:"code"`
+    Items []*FriendVo `json:"items"`
 }
 
 // 通过id或昵称搜索玩家
 type ResFriendSearchPlayers struct {
-	Code  int         `json:"code"`
-	Items []*FriendVo `json:"items"`
+    _     struct{} `cmd_ref:"CmdFriendResSearchPlayers" type:"res"`
+    Code  int         `json:"code"`
+    Items []*FriendVo `json:"items"`
 }

@@ -1,55 +1,68 @@
 package protos
 
 type ReqPlayerLogin struct {
-	Pwd      string
-	PlayerId string
+    _        struct{} `cmd_ref:"CmdPlayerReqLogin" type:"req"`
+    Pwd      string
+    PlayerId string
 }
 
-type ReqPlayerLoadingFinish struct{}
+type ReqPlayerLoadingFinish struct{
+    _        struct{} `cmd_ref:"CmdPlayerReqLoadingFinish" type:"req"`
+}
 
 // ResPlayerLogin 玩家登录响应
 type ResPlayerLogin struct {
-	Code       int32  `json:"code"`
-	PlayerId   string `json:"playerId"`   //  玩家ID
-	NewCreate  bool   `json:"newCreate"`  //  是否是新创建的玩家
-	CreateTime int64  `json:"createTime"` //  创建时间
-	Head       int32  `json:"head"`       //  玩家头像
-	Level      int32  `json:"level"`      //  玩家等级
-	Name       string `json:"name"`       //  玩家名称
-	Fighting   int32  `json:"fighting"`   //  玩家战斗力
-	Camp       int32  `json:"camp"`       //  玩家阵营
+    _          struct{} `cmd_ref:"CmdPlayerResLogin" type:"res"`
+    Code       int32  `json:"code"`
+    PlayerId   string `json:"playerId"`
+    NewCreate  bool   `json:"newCreate"`
+    CreateTime int64  `json:"createTime"`
+    Head       int32  `json:"head"`
+    Level      int32  `json:"level"`
+    Name       string `json:"name"`
+    Fighting   int32  `json:"fighting"`
+    Camp       int32  `json:"camp"`
 }
 
 type ReqPlayerCreate struct {
-	Name string
+    _    struct{} `cmd_ref:"CmdPlayerReqCreate" type:"req"`
+    Name string
 }
 
 type ResPlayerCreate struct {
-	Id int64
+    _  struct{} `cmd_ref:"CmdPlayerResCreate" type:"res"`
+    Id int64
 }
 
 type PushReplacingLogin struct {
 }
 
 type ReqJoinRoom struct {
-	RoomId   int64 `json:"roomId"`   //  房间ID
-	PlayerId int64 `json:"playerId"` //  玩家ID
+    _        struct{} `cmd_ref:"CmdChaJoinRoom" type:"req"`
+    RoomId   int64 `json:"roomId"`
+    PlayerId int64 `json:"playerId"`
 }
 
 type ReqPlayerUpLevel struct {
-	ToLevel int32 `json:"toLevel"`
+    _       struct{} `cmd_ref:"CmdPlayerReqUpLevel" type:"req"`
+    ToLevel int32 `json:"toLevel"`
 }
 
 type ResPlayerUpLevel struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdPlayerResUpLevel" type:"res"`
+    Code int32 `json:"code"`
 }
 
 type PushPlayerFightChange struct {
-	Fight int32 `json:"fight"`
+    _     struct{} `cmd_ref:"CmdPlayerPushFightChange" type:"push"`
+    Fight int32 `json:"fight"`
 }
 
-type ReqPlayerUpStage struct{}
+type ReqPlayerUpStage struct{
+    _     struct{} `cmd_ref:"CmdPlayerReqUpStage" type:"req"`
+}
 
 type ResPlayerUpStage struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdPlayerResUpStage" type:"res"`
+    Code int32 `json:"code"`
 }

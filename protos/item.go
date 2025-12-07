@@ -1,7 +1,8 @@
 package protos
 
 type ResBackpackInfo struct {
-	Items []ItemInfo `json:"items"`
+    _     struct{} `cmd_ref:"CmdItemResBackpackInfo" type:"res"`
+    Items []ItemInfo `json:"items"`
 }
 
 type ItemInfo struct {
@@ -10,12 +11,14 @@ type ItemInfo struct {
 }
 
 type ReqGmAction struct {
-	Topic  string
-	Params string
+    _      struct{} `cmd_ref:"CmdGmReqAction" type:"req"`
+    Topic  string
+    Params string
 }
 
 type ResGmAction struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdGmResAction" type:"res"`
+    Code int32 `json:"code"`
 }
 
 type RewardInfo struct {
@@ -24,11 +27,13 @@ type RewardInfo struct {
 }
 
 type PushPurseInfo struct {
-	Diamond int32 `json:"diamond"`
-	Gold    int32 `json:"gold"`
+    _       struct{} `cmd_ref:"CmdItemResPurseInfo" type:"push"`
+    Diamond int32 `json:"diamond"`
+    Gold    int32 `json:"gold"`
 }
 
 type PushItemChanged struct {
-	ItemId int32 `json:"itemId"`
-	Count  int32 `json:"count"`
+    _      struct{} `cmd_ref:"CmdItemPushChanged" type:"push"`
+    ItemId int32 `json:"itemId"`
+    Count  int32 `json:"count"`
 }

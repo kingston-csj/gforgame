@@ -15,8 +15,8 @@ func NewRankController() *RankController {
 }
 
 func (c *RankController) Init() {
-	network.RegisterMessage(protos.CmdRankReqQuery, &protos.ReqRankQuery{})
-	network.RegisterMessage(protos.CmdRankResQuery, &protos.ResRankQuery{})
+	// network.RegisterMessage(protos.CmdRankReqQuery, &protos.ReqRankQuery{})
+	// network.RegisterMessage(protos.CmdRankResQuery, &protos.ResRankQuery{})
 }
 
 func (c *RankController) ReqRankQuery(s *network.Session, index int, msg *protos.ReqRankQuery) *protos.ResRankQuery {

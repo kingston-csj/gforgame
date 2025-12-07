@@ -12,43 +12,57 @@ type MailVo struct { // 邮件vo
 }
 
 type PushMailAll struct {
-	Mails []MailVo `json:"mails"` // 所有邮件
+    _     struct{} `cmd_ref:"CmdMailPushAll" type:"push"`
+    Mails []MailVo `json:"mails"`
 }
 
-type ReqMailGetAllRewards struct{}
+type ReqMailGetAllRewards struct{
+    _ struct{} `cmd_ref:"CmdMailReqGetAllReward" type:"req"`
+}
 
 type ResMailGetAllRewards struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdMailResGetAllReward" type:"res"`
+    Code int32 `json:"code"`
 }
 
 type ReqMailRead struct {
-	Id int64 `json:"id"`
+    _  struct{} `cmd_ref:"CmdMailReqRead" type:"req"`
+    Id int64 `json:"id"`
 }
 
 type ResMailRead struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdMailResRead" type:"res"`
+    Code int32 `json:"code"`
 }
 
 type ReqMailGetReward struct {
-	Id int64 `json:"id"`
+    _  struct{} `cmd_ref:"CmdMailReqGetReward" type:"req"`
+    Id int64 `json:"id"`
 }
 
 type ResMailGetReward struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdMailResGetReward" type:"res"`
+    Code int32 `json:"code"`
 }
 
-type ReqMailDeleteAll struct{}
+type ReqMailDeleteAll struct{
+    _ struct{} `cmd_ref:"CmdMailReqDeleteAll" type:"req"`
+}
 
 type ResMailDeleteAll struct {
-	Removed []int64 `json:"removed"`
+    _       struct{} `cmd_ref:"CmdMailResDeleteAll" type:"res"`
+    Removed []int64 `json:"removed"`
 }
 
 type ResMailDelete struct {
 	Code int32 `json:"code"`
 }
 
-type ReqMailReadAll struct{}
+type ReqMailReadAll struct{
+    _ struct{} `cmd_ref:"CmdMailReqReadAll" type:"req"`
+}
 
 type ResMailReadAll struct {
-	Code int32 `json:"code"`
+    _    struct{} `cmd_ref:"CmdMailResReadAll" type:"res"`
+    Code int32 `json:"code"`
 }

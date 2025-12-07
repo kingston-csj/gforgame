@@ -17,9 +17,9 @@ func NewChatController() *ChatController {
 }
 
 func (rs *ChatController) Init() {
-	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
-	network.RegisterMessage(protos.CmdChatResChat, &protos.ResChat{})
-	network.RegisterMessage(protos.CmdChatPushNew, &protos.PushChatNewMessage{})
+	// network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
+	// network.RegisterMessage(protos.CmdChatResChat, &protos.ResChat{})
+	// network.RegisterMessage(protos.CmdChatPushNew, &protos.PushChatNewMessage{})
 
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		GetChatService().LoadOfflineMessages(data.(*playerdomain.Player))

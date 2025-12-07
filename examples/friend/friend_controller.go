@@ -21,17 +21,6 @@ func NewFriendController() *FriendController {
 }
 
 func (c *FriendController) Init() {
-	network.RegisterMessage(protos.CmdFriendReqApply, &protos.ReqFriendApply{})
-	network.RegisterMessage(protos.CmdFriendResApply, &protos.ResFriendApply{})
-	network.RegisterMessage(protos.CmdFriendReqDealApply, &protos.ReqFriendDealApplyRecord{})
-	network.RegisterMessage(protos.CmdFriendResDealApply, &protos.ResFriendDealApplyRecord{})
-	network.RegisterMessage(protos.CmdFriendReqDelete, &protos.ReqFriendDelete{})
-	network.RegisterMessage(protos.CmdFriendResDelete, &protos.ResFriendDelete{})
-	network.RegisterMessage(protos.CmdFriendReqQueryFriends, &protos.ReqFriendQueryMyFriends{})
-	network.RegisterMessage(protos.CmdFriendResQueryFriends, &protos.ResFriendQueryMyFriends{})
-	network.RegisterMessage(protos.CmdFriendReqSearchPlayers, &protos.ReqFriendSearchPlayers{})
-	network.RegisterMessage(protos.CmdFriendResSearchPlayers, &protos.ResFriendSearchPlayers{})
-
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		GetFriendService().RefreshClientInfo(data.(*playerdomain.Player))
 	})

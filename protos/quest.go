@@ -12,10 +12,12 @@ type QuestVo struct {
 
 // 主线任务——自动领奖
 type PushQuestAutoTakeReward struct {
+	_         struct{}    `cmd_ref:"CMD_PUSH_QUEST_AUTO_REWARD" type:"push"`
 	RewardVos []*RewardVo `json:"rewardVos"`
 }
 
 type PushQuestDailyInfo struct {
+	_ struct{} `cmd_ref:"CMD_PUSH_DAILY_QUEST" type:"push"`
 	// 已领取的档位索引（0为未领取)
 	DailyRewardIndex int32 `json:"dailyRewardIndex"`
 	// 今日活跃度
@@ -25,10 +27,12 @@ type PushQuestDailyInfo struct {
 }
 
 type PushQuestRefreshVo struct {
+	_     struct{} `cmd_ref:"CMD_PUSH_UPDATE_QUEST" type:"push"`
 	Quest *QuestVo `json:"quest"`
 }
 
 type PushQuestReplace struct {
+	_ struct{} `cmd_ref:"CMD_RES_REPLACE_QUEST" type:"push"`
 	// 旧任务id
 	OldQuestId int32 `json:"oldQuestId"`
 
@@ -37,6 +41,7 @@ type PushQuestReplace struct {
 
 // 每周任务主界面信息
 type PushQuestWeeklyInfo struct {
+	_ struct{} `cmd_ref:"CMD_PUSH_WEEKLY_QUEST" type:"push"`
 	// 已领取的档位索引（0为未领取)
 	WeeklyRewardIndex int32 `json:"weeklyRewardIndex"`
 	// 本周活跃度
@@ -47,6 +52,7 @@ type PushQuestWeeklyInfo struct {
 
 // 任务——一键领取所有奖励
 type ReqQuestTakeAllRewards struct {
+	_ struct{} `cmd_ref:"CMD_REQ_QUEST_ALL_REWARD" type:"req"`
 
 	// 任务类型 1主线，2日常
 	Category int32 `json:"category"`
@@ -54,6 +60,7 @@ type ReqQuestTakeAllRewards struct {
 
 // 任务——领取档位奖
 type ReqQuestTakeProgressReward struct {
+	_ struct{} `cmd_ref:"CMD_REQ_QUEST_PROGRESS_REWARD" type:"req"`
 
 	// 任务类型 2每日，5每周，6公会
 	Type int32 `json:"type"`
@@ -61,6 +68,7 @@ type ReqQuestTakeProgressReward struct {
 
 // 任务——领取达标奖
 type ReqQuestTakeReward struct {
+	_ struct{} `cmd_ref:"CMD_REQ_QUEST_REWARD" type:"req"`
 
 	// 任务id
 	Id int32 `json:"id"`
@@ -68,6 +76,7 @@ type ReqQuestTakeReward struct {
 
 // 任务——一键领取所有奖励
 type ResQuestTakeAllRewards struct {
+	_ struct{} `cmd_ref:"CMD_RES_QUEST_ALL_REWARD" type:"res"`
 
 	// 奖励vo
 	RewardVos []*RewardVo `json:"rewardVos"`
@@ -85,6 +94,7 @@ type ResQuestTakeAllRewards struct {
 }
 
 type ResQuestTakeProgressReward struct {
+	_ struct{} `cmd_ref:"CMD_RES_QUEST_PROGRESS_REWARD" type:"res"`
 	// 任务类型 2每日，5每周，6公会
 	Type int32 `json:"type"`
 	// 已领取的档位索引（0为未领取)
@@ -95,6 +105,7 @@ type ResQuestTakeProgressReward struct {
 
 // 任务——领取达标奖
 type ResQuestTakeReward struct {
+	_ struct{} `cmd_ref:"CMD_RES_QUEST_REWARD" type:"res"`
 	// 今日活跃度
 	DailyScore int32 `json:"dailyScore"`
 	// 本周活跃度

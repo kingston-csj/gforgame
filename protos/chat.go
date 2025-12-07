@@ -15,17 +15,20 @@ type ChatMessageVo struct  // 聊天消息vo
 
 // / PushChatNewMessage 推送新聊天消息
 type PushChatNewMessage struct {
-	Code     int              `json:"code"`
-	Messages []*ChatMessageVo `json:"messages"`
+    _        struct{} `cmd_ref:"CmdChatPushNew" type:"push"`
+    Code     int              `json:"code"`
+    Messages []*ChatMessageVo `json:"messages"`
 }
 
 // / ReqChat 发送聊天消息请求
 type ReqChat struct {
-	Channel int    `json:"channel"` // 发送频道：1个人 2世界
-	Target  string `json:"target"`  // 发送目标：个人id 世界id
-	Content string `json:"content"` // 发送内容
+    _       struct{} `cmd_ref:"CmdChatReqChat" type:"req"`
+    Channel int    `json:"channel"`
+    Target  string `json:"target"`
+    Content string `json:"content"`
 }
 
 type ResChat struct {
-	Code int `json:"code"`
+    _    struct{} `cmd_ref:"CmdChatResChat" type:"res"`
+    Code int `json:"code"`
 }

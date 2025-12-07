@@ -32,18 +32,6 @@ func NewPlayerController() *PlayerController {
 }
 
 func (ps *PlayerController) Init() {
-	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})
-	network.RegisterMessage(protos.CmdPlayerResLogin, &protos.ResPlayerLogin{})
-
-	network.RegisterMessage(protos.CmdPlayerReqCreate, &protos.ReqPlayerCreate{})
-	network.RegisterMessage(protos.CmdPlayerResCreate, &protos.ResPlayerCreate{})
-	network.RegisterMessage(protos.CmdPlayerReqLoadingFinish, &protos.ReqPlayerLoadingFinish{})
-	network.RegisterMessage(protos.CmdPlayerReqUpLevel, &protos.ReqPlayerUpLevel{})
-	network.RegisterMessage(protos.CmdPlayerResUpLevel, &protos.ResPlayerUpLevel{})
-	network.RegisterMessage(protos.CmdPlayerReqUpStage, &protos.ReqPlayerUpStage{})
-	network.RegisterMessage(protos.CmdPlayerResUpStage, &protos.ResPlayerUpStage{})
-	network.RegisterMessage(protos.CmdPlayerPushFightChange, &protos.PushPlayerFightChange{})
-
 	// 自动建表
 	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
 	if err != nil {

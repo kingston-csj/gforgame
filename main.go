@@ -204,5 +204,9 @@ func TryExportProtocols() {
 		if error != nil {
 			panic(error)
 		}
+		err2 := generator.BaseGenerator.GenerateRegisterFromTags("protos", "protos\\register_gen.go", nil)
+		if err2 != nil {
+			panic(err2)
+		}
 	}
 }

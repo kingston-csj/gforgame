@@ -35,11 +35,11 @@ namespace Game.Core
             dataManager.AutoInit();
             AppContext.dataManager = dataManager;
             CommonValueMgr.Instance.AutoInject();
-            
+
             // 游戏配置
             GameConfig gameConfig = new GameConfig();
             AppContext.gameConfig = gameConfig;
-            
+
             // 网络连接
             _CreateSocketClient();
         }
@@ -50,13 +50,14 @@ namespace Game.Core
             SocketRuntimeEnvironment runtimeEnvironment =
                 new SocketRuntimeEnvironment(typeof(MessageRouter), new JsonCodec(), new MessageFactory());
             // 自动注册所有的消息类型
-            foreach (Type item in ClassScanner.ListAllSubclasses("Scripts\\Game\\Net", typeof(Message)))
+            foreach (Type item in ClassScanner.ListClassesWithAttribution<MessageMeta>())
             {
                 // 获得class对应MessageMeta特性的cmd
                 MessageMeta messageMeta = item.GetCustomAttribute(typeof(MessageMeta)) as MessageMeta;
                 int cmd = messageMeta.Cmd;
                 runtimeEnvironment.MessageFactory.Register(cmd, item);
             }
+
             SocketClient webSocketClient = new WebSocketClient(AppContext.gameConfig.serverUrl, runtimeEnvironment);
             AppContext.socketClient = webSocketClient;
 
@@ -66,7 +67,7 @@ namespace Game.Core
                 LoggerUtil.Info("连接成功");
 
                 // 发送登录请求
-                ReqPlayerLogin reqLogin = new ReqPlayerLogin {playerId = "1001"};
+                ReqPlayerLogin reqLogin = new ReqPlayerLogin { playerId = "1001" };
                 webSocketClient.Send(reqLogin, (ResPlayerLogin res) => Debug.Log($"登录成功，玩家名称：{res.name}"));
             });
         }

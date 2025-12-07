@@ -19,18 +19,6 @@ func NewMailController() *MailController {
 }
 
 func (c *MailController) Init() {
-	network.RegisterMessage(protos.CmdMailReqGetAllReward, &protos.ReqMailGetAllRewards{})
-	network.RegisterMessage(protos.CmdMailResGetAllReward, &protos.ResMailGetAllRewards{})
-	network.RegisterMessage(protos.CmdMailReqRead, &protos.ReqMailRead{})
-	network.RegisterMessage(protos.CmdMailResRead, &protos.ResMailRead{})
-	network.RegisterMessage(protos.CmdMailReqGetReward, &protos.ReqMailGetReward{})
-	network.RegisterMessage(protos.CmdMailResGetReward, &protos.ResMailGetReward{})
-	network.RegisterMessage(protos.CmdMailReqDeleteAll, &protos.ReqMailDeleteAll{})
-	network.RegisterMessage(protos.CmdMailResDeleteAll, &protos.ResMailDeleteAll{})
-	network.RegisterMessage(protos.CmdMailReqReadAll, &protos.ReqMailReadAll{})
-	network.RegisterMessage(protos.CmdMailResReadAll, &protos.ResMailReadAll{})
-	network.RegisterMessage(protos.CmdMailPushAll, &protos.PushMailAll{})
-
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		c.OnPlayerLogin(data.(*playerdomain.Player))
 	})

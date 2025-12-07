@@ -10,12 +10,14 @@ type RankInfo struct {
 }
 
 type ReqRankQuery struct {
-	Type     int `json:"type"`
-	Start    int `json:"start"`
-	PageSize int `json:"pageSize"`
+	_        struct{} `cmd_ref:"CmdRankReqQuery" type:"req"`
+	Type     int      `json:"type"`
+	Start    int      `json:"start"`
+	PageSize int      `json:"pageSize"`
 }
 
 type ResRankQuery struct {
+	_        struct{}   `cmd_ref:"CmdRankResQuery" type:"res"`
 	Type     int        `json:"type"`
 	Records  []RankInfo `json:"records"`
 	MyRecord RankInfo   `json:"myRecord"`

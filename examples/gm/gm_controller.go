@@ -24,8 +24,6 @@ func NewGmController() *GmController {
 }
 
 func (ps *GmController) Init() {
-	network.RegisterMessage(protos.CmdGmReqAction, &protos.ReqGmAction{})
-	network.RegisterMessage(protos.CmdGmResAction, &protos.ResGmAction{})
 }
 
 func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.ReqGmAction) interface{} {
