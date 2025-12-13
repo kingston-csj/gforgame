@@ -6,8 +6,11 @@ type ResBackpackInfo struct {
 }
 
 type ItemInfo struct {
-	Id    int32 `json:"id"`
+	Cf_id    int32 `json:"cf_id"`
+    Uid      string `json:"uid"`
 	Count int32 `json:"count"`
+    Level int32 `json:"level"`
+    Extra string `json:"extra"`
 }
 
 type ReqGmAction struct {
@@ -21,11 +24,6 @@ type ResGmAction struct {
     Code int32 `json:"code"`
 }
 
-type RewardInfo struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
-}
-
 type PushPurseInfo struct {
     _       struct{} `cmd_ref:"CmdItemResPurseInfo" type:"push"`
     Diamond int32 `json:"diamond"`
@@ -34,6 +32,7 @@ type PushPurseInfo struct {
 
 type PushItemChanged struct {
     _      struct{} `cmd_ref:"CmdItemPushChanged" type:"push"`
-    ItemId int32 `json:"itemId"`
-    Count  int32 `json:"count"`
+    // item, rune,card 等道具类型
+    Type string `json:"type"`   
+    Changed []ItemInfo `json:"changed"`
 }

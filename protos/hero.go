@@ -6,9 +6,9 @@ type ReqHeroRecruit struct {
 }
 
 type ResHeroRecruit struct {
-	_           struct{}      `cmd_ref:"CmdHeroResRecruit" type:"res"`
-	Code        int32         `json:"code"`
-	RewardInfos []*RewardInfo `json:"rewardInfos"`
+	_           struct{}    `cmd_ref:"CmdHeroResRecruit" type:"res"`
+	Code        int32       `json:"code"`
+	RewardInfos []*RewardVo `json:"rewardInfos"`
 }
 
 type PushAllHeroInfo struct {

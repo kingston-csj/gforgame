@@ -1,5 +1,5 @@
-import { MailBoxModel } from '../../../game/mail/MailBoxModel';
-import RewardInfo from './RewardInfo';
+import { MailBoxModel } from "../../../game/mail/MailBoxModel";
+import RewardVo from "./RewardVo";
 
 export class MailVo {
   public id: number;
@@ -7,9 +7,11 @@ export class MailVo {
   public content: string;
   public time: number;
   public status: number;
-  public rewards: RewardInfo[];
+  public rewards: RewardVo[];
 
   public hasNotReceivedRewards(): boolean {
-    return this.status != MailBoxModel.STATUS_RECEIVED && this.rewards.length > 0;
+    return (
+      this.status != MailBoxModel.STATUS_RECEIVED && this.rewards.length > 0
+    );
   }
 }

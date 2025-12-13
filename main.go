@@ -170,6 +170,9 @@ func main() {
 	// 各自业务初始化
 	player.GetPlayerService().LoadPlayerProfile()
 
+	// p := player.GetPlayerService().GetPlayer("111")
+	// logger.Info(p.Name)
+
 	sg := make(chan os.Signal)
 	signal.Notify(sg, os.Interrupt, os.Kill)
 	select {

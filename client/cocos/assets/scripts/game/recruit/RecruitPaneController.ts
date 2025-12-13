@@ -1,22 +1,22 @@
-import { _decorator } from 'cc';
+import { _decorator } from "cc";
 
-import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
+import { ResHeroRecruit } from "../../net/protocol/ResHeroRecruit";
 
-import { BaseController } from '../../frame/mvc/BaseController';
-import { LayerIdx } from '../../ui/LayerIds';
-import R from '../../ui/R';
-import UiViewFactory from '../../ui/UiViewFactory';
-import { TipsPaneController } from '../common/TipsPaneController';
+import { BaseController } from "../../frame/mvc/BaseController";
+import { LayerIdx } from "../../ui/LayerIds";
+import R from "../../ui/R";
+import UiViewFactory from "../../ui/UiViewFactory";
+import { TipsPaneController } from "../common/TipsPaneController";
 
-import GameConstants from '../constants/GameConstants';
-import BagpackModel from '../item/BagpackModel';
-import { RecruitModel } from './RecruitModel';
-import { RecruitPaneView } from './RecruitPaneView';
-import { RecruitSettleModel } from './RecruitSettleModel';
-import { RecruitSettlePaneController } from './RecruitSettlePaneController';
+import GameConstants from "../constants/GameConstants";
+import BagpackModel from "../item/BagpackModel";
+import { RecruitModel } from "./RecruitModel";
+import { RecruitPaneView } from "./RecruitPaneView";
+import { RecruitSettleModel } from "./RecruitSettleModel";
+import { RecruitSettlePaneController } from "./RecruitSettlePaneController";
 const { ccclass, property } = _decorator;
 
-@ccclass('RecruitPaneController')
+@ccclass("RecruitPaneController")
 export class RecruitPaneController extends BaseController {
   private static instance: RecruitPaneController;
 
@@ -32,12 +32,18 @@ export class RecruitPaneController extends BaseController {
   }
 
   protected bindViewEvents() {
-    this.recruitPaneView.node.on('recruitBtnClick', this.onRecruitBtnClick, this);
-    this.recruitPaneView.node.on('closeBtnClick', this.onCloseBtnClick, this);
+    this.recruitPaneView.node.on(
+      "recruitBtnClick",
+      this.onRecruitBtnClick,
+      this
+    );
+    this.recruitPaneView.node.on("closeBtnClick", this.onCloseBtnClick, this);
   }
 
   onRecruitBtnClick(times: number) {
-    let ownItem = BagpackModel.getInstance().getItemByModelId(GameConstants.Item.RECRUIT_ID);
+    let ownItem = BagpackModel.getInstance().getItemCount(
+      GameConstants.Item.RECRUIT_ID
+    );
     // if (!ownItem || ownItem.count < times) {
     //   return;
     // }

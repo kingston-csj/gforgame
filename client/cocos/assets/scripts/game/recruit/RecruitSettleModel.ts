@@ -1,12 +1,12 @@
-import GameContext from '../../GameContext';
-import RewardInfo from '../../net/protocol/items/RewardInfo';
-import { ReqHeroRecruit } from '../../net/protocol/ReqHeroRecruit';
-import { ResHeroRecruit } from '../../net/protocol/ResHeroRecruit';
+import GameContext from "../../GameContext";
+import RewardVo from "../../net/protocol/items/RewardVo";
+import { ReqHeroRecruit } from "../../net/protocol/ReqHeroRecruit";
+import { ResHeroRecruit } from "../../net/protocol/ResHeroRecruit";
 
 export class RecruitSettleModel {
   public static instance: RecruitSettleModel;
 
-  private rewardItems: RewardInfo[] = [];
+  private rewardItems: RewardVo[] = [];
 
   public static getInstance(): RecruitSettleModel {
     if (!RecruitSettleModel.instance) {
@@ -15,11 +15,11 @@ export class RecruitSettleModel {
     return RecruitSettleModel.instance;
   }
 
-  public setRewardItems(rewardItems: RewardInfo[]) {
+  public setRewardItems(rewardItems: RewardVo[]) {
     this.rewardItems = rewardItems;
   }
 
-  public getRewardItems(): RewardInfo[] {
+  public getRewardItems(): RewardVo[] {
     return this.rewardItems;
   }
 

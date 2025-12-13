@@ -26,9 +26,10 @@ func (c *ItemConsume) VerifySliently(player *player.Player) bool {
 }
 
 func (c *ItemConsume) Consume(player *player.Player) {
-	player.Backpack.RemoveItem(c.ItemId, c.Amount)
-	io.NotifyPlayer(player, &protos.PushItemChanged{
-		ItemId: c.ItemId,
-		Count:  -c.Amount,
-	})
+	changeResult := player.Backpack.ReduceByModelId(c.ItemId, c.Amount)
+	notify :=  &protos.PushItemChanged{
+		Type: "item",
+		Changed: changeResult.ToChangeInfos(),
+	}
+	io.NotifyPlayer(player, notify)
 }

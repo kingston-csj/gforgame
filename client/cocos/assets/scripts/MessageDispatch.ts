@@ -1,24 +1,28 @@
-import PlayerData from './data/user/PlayerData';
-import { FightingUpTipsView } from './game/common/FightingUpTipsView';
-import { HeroBoxModel } from './game/hero/HeroBoxModel';
-import BagpackModel from './game/item/BagpackModel';
-import { MailBoxModel } from './game/mail/MailBoxModel';
-import { PurseModel } from './game/main/PurseModel';
-import { HeroVo } from './net/protocol/items/HeroVo';
-import { MailVo } from './net/protocol/items/MailVo';
-import PushHeroAttrChanged from './net/protocol/PushHeroAttrChanged';
-import { PushItemChanged } from './net/protocol/PushItemChanged';
-import { PushPlayerFightChange } from './net/protocol/PushPlayerFightChange';
-import PushPurseInfo from './net/protocol/PushPurseInfo';
-import { ResAllHeroInfo } from './net/protocol/ResAllHeroInfo';
-import ResBackpackInfo from './net/protocol/ResBackpackInfo';
-import { PushMailAll } from './net/protocol/ResMailList';
+import PlayerData from "./data/user/PlayerData";
+import { FightingUpTipsView } from "./game/common/FightingUpTipsView";
+import { HeroBoxModel } from "./game/hero/HeroBoxModel";
+import BagpackModel from "./game/item/BagpackModel";
+import { MailBoxModel } from "./game/mail/MailBoxModel";
+import { PurseModel } from "./game/main/PurseModel";
+import { HeroVo } from "./net/protocol/items/HeroVo";
+import { MailVo } from "./net/protocol/items/MailVo";
+import PushHeroAttrChanged from "./net/protocol/PushHeroAttrChanged";
+import { PushItemChanged } from "./net/protocol/PushItemChanged";
+import { PushPlayerFightChange } from "./net/protocol/PushPlayerFightChange";
+import PushPurseInfo from "./net/protocol/PushPurseInfo";
+import { ResAllHeroInfo } from "./net/protocol/ResAllHeroInfo";
+import PushBackpackInfo from "./net/protocol/PushBackpackInfo";
+import { PushMailAll } from "./net/protocol/ResMailList";
 
 // 存储待注册的处理器
 const pendingHandlers: Array<{ cmd: number; handler: Function }> = [];
 
 function MessageHandler(cmd: number) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
     const originalMethod = descriptor.value;
     // 将处理器存储到待注册列表
     pendingHandlers.push({ cmd, handler: originalMethod });
@@ -37,10 +41,12 @@ export class MessageDispatch {
     });
   }
 
-  @MessageHandler(ResBackpackInfo.cmd)
-  private static handleBackpackInfo(msg: ResBackpackInfo) {
+  @MessageHandler(PushBackpackInfo.cmd)
+  private static handleBackpackInfo(msg: PushBackpackInfo) {
     if (msg.items) {
-      BagpackModel.getInstance().reset(new Map(msg.items.map((item) => [item.id, item])));
+      BagpackModel.getInstance().reset(
+        new Map(msg.items.map((item) => [item.uid, item]))
+      );
     }
   }
 
@@ -57,13 +63,19 @@ export class MessageDispatch {
   @MessageHandler(ResAllHeroInfo.cmd)
   private static handleAllHeroInfo(msg: ResAllHeroInfo) {
     if (msg.heros) {
-      HeroBoxModel.getInstance().reset(new Map(msg.heros.map((hero) => [hero.id, hero])));
+      HeroBoxModel.getInstance().reset(
+        new Map(msg.heros.map((hero) => [hero.id, hero]))
+      );
     }
   }
 
   @MessageHandler(PushItemChanged.cmd)
   private static handleItemChanged(msg: PushItemChanged) {
-    BagpackModel.getInstance().changeItemByModelId(msg.itemId, msg.count);
+    if (msg.type == "item") {
+      msg.changed.forEach((item) => {
+        BagpackModel.getInstance().changeItemByModelId(item.cf_id, item.count);
+      });
+    }
   }
 
   @MessageHandler(PushHeroAttrChanged.cmd)

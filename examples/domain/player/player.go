@@ -23,6 +23,8 @@ type Player struct {
 	Stage          int32              `gorm:"player's stage"`
 	Backpack       *Backpack          `gorm:"-"`
 	BackpackJson   string             `gorm:"backpack"`
+	RuneBackpack       *Backpack          `gorm:"-"`
+	RuneBackpackJson   string             `gorm:"runeBackpack"`
 	HeroBox        *HeroBox           `gorm:"-"`
 	HeroBoxJson    string             `gorm:"herobox"`
 	Purse          *Purse             `gorm:"-"`
@@ -50,6 +52,17 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.BackpackJson = string(jsonData)
 	}
+
+	if p.RuneBackpack == nil {
+		p.RuneBackpackJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.RuneBackpack)
+		if err != nil {
+			return err
+		}
+		p.RuneBackpackJson = string(jsonData)
+	}
+
 	if p.HeroBox == nil {
 		p.HeroBoxJson = ""
 	} else {
@@ -109,11 +122,32 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 func (p *Player) AfterFind(tx *gorm.DB) error {
 	if util.IsEmptyString(p.BackpackJson) {
 		p.Backpack = &Backpack{
-			Items: make(map[int32]int32),
+			Items: make(map[string]*Item),
+			configProvider: BaseItemConfigProviderInstance,
 		}
 	} else {
-		json.Unmarshal([]byte(p.BackpackJson), &p.Backpack)
+		backpack := &Backpack{
+			Items: make(map[string]*Item),
+			configProvider: BaseItemConfigProviderInstance,
+		}
+		json.Unmarshal([]byte(p.BackpackJson), &backpack)
+		p.Backpack = backpack
 	}
+
+	if util.IsEmptyString(p.RuneBackpackJson) {
+		p.RuneBackpack = &Backpack{
+			Items: make(map[string]*Item),
+			configProvider: RuneConfigProviderInstance,
+		}
+	} else {
+		backpack := &Backpack{
+			Items: make(map[string]*Item),
+			configProvider: RuneConfigProviderInstance,
+		}
+		json.Unmarshal([]byte(p.RuneBackpackJson), &backpack)
+		p.RuneBackpack = backpack
+	}
+
 	if util.IsEmptyString(p.HeroBoxJson) {
 		p.HeroBox = &HeroBox{
 			Heros: make(map[int32]*Hero),

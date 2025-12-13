@@ -1,10 +1,8 @@
-package contracts
+package item
 
 import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 )
-
-
 
 type ItemOps interface {
     AddByModelId(p *playerdomain.Player, itemId int32, amount int32) error

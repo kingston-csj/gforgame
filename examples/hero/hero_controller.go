@@ -107,7 +107,7 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 }
 
 func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
-	rewardInfos := make([]*protos.RewardInfo, 0)
+	rewardInfos := make([]*protos.RewardVo, 0)
 
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	if p.Backpack.GetItemCount(item.RecruitItemId) < int32(msg.Times) {
@@ -116,19 +116,19 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 		}
 	}
 
-	p.Backpack.RemoveItem(item.RecruitItemId, msg.Times)
+	p.Backpack.ReduceByModelId(item.RecruitItemId, msg.Times)
 
 	for i := 0; i < int(msg.Times); i++ {
 		heroData := GetHeroService().GetRandomHero()
 		// 如果已经拥有该英雄，则转为碎片
 		if p.HeroBox.HasHero(heroData.Id) {
-			rewardInfos = append(rewardInfos, &protos.RewardInfo{
+			rewardInfos = append(rewardInfos, &protos.RewardVo{
 				Type:  "item",
 				Value: fmt.Sprintf("%d=%d", heroData.Item, heroData.Shard),
 			})
 			item.GetItemService().AddByModelId(p, heroData.Item, heroData.Shard)
 		} else {
-			rewardInfos = append(rewardInfos, &protos.RewardInfo{
+			rewardInfos = append(rewardInfos, &protos.RewardVo{
 				Type:  "hero",
 				Value: strconv.Itoa(int(heroData.Id)),
 			})

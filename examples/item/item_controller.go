@@ -27,11 +27,8 @@ func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
 	// 发送背包信息
 	resBackpack := &protos.ResBackpackInfo{}
 	if player.Backpack != nil {
-		for id, count := range player.Backpack.Items {
-			resBackpack.Items = append(resBackpack.Items, protos.ItemInfo{
-				Id:    int32(id),
-				Count: int32(count),
-			})
+		for _, item := range player.Backpack.Items {
+			resBackpack.Items = append(resBackpack.Items, item.ToVo())
 		}
 	}
 	io.NotifyPlayer(player, resBackpack)

@@ -1,12 +1,8 @@
+import { ItemInfo } from "./items/ItemInfo";
+
 export class PushItemChanged {
   public static cmd: number = 4003;
-
-  /// <summary>
-  /// 物品ID
-  /// </summary>
-  public itemId: number;
-  /// <summary>
-  /// 物品数量
-  /// </summary>
-  public count: number;
+  // item, rune,card 等道具类型
+  public type: string;
+  public changed: ItemInfo[];
 }

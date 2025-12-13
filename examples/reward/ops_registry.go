@@ -1,35 +1,35 @@
 package reward
 
 import (
-    "io/github/gforgame/examples/domain/contracts"
-    "sync"
+	itemcontract "io/github/gforgame/examples/contracts/item"
+	"sync"
 )
 
 var (
     mu          sync.RWMutex
-    itemOps     contracts.ItemOps
-    currencyOps contracts.CurrencyOps
+    itemOps     itemcontract.ItemOps
+    currencyOps itemcontract.CurrencyOps
 )
 
-func SetItemOps(ops contracts.ItemOps) {
+func SetItemOps(ops itemcontract.ItemOps) {
     mu.Lock()
     itemOps = ops
     mu.Unlock()
 }
 
-func SetCurrencyOps(ops contracts.CurrencyOps) {
+func SetCurrencyOps(ops itemcontract.CurrencyOps) {
     mu.Lock()
     currencyOps = ops
     mu.Unlock()
 }
 
-func getItemOps() contracts.ItemOps {
+func getItemOps() itemcontract.ItemOps {
     mu.RLock()
     defer mu.RUnlock()
     return itemOps
 }
 
-func getCurrencyOps() contracts.CurrencyOps {
+func getCurrencyOps() itemcontract.CurrencyOps {
     mu.RLock()
     defer mu.RUnlock()
     return currencyOps

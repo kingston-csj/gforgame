@@ -5,10 +5,6 @@ import (
 )
 
 func init() {
-	// ----from rank.go----
-	network.RegisterMessage(7001, &ReqRankQuery{})
-	network.RegisterMessage(7002, &ResRankQuery{})
-
 	// ----from chat.go----
 	network.RegisterMessage(1899, &PushChatNewMessage{})
 	network.RegisterMessage(1801, &ReqChat{})
@@ -91,5 +87,9 @@ func init() {
 	network.RegisterMessage(762, &ResQuestTakeAllRewards{})
 	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
 	network.RegisterMessage(54, &ResQuestTakeReward{})
+
+	// ----from rank.go----
+	network.RegisterMessage(7001, &ReqRankQuery{})
+	network.RegisterMessage(7002, &ResRankQuery{})
 
 }

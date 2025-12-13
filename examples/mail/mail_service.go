@@ -77,9 +77,9 @@ func (s *MailService) notifyMails(player *playerdomain.Player) {
 	}
 
 	for _, mail := range player.Mailbox.GetMailList() {
-		rewardVo := make([]protos.RewardInfo, 0, len(mail.Rewards))
+		rewardVo := make([]protos.RewardVo, 0, len(mail.Rewards))
 		for _, reward := range mail.Rewards {
-			rewardVo = append(rewardVo, protos.RewardInfo{
+			rewardVo = append(rewardVo, protos.RewardVo{
 				Type:  reward.Type,
 				Value: reward.Value,
 			})
