@@ -1,6 +1,7 @@
 package activity
 
 import (
+	"errors"
 	"io/github/gforgame/examples/config"
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/logger"
@@ -8,6 +9,7 @@ import (
 	"io/github/gforgame/util/timeutil"
 	"reflect"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -17,12 +19,54 @@ type Cancellable interface {
 	Cancel() bool
 }
 
+// 定义错误常量，方便外部判断
+var (
+	ErrInvalidTask     = errors.New("task scheduler: task function is nil")
+	ErrInvalidExecTime = errors.New("task scheduler: execution time is invalid (zero time)")
+)
+
+// timerCancellable 是 Cancellable 接口的具体实现，包装 time.Timer 实现取消逻辑
+type timerCancellable struct {
+	timer    *time.Timer       // 底层定时器
+	canceled atomic.Bool       // 标记是否已取消（原子变量保证并发安全）
+	done     chan struct{}     // 标记任务是否已执行
+}
+
+// Cancel 实现 Cancellable 接口的 Cancel 方法
+// 返回值：true=成功取消（任务未执行），false=任务已执行/已取消/定时器已触发
+func (tc *timerCancellable) Cancel() bool {
+	// 双重检查+原子操作，避免重复取消
+	if tc.canceled.CompareAndSwap(false, true) {
+		// 停止定时器：Stop() 返回true表示定时器未触发，false表示已触发/已停止
+		stopped := tc.timer.Stop()
+		close(tc.done) // 关闭done通道，通知等待的goroutine
+		return stopped
+	}
+	return false
+}
+
 // TaskScheduler 定时任务调度接口
 type TaskScheduler interface {
 	// Schedule 调度一次性任务，在指定时间执行
 	Schedule(task func(), execTime time.Time) (Cancellable, error)
 }
 
+// newTimerCancellable 创建 timerCancellable 实例
+func newTimerCancellable(timer *time.Timer) *timerCancellable {
+	return &timerCancellable{
+		timer: timer,
+		done:  make(chan struct{}),
+	}
+}
+
+// DefaultTaskScheduler 是 TaskScheduler 接口的默认实现
+// 基于 time.Timer 实现一次性定时任务调度，支持任务取消、并发安全
+type DefaultTaskScheduler struct{}
+
+// NewDefaultTaskScheduler 创建 DefaultTaskScheduler 实例
+func NewDefaultTaskScheduler() *DefaultTaskScheduler {
+	return &DefaultTaskScheduler{}
+}
 
 // innerTaskMap 内层任务映射，保证并发安全
 type innerTaskMap struct {
@@ -35,10 +79,79 @@ type innerTaskMap struct {
 type ActivityScheduler struct {
 	// taskScheduler 定时任务调度器 
 	taskScheduler TaskScheduler
-
 	// scheduledTasks 记录活动调度任务，双层并发安全映射
 	// key: 活动ID（int32）, value: *innerTaskMap（状态名称 -> 可取消任务）
 	scheduledTasks sync.Map
+}
+
+// Schedule 实现 TaskScheduler 接口的 Schedule 方法
+// 功能：调度一次性任务，在指定时间 execTime 执行
+// 参数：
+//   - task: 要执行的任务函数（不能为 nil）
+//   - execTime: 任务执行时间（不能为零值）
+// 返回值：
+//   - Cancellable: 任务取消器，可调用 Cancel() 取消未执行的任务
+//   - error: 入参非法时返回非 nil 错误
+func (d *DefaultTaskScheduler) Schedule(task func(), execTime time.Time) (Cancellable, error) {
+	// 1. 入参校验
+	if task == nil {
+		return nil, ErrInvalidTask
+	}
+	if execTime.IsZero() {
+		return nil, ErrInvalidExecTime
+	}
+
+	// 2. 计算当前时间到执行时间的延迟
+	now := time.Now()
+	delay := execTime.Sub(now)
+
+	// 3. 处理延迟<=0的情况（执行时间已过期，立即异步执行任务）
+	if delay <= 0 {
+		logger.Info("task scheduler: execTime is in the past, execute task immediately")
+		// 异步执行任务，避免阻塞当前goroutine
+		go func() {
+			defer func() {
+				// 捕获任务执行中的panic，避免程序崩溃
+				if r := recover(); r != nil {
+					logger.Error2("task scheduler: task panic" , r.(error))
+				}
+			}()
+			task()
+		}()
+
+		// 返回一个已取消的Cancellable（任务已执行，无法取消）
+		return &timerCancellable{
+			canceled: atomic.Bool{},
+		}, nil
+	}
+
+	// 4. 延迟执行：创建定时器，调度任务
+	timer := time.NewTimer(delay)
+	cancellable := newTimerCancellable(timer)
+
+	// 启动goroutine等待定时器触发，执行任务
+	go func() {
+		defer func() {
+			// 捕获任务执行中的panic
+			if r := recover(); r != nil {
+				logger.Error2("task scheduler: task panic", r.(error))
+			}
+		}()
+
+		select {
+		case <-timer.C:
+			// 定时器触发，执行任务
+			task()
+			// 标记任务已执行
+			cancellable.canceled.Store(true)
+			close(cancellable.done)
+		case <-cancellable.done:
+			// 任务被取消，直接退出
+			return
+		}
+	}()
+
+	return cancellable, nil
 }
 
 // NewActivityScheduler 创建新的活动调度器
@@ -50,14 +163,20 @@ func NewActivityScheduler(taskScheduler TaskScheduler) *ActivityScheduler {
 }
 
 // ScheduleActivity 调度活动
-func (a *ActivityScheduler) ScheduleActivity(activity *AbsActivityHandler) {
-	if activity == nil {
+func (a *ActivityScheduler) ScheduleActivity(handler ActivityHandler) {
+	if handler == nil {
 		return
 	}
-	activityId := activity.ActivityId
+	getter, ok := handler.(BaseHandlerGetter)
+	if !ok {
+		activityId := handler.GetActivityId()
+		logger.Info("ScheduleActivity: handler does not implement BaseHandlerGetter, activityId= " + string(activityId))
+		return
+	}
+	activityId := getter.GetBaseHandler().GetActivityId()
 
 	defer func() {
-		// 捕获 panic（对应 Java 的 catch 异常）
+		// 捕获 panic
 		if r := recover(); r != nil {
 			logger.Error(  r.(error))
 		}
@@ -72,7 +191,7 @@ func (a *ActivityScheduler) ScheduleActivity(activity *AbsActivityHandler) {
 	endCron := activityData.End
 
 	// 获取参考日期和当前时间
-	referDate := a.getReferenceDate(activity, startCron)
+	referDate := a.getReferenceDate(getter, startCron)
 	now := time.Now()
 
 	// 计算开始和结束时间
@@ -93,21 +212,21 @@ func (a *ActivityScheduler) ScheduleActivity(activity *AbsActivityHandler) {
 	}
 
 	// 设置活动结束时间戳
-	activity.EndTime = endDate.UnixMilli()
+	getter.GetBaseHandler().EndTime = endDate.UnixMilli()
 
 	// 如果结束时间在当前时间之后，调度相关任务
 	if endDate.After(now) {
-		a.scheduleStartTask(activity, activityId, startDate, now, endDate)
+		a.scheduleStartTask(getter, startDate, now, endDate)
 		a.scheduleEndTask(activityId, endDate, now)
-		a.scheduleCronTasks(activity, activityId, now)
+		a.scheduleCronTasks(getter, activityId, now)
 	}
 }
 
-// getReferenceDate 获取参考日期（对应 Java 的 getReferenceDate 方法）
-func (a *ActivityScheduler) getReferenceDate(activity *AbsActivityHandler, startCron string) time.Time {
+// getReferenceDate 获取参考日期
+func (a *ActivityScheduler) getReferenceDate(handler BaseHandlerGetter, startCron string) time.Time {
 	// 程序运行期间，参考日期以最近的活动结束时间为准
-	if activity.LastEndDate != nil {
-		return *activity.LastEndDate
+	if handler.GetBaseHandler().LastEndDate != nil {
+		return *handler.GetBaseHandler().LastEndDate
 	}
 
 	// 周期性活动，取当前时间
@@ -120,24 +239,18 @@ func (a *ActivityScheduler) getReferenceDate(activity *AbsActivityHandler, start
 	return defaultDate
 }
 
-// scheduleStartTask 调度活动开始任务（对应 Java 的 scheduleStartTask 方法）
+// scheduleStartTask 调度活动开始任务
 func (a *ActivityScheduler) scheduleStartTask(
-	activity *AbsActivityHandler,
-	activityId int32,
+	handler BaseHandlerGetter,
 	startDate, now, endDate time.Time) {
 	// 设置活动结束时间
-	activity.EndTime = endDate.UnixMilli()
-
+	handler.GetBaseHandler().EndTime = endDate.UnixMilli()
+	activityId := handler.GetBaseHandler().ActivityId	
 	// 定义开始任务
 	startTask := func() {
 		logger.Log(logger.Activity, "type", "start", "activityId", activityId)
 		// 调用活动开始方法
-		handler, err := GetHandler(activityId)
-		if err != nil {
-			logger.Error(err)
-			return
-		}
-		handler.ActivityStart()
+		handler.GetBaseHandler().ActivityStart()
 	}
 
 	// 开始时间已过期，立即执行
@@ -184,9 +297,9 @@ func (a *ActivityScheduler) scheduleEndTask(activityId int32, endDate, now time.
 }
 
 // scheduleCronTasks 调度其他特殊时间任务（对应 Java 的 scheduleCronTasks 方法）
-func (a *ActivityScheduler) scheduleCronTasks(activity *AbsActivityHandler, activityId int32, now time.Time) {
+func (a *ActivityScheduler) scheduleCronTasks(handler BaseHandlerGetter, activityId int32, now time.Time) {
 	// 遍历 Cron 方法映射
-	for cronExpr, method := range activity.CronMethods {
+	for cronExpr, method := range handler.GetBaseHandler().CronMethods {
 		cronDate, _ := schedule.GetNextTriggerTimeAfter(cronExpr, now)
 		if !cronDate.After(now) {
 			continue

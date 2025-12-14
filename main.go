@@ -10,6 +10,7 @@ import (
 
 	"io/github/gforgame/codec/json"
 	serverconfig "io/github/gforgame/config"
+	"io/github/gforgame/examples/activity"
 	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
@@ -169,6 +170,8 @@ func main() {
 	
 	// 各自业务初始化
 	player.GetPlayerService().LoadPlayerProfile()
+
+	activity.GetActivityService().ScheduleAllActivity()
 
 	// p := player.GetPlayerService().GetPlayer("111")
 	// logger.Info(p.Name)

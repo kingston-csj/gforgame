@@ -76,6 +76,13 @@ func init() {
 			ContainerType: reflect.TypeOf(&container.QuestContainer{}),
 			IndexFuncs:    map[string]string{"Category": "Category"},
 		},
+		// 活动表
+		{
+			TableName:     "activity",
+			IDField:       "Id",
+			RecordType:    reflect.TypeOf(domain.ActivityData{}),
+			ContainerType: reflect.TypeOf(&data.Container[int32, domain.ActivityData]{}),
+		},
 	}
 
 	for _, config := range tableConfigs {

@@ -196,3 +196,50 @@ func Error(err error) {
 		)))
 	}
 }
+
+ 
+
+// Error 记录带自定义异常内容、原始错误和调用栈的错误日志
+// 参数：
+//   - customMsg: 自定义异常描述（如"活动调度任务取消失败"），可为空
+//   - err: 原始错误对象，若为nil则不记录日志
+func Error2(customMsg string, err error) {
+	if err != nil {
+		// 获取调用栈信息
+		stack := make([]byte, 1024)
+		n := runtime.Stack(stack, false)
+		stackStr := string(stack[:n])
+
+		// 优化调用栈输出（保留原有逻辑）
+		stackLines := strings.Split(stackStr, "\n")
+		var optimizedStack []string
+		for i, line := range stackLines {
+			if i%2 == 0 {
+				// 函数名行
+				optimizedStack = append(optimizedStack, line)
+			} else {
+				// 文件路径行，只显示文件名
+				parts := strings.Split(line, "/")
+				if len(parts) > 0 {
+					optimizedStack = append(optimizedStack, "\t"+parts[len(parts)-1])
+				}
+			}
+		}
+
+		// 拼接自定义异常内容（为空则不显示，避免多余字符）
+		var msgPrefix string
+		if customMsg != "" {
+			msgPrefix = fmt.Sprintf("%s - ", customMsg)
+		}
+
+		// 记录日志（整合自定义内容、原始错误、调用栈）
+		logContent := fmt.Sprintf(
+			"%s ERROR EXCEPTION - %s\"%s\" \n%s\n",
+			time.Now().Format("2006-01-02 15:04:05"),
+			msgPrefix,       // 自定义内容前缀（为空则无）
+			err.Error(),     // 原始错误信息
+			strings.Join(optimizedStack, "\n"), // 优化后的调用栈
+		)
+		errorLog.Out.Write([]byte(logContent))
+	}
+}

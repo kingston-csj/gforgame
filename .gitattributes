@@ -1,2 +1,2 @@
-client/cocos/resource linguist-detectable=false  
-client/unity/Assets/Scripts/plugins linguist-detectable=false 
+client/cocos/assets/resources/** linguist-ignore=true
+client/unity/Assets/Scripts/plugins/** linguist-ignore=true

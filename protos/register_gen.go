@@ -5,36 +5,6 @@ import (
 )
 
 func init() {
-	// ----from player.go----
-	network.RegisterMessage(103, &ReqPlayerLogin{})
-	network.RegisterMessage(2005, &ReqPlayerLoadingFinish{})
-	network.RegisterMessage(154, &ResPlayerLogin{})
-	network.RegisterMessage(2003, &ReqPlayerCreate{})
-	network.RegisterMessage(2004, &ResPlayerCreate{})
-	network.RegisterMessage(1800, &ReqJoinRoom{})
-	network.RegisterMessage(2006, &ReqPlayerUpLevel{})
-	network.RegisterMessage(2007, &ResPlayerUpLevel{})
-	network.RegisterMessage(2008, &PushPlayerFightChange{})
-	network.RegisterMessage(2009, &ReqPlayerUpStage{})
-	network.RegisterMessage(2010, &ResPlayerUpStage{})
-
-	// ----from quest.go----
-	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
-	network.RegisterMessage(798, &PushQuestDailyInfo{})
-	network.RegisterMessage(795, &PushQuestRefreshVo{})
-	network.RegisterMessage(760, &PushQuestReplace{})
-	network.RegisterMessage(799, &PushQuestWeeklyInfo{})
-	network.RegisterMessage(706, &ReqQuestTakeAllRewards{})
-	network.RegisterMessage(702, &ReqQuestTakeProgressReward{})
-	network.RegisterMessage(701, &ReqQuestTakeReward{})
-	network.RegisterMessage(762, &ResQuestTakeAllRewards{})
-	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
-	network.RegisterMessage(54, &ResQuestTakeReward{})
-
-	// ----from rank.go----
-	network.RegisterMessage(7001, &ReqRankQuery{})
-	network.RegisterMessage(7002, &ResRankQuery{})
-
 	// ----from chat.go----
 	network.RegisterMessage(1899, &PushChatNewMessage{})
 	network.RegisterMessage(1801, &ReqChat{})
@@ -91,5 +61,35 @@ func init() {
 	network.RegisterMessage(6008, &ResMailDeleteAll{})
 	network.RegisterMessage(6009, &ReqMailReadAll{})
 	network.RegisterMessage(6010, &ResMailReadAll{})
+
+	// ----from player.go----
+	network.RegisterMessage(103, &ReqPlayerLogin{})
+	network.RegisterMessage(2005, &ReqPlayerLoadingFinish{})
+	network.RegisterMessage(154, &ResPlayerLogin{})
+	network.RegisterMessage(2003, &ReqPlayerCreate{})
+	network.RegisterMessage(2004, &ResPlayerCreate{})
+	network.RegisterMessage(1800, &ReqJoinRoom{})
+	network.RegisterMessage(2006, &ReqPlayerUpLevel{})
+	network.RegisterMessage(2007, &ResPlayerUpLevel{})
+	network.RegisterMessage(2008, &PushPlayerFightChange{})
+	network.RegisterMessage(2009, &ReqPlayerUpStage{})
+	network.RegisterMessage(2010, &ResPlayerUpStage{})
+
+	// ----from quest.go----
+	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
+	network.RegisterMessage(798, &PushQuestDailyInfo{})
+	network.RegisterMessage(795, &PushQuestRefreshVo{})
+	network.RegisterMessage(760, &PushQuestReplace{})
+	network.RegisterMessage(799, &PushQuestWeeklyInfo{})
+	network.RegisterMessage(706, &ReqQuestTakeAllRewards{})
+	network.RegisterMessage(702, &ReqQuestTakeProgressReward{})
+	network.RegisterMessage(701, &ReqQuestTakeReward{})
+	network.RegisterMessage(762, &ResQuestTakeAllRewards{})
+	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
+	network.RegisterMessage(54, &ResQuestTakeReward{})
+
+	// ----from rank.go----
+	network.RegisterMessage(7001, &ReqRankQuery{})
+	network.RegisterMessage(7002, &ResRankQuery{})
 
 }
