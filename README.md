@@ -39,10 +39,11 @@ go 客户端入口：client/go/client.go
 
 在 message.go 统一管理所有协议的 id
 文本类型，可以使用 json 格式。  
-二进制类型，可以使用基于 struct 反射，或者 protobuf 格式。  
+二进制类型，可以使用基于 struct 反射（目前只支持 unity 客户端），或者 protobuf 格式。  
 如果选择 json 或 struct 的方式，直接在 protos 目录下定义消息格式即可。  
 如果采用 protobuf 的话，则通过 message.proto 进行注册，再通过 gen_proto.bat 脚本生成 message.pb.go 文件  
 （使用 protobuf，需要下载 protobuf 编译工具，以及 go 插件，并将两者添加到系统环境变量）
+新手用户推送使用 json 格式，cocos/unity 客户端默认支持。
 
 ### 消息路由
 

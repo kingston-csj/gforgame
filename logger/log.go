@@ -22,6 +22,7 @@ const (
 	Player
 	Mail
 	Item
+	Activity
 )
 
 var logName = map[Type]string{
@@ -30,6 +31,7 @@ var logName = map[Type]string{
 	Player:      "player",
 	Mail:        "mail",
 	Item:        "item",
+	Activity:    "activity",
 }
 
 var (

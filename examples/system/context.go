@@ -4,18 +4,18 @@ var (
 	dailyReset   *DailyReset
 	weeklyReset  *WeeklyReset
 	monthlyReset *MonthlyReset
+	openSever    *OpenSeverTime
 )
 
 func init() {
 	once.Do(func() {
 		GetSystemParameterService().init()
 
-		dailyReset = &DailyReset{
-			ID: "1001",
-		}
 		// 从数据库加载数据
-		loadParameterData(dailyReset.GetID())
-
+		loadParameterData("1001")
+		loadParameterData("1002")
+		loadParameterData("1003")
+		loadParameterData("1004")
 	})
 }
 
@@ -33,4 +33,8 @@ func GetWeeklyReset() *WeeklyReset {
 
 func GetMonthlyReset() *MonthlyReset {
 	return monthlyReset
+}
+
+func GetOpenSeverTime() *OpenSeverTime {
+	return openSever
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/util/timeutil"
 	"log"
 	"time"
 
@@ -39,8 +40,8 @@ func StartSystemTask() {
 		log.Printf("添加每周更新任务失败: %v", err)
 	}
 
-	// 每个月最后一天的 23:59:59 执行的定时任务(暂时无法工作)
-	_, err = scheduler.AddFunc("59 59 23 L * *", performMonthlyUpdate)
+	// 每个月最后一天的 23:59:59 执行的定时任务(每个月最后几天定时触发+二次判断)
+	_, err = scheduler.AddFunc("59 59 23 28-31 * *", performMonthlyUpdate)
 	if err != nil {
 		log.Printf("添加每月更新任务失败: %v", err)
 	}
@@ -61,7 +62,7 @@ func StopSystemTask() {
 
 // performDailyUpdate 执行每日更新操作
 func performDailyUpdate() {
-	log.Println("执行每日更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
+	log.Println("执行每日更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	dailyReset := GetDailyReset()
 
@@ -74,7 +75,7 @@ func performDailyUpdate() {
 
 // performHourlyUpdate 执行每小时更新操作
 func performHourlyUpdate() {
-	log.Println("执行每小时更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
+	log.Println("执行每小时更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	// 在这里添加需要每小时更新的逻辑
 	// 例如：更新在线玩家状态、检查服务器负载等
@@ -82,7 +83,7 @@ func performHourlyUpdate() {
 
 // performWeeklyUpdate 执行每周更新操作
 func performWeeklyUpdate() {
-	log.Println("执行每周更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
+	log.Println("执行每周更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	weeklyReset := GetWeeklyReset()
 
@@ -95,7 +96,12 @@ func performWeeklyUpdate() {
 
 // performMonthlyUpdate 执行每月更新操作
 func performMonthlyUpdate() {
-	log.Println("执行每月更新任务 -", time.Now().Format("2006-01-02 15:04:05"))
+	// cron库不支持每个月最后一天的表达式，这里加一个二次判断
+    now := time.Now()
+    if now.AddDate(0, 0, 1).Day() != 1 {
+        return
+    }
+	log.Println("执行每月更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	monthlyReset := GetMonthlyReset()
 

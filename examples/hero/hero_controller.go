@@ -32,30 +32,6 @@ func NewHeroController() *HeroController {
 }
 
 func (ps *HeroController) Init() {
-	// network.RegisterMessage(protos.CmdHeroReqRecruit, &protos.ReqHeroRecruit{})
-	// network.RegisterMessage(protos.CmdHeroResRecruit, &protos.ResHeroRecruit{})
-	// network.RegisterMessage(protos.CmdHeroPushAllHero, &protos.PushAllHeroInfo{})
-
-	// network.RegisterMessage(protos.CmdHeroReqLevelUp, &protos.ReqHeroLevelUp{})
-	// network.RegisterMessage(protos.CmdHeroResLevelUp, &protos.ResHeroLevelUp{})
-	// network.RegisterMessage(protos.CmdHeroPushAdd, &protos.PushHeroAdd{})
-	// network.RegisterMessage(protos.CmdHeroPushAttrChange, &protos.PushHeroAttrChange{})
-
-	// network.RegisterMessage(protos.CmdHeroReqUpStage, &protos.ReqHeroUpStage{})
-	// network.RegisterMessage(protos.CmdHeroResUpStage, &protos.ResHeroUpStage{})
-
-	// network.RegisterMessage(protos.CmdHeroReqCombine, &protos.ReqHeroCombine{})
-	// network.RegisterMessage(protos.CmdHeroResCombine, &protos.ResHeroCombine{})
-
-	// network.RegisterMessage(protos.CmdHeroReqUpFight, &protos.ReqHeroUpFight{})
-	// network.RegisterMessage(protos.CmdHeroResUpFight, &protos.ResHeroUpFight{})
-
-	// network.RegisterMessage(protos.CmdHeroReqOffFight, &protos.ReqHeroOffFight{})
-	// network.RegisterMessage(protos.CmdHeroResOffFight, &protos.ResHeroOffFight{})
-
-	// network.RegisterMessage(protos.CmdHeroReqChangePosition, &protos.ReqHeroChangePosition{})
-	// network.RegisterMessage(protos.CmdHeroResChangePosition, &protos.ResHeroChangePosition{})
-
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
