@@ -1,2 +1,4 @@
 client/cocos/assets/resources/** linguist-ignore=true
 client/unity/Assets/Scripts/plugins/** linguist-ignore=true
+client/unity/Assets/Resources/** linguist-ignore=true
+*.tps linguist-ignore=true
