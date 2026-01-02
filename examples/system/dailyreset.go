@@ -21,6 +21,7 @@ func (d *DailyReset) DoParse() interface{} {
 	if err != nil {
 		return int64(0)
 	}
+	d.ResetTime = value
 	return value
 }
 

@@ -20,7 +20,7 @@ const (
 // ProtocolAdapter 协议适配器接口
 type ProtocolAdapter interface {
 	Decode(data []byte) ([]*Packet, error)
-	Encode(cmd int, index int, data []byte) ([]byte, error)
+	Encode(cmd int32, index int32, data []byte) ([]byte, error)
 }
 
 // BinaryProtocolAdapter 二进制协议适配器
@@ -40,7 +40,7 @@ func (b *BinaryProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 }
 
 // Encode 实现ProtocolAdapter接口
-func (b *BinaryProtocolAdapter) Encode(cmd int, index int, data []byte) ([]byte, error) {
+func (b *BinaryProtocolAdapter) Encode(cmd int32, index int32, data []byte) ([]byte, error) {
 	return b.Protocol.Encode(cmd, index, data)
 }
 
@@ -57,10 +57,10 @@ func NewJSONProtocolAdapter() *JSONProtocolAdapter {
 
 // WebSocketJsonFrame JSON格式的数据包
 type WebSocketJsonFrame struct {
-	Type  string      `json:"$type,omitempty"` // 消息类型标识
-	Cmd   int         `json:"cmd"`             // 消息类型
-	Index int         `json:"index"`           // 客户端消息索引
-	Msg   string 	  `json:"msg,omitempty"`   // 消息数据
+	Type  string `json:"$type,omitempty"` // 消息类型标识
+	Cmd   int32  `json:"cmd"`             // 消息类型
+	Index int32  `json:"index"`           // 客户端消息索引
+	Msg   string `json:"msg,omitempty"`   // 消息数据
 	Data  string `json:"data,omitempty"`  // 兼容data字段
 }
 
@@ -103,7 +103,7 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 		Header: MessageHeader{
 			Cmd:   jsonPacket.Cmd,
 			Index: jsonPacket.Index,
-			Size:  len(dataBytes),
+			Size:  int32(len(dataBytes)),
 		},
 		Data: dataBytes,
 	}
@@ -112,9 +112,9 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 }
 
 // Encode 编码为JSON格式
-func (j *JSONProtocolAdapter) Encode(cmd int, index int, data []byte) ([]byte, error) {
+func (j *JSONProtocolAdapter) Encode(cmd int32, index int32, data []byte) ([]byte, error) {
 	// 尝试将data解析为JSON对象
-	var dataObj = "" 
+	var dataObj = ""
 	if len(data) > 0 {
 		dataObj = string(data)
 	}

@@ -1,7 +1,7 @@
 package protos
 
-type ResBackpackInfo struct {
-    _     struct{} `cmd_ref:"CmdItemResBackpackInfo" type:"res"`
+type PushBackpackInfo struct {
+    _     struct{} `cmd_ref:"CmdItemPushBackpackInfo" type:"push"`
     Items []ItemInfo `json:"items"`
 }
 

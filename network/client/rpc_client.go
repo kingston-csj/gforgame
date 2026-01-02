@@ -15,17 +15,17 @@ var (
 func Callback(session *network.Session, request any, callback RequestCallback) {
 	atomic.AddInt32(&counter, 1)
 	future := &RequestResponseFuture{RequestCallback: callback, start: time.Now().Second()}
-	CallBackManager.Register(int(counter), future)
-	session.Send(request, int(counter))
+	CallBackManager.Register(counter, future)
+	session.Send(request, int32(counter))
 }
 
 func Request(session *network.Session, request any) (any, error) {
 	atomic.AddInt32(&counter, 1)
-	session.Send(request, int(counter))
+	session.Send(request, int32(counter))
 	future := &RequestResponseFuture{start: time.Now().Second()}
 	future.waitCause = make(chan error)
 	future.waitResponse = make(chan any)
-	CallBackManager.Register(int(counter), future)
+	CallBackManager.Register(counter, future)
 	// 调用成功，获得消息返回值; 失败，获得错误（如超时）
 	// 这里的代码相对java来得优雅
 	select {

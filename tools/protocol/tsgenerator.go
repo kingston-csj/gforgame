@@ -74,7 +74,7 @@ func (t *TypeScriptGenerator) MapType(goType string) string {
 
 // tSTemplateData TS模板数据
 type tSTemplateData struct {
-	Cmd   int
+	Cmd   int32
 	ClassName     string
 	ClassComment       string
 	Fields        []tSField
@@ -94,7 +94,7 @@ func toLowerFirst(s string) string {
 	return strings.ToLower(s[:1]) + s[1:]
 }
 // BuildTemplateData 构建TS模板数据（子类差异化实现）
-func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string]int) interface{} {
+func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) interface{} {
 	var fields []tSField
 	for _, f := range si.Fields {
 		fields = append(fields, tSField{
@@ -115,6 +115,6 @@ func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string
 }
 
 // Generate 暴露给外部的生成入口
-func (t *TypeScriptGenerator) Generate(msgIds map[string]int) error {
+func (t *TypeScriptGenerator) Generate(msgIds map[string]int32) error {
 	return t.BaseGenerator.Generate(t, msgIds)
 }

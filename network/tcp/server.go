@@ -96,14 +96,18 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 
 	// read loop
 	//  轮询，保证异步任务和客户端消息的执行是线程安全的
-	select {
-	case task := <-ioSession.AsynTasks:
-		task()
-	case ioFrame := <-ioSession.DataReceived:
-		node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
-	case <-ioSession.Die:
-		// 关闭session，执行defer函数
+	for {
+		select {
+		case task := <-ioSession.AsynTasks:
+			task()
+		case ioFrame := <-ioSession.DataReceived:
+			node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
+		case <-ioSession.Die:
+			// 关闭session，执行defer函数
+			break
+		}
 	}
+	logger.Debugf("tcp conn closed %v", conn.RemoteAddr())
 }
 
 func (n *TcpServer) Stop() {

@@ -5,6 +5,31 @@ import (
 )
 
 func init() {
+	// ----from chat.go----
+	network.RegisterMessage(1899, &PushChatNewMessage{})
+	network.RegisterMessage(1801, &ReqChat{})
+	network.RegisterMessage(1851, &ResChat{})
+
+	// ----from friend.go----
+	network.RegisterMessage(1997, &PushFriendInfo{})
+	network.RegisterMessage(1902, &ReqFriendSearchPlayers{})
+	network.RegisterMessage(1904, &ReqFriendApply{})
+	network.RegisterMessage(1905, &ReqFriendDealApplyRecord{})
+	network.RegisterMessage(1906, &ReqFriendDelete{})
+	network.RegisterMessage(1903, &ReqFriendQueryMyFriends{})
+	network.RegisterMessage(1954, &ResFriendApply{})
+	network.RegisterMessage(1955, &ResFriendDealApplyRecord{})
+	network.RegisterMessage(1956, &ResFriendDelete{})
+	network.RegisterMessage(1953, &ResFriendQueryMyFriends{})
+	network.RegisterMessage(1952, &ResFriendSearchPlayers{})
+
+	// ----from item.go----
+	network.RegisterMessage(250, &PushBackpackInfo{})
+	network.RegisterMessage(3001, &ReqGmAction{})
+	network.RegisterMessage(3002, &ResGmAction{})
+	network.RegisterMessage(4002, &PushPurseInfo{})
+	network.RegisterMessage(253, &PushItemChanged{})
+
 	// ----from player.go----
 	network.RegisterMessage(103, &ReqPlayerLogin{})
 	network.RegisterMessage(2005, &ReqPlayerLoadingFinish{})
@@ -12,11 +37,12 @@ func init() {
 	network.RegisterMessage(2003, &ReqPlayerCreate{})
 	network.RegisterMessage(2004, &ResPlayerCreate{})
 	network.RegisterMessage(1800, &ReqJoinRoom{})
-	network.RegisterMessage(2006, &ReqPlayerUpLevel{})
-	network.RegisterMessage(2007, &ResPlayerUpLevel{})
+	network.RegisterMessage(105, &ReqPlayerUpLevel{})
+	network.RegisterMessage(152, &ResPlayerUpLevel{})
 	network.RegisterMessage(2008, &PushPlayerFightChange{})
-	network.RegisterMessage(2009, &ReqPlayerUpStage{})
-	network.RegisterMessage(2010, &ResPlayerUpStage{})
+	network.RegisterMessage(106, &ReqPlayerUpStage{})
+	network.RegisterMessage(153, &ResPlayerUpStage{})
+	network.RegisterMessage(155, &PushLoadComplete{})
 
 	// ----from quest.go----
 	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
@@ -35,23 +61,11 @@ func init() {
 	network.RegisterMessage(7001, &ReqRankQuery{})
 	network.RegisterMessage(7002, &ResRankQuery{})
 
-	// ----from chat.go----
-	network.RegisterMessage(1899, &PushChatNewMessage{})
-	network.RegisterMessage(1801, &ReqChat{})
-	network.RegisterMessage(1851, &ResChat{})
-
-	// ----from friend.go----
-	network.RegisterMessage(1997, &PushFriendInfo{})
-	network.RegisterMessage(1902, &ReqFriendSearchPlayers{})
-	network.RegisterMessage(1904, &ReqFriendApply{})
-	network.RegisterMessage(1905, &ReqFriendDealApplyRecord{})
-	network.RegisterMessage(1906, &ReqFriendDelete{})
-	network.RegisterMessage(1903, &ReqFriendQueryMyFriends{})
-	network.RegisterMessage(1954, &ResFriendApply{})
-	network.RegisterMessage(1955, &ResFriendDealApplyRecord{})
-	network.RegisterMessage(1956, &ResFriendDelete{})
-	network.RegisterMessage(1953, &ResFriendQueryMyFriends{})
-	network.RegisterMessage(1952, &ResFriendSearchPlayers{})
+	// ----from scene.go----
+	network.RegisterMessage(2851, &ReqSceneGetData{})
+	network.RegisterMessage(2802, &ReqSceneSetData{})
+	network.RegisterMessage(2801, &ResSceneGetData{})
+	network.RegisterMessage(2852, &ResSceneSetData{})
 
 	// ----from hero.go----
 	network.RegisterMessage(5001, &ReqHeroRecruit{})
@@ -71,13 +85,6 @@ func init() {
 	network.RegisterMessage(5015, &ResHeroOffFight{})
 	network.RegisterMessage(5016, &ReqHeroChangePosition{})
 	network.RegisterMessage(5017, &ResHeroChangePosition{})
-
-	// ----from item.go----
-	network.RegisterMessage(4001, &ResBackpackInfo{})
-	network.RegisterMessage(3001, &ReqGmAction{})
-	network.RegisterMessage(3002, &ResGmAction{})
-	network.RegisterMessage(4002, &PushPurseInfo{})
-	network.RegisterMessage(4003, &PushItemChanged{})
 
 	// ----from mail.go----
 	network.RegisterMessage(6011, &PushMailAll{})

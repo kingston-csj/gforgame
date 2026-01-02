@@ -12,9 +12,9 @@ const (
 )
 
 type MessageHeader struct {
-	Cmd   int //消息类型
-	Index int //客户端消息索引，由客户端维护自增长
-	Size  int //消息长度
+	Cmd   int32 //消息类型
+	Index int32 //客户端消息索引，由客户端维护自增长
+	Size  int32 //消息长度
 }
 
 // ErrPacketSizeExceed is the error used for encode/decode.
@@ -36,15 +36,15 @@ func (c *Protocol) readHeader() (*MessageHeader, error) {
 	if err != nil {
 		return nil, err
 	}
-	id := bytesToInt(buff[0:4])
-	index := bytesToInt(buff[4:8])
-	size := bytesToInt(buff[8:HeadLength])
+	size := bytesToInt32(buff[0:4])
+	index := bytesToInt32(buff[4:8])
+	cmd := bytesToInt32(buff[8:HeadLength])
 
 	// packet length limitation
-	if size > MaxPacketSize {
+	if int(size) > MaxPacketSize {
 		return nil, ErrPacketSizeExceed
 	}
-	return &MessageHeader{Cmd: id, Index: index, Size: size}, nil
+	return &MessageHeader{Cmd: cmd, Index: index, Size: size}, nil
 }
 
 func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
@@ -62,9 +62,10 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 		if err != nil {
 			return packets, err
 		}
-
-		if header.Size <= c.buf.Len() {
-			body, err := c.buf.Next(header.Size)
+		// 消息体长度
+		bodySize := int(header.Size) - HeadLength
+		if bodySize <= c.buf.Len() {
+			body, err := c.buf.Next(bodySize)
 			if err != nil {
 				return packets, err
 			}
@@ -79,28 +80,28 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 	return packets, nil
 }
 
-func (c *Protocol) Encode(cmd int, index int, data []byte) ([]byte, error) {
+func (c *Protocol) Encode(cmd int32, index int32, data []byte) ([]byte, error) {
 	bodyLen := len(data)
 	buf := make([]byte, HeadLength+bodyLen)
-
-	copy(buf[0:4], intToBytes(cmd))
-	copy(buf[4:8], intToBytes(index))
-	copy(buf[8:HeadLength], intToBytes(bodyLen))
+	msgLength := HeadLength + bodyLen
+	copy(buf[0:4], int32ToBytes(int32(msgLength)))
+	copy(buf[4:8], int32ToBytes(index))
+	copy(buf[8:HeadLength], int32ToBytes(int32(cmd)))
 	copy(buf[HeadLength:], data)
 
 	return buf, nil
 }
 
 // Decode packet data length byte to int(Big end)
-func bytesToInt(b []byte) int {
-	result := 0
+func bytesToInt32(b []byte) int32 {
+	result := int32(0)
 	for _, v := range b {
-		result = result<<8 + int(v)
+		result = result<<8 + int32(v)
 	}
 	return result
 }
 
-func intToBytes(n int) []byte {
+func int32ToBytes(n int32) []byte {
 	buf := make([]byte, 4)
 	buf[0] = byte((n >> 24) & 0xFF)
 	buf[1] = byte((n >> 16) & 0xFF)

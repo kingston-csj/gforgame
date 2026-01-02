@@ -8,7 +8,7 @@ import (
 
 // CallBackService 定义了回调服务
 type CallBackService struct {
-	mapper     map[int]*RequestResponseFuture
+	mapper     map[int32]*RequestResponseFuture
 	mapperLock sync.Mutex
 	ticker     *time.Ticker
 	stopChan   chan bool
@@ -27,20 +27,20 @@ func init() {
 // NewCallBackService 初始化回调服务
 func NewCallBackService() *CallBackService {
 	return &CallBackService{
-		mapper:   make(map[int]*RequestResponseFuture),
+		mapper:   make(map[int32]*RequestResponseFuture),
 		stopChan: make(chan bool),
 	}
 }
 
 // Register 注册请求
-func (s *CallBackService) Register(correlationId int, future *RequestResponseFuture) {
+func (s *CallBackService) Register(correlationId int32, future *RequestResponseFuture) {
 	s.mapperLock.Lock()
 	defer s.mapperLock.Unlock()
 	s.mapper[correlationId] = future
 }
 
 // Remove 移除请求
-func (s *CallBackService) Remove(correlationId int) *RequestResponseFuture {
+func (s *CallBackService) Remove(correlationId int32) *RequestResponseFuture {
 	s.mapperLock.Lock()
 	defer s.mapperLock.Unlock()
 	if future, ok := s.mapper[correlationId]; ok {
@@ -97,7 +97,7 @@ func (s *CallBackService) scanExpiredRequest() {
 }
 
 // FillCallBack 填充回调
-func (s *CallBackService) FillCallBack(index int, message any) {
+func (s *CallBackService) FillCallBack(index int32, message any) {
 	future := s.Remove(index)
 	if future == nil {
 		return

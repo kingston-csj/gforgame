@@ -87,6 +87,6 @@ func (v *VipService) getEffectiveVipData(p *playerdomain.Player) *configdomain.V
 		return nil
 	}
 	vipContainer := config.QueryContainer[configdomain.VipData, *container.VipContainer]()
-	vipData := vipContainer.GetRecord(int32(p.VipLevel))
+	vipData := vipContainer.GetRecord(p.VipLevel)
 	return vipData
 }

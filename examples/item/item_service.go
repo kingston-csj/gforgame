@@ -83,7 +83,7 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 		return errorIllegalParams
 	}
 
-	itemData := config.QueryById[configdomain.ItemData](int64(itemId))
+	itemData := config.QueryById[configdomain.ItemData](itemId)
 	if itemData == nil {
 		return errorIllegalParams
 	}

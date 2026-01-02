@@ -1,4 +1,4 @@
-import { MessageDispatch } from '../MessageDispatch';
+import { MessageDispatch } from "../MessageDispatch";
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
@@ -10,7 +10,11 @@ export class WebSocketClient {
    * 向服务器发送消息
    * @param msg 消息
    */
-  public sendMessage(msgId: number, msg: any, callback: Function | null = null): void {
+  public sendMessage(
+    msgId: number,
+    msg: any,
+    callback: Function | null = null
+  ): void {
     this._index++;
 
     if (callback) {
@@ -32,11 +36,11 @@ export class WebSocketClient {
     const cmdBytes = this.intToBytes(msgId);
     // 流水号统一为0
     const indexBytes = this.intToBytes(index);
-    const lenBytes = this.intToBytes(msgSize);
+    const lenBytes = this.intToBytes(msgSize + headerSize);
 
-    buffer.set(cmdBytes, 0);
+    buffer.set(lenBytes, 0);
     buffer.set(indexBytes, 4);
-    buffer.set(lenBytes, 8);
+    buffer.set(cmdBytes, 8);
     buffer.set(new TextEncoder().encode(json), headerSize);
     this.ws.send(buffer);
     return true;
@@ -67,7 +71,7 @@ export class WebSocketClient {
   public connect(url: string): void {
     this.ws = new WebSocket(url);
     this.ws.onopen = (evt: Event) => {
-      console.info('建立连接');
+      console.info("建立连接");
       this.onConnect(evt);
     };
     this.ws.onmessage = (evt: MessageEvent) => {
@@ -87,12 +91,12 @@ export class WebSocketClient {
         const uint8Array = new Uint8Array(buffer);
         // 解析头部信息 (12字节)
         const headerSize = 12;
-        const cmd = this.bytesToInt(uint8Array.slice(0, 4));
+        const msgSize = this.bytesToInt(uint8Array.slice(0, 4));
         const index = this.bytesToInt(uint8Array.slice(4, 8));
-        const msgSize = this.bytesToInt(uint8Array.slice(8, 12));
+        const cmd = this.bytesToInt(uint8Array.slice(8, 12));
 
         // 解析消息体
-        const msgBytes = uint8Array.slice(headerSize, headerSize + msgSize);
+        const msgBytes = uint8Array.slice(headerSize, msgSize);
         const decoder = new TextDecoder();
         const msgStr = decoder.decode(msgBytes);
         const body = JSON.parse(msgStr);

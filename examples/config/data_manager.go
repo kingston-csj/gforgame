@@ -132,13 +132,12 @@ func GetSpecificContainer[C any](name string) *C {
 
 // QueryById 根据ID查询指定类型的记录
 // 这段恶心的代码先凑合着用，后续再干掉
-func QueryById[V any](id any) *V {
+func QueryById[V any](id int32) *V {
 	tableName := getTableName[V]()
 	container := GetDataManager().GetContainer(tableName)
 	if container == nil {
 		return nil
 	}
-
 	// 尝试调用GetRecord方法
 	if method := reflect.ValueOf(container).MethodByName("GetRecord"); method.IsValid() {
 		// 获取方法的参数类型
@@ -152,22 +151,8 @@ func QueryById[V any](id any) *V {
 		idValue := reflect.ValueOf(id)
 		var convertedValue reflect.Value
 
-		// 处理数字类型转换
-		if isNumber(idValue.Type()) && isNumber(paramType) {
-			if idValue.Type().ConvertibleTo(paramType) {
-				convertedValue = idValue.Convert(paramType)
-			} else {
-				// 通过float64作为中介进行转换
-				f64 := reflect.ValueOf(toFloat64(idValue.Interface()))
-				if f64.Type().ConvertibleTo(paramType) {
-					convertedValue = f64.Convert(paramType)
-				}
-			}
-		} else {
-			// 非数字类型，尝试直接转换
-			if idValue.Type().ConvertibleTo(paramType) {
-				convertedValue = idValue.Convert(paramType)
-			}
+		if idValue.Type().ConvertibleTo(paramType) {
+			convertedValue = idValue.Convert(paramType)
 		}
 
 		if !convertedValue.IsValid() {
@@ -208,48 +193,6 @@ func QueryById[V any](id any) *V {
 	}
 
 	return nil
-}
-
-// isNumber 检查类型是否为数字类型
-func isNumber(t reflect.Type) bool {
-	switch t.Kind() {
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64:
-		return true
-	}
-	return false
-}
-
-// toFloat64 将数字类型转换为float64
-func toFloat64(v interface{}) float64 {
-	switch v := v.(type) {
-	case int:
-		return float64(v)
-	case int8:
-		return float64(v)
-	case int16:
-		return float64(v)
-	case int32:
-		return float64(v)
-	case int64:
-		return float64(v)
-	case uint:
-		return float64(v)
-	case uint8:
-		return float64(v)
-	case uint16:
-		return float64(v)
-	case uint32:
-		return float64(v)
-	case uint64:
-		return float64(v)
-	case float32:
-		return float64(v)
-	case float64:
-		return v
-	}
-	return 0
 }
 
 // QueryContainer 获取指定类型的容器

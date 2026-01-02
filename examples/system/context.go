@@ -10,12 +10,11 @@ var (
 func init() {
 	once.Do(func() {
 		GetSystemParameterService().init()
-
+		dailyReset = &DailyReset{}
+		weeklyReset = &WeeklyReset{}
+		monthlyReset = &MonthlyReset{}
+		openSever = &OpenSeverTime{}
 		// 从数据库加载数据
-		loadParameterData("1001")
-		loadParameterData("1002")
-		loadParameterData("1003")
-		loadParameterData("1004")
 	})
 }
 

@@ -1,3 +1,3 @@
 export class ReqPlayerUpStage {
-  public static cmd: number = 2009;
+  public static cmd: number = 106;
 }

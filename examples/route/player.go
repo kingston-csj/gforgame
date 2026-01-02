@@ -70,7 +70,7 @@ func (ps *PlayerController) Init() {
 	})
 }
 
-func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
+func (ps *PlayerController) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin) {
 	if util.IsBlankString(msg.PlayerId) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return

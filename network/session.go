@@ -5,6 +5,7 @@ import (
 	"io/github/gforgame/codec"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network/protocol"
+	"io/github/gforgame/util/jsonutil"
 	"log"
 	"net"
 	"reflect"
@@ -79,7 +80,7 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 // @param msg 要发送的消息
 // @param index 消息索引
 // @return 发送过程遇到的异常
-func (s *Session) Send(msg any, index int) error {
+func (s *Session) Send(msg any, index int32) error {
 	if msg == nil {
 		return nil
 	}
@@ -93,14 +94,21 @@ func (s *Session) Send(msg any, index int) error {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
 
-	fmt.Println("发送消息: ", cmd, " 内容：", msg)
-	frame, _ := s.ProtocolCodec.Encode(cmd, index, msgData)
+	msgName, e3 := GetMsgName(cmd)
+	if e3 != nil {
+		return fmt.Errorf("get message %s name failed:%v", msg, e3)
+	}
+	jsonStr, err := jsonutil.StructToJSON(msg)
+	if err == nil {
+		fmt.Println("发送消息: cmd:", cmd, " name:", msgName, " 内容：", jsonStr)
+	}
+	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
 	s.dataToSend <- frame
 	return nil
 }
 
 func (s *Session) SendWithoutIndex(msg any) error {
-	return s.Send(msg, -1)
+	return s.Send(msg, 0)
 }
 
 // SendAndClose 发送消息并关闭连接
@@ -121,9 +129,12 @@ func (s *Session) SendAndClose(msg any) error {
 	if e2 != nil {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
-
-	fmt.Println("发送消息: ", cmd, " 内容：", msg)
-	frame, _ := s.ProtocolCodec.Encode(cmd, -1, msgData)
+	msgName, e3 := GetMsgName(cmd)
+	if e3 != nil {
+		return fmt.Errorf("get message %s name failed:%v", msg, e3)
+	}
+	fmt.Println("发送消息: cmd:", cmd, " name:", msgName, " 内容：", msg)
+	frame, _ := s.ProtocolCodec.Encode(cmd, int32(-1), msgData)
 	_, err = s.conn.Write(frame)
 	if err != nil {
 		return err

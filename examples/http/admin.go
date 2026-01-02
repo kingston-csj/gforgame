@@ -8,5 +8,5 @@ import (
 
 // 关闭服务器
 func StopServer(c *gin.Context) {
-	context.WsServer.Running <- true
+	context.TcpServer.Running <- true
 }

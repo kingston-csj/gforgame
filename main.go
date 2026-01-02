@@ -26,8 +26,9 @@ import (
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/network/ws"
+	"io/github/gforgame/network/tcp"
 	protocolexporter "io/github/gforgame/tools/protocol"
+	"io/github/gforgame/util/jsonutil"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,8 +44,12 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			logger.Error(r.(error))
 		}
 	}()
-
-	fmt.Println("接收消息: ", frame.Header.Cmd, " 内容：", frame.Msg)
+	msgName, _ := network.GetMsgName(frame.Header.Cmd)
+	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
+	if err == nil {
+		fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容：", jsonStr)
+	}
+	
 
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	var args []reflect.Value
@@ -103,7 +108,7 @@ func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
 func main() {
 	startTime := time.Now()
 
-	router := &network.MessageRoute{Handlers: make(map[int]*network.Handler)}
+	router := network.NewMessageRoute()
 	ioDispatcher := &MyMessageDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
 	// codec := protobuf.NewSerializer()
@@ -121,14 +126,14 @@ func main() {
 		friend.NewFriendController(),
 	}
 
-	node := ws.NewServer(
-		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
-		ws.WithRouter(router),
-		ws.WithIoDispatch(ioDispatcher),
-		ws.WithCodec(codec),
-		ws.WithModules(modules...),
+	node := tcp.NewServer(
+		tcp.WithAddress(serverconfig.ServerConfig.ServerUrl),
+		tcp.WithRouter(router),
+		tcp.WithIoDispatch(ioDispatcher),
+		tcp.WithCodec(codec),
+		tcp.WithModules(modules...),
 	)
-	context.WsServer = node
+	context.TcpServer = node
 
 	err := node.Start()
 	if err != nil {

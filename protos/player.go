@@ -68,3 +68,7 @@ type ResPlayerUpStage struct {
     _    struct{} `cmd_ref:"CmdPlayerResUpStage" type:"res"`
     Code int32 `json:"code"`
 }
+
+type PushLoadComplete struct {
+    _     struct{} `cmd_ref:"CmdPlayerPushLoadComplete" type:"push"`
+}

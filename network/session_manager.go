@@ -37,6 +37,9 @@ func AddSession(session *Session, player domain.Player) {
 func RemoveSession(session *Session) {
 	player := session2PlayerMap[session]
 	delete(session2PlayerMap, session)
+	if player == nil {
+		return
+	}
 	delete(player2SessionMap, player.GetId())
 }
 

@@ -44,7 +44,7 @@ type BaseItemConfigProvider struct {
 }
 
 func (p *BaseItemConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
-	return config.QueryById[configdomain.ItemData](int64(itemId))
+	return config.QueryById[configdomain.ItemData](itemId)
 }
 
 /// 符文配置提供器
@@ -52,7 +52,7 @@ type RuneConfigProvider struct {
 }
 
 func (p *RuneConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
-	return config.QueryById[configdomain.RuneData](int64(itemId))
+	return config.QueryById[configdomain.RuneData](itemId)
 }
 
 var (

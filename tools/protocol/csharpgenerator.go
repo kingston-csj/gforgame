@@ -86,7 +86,7 @@ type cSharpField struct {
 }
 
 // BuildTemplateData 构建C#模板数据
-func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int) interface{} {
+func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) interface{} {
 	var fields []cSharpField
 	for _, f := range si.Fields {
 		fields = append(fields, cSharpField{
@@ -108,6 +108,6 @@ func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int
 }
 
 // Generate 暴露给外部的生成入口
-func (c *CSharpGenerator) Generate(msgIds map[string]int) error {
+func (c *CSharpGenerator) Generate(msgIds map[string]int32) error {
 	return c.BaseGenerator.Generate(c, msgIds)
 }

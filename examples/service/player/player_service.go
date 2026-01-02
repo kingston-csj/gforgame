@@ -97,7 +97,7 @@ func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	context.DbService.SaveToDb(player)
 }
 
-func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int) {
+func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int32) {
 	// 是否是新角色
 	newCreated := ps.GetPlayerProfileById(playerId) == nil
 	player := ps.GetOrCreatePlayer(playerId)
@@ -124,8 +124,13 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int)
 	// 添加session
 	network.AddSession(s, player)
 
-	// 客户端红点系统，要求服务器先下发所有基础数据后，客户端再切到主界面
-	context.EventBus.Publish(events.PlayerLogin, player)
+	// 客户端红点系统，要求服务器先下发所有基础数据
+	// 异步推送
+	go func(){
+		context.EventBus.Publish(events.PlayerLogin, player)
+		// 客户端再切到主界面
+		s.SendWithoutIndex(&protos.PushLoadComplete{})
+	}()
 
 	s.Send(&protos.ResPlayerLogin{
 		Code:       0,

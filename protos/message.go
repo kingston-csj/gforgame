@@ -7,22 +7,27 @@ const (
 	CmdGetServerTimeRes = -152
 		
 	CmdPlayerReqLogin         = 103
+	CmdPlayerReqUpLevel       = 105
+	CmdPlayerReqUpStage       = 106
 	CmdPlayerResLogin         = 154
+	CmdPlayerPushLoadComplete = 155
+	CmdPlayerResUpLevel       = 152
+	CmdPlayerResUpStage       = 153
+
+
 	CmdPlayerReqCreate        = 2003
 	CmdPlayerResCreate        = 2004
 	CmdPlayerReqLoadingFinish = 2005
-	CmdPlayerReqUpLevel       = 2006
-	CmdPlayerResUpLevel       = 2007
 	CmdPlayerPushFightChange  = 2008
-	CmdPlayerReqUpStage       = 2009
-	CmdPlayerResUpStage       = 2010
+
+	
 
 	CmdGmReqAction = 3001
 	CmdGmResAction = 3002
 
-	CmdItemResBackpackInfo = 4001
+	CmdItemPushBackpackInfo = 250
 	CmdItemResPurseInfo    = 4002
-	CmdItemPushChanged     = 4003
+	CmdItemPushChanged     = 253
 
 	CmdHeroReqRecruit        = 5001
 	CmdHeroResRecruit        = 5002
@@ -85,4 +90,11 @@ const (
 
 	CmdRankReqQuery = 7001
 	CmdRankResQuery = 7002
+
+
+	CmdSceneReqGetData = 2851
+	CmdSceneReqSetData = 2802
+
+	CmdSceneResGetData = 2801
+	CmdSceneResSetData = 2852
 )

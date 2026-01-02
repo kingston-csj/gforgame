@@ -15,9 +15,13 @@ type (
 	}
 
 	MessageRoute struct {
-		Handlers map[int]*Handler
+		Handlers map[int32]*Handler
 	}
 )
+
+func NewMessageRoute() *MessageRoute {
+	return &MessageRoute{Handlers: make(map[int32]*Handler)}
+}
 
 var (
 	typeOfSession = reflect.TypeOf(&Session{})
@@ -78,7 +82,7 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 	return true
 }
 
-func (r *MessageRoute) GetHandler(cmd int) (*Handler, error) {
+func (r *MessageRoute) GetHandler(cmd int32) (*Handler, error) {
 	value, ok := r.Handlers[cmd]
 	if ok {
 		return value, nil

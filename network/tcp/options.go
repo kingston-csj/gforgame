@@ -6,12 +6,12 @@ import (
 )
 
 type Options struct {
-    Name         string // 服务器名称
-    ServiceAddr  string // current server service address (RPC)
-    MessageCodec codec.MessageCodec
-    IoDispatch   network.IoDispatch
-    modules      []network.Module
-    Router       *network.MessageRoute
+	Name         string // 服务器名称
+	ServiceAddr  string // current server service address (RPC)
+	MessageCodec codec.MessageCodec
+	IoDispatch   network.IoDispatch
+	modules      []network.Module
+	Router       *network.MessageRoute
 }
 
 type Option func(*Options)
@@ -25,9 +25,9 @@ func WithAddress(addr string) Option {
 
 // WithIoDispatch 消息处理链
 func WithIoDispatch(dispatch network.IoDispatch) Option {
-    return func(opt *Options) {
-        opt.IoDispatch = dispatch
-    }
+	return func(opt *Options) {
+		opt.IoDispatch = dispatch
+	}
 }
 
 // WithCodec 消息编解码

@@ -16,13 +16,13 @@ import (
 // ProtocolGenerator 协议生成器抽象基类
 type ProtocolGenerator interface {
 	// 通用生成入口（基类实现）
-	Generate(msgIds map[string]int) error
+	Generate(msgIds map[string]int32) error
 	// 返回文件后缀（.cs/.ts）
 	GetFileSuffix() string   
 	// Go类型 → 目标语言类型映射           
 	MapType(goType string) string
 	// 构建模板数据
-	BuildTemplateData(si structInfo, msgIds map[string]int) interface{} 
+	BuildTemplateData(si structInfo, msgIds map[string]int32) interface{} 
 	// 返回模板文件路径
 	GetTemplatePath() string             
 }
@@ -54,7 +54,7 @@ func (b *BaseGenerator) GetTemplatePath() string {
 }
 
 // Generate 通用生成逻辑（所有语言共享）
-func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int) error {
+func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int32) error {
 	// 初始化模板
 	if err := b.Init(g); err != nil {
 		return err
@@ -95,7 +95,7 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int) err
 }
 
 // generateStructFile 生成单个结构体文件（通用逻辑）
-func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si structInfo, msgIds map[string]int) error {
+func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si structInfo, msgIds map[string]int32) error {
 	// 子类构建模板数据
 	data := g.BuildTemplateData(si, msgIds)
 	// 渲染模板
