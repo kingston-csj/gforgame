@@ -4,7 +4,7 @@ import (
 	"io/github/gforgame/examples/constants"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	friendservice "io/github/gforgame/examples/friend"
-	playerservice "io/github/gforgame/examples/player"
+	playerservice "io/github/gforgame/examples/service/player"
 )
 
 type FriendChannelHandler struct {

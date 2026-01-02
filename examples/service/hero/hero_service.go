@@ -2,10 +2,12 @@ package hero
 
 import (
 	"fmt"
-	"slices"
+	"math/rand"
 	"strconv"
+	"sync"
 
 	"io/github/gforgame/common"
+	"io/github/gforgame/data"
 	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
@@ -13,43 +15,34 @@ import (
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/item"
-
+	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
-
-	"io/github/gforgame/network"
+	"io/github/gforgame/examples/item"
 	"io/github/gforgame/protos"
 )
 
-type HeroController struct {
-	network.Base
-}
+type HeroService struct{}
 
-func NewHeroController() *HeroController {
-	return &HeroController{}
-}
+var (
+	instance *HeroService
+	once     sync.Once
+)
 
-func (ps *HeroController) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
-		ps.OnPlayerLogin(data.(*playerdomain.Player))
+func GetHeroService() *HeroService {
+	once.Do(func() {
+		instance = &HeroService{}
 	})
-
-	context.EventBus.Subscribe(events.PlayerAfterLoad, func(data interface{}) {
-		p := data.(*playerdomain.Player)
-		for _, h := range p.HeroBox.Heros {
-			GetHeroService().ReCalculateHeroAttr(p, h, false)
-		}
-	})
+	return instance
 }
 
-func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
+func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	resAllHeroInfo := &protos.PushAllHeroInfo{}
 
 	// 普通英雄
 	for _, h := range player.HeroBox.Heros {
-		GetHeroService().ReCalculateHeroAttr(player, h, false)
+		ps.ReCalculateHeroAttr(player, h, false)
 		attrInfos := make([]protos.AttrInfo, 0)
 		for _, attr := range h.AttrBox.GetAttrs() {
 			attrInfos = append(attrInfos, protos.AttrInfo{
@@ -82,20 +75,19 @@ func (ps *HeroController) OnPlayerLogin(player *playerdomain.Player) {
 	io.NotifyPlayer(player, resAllHeroInfo)
 }
 
-func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
+func (ps *HeroService) DoRecruit(p *player.Player, times int32) *protos.ResHeroRecruit {
 	rewardInfos := make([]*protos.RewardVo, 0)
 
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-	if p.Backpack.GetItemCount(item.RecruitItemId) < int32(msg.Times) {
+	if p.Backpack.GetItemCount(item.RecruitItemId) < times {
 		return &protos.ResHeroRecruit{
 			Code: constants.I18N_ITEM_NOT_ENOUGH,
 		}
 	}
 
-	p.Backpack.ReduceByModelId(item.RecruitItemId, msg.Times)
+	p.Backpack.ReduceByModelId(item.RecruitItemId, times)
 
-	for i := 0; i < int(msg.Times); i++ {
-		heroData := GetHeroService().GetRandomHero()
+	for i := 0; i < int(times); i++ {
+		heroData := ps.GetRandomHero()
 		// 如果已经拥有该英雄，则转为碎片
 		if p.HeroBox.HasHero(heroData.Id) {
 			rewardInfos = append(rewardInfos, &protos.RewardVo{
@@ -110,9 +102,8 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 			})
 			ps.NewHero(p, heroData.Id)
 
-			GetHeroService().ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
+			ps.ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
 		}
-
 	}
 
 	context.EventBus.Publish(events.PlayerEntityChange, p)
@@ -123,8 +114,8 @@ func (ps *HeroController) ReqRecruit(s *network.Session, index int, msg *protos.
 	}
 }
 
-func (ps *HeroController) NewHero(p *playerdomain.Player,heroId int32) {
-	p.HeroBox.AddHero(&playerdomain.Hero{
+func (ps *HeroService) NewHero(p *player.Player, heroId int32) {
+	p.HeroBox.AddHero(&player.Hero{
 				ModelId: heroId,
 				Level:   1,
 			})
@@ -134,10 +125,45 @@ func (ps *HeroController) NewHero(p *playerdomain.Player,heroId int32) {
 	})
 }
 
-func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-	toLevel := msg.ToLevel
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) GetRandomHero() configdomain.HeroData {
+	heroDatas := ps.filterNormalHeros()
+	// 根据HeroData的Prob进行抽奖
+	var totalProb int32 = 0
+	for _, heroData := range heroDatas {
+		totalProb += heroData.Prob
+	}
+
+	randProb := rand.Int31n(totalProb)
+	var currentProb int32 = 0
+	var selectedHero configdomain.HeroData
+
+	for _, heroData := range heroDatas {
+		currentProb += heroData.Prob
+		if randProb < currentProb {
+			selectedHero = *heroData
+			break
+		}
+	}
+
+	return selectedHero
+}
+
+// 过滤掉主公
+func (ps *HeroService) filterNormalHeros() []*configdomain.HeroData {
+	container := config.QueryContainer[configdomain.HeroData, *data.Container[int32, configdomain.HeroData]]()
+
+	var result []*configdomain.HeroData
+	for _, heroData := range container.GetAllRecords() {
+		// 主公概率为0
+		if heroData.Prob > 0 {
+			result = append(result, heroData)
+		}
+	}
+	return result
+}
+
+func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) *protos.ResHeroLevelUp {
+	h := p.HeroBox.GetHero(heroId)
 	if h == nil {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -169,7 +195,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 		}
 	}
 
-	costGold := GetHeroService().CalcTotalUpLevelConsume(h.Level, toLevel)
+	costGold := ps.CalcTotalUpLevelConsume(h.Level, toLevel)
 	if !p.Purse.IsEnoughGold(costGold) {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_GOLD_NOT_ENOUGH,
@@ -189,7 +215,7 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 	consume.Consume(p)
 
 	h.Level = toLevel
-	GetHeroService().ReCalculateHeroAttr(p, h, true)
+	ps.ReCalculateHeroAttr(p, h, true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroLevelUp{
@@ -197,10 +223,8 @@ func (ps *HeroController) ReqHeroLevelUp(s *network.Session, index int, msg *pro
 	}
 }
 
-func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqHeroUpStage) *protos.ResHeroUpStage {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) DoStageUp(p *player.Player, heroId int32) *protos.ResHeroUpStage {
+	h := p.HeroBox.GetHero(heroId)
 	if h == nil {
 		return &protos.ResHeroUpStage{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -234,7 +258,7 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 
 	h.Stage = h.Stage + 1
 
-	GetHeroService().ReCalculateHeroAttr(p, h, true)
+	ps.ReCalculateHeroAttr(p, h, true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroUpStage{
@@ -242,16 +266,14 @@ func (ps *HeroController) ReqHeroUpStage(s *network.Session, index int, msg *pro
 	}
 }
 
-func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *protos.ReqHeroCombine) *protos.ResHeroCombine {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) DoCombine(p *player.Player, heroId int32) *protos.ResHeroCombine {
+	h := p.HeroBox.GetHero(heroId)
 	if h != nil {
 		return &protos.ResHeroCombine{
 			Code: constants.I18N_HERO_TIP5,
 		}
 	}
-	heroData := config.QueryById[configdomain.HeroData](msg.HeroId)
+	heroData := config.QueryById[configdomain.HeroData](heroId)
 	itemConsume := consume.ItemConsume{
 		ItemId: heroData.Item,
 		Amount: heroData.Shard,
@@ -264,12 +286,12 @@ func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *pro
 	}
 	itemConsume.Consume(p)
 
-	p.HeroBox.AddHero(&playerdomain.Hero{
+	p.HeroBox.AddHero(&player.Hero{
 		ModelId: heroData.Id,
 		Level:   1,
 	})
 
-	GetHeroService().ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
+	ps.ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroCombine{
@@ -277,10 +299,8 @@ func (ps *HeroController) ReqHeroCombine(s *network.Session, index int, msg *pro
 	}
 }
 
-func (ps *HeroController) ReqHeroUpFight(s *network.Session, index int, msg *protos.ReqHeroUpFight) *protos.ResHeroUpFight {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) DoUpFight(p *player.Player, heroId int32) *protos.ResHeroUpFight {
+	h := p.HeroBox.GetHero(heroId)
 	if h == nil {
 		return &protos.ResHeroUpFight{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -293,15 +313,10 @@ func (ps *HeroController) ReqHeroUpFight(s *network.Session, index int, msg *pro
 			Code: constants.I18N_HERO_TIP6,
 		}
 	}
-	// 判断位置是否为空闲位置
-	if !slices.Contains(pos, msg.Position) {
-		return &protos.ResHeroUpFight{
-			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
-		}
-	}
 
-	h.Position = msg.Position
-	GetHeroService().ReCalculateHeroAttr(p, h, true)
+	h.Stage = h.Stage + 1
+
+	ps.ReCalculateHeroAttr(p, h, true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroUpFight{
@@ -309,10 +324,8 @@ func (ps *HeroController) ReqHeroUpFight(s *network.Session, index int, msg *pro
 	}
 }
 
-func (ps *HeroController) ReqHeroOffFight(s *network.Session, index int, msg *protos.ReqHeroOffFight) *protos.ResHeroOffFight {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) DoOffFight(p *player.Player, heroId int32) *protos.ResHeroOffFight {
+	h := p.HeroBox.GetHero(heroId)
 	if h == nil {
 		return &protos.ResHeroOffFight{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -325,14 +338,9 @@ func (ps *HeroController) ReqHeroOffFight(s *network.Session, index int, msg *pr
 		}
 	}
 
-	if len(p.HeroBox.GetUpFightHeros()) == 1 {
-		return &protos.ResHeroOffFight{
-			Code: constants.I18N_HERO_TIP8,
-		}
-	}
-
 	h.Position = 0
-	GetHeroService().ReCalculateHeroAttr(p, h, true)
+
+	ps.ReCalculateHeroAttr(p, h, true)
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
 	return &protos.ResHeroOffFight{
@@ -340,45 +348,81 @@ func (ps *HeroController) ReqHeroOffFight(s *network.Session, index int, msg *pr
 	}
 }
 
-func (ps *HeroController) ReqHeroChangePosition(s *network.Session, index int, msg *protos.ReqHeroChangePosition) *protos.ResHeroChangePosition {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
-	h := p.HeroBox.GetHero(msg.HeroId)
+func (ps *HeroService) DoChangePosition(p *player.Player, heroId int32, position int32) *protos.ResHeroChangePosition {
+	h := p.HeroBox.GetHero(heroId)
 	if h == nil {
 		return &protos.ResHeroChangePosition{
 			Code: constants.I18N_COMMON_NOT_FOUND,
 		}
 	}
 
-	if h.Position == msg.Position || h.Position == 0 {
+	if h.Position == position {
 		return &protos.ResHeroChangePosition{
-			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
+			Code: constants.I18N_HERO_TIP8,
 		}
 	}
 
-	// 如果目标位置有英雄，则表示交换
-	prevHero := p.HeroBox.GetHeroByPosition(msg.Position)
-	if prevHero != nil {
-		prevPos := prevHero.Position
-		prevHero.Position = h.Position
-		h.Position = prevPos
-		context.EventBus.Publish(events.PlayerEntityChange, p)
-		return &protos.ResHeroChangePosition{
-			Code:  0,
-			PosA:  h.Position,
-			HeroA: h.ModelId,
-			PosB:  prevHero.Position,
-			HeroB: prevHero.ModelId,
+	h.Position = position
+
+	ps.ReCalculateHeroAttr(p, h, true)
+	context.EventBus.Publish(events.PlayerEntityChange, p)
+
+	return &protos.ResHeroChangePosition{
+		Code: 0,
+	}
+}
+
+// 重新计算武将属性
+func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, notify bool) {
+	// 英雄本身属性
+	heroData := config.QueryById[configdomain.HeroData](hero.ModelId)
+	attrContainer := attribute.NewAttrBox()
+	attrContainer.AddAttrs(heroData.GetHeroAttrs())
+
+	// 英雄等级属性
+	levelContainer := config.QueryContainer[configdomain.HeroLevelData, *container.HeroLevelContainer]()
+	levelData := levelContainer.GetLevelData(hero.ModelId, hero.Level)
+	if levelData != nil {
+		attrContainer.AddAttrs(levelData.GetHeroLevelAttrs())
+	}
+
+	// 英雄突破属性
+	stageContainer := config.QueryContainer[configdomain.HeroStageData, *container.HeroStageContainer]()
+	stageData := stageContainer.GetRecordByStage(hero.Stage)
+	if stageData != nil {
+		attrContainer.AddAttrs(stageData.Attrs)
+	}
+
+	hero.AttrBox = attrContainer
+	hero.Fight = attribute.CalculateFightingPower(attrContainer)
+
+	if notify {
+		attrs := make([]protos.AttrInfo, 0, len(attrContainer.Attrs))
+		for attrType, value := range attrContainer.Attrs {
+			attrs = append(attrs, protos.AttrInfo{
+				AttrType: string(attrType),
+				Value:    value,
+			})
 		}
-	} else {
-		h.Position = msg.Position
-		context.EventBus.Publish(events.PlayerEntityChange, p)
-		return &protos.ResHeroChangePosition{
-			Code:  0,
-			PosA:  h.Position,
-			HeroA: h.ModelId,
-			PosB:  0,
-			HeroB: 0,
+
+		io.NotifyPlayer(p, &protos.PushHeroAttrChange{
+			HeroId: int32(hero.ModelId),
+			Attrs:  attrs,
+			Fight:  attribute.CalculateFightingPower(attrContainer),
+		})
+	}
+
+	context.EventBus.Publish(events.PlayerAttrChange, p)
+}
+
+func (ps *HeroService) CalcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {
+	levelContainer := config.QueryContainer[configdomain.HeroLevelData, *container.HeroLevelContainer]()
+	total := int32(0)
+	for i := fromLevel; i < toLevel; i++ {
+		levelData := levelContainer.GetLevelData(i, i)
+		if levelData != nil {
+			total += levelData.Cost
 		}
 	}
+	return total
 }

@@ -16,12 +16,12 @@ import (
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/friend"
 	"io/github/gforgame/examples/gm"
-	"io/github/gforgame/examples/hero"
 	"io/github/gforgame/examples/http"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/mail"
-	"io/github/gforgame/examples/player"
 	"io/github/gforgame/examples/rank"
+	"io/github/gforgame/examples/route"
+	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/system"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
@@ -111,10 +111,10 @@ func main() {
 
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
-		player.NewPlayerController(),
+		route.NewPlayerController(),
 		gm.NewGmController(),
 		item.NewItemController(),
-		hero.NewHeroController(),
+		route.NewHeroController(),
 		mail.NewMailController(),
 		rank.NewRankController(),
 		chat.NewChatController(),

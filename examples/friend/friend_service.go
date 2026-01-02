@@ -6,7 +6,7 @@ import (
 	"io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	playerservice "io/github/gforgame/examples/player"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"

@@ -6,8 +6,8 @@ import (
 	"io/github/gforgame/examples/constants"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/item"
-	playerService "io/github/gforgame/examples/player"
 	"io/github/gforgame/examples/reward"
+	playerService "io/github/gforgame/examples/service/player"
 
 	"io/github/gforgame/util"
 

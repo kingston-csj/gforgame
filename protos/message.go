@@ -1,6 +1,11 @@
 package protos
 
 const (
+	CmdHeartBeatReq = -101
+	CmdHeartBeatRes = -151
+	CmdGetServerTimeReq = -102
+	CmdGetServerTimeRes = -152
+		
 	CmdPlayerReqLogin         = 103
 	CmdPlayerResLogin         = 154
 	CmdPlayerReqCreate        = 2003

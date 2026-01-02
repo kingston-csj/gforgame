@@ -4,7 +4,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 )
 
-type ItemOps interface {
+type ItemRewardOps interface {
     AddByModelId(p *playerdomain.Player, itemId int32, amount int32) error
 }
 

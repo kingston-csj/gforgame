@@ -28,9 +28,13 @@ func (r *ItemReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *ItemReward) Reward(player *player.Player) {
-    if ops := getItemOps(); ops != nil {
-        ops.AddByModelId(player, r.ItemId, r.Amount)
-    }
+   itemOps := getItemOps()
+	if itemOps == nil {
+		return
+	}
+	if err := itemOps.AddByModelId(player, r.ItemId, r.Amount); err != nil {
+		return
+	}
 }
 
 func (r *ItemReward) GetType() string {

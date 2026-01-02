@@ -1,7 +1,7 @@
 package rank
 
 import (
-	"io/github/gforgame/examples/player"
+	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )

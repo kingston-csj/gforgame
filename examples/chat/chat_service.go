@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
-	playerservice "io/github/gforgame/examples/player"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/util"
 	"time"
 )

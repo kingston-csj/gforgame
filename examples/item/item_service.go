@@ -8,6 +8,7 @@ import (
 
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
@@ -41,6 +42,7 @@ func GetItemService() *ItemService {
 
 func (s *ItemService) init() {
 	reward.SetItemOps( s)
+	consume.SetItemOps(s)
 }
 
 func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count int32) error {

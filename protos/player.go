@@ -26,12 +26,14 @@ type ResPlayerLogin struct {
 
 type ReqPlayerCreate struct {
     _    struct{} `cmd_ref:"CmdPlayerReqCreate" type:"req"`
-    Name string
+    Name string `json:"name"`
+    Camp int32 `json:"camp"`
 }
 
 type ResPlayerCreate struct {
-    _  struct{} `cmd_ref:"CmdPlayerResCreate" type:"res"`
-    Id int64
+    _        struct{} `cmd_ref:"CmdPlayerResCreate" type:"res"`
+    Code     int32 `json:"code"`
+    PlayerId string `json:"playerId"`
 }
 
 type PushReplacingLogin struct {

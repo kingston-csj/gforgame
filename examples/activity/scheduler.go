@@ -39,7 +39,8 @@ func (tc *timerCancellable) Cancel() bool {
 	if tc.canceled.CompareAndSwap(false, true) {
 		// 停止定时器：Stop() 返回true表示定时器未触发，false表示已触发/已停止
 		stopped := tc.timer.Stop()
-		close(tc.done) // 关闭done通道，通知等待的goroutine
+		// 关闭一个无缓冲通道后，所有监听该通道的 case <-chan 会立即触发（即使通道中没有数据）
+		close(tc.done) 
 		return stopped
 	}
 	return false
@@ -93,7 +94,7 @@ type ActivityScheduler struct {
 //   - Cancellable: 任务取消器，可调用 Cancel() 取消未执行的任务
 //   - error: 入参非法时返回非 nil 错误
 func (d *DefaultTaskScheduler) Schedule(task func(), execTime time.Time) (Cancellable, error) {
-	// 1. 入参校验
+	// 入参校验
 	if task == nil {
 		return nil, ErrInvalidTask
 	}
@@ -101,11 +102,11 @@ func (d *DefaultTaskScheduler) Schedule(task func(), execTime time.Time) (Cancel
 		return nil, ErrInvalidExecTime
 	}
 
-	// 2. 计算当前时间到执行时间的延迟
+	// 计算当前时间到执行时间的延迟
 	now := time.Now()
 	delay := execTime.Sub(now)
 
-	// 3. 处理延迟<=0的情况（执行时间已过期，立即异步执行任务）
+	// 处理延迟<=0的情况（执行时间已过期，立即异步执行任务）
 	if delay <= 0 {
 		logger.Info("task scheduler: execTime is in the past, execute task immediately")
 		// 异步执行任务，避免阻塞当前goroutine
@@ -125,7 +126,7 @@ func (d *DefaultTaskScheduler) Schedule(task func(), execTime time.Time) (Cancel
 		}, nil
 	}
 
-	// 4. 延迟执行：创建定时器，调度任务
+	// 延迟执行：创建定时器，调度任务
 	timer := time.NewTimer(delay)
 	cancellable := newTimerCancellable(timer)
 

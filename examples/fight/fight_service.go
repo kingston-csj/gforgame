@@ -8,7 +8,7 @@ import (
 	"io/github/gforgame/examples/fight/match"
 	"io/github/gforgame/examples/fight/report"
 	skillservice "io/github/gforgame/examples/fight/skill"
-	"io/github/gforgame/examples/player"
+	"io/github/gforgame/examples/service/player"
 	"sort"
 	"sync"
 )

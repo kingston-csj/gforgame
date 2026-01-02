@@ -1,0 +1,103 @@
+package route
+
+import (
+	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/context"
+	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/service/player"
+
+	"io/github/gforgame/network"
+	"io/github/gforgame/protos"
+	"io/github/gforgame/util"
+
+	"gorm.io/gorm"
+)
+
+type PlayerController struct {
+	network.Base
+	service *player.PlayerService
+}
+
+func NewPlayerController() *PlayerController {
+	return &PlayerController{
+		service: player.GetPlayerService(),
+	}
+}
+
+func (ps *PlayerController) Init() {
+	// 自动建表
+	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
+	if err != nil {
+		panic(err)
+	}
+
+	// 缓存数据读取
+	dbLoader := func(key string) (interface{}, error) {
+		var p playerdomain.Player
+		result := mysqldb.Db.First(&p, "id=?", key)
+		if result.Error != nil {
+			if result.Error == gorm.ErrRecordNotFound {
+				// 未找到记录
+				return nil, nil
+			}
+		}
+		p.AfterFind(nil)
+		context.EventBus.Publish(events.PlayerAfterLoad, &p)
+		return &p, nil
+	}
+	context.CacheManager.Register("player", dbLoader)
+
+	context.EventBus.Subscribe(events.PlayerEntityChange, func(data interface{}) {
+		ps.service.SavePlayer(data.(*playerdomain.Player))
+	})
+
+	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
+		ps.service.RefreshFighting(data.(*playerdomain.Player))
+	})
+
+	// 在线玩家每日重置
+	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
+		allSessions := network.GetAllOnlinePlayerSessions()
+		for _, s := range allSessions {
+			s.AsynTasks <- func() {
+				player := network.GetPlayerBySession(s).(*playerdomain.Player)
+				player.DailyReset.Reset(data.(int64))
+				ps.service.SavePlayer(player)
+			}
+		}
+	})
+}
+
+func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
+	if util.IsBlankString(msg.PlayerId) {
+		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
+		return
+	}
+	ps.service.DoLogin(msg.PlayerId, s, index)
+}
+
+func (ps *PlayerController) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	context.EventBus.Publish(events.PlayerLoadingFinish, player)
+}
+
+func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
+	if util.IsBlankString(msg.Name) {
+		s.Send(&protos.ResPlayerCreate{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, 0)
+		return
+	}
+	player := ps.service.Create(msg.Name, msg.Camp)
+	s.Send(&protos.ResPlayerCreate{Code: 0, PlayerId: player.Id}, 0)
+}
+
+func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	return ps.service.DoUpLevel(p, msg.ToLevel)
+}
+
+func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
+	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	return ps.service.DoUpStage(p)
+}

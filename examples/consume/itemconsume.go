@@ -4,8 +4,6 @@ import (
 	"io/github/gforgame/common"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
 )
 
 type ItemConsume struct {
@@ -26,10 +24,11 @@ func (c *ItemConsume) VerifySliently(player *player.Player) bool {
 }
 
 func (c *ItemConsume) Consume(player *player.Player) {
-	changeResult := player.Backpack.ReduceByModelId(c.ItemId, c.Amount)
-	notify :=  &protos.PushItemChanged{
-		Type: "item",
-		Changed: changeResult.ToChangeInfos(),
+	itemOps := GetItemOps()
+	if itemOps == nil {
+		return
 	}
-	io.NotifyPlayer(player, notify)
+	if err := itemOps.UseByModelId(player, c.ItemId, c.Amount); err != nil {
+		return
+	}
 }

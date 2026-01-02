@@ -1,88 +1,106 @@
 package player
 
 import (
+	"errors"
 	"fmt"
+	"strings"
+	"sync"
 
 	"io/github/gforgame/common"
+	"io/github/gforgame/db"
 	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/examples/context"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/hero"
+	"io/github/gforgame/examples/fight/attribute"
+	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/service/hero"
 	"io/github/gforgame/examples/system"
-
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
-
-	"gorm.io/gorm"
 )
 
-type PlayerController struct {
+var (
+	ErrNotFound    = errors.New("record not found")
+	ErrCast        = errors.New("cast exception")
+	instance       *PlayerService
+	once           sync.Once
+	playerProfiles map[string]*playerdomain.PlayerProfile = make(map[string]*playerdomain.PlayerProfile)
+)
+
+type PlayerService struct {
 	network.Base
 }
 
-func NewPlayerController() *PlayerController {
-	return &PlayerController{}
+func GetPlayerService() *PlayerService {
+	once.Do(func() {
+		instance = &PlayerService{}
+	})
+	return instance
 }
 
-func (ps *PlayerController) Init() {
-	// 自动建表
-	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
+func (ps *PlayerService) LoadPlayerProfile() {
+	var profiles []*playerdomain.PlayerProfile
+	err := db.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
 	if err != nil {
 		panic(err)
 	}
 
-	// 缓存数据读取
-	dbLoader := func(key string) (interface{}, error) {
-		var p playerdomain.Player
-		result := mysqldb.Db.First(&p, "id=?", key)
-		if result.Error != nil {
-			if result.Error == gorm.ErrRecordNotFound {
-				// 未找到记录
-				return nil, nil
-			}
-		}
-		p.AfterFind(nil)
-		context.EventBus.Publish(events.PlayerAfterLoad, &p)
-		return &p, nil
+	// 输出查询结果
+	for _, profile := range profiles {
+		playerProfiles[profile.Id] = profile
 	}
-	context.CacheManager.Register("player", dbLoader)
-
-	context.EventBus.Subscribe(events.PlayerEntityChange, func(data interface{}) {
-		GetPlayerService().SavePlayer(data.(*playerdomain.Player))
-	})
-
-	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
-		GetPlayerService().refreshFighting(data.(*playerdomain.Player))
-	})
-
-	// 在线玩家每日重置
-	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
-		allSessions := network.GetAllOnlinePlayerSessions()
-		for _, s := range allSessions {
-			s.AsynTasks <- func() {
-				player := network.GetPlayerBySession(s).(*playerdomain.Player)
-				player.DailyReset.Reset(data.(int64))
-				GetPlayerService().SavePlayer(player)
-			}
-		}
-	})
 }
 
-func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin) {
-	if util.IsBlankString(msg.PlayerId) {
-		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
-		return
+func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.PlayerProfile {
+	return playerProfiles[playerId]
+}
+
+func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
+	cache, _ := context.CacheManager.GetCache("player")
+	cacheEntity, err := cache.Get(playerId)
+	if err != nil {
+		return nil
 	}
+	if cacheEntity == nil {
+		return nil
+	}
+	player, _ := cacheEntity.(*playerdomain.Player)
+	return player
+}
+
+func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player {
+	player := ps.GetPlayer(playerId)
+	if player == nil {
+		player = &playerdomain.Player{}
+		player.Id = playerId
+		player.Name = ""
+		player.Level = 1
+		player.Camp = camp.Camp_Hao
+		player.AfterFind(nil)
+		ps.SavePlayer(player)
+	}
+	return player
+}
+
+func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
+	cache, _ := context.CacheManager.GetCache("player")
+	cache.Set(player.GetId(), player)
+	context.DbService.SaveToDb(player)
+}
+
+func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int) {
 	// 是否是新角色
-	newCreated := GetPlayerService().GetPlayerProfileById(msg.PlayerId) == nil
-	player := GetPlayerService().GetOrCreatePlayer(msg.PlayerId)
+	newCreated := ps.GetPlayerProfileById(playerId) == nil
+	player := ps.GetOrCreatePlayer(playerId)
 	if !newCreated {
 		oldSession := network.GetSessionByPlayerId(player.Id)
 		if oldSession != nil {
@@ -122,25 +140,21 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int, msg *protos.
 	}, index)
 }
 
-func (ps *PlayerController) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
-	context.EventBus.Publish(events.PlayerLoadingFinish, player)
-}
-
-func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
+func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 	id := util.GetNextID()
 	player := &playerdomain.Player{}
 	player.Id = id
-	player.Name = msg.Name
+	player.Name = name
+	player.Camp = camp
 	mysqldb.Db.Create(&player)
 
 	logger.Log(logger.Player, "Id", player.Id, "name", player.Name)
 	fmt.Printf(player.Name)
+
+	return player
 }
 
-func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-	toLevel := msg.ToLevel
+func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *protos.ResPlayerUpLevel {
 	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResPlayerUpLevel{
@@ -174,12 +188,12 @@ func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg 
 	if err != nil {
 		return &protos.ResPlayerUpLevel{
 			Code: int32(err.(*common.BusinessRequestException).Code()),
-		}
+		}	
 	}
 	consume.Consume(p)
 
 	p.Level = toLevel
-	GetPlayerService().refreshFighting(p)
+	GetPlayerService().RefreshFighting(p)
 	GetPlayerService().SavePlayer(p)
 
 	return &protos.ResPlayerUpLevel{
@@ -187,9 +201,7 @@ func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg 
 	}
 }
 
-func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-
+func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResHeroUpStage {
 	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResHeroUpStage{
@@ -224,10 +236,63 @@ func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *p
 
 	p.Stage = p.Stage + 1
 
-	GetPlayerService().refreshFighting(p)
+	GetPlayerService().RefreshFighting(p)
 	GetPlayerService().SavePlayer(p)
 
 	return &protos.ResHeroUpStage{
 		Code: 0,
 	}
 }
+
+func (ps *PlayerService) RefreshFighting(player *playerdomain.Player) {
+	ps.recomputeAttribute(player)
+	fighting := 0
+	for _, hero := range player.HeroBox.Heros {
+		fighting += int(hero.Fight)
+	}
+	player.Fight = int32(fighting)
+	io.NotifyPlayer(player, &protos.PushPlayerFightChange{
+		Fight: player.Fight,
+	})
+}
+
+func (ps *PlayerService) recomputeAttribute(player *playerdomain.Player) {
+	attrContainer := attribute.NewAttrBox()
+	// 主公等级属性
+
+	heroLevelData := config.QueryById[configdomain.HeroLevelData](player.Level)
+	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
+
+	// 主公突破属性
+	stageContainer := config.QueryContainer[configdomain.HeroStageData, *container.HeroStageContainer]()
+	stageData := stageContainer.GetRecordByStage(player.Stage)
+	attrContainer.AddAttrs(stageData.GetHeroStageAttrs())
+
+	player.AttrBox = attrContainer
+}
+
+func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
+	if camp == 1001 {
+		return 1001
+	}
+	if camp == 1002 {
+		return 1002
+	}
+	if camp == 1003 {
+		return 1003
+	}
+	return 1004
+}
+
+// 模糊搜索玩家(名字包含关键字)
+func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
+	playerIds := make([]string, 0)
+	for _, profile := range playerProfiles {
+		if strings.Contains(profile.Name, name) {
+			playerIds = append(playerIds, profile.Id)
+		}
+	}
+	return playerIds
+}
+
+ 

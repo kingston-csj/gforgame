@@ -7,11 +7,11 @@ import (
 
 var (
     mu          sync.RWMutex
-    itemOps     itemcontract.ItemOps
+    itemOps     itemcontract.ItemRewardOps
     currencyOps itemcontract.CurrencyOps
 )
 
-func SetItemOps(ops itemcontract.ItemOps) {
+func SetItemOps(ops itemcontract.ItemRewardOps) {
     mu.Lock()
     itemOps = ops
     mu.Unlock()
@@ -23,7 +23,7 @@ func SetCurrencyOps(ops itemcontract.CurrencyOps) {
     mu.Unlock()
 }
 
-func getItemOps() itemcontract.ItemOps {
+func getItemOps() itemcontract.ItemRewardOps {
     mu.RLock()
     defer mu.RUnlock()
     return itemOps
