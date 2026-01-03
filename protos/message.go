@@ -13,6 +13,7 @@ const (
 	CmdPlayerPushLoadComplete = 155
 	CmdPlayerResUpLevel       = 152
 	CmdPlayerResUpStage       = 153
+	CmdPlayerPushDailyResetInfo = 156
 
 
 	CmdPlayerReqCreate        = 2003
@@ -31,7 +32,7 @@ const (
 
 	CmdHeroReqRecruit        = 5001
 	CmdHeroResRecruit        = 5002
-	CmdHeroPushAllHero        = 5003
+	CmdHeroPushAllHero        = 857
 	CmdHeroReqLevelUp        = 5004
 	CmdHeroResLevelUp        = 5005
 	CmdHeroPushAdd           = 5006
@@ -47,17 +48,20 @@ const (
 	CmdHeroReqChangePosition = 5016
 	CmdHeroResChangePosition = 5017
 
-	CmdMailReqGetAllReward = 6001
-	CmdMailResGetAllReward = 6002
-	CmdMailReqRead         = 6003
-	CmdMailResRead         = 6004
-	CmdMailReqGetReward    = 6005
-	CmdMailResGetReward    = 6006
-	CmdMailReqDeleteAll    = 6007
-	CmdMailResDeleteAll    = 6008
+	
+	
+	CmdMailReqRead         = 501
+	CmdMailReqGetReward    = 502
+	CmdMailReqGetAllReward = 504
+	CmdMailReqDeleteAll    = 505
+	
+	CmdMailResRead         = 551	
+	CmdMailResGetReward    = 552
+	CmdMailResGetAllReward = 554
+	CmdMailResDeleteAll    = 555
 	CmdMailReqReadAll      = 6009
 	CmdMailResReadAll      = 6010
-	CmdMailPushAll         = 6011
+	CmdMailPushAll         = 599
 
 	CMD_PUSH_QUEST_AUTO_REWARD = 797
 	CMD_PUSH_DAILY_QUEST      = 798

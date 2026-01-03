@@ -1,5 +1,5 @@
 export class ReqMailGetReward {
-  public static cmd: number = 6005;
+  public static cmd: number = 552;
 
   public id: number;
 }

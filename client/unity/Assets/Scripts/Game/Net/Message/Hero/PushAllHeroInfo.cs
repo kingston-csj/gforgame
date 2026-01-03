@@ -2,7 +2,7 @@
 
 namespace Game.Net.Message.Hero
 {
-    [MessageMeta(Cmd = 2003)]
+    [MessageMeta(Cmd = 857)]
     public class PushAllHeroInfo : Nova.Net.Socket.Message
     {
         public HeroInfo[] heros;

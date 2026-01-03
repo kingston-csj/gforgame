@@ -1,3 +1,3 @@
 export class ReqMailGetAllReward {
-  public static cmd: number = 6001;
+  public static cmd: number = 554;
 }

@@ -116,10 +116,12 @@ func main() {
 
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
-		route.NewPlayerController(),
-		gm.NewGmController(),
+		route.NewPlayerRoute(),
+		route.NewHeroRoute(),
+		route.NewSceneRoute(),
+		gm.NewGmRoute(),
 		item.NewItemController(),
-		route.NewHeroController(),
+		
 		mail.NewMailController(),
 		rank.NewRankController(),
 		chat.NewChatController(),

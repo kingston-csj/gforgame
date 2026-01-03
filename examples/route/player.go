@@ -15,18 +15,18 @@ import (
 	"gorm.io/gorm"
 )
 
-type PlayerController struct {
+type PlayerRoute struct {
 	network.Base
 	service *player.PlayerService
 }
 
-func NewPlayerController() *PlayerController {
-	return &PlayerController{
+func NewPlayerRoute() *PlayerRoute {
+	return &PlayerRoute{
 		service: player.GetPlayerService(),
 	}
 }
 
-func (ps *PlayerController) Init() {
+func (ps *PlayerRoute) Init() {
 	// 自动建表
 	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
 	if err != nil {
@@ -70,7 +70,7 @@ func (ps *PlayerController) Init() {
 	})
 }
 
-func (ps *PlayerController) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin) {
+func (ps *PlayerRoute) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin) {
 	if util.IsBlankString(msg.PlayerId) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return
@@ -78,12 +78,12 @@ func (ps *PlayerController) ReqLogin(s *network.Session, index int32, msg *proto
 	ps.service.DoLogin(msg.PlayerId, s, index)
 }
 
-func (ps *PlayerController) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
+func (ps *PlayerRoute) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
 	player := network.GetPlayerBySession(s).(*playerdomain.Player)
 	context.EventBus.Publish(events.PlayerLoadingFinish, player)
 }
 
-func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
+func (ps *PlayerRoute) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
 	if util.IsBlankString(msg.Name) {
 		s.Send(&protos.ResPlayerCreate{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, 0)
 		return
@@ -92,12 +92,12 @@ func (ps *PlayerController) ReqCreate(s *network.Session, msg *protos.ReqPlayerC
 	s.Send(&protos.ResPlayerCreate{Code: 0, PlayerId: player.Id}, 0)
 }
 
-func (ps *PlayerController) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
+func (ps *PlayerRoute) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpLevel(p, msg.ToLevel)
 }
 
-func (ps *PlayerController) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
+func (ps *PlayerRoute) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpStage(p)
 }

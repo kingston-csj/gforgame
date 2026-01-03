@@ -25,7 +25,9 @@ func (ps *ItemController) Init() {
 
 func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
 	// 发送背包信息
-	resBackpack := &protos.PushBackpackInfo{}
+	resBackpack := &protos.PushBackpackInfo{
+		Items: []protos.ItemInfo{},
+	}
 	if player.Backpack != nil {
 		for _, item := range player.Backpack.Items {
 			resBackpack.Items = append(resBackpack.Items, item.ToVo())

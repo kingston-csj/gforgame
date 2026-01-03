@@ -1,5 +1,5 @@
 export class ResMailGetReward {
-  public static cmd: number = 6006;
+  public static cmd: number = 552;
 
   public code: number;
 }

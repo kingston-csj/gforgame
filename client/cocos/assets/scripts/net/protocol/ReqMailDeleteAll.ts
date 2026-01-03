@@ -1,3 +1,3 @@
 export class ReqMailDeleteAll {
-  public static cmd: number = 6007;
+  public static cmd: number = 555;
 }

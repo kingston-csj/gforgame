@@ -7,6 +7,7 @@ const (
 	PlayerAttrChange   = "player_attr_change"
 	// 客户端加载完成
 	PlayerLoadingFinish = "player_loading_finish"
+	PlayerDailyReset    = "player_daily_reset"
 
 	ItemConsume = "item_consume"
 

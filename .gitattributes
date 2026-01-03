@@ -1,4 +1,6 @@
-client/cocos/assets/resources/** linguist-ignore=true
-client/unity/Assets/Scripts/plugins/** linguist-ignore=true
-client/unity/Assets/Resources/** linguist-ignore=true
-*.tps linguist-ignore=true
+client/cocos/assets/resources/** linguist-vendored=true
+client/unity/Assets/Resources/** linguist-vendored=true
+*.tps linguist-vendored=true
+client/unity/Assets/Scripts/plugins/** linguist-vendored=true
+
+tools/protocol/templates/*.tpl linguist-vendored=true

@@ -15,18 +15,18 @@ import (
 	"io/github/gforgame/protos"
 )
 
-type GmController struct {
+type GmRoute struct {
 	network.Base
 }
 
-func NewGmController() *GmController {
-	return &GmController{}
+func NewGmRoute() *GmRoute {
+	return &GmRoute{}
 }
 
-func (ps *GmController) Init() {
+func (ps *GmRoute) Init() {
 }
 
-func (ps *GmController) ReqAction(s *network.Session, index int, msg *protos.ReqGmAction) interface{} {
+func (ps *GmRoute) ReqAction(s *network.Session, index int, msg *protos.ReqGmAction) interface{} {
 	topic := msg.Topic
 	params := msg.Params
 	player := network.GetPlayerBySession(s)

@@ -59,7 +59,7 @@ func (ps *SceneService) GetSceneRecord(playerId string, sceneId string) *playerd
 	return scene
 }
 
-func (s *SceneService) GetOrCreatePlayer(playerId string, sceneId string) *playerdomain.Scene {
+func (s *SceneService) GetOrCreateScene(playerId string, sceneId string) *playerdomain.Scene {
 	var p playerdomain.Scene
 	record := s.GetSceneRecord(playerId, sceneId)
 	if record == nil {
@@ -72,4 +72,16 @@ func (s *SceneService) GetOrCreatePlayer(playerId string, sceneId string) *playe
 		p = *record
 	}
 	return &p
+}
+
+func (ps *SceneService) UpdateScene(playerId string, sceneId string, data string) {
+	scene := ps.GetOrCreateScene(playerId, sceneId)
+	scene.Data = data
+	ps.SaveScene(scene)
+}
+
+func (ps *SceneService) SaveScene(scene *playerdomain.Scene) {
+	cache, _ := context.CacheManager.GetCache("scene")
+	cache.Set(scene.GetId(), scene)
+	context.DbService.SaveToDb(scene)
 }

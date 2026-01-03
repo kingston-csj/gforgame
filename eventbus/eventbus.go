@@ -7,26 +7,26 @@ import (
 
 // EventBus 结构体用于管理事件的发布和订阅
 type EventBus struct {
-	handlers map[string][]func(interface{})
+	handlers map[string][]func(any)
 	mu       sync.Mutex
 }
 
 // NewEventBus 创建一个新的 EventBus 实例
 func NewEventBus() *EventBus {
 	return &EventBus{
-		handlers: make(map[string][]func(interface{})),
+		handlers: make(map[string][]func(any)),
 	}
 }
 
 // Subscribe 订阅指定事件，将处理函数添加到对应的事件处理列表中
-func (eb *EventBus) Subscribe(event string, handler func(interface{})) {
+func (eb *EventBus) Subscribe(event string, handler func(any)) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
 	eb.handlers[event] = append(eb.handlers[event], handler)
 }
 
 // Publish 发布事件，调用所有订阅该事件的处理函数
-func (eb *EventBus) Publish(event string, data interface{}) {
+func (eb *EventBus) Publish(event string, data any) {
 	eb.mu.Lock()
 	handlers, exists := eb.handlers[event]
 	eb.mu.Unlock()
@@ -43,7 +43,7 @@ func main() {
 	bus := NewEventBus()
 
 	// 定义一个事件处理函数
-	handler := func(data interface{}) {
+	handler := func(data any) {
 		fmt.Printf("Received event data: %v\n", data)
 	}
 

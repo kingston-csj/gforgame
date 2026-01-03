@@ -115,14 +115,17 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 	}
 	fmt.Println("登录成功，id为：", player.Id)
 
+	// 添加session
+	network.AddSession(s, player)
+	
 	// 离线，登录触发每日重置检测
 	dailyReset := system.GetDailyReset().GetValue().(int64)
 	if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
-		player.DailyReset.Reset(dailyReset)
-		GetPlayerService().SavePlayer(player)
+		ps.dailyReset(player, dailyReset)
+	} else {
+		ps.PushDailyResetInfo(player)
 	}
-	// 添加session
-	network.AddSession(s, player)
+	
 
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送
@@ -198,8 +201,8 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *prot
 	consume.Consume(p)
 
 	p.Level = toLevel
-	GetPlayerService().RefreshFighting(p)
-	GetPlayerService().SavePlayer(p)
+	ps.RefreshFighting(p)
+	ps.SavePlayer(p)
 
 	return &protos.ResPlayerUpLevel{
 		Code: 0,
@@ -241,8 +244,8 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResHeroUpStag
 
 	p.Stage = p.Stage + 1
 
-	GetPlayerService().RefreshFighting(p)
-	GetPlayerService().SavePlayer(p)
+	ps.RefreshFighting(p)
+	ps.SavePlayer(p)
 
 	return &protos.ResHeroUpStage{
 		Code: 0,
@@ -300,4 +303,19 @@ func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	return playerIds
 }
 
- 
+ func (ps *PlayerService) dailyReset(player *playerdomain.Player, resetTime int64) {
+	box := &playerdomain.DailyReset{
+		LastDailyReset: resetTime,
+	}
+	player.DailyReset = box
+	context.EventBus.Publish(events.PlayerDailyReset, player)
+	ps.SavePlayer(player)
+	ps.PushDailyResetInfo(player)
+ }
+
+  func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
+	io.NotifyPlayer(player, &protos.PushDailyResetInfo{
+		NormalRecruitTimes: player.HeroBox.RecruitSum,
+	})
+  }
+

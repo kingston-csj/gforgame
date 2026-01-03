@@ -72,3 +72,12 @@ type ResPlayerUpStage struct {
 type PushLoadComplete struct {
     _     struct{} `cmd_ref:"CmdPlayerPushLoadComplete" type:"push"`
 }
+
+// PushDailyResetInfo 玩家每日重置信息推送
+type PushDailyResetInfo struct {
+    _     struct{} `cmd_ref:"CmdPlayerPushDailyResetInfo" type:"push"`
+    NormalRecruitTimes int32 `json:"normalRecruitTimes"` // 普通招募次数
+    HighRecruitTimes int32 `json:"highRecruitTimes"` // 高级招募次数
+    MallDailyBuyTimes int32 `json:"mallDailyBuyTimes"` // 商城每日购买次数
+    DailyRechargeSum int32 `json:"dailyRechargeSum"` // 每日充值金额
+}
