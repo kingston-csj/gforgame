@@ -8,6 +8,8 @@ type ExtendBox struct {
 	VipPeriodMoney float32 `json:"vipPeriodMoney"`
 	// vip过期时间
 	VipExpiredTime int64 `json:"vipExpiredTime"`
+	// 成就积分
+	AchievementScore int32 `json:"achievementScore"`
 }
 
 func (b *ExtendBox) AddNewMessage(message *ChatMessage) {

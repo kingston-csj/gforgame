@@ -73,7 +73,7 @@ func (d *DailyQuestDirector) TakeProgressRewards(player *playerdomain.Player) []
 }
  
 // 获取任务类型
-func (d *DailyQuestDirector) GetCategoryType(quest *playerdomain.Quest) int32 {
+func (d *DailyQuestDirector) GetCategoryType() int32 {
 	return  constants.QuestCategoryDaily
 }
  

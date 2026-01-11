@@ -101,3 +101,13 @@ func (q *QuestBox) GetQuest(questId int32) *Quest {
 	return quest
 }
 
+	// HasAppointedTypeAchievement 是否接取了指定类型的任务
+func (q *QuestBox) 	HasAppointedTypeAchievement(questCategory int32, questType int32) bool {
+	for _, quest := range q.Doing {
+		questData := config.QueryById[configdomain.QuestData](quest.Id)
+		if questData.Type == questType && questData.Category == questCategory {
+			return true;
+		}
+	}
+	return false;
+}

@@ -41,13 +41,17 @@ type PushQuestReplace struct {
 
 // 每周任务主界面信息
 type PushQuestWeeklyInfo struct {
-	_ struct{} `cmd_ref:"CMD_PUSH_WEEKLY_QUEST" type:"push"`
-	// 已领取的档位索引（0为未领取)
-	WeeklyRewardIndex int32 `json:"weeklyRewardIndex"`
-	// 本周活跃度
-	WeeklyScore int32 `json:"weeklyScore"`
-	// 所有任务
-	Quests []*QuestVo `json:"quests"`
+	_                 struct{}   `cmd_ref:"CMD_PUSH_WEEKLY_QUEST" type:"push"`
+	WeeklyRewardIndex int32      `json:"weeklyRewardIndex"` // 已领取的档位索引（0为未领取)
+	WeeklyScore       int32      `json:"weeklyScore"`       // 本周活跃度
+	Quests            []*QuestVo `json:"quests"`            // 所有任务
+}
+
+// 成就——加载所有信息
+type PushAchievementInfo struct {
+	_              struct{}   `cmd_ref:"CMD_PUSH_ACHIEVEMENT" type:"push"`
+	Score          int32      `json:"score"`          // 积分
+	AchievementVos []*QuestVo `json:"achievementVos"` // 所有任务
 }
 
 // 任务——一键领取所有奖励

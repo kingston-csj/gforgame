@@ -7,6 +7,7 @@ import (
 	"io/github/gforgame/examples/consume"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
+	"math"
 	"strings"
 )
 
@@ -148,5 +149,42 @@ func ToRewardVo(reward Reward) *protos.RewardVo {
 	return &protos.RewardVo{
 		Type:  reward.GetType(),
 		Value: reward.Serial(),
+	}
+}
+
+func MultiplyAndReward(sourceRewards *AndReward, multiple float64) *AndReward {
+	andReward := NewAndReward()
+	for _, reward := range sourceRewards.Rewards {
+		// 数量全部向上取整
+		rewardAmount := int32(math.Ceil(float64(reward.GetAmount()) * multiple))
+		andReward.AddReward(modifyRewardAmount(reward, rewardAmount));
+	}
+	return andReward;
+}
+
+func modifyRewardAmount(reward Reward, amount int32) Reward {
+	if _, ok := reward.(*CurrencyReward); ok {
+		return &CurrencyReward{Currency: reward.(*CurrencyReward).Currency, Amount: amount}
+	} else if _, ok := reward.(*ItemReward); ok {
+		return &ItemReward{ItemId: reward.(*ItemReward).ItemId, Amount: amount}
+	} else if _, ok := reward.(*TicketReward); ok {
+		return &TicketReward{MapId: reward.(*TicketReward).MapId, Amount: amount}
+	} else if _, ok := reward.(*RuneReward); ok {
+		return &RuneReward{ItemId: reward.(*RuneReward).ItemId, Amount: amount}
+	} else if _, ok := reward.(*HeroReward); ok {
+		return &HeroReward{HeroId: reward.(*HeroReward).HeroId, Amount: amount}
+	} else if _, ok := reward.(*CardReward); ok {
+		return &CardReward{CardId: reward.(*CardReward).CardId, Amount: amount}
+	} else {
+		panic("unsupported reward type: " + reward.GetType())
+	}
+}
+
+// 奖励加倍（数量为向上取整）
+func multiply(sourceRewards Reward, multiple float64) Reward {
+	if _, ok := sourceRewards.(*AndReward); ok {
+		return MultiplyAndReward(sourceRewards.(*AndReward), multiple);
+	} else {
+		return modifyRewardAmount(sourceRewards, int32(math.Ceil(float64(sourceRewards.GetAmount()) * multiple)));
 	}
 }

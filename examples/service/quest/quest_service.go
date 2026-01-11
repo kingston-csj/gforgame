@@ -38,6 +38,7 @@ func GetQuestService() *QuestService {
 
 		instance.directors[constants.QuestCategoryDaily] = NewDailyQuestDirector()
 		instance.directors[constants.QuestCategoryMain] = NewMainQuestDirector()
+		instance.directors[constants.QuestCategoryAchievement] = NewAchievementQuestDirector()
 
 		// 注册所有任务类型
 		instance.handlers[constants.QuestTypeRecruit] = &handler.RecruitQuestHandler{}

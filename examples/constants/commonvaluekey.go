@@ -1,5 +1,6 @@
 package constants
 
 const (
-	CommonValueKeyDailyQuestProessReward = "dailyQuestScoreRewards"
+	CommonValueKeyDailyQuestProessReward       = "dailyQuestScoreRewards"
+	CommonValueKeyAchievementQuestProessReward = "achievementScoreRewards"
 )

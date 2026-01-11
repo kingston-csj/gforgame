@@ -38,6 +38,11 @@ const (
 	 * 任务分类-公会
 	 */
 	QuestCategoryGuild = int32(6)
+
+	/**
+	 * 任务分类-成就
+	 */
+	QuestCategoryAchievement = int32(9)
 )
 
 // 任务类型枚举

@@ -24,7 +24,7 @@ type QuestDirector interface {
     TakeProgressRewards(player *playerdomain.Player) []*protos.RewardVo
 
 	// 获取任务类型
-	GetCategoryType(quest *playerdomain.Quest) int32
+	GetCategoryType() int32
 }
 
 type baseQuestDirector struct {

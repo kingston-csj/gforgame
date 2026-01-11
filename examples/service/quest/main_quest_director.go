@@ -65,7 +65,7 @@ func (d *MainQuestDirector) notifyMainQuest(player *playerdomain.Player) {
 }
 
 // 获取任务类型
-func (d *MainQuestDirector) GetCategoryType(quest *playerdomain.Quest) int32 {
+func (d *MainQuestDirector) GetCategoryType() int32 {
 	return constants.QuestCategoryMain
 }
  
