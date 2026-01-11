@@ -32,6 +32,8 @@ type Player struct {
 	PurseJson      string             `gorm:"purse"`
 	DailyReset     *DailyReset        `gorm:"-"`
 	DailyResetJson string             `gorm:"dailyreset"`
+	WeeklyReset     *WeeklyReset        `gorm:"-"`
+	WeeklyResetJson string             `gorm:"weeklyreset"`
 	Fight          int32              `gorm:"player's fight"`
 	Camp           int32              `gorm:"player's camp"`
 	Mailbox        *Mailbox           `gorm:"-"`
@@ -89,6 +91,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 			return err
 		}
 		p.DailyResetJson = string(jsonData)
+	}
+	if p.WeeklyReset == nil {
+		p.WeeklyResetJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.WeeklyReset)
+		if err != nil {
+			return err
+		}
+		p.WeeklyResetJson = string(jsonData)
 	}
 	if p.Mailbox == nil {
 		p.MailboxJson = ""
@@ -171,6 +182,14 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		}
 	} else {
 		json.Unmarshal([]byte(p.DailyResetJson), &p.DailyReset)
+	}
+	if util.IsEmptyString(p.WeeklyResetJson) {
+		p.WeeklyReset = &WeeklyReset{
+			LastWeeklyReset:  0,
+			WeeklyQuestScore: 0,
+		}
+	} else {
+		json.Unmarshal([]byte(p.WeeklyResetJson), &p.WeeklyReset)
 	}
 	if util.IsEmptyString(p.MailboxJson) {
 		p.Mailbox = &Mailbox{

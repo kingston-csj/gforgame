@@ -17,4 +17,6 @@ type QuestData struct {
 	Auto        int32 `json:"auto" excel:"auto"`
 	// 下一个任务（主线）
 	Next        int32 `json:"next" excel:"next"`
+	// 奖励数组字符串
+	Rewards      string `json:"rewards" excel:"rewards"`
 }

@@ -13,17 +13,6 @@ type ItemInfo struct {
     Extra string `json:"extra"`
 }
 
-type ReqGmAction struct {
-    _      struct{} `cmd_ref:"CmdGmReqAction" type:"req"`
-    Topic  string
-    Params string
-}
-
-type ResGmAction struct {
-    _    struct{} `cmd_ref:"CmdGmResAction" type:"res"`
-    Code int32 `json:"code"`
-}
-
 type PushPurseInfo struct {
     _       struct{} `cmd_ref:"CmdItemResPurseInfo" type:"push"`
     Diamond int32 `json:"diamond"`

@@ -93,3 +93,11 @@ func (q *QuestBox) GetCurrentMainQuest() *Quest {
 	return nil
 }
 
+func (q *QuestBox) GetQuest(questId int32) *Quest {
+	quest, ok := q.Doing[questId]
+	if !ok {
+		return nil
+	}
+	return quest
+}
+

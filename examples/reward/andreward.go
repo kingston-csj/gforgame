@@ -29,9 +29,9 @@ func (r *AndReward) VerifySliently(player *player.Player) bool {
 	return r.Verify(player) == nil
 }
 
-func (r *AndReward) Reward(player *player.Player) {
+func (r *AndReward) Reward(player *player.Player, actionType int) {
 	for _, reward := range r.Rewards {
-		reward.Reward(player)
+		reward.Reward(player, actionType)
 	}
 }
 

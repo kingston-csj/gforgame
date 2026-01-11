@@ -40,7 +40,7 @@ func (c *MailController) ReqGetAllRewards(s *network.Session, index int, msg *pr
 		}
 	}
 	andReward = andReward.Merge()
-	andReward.Reward(player)
+	andReward.Reward(player, constants.ActionType_MailGetAll)
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 	return &protos.ResMailGetAllRewards{
 		Code: 0,
@@ -75,7 +75,7 @@ func (c *MailController) ReqGetReward(s *network.Session, index int, msg *protos
 	}
 	mailRewards := reward.ParseRewards(mail.Rewards)
 	mail.Status = constants.MailStatusReceived
-	mailRewards.Reward(player)
+	mailRewards.Reward(player, constants.ActionType_MailGetReward)
 
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 

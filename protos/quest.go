@@ -105,7 +105,8 @@ type ResQuestTakeProgressReward struct {
 
 // 任务——领取达标奖
 type ResQuestTakeReward struct {
-	_ struct{} `cmd_ref:"CMD_RES_QUEST_REWARD" type:"res"`
+	_    struct{} `cmd_ref:"CMD_RES_QUEST_REWARD" type:"res"`
+	Code int32    `json:"code"`
 	// 今日活跃度
 	DailyScore int32 `json:"dailyScore"`
 	// 本周活跃度

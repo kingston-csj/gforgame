@@ -3,8 +3,12 @@ package protos
 const (
 	CmdHeartBeatReq = -101
 	CmdHeartBeatRes = -151
+
 	CmdGetServerTimeReq = -102
 	CmdGetServerTimeRes = -152
+
+	CmdGmReqCommand = -201
+	CmdGmResCommand = -251
 		
 	CmdPlayerReqLogin         = 103
 	CmdPlayerReqUpLevel       = 105
@@ -73,7 +77,7 @@ const (
 	CMD_REQ_QUEST_REWARD      = 701
 	CMD_RES_QUEST_ALL_REWARD = 762
 	CMD_RES_QUEST_PROGRESS_REWARD = 753
-	CMD_RES_QUEST_REWARD = 54
+	CMD_RES_QUEST_REWARD = 754
 
 	CmdChaJoinRoom = 1800
 	CmdChatReqChat = 1801

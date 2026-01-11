@@ -107,7 +107,6 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 			break
 		}
 	}
-	logger.Debugf("tcp conn closed %v", conn.RemoteAddr())
 }
 
 func (n *TcpServer) Stop() {

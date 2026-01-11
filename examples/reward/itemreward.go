@@ -27,7 +27,7 @@ func (r *ItemReward) VerifySliently(player *player.Player) bool {
 	return true
 }
 
-func (r *ItemReward) Reward(player *player.Player) {
+func (r *ItemReward) Reward(player *player.Player, actionType int) {
    itemOps := getItemOps()
 	if itemOps == nil {
 		return

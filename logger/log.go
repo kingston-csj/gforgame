@@ -243,3 +243,7 @@ func Error2(customMsg string, err error) {
 		errorLog.Out.Write([]byte(logContent))
 	}
 }
+
+func Error3(customMsg string) {
+	errorLog.Info(customMsg)
+}

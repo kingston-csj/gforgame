@@ -1,9 +1,9 @@
 package reward
 
 import (
-    "io/github/gforgame/examples/constants"
-    "io/github/gforgame/examples/domain/player"
-    "strconv"
+	"io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/domain/player"
+	"strconv"
 )
 
 type TicketReward struct {
@@ -27,7 +27,7 @@ func (r *TicketReward) VerifySliently(player *player.Player) bool {
 	return true
 }
 
-func (r *TicketReward) Reward(player *player.Player) {
+func (r *TicketReward) Reward(player *player.Player, actionType int) {
     if ops := getItemOps(); ops != nil {
         ops.AddByModelId(player, r.MapId, r.Amount)
     }

@@ -166,7 +166,14 @@ func (s *Session) Write() {
 func (s *Session) Read() {
     defer func() {
         if r := recover(); r != nil {
-            logger.Error(r.(error))
+            var err error
+			switch v := r.(type) {
+			case error:
+				err = v
+			default:
+				err = fmt.Errorf("%v", v)
+			}
+			logger.Error(err)
         }
     }()
     // 检查是否是WebSocket连接
@@ -276,7 +283,7 @@ func (s *Session) readTCPStream() {
 		for _, p := range packets {
 			typ, _ := GetMessageType(p.Header.Cmd)
 			if typ == nil {
-				logger.Error(fmt.Errorf("message type not found %v", p.Header.Cmd))
+				logger.Error3(fmt.Sprintf("message type not found %v", p.Header.Cmd))
 				continue
 			}
 			msg := reflect.New(typ.Elem()).Interface()

@@ -15,7 +15,6 @@ import (
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/friend"
-	"io/github/gforgame/examples/gm"
 	"io/github/gforgame/examples/http"
 	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/mail"
@@ -41,7 +40,14 @@ type GameTaskHandler struct {
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error(r.(error))
+			var err error
+			switch v := r.(type) {
+			case error:
+				err = v
+			default:
+				err = fmt.Errorf("%v", v)
+			}
+			logger.Error(err)
 		}
 	}()
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
@@ -114,12 +120,16 @@ func main() {
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
+	// 开发环境，导出所有客户端协议
+	TryExportProtocols()
+
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
 		route.NewPlayerRoute(),
 		route.NewHeroRoute(),
 		route.NewSceneRoute(),
-		gm.NewGmRoute(),
+		route.NewQuestRoute(),
+		route.NewGmRoute(),
 		item.NewItemController(),
 		
 		mail.NewMailController(),
@@ -172,9 +182,6 @@ func main() {
 
 	// fight.GetFightService().Test()
  
-	// 开发环境，导出所有客户端协议
-	TryExportProtocols()
-	
 	// 各自业务初始化
 	player.GetPlayerService().LoadPlayerProfile()
 

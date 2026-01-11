@@ -1,6 +1,11 @@
 package player
 
-import protos "io/github/gforgame/protos"
+import (
+	"io/github/gforgame/examples/config"
+	configdomain "io/github/gforgame/examples/domain/config"
+	"io/github/gforgame/protos"
+)
+
 
 type Quest struct {
 	Id int32
@@ -33,4 +38,8 @@ func (q *Quest) ToVo() *protos.QuestVo {
 		Target:   int32(q.Target),
 		Status:   q.Status,
 	}
+}
+
+func (q *Quest) Prototype() *configdomain.QuestData {
+	return config.QueryById[configdomain.QuestData](q.Id)
 }

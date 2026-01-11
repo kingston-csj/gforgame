@@ -134,6 +134,11 @@ func IntValue(object any) int {
 	return IntValueWithDefault(object, 0)
 }
 
+// Int32Value 将 any 类型转换为 int32（默认值：0）
+func Int32Value(object any) int32 {
+	return int32(IntValue(object))
+}
+
 // IntValueWithDefault 将 any 类型转换为 int（支持自定义默认值）
 func IntValueWithDefault(object any, defaultValue int) int {
 	if object == nil {

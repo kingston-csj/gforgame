@@ -18,7 +18,7 @@ type Reward interface {
 	VerifySliently(player *player.Player) bool
 
 	// 真正的发放逻辑
-	Reward(player *player.Player)
+	Reward(player *player.Player, actionType int)
 
 	GetType() string
 

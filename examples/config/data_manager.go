@@ -27,6 +27,13 @@ func init() {
 	tableConfigMap = make(map[string]data.TableMeta)
 	// 定义表配置
 	tableConfigs := []data.TableMeta{
+		// 公共配置表
+		{
+			TableName:  "common",
+			IDField:    "Id",
+			RecordType: reflect.TypeOf(domain.CommonData{}),
+			ContainerType: reflect.TypeOf(&container.CommonContainer{}),
+		},
 		// 道具表
 		{
 			TableName:  "item",
@@ -60,13 +67,6 @@ func init() {
 			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.SkillData{}),
 			ContainerType: reflect.TypeOf(&data.Container[int32, domain.SkillData]{}),
-		},
-		// buff表
-		{
-			TableName:     "buff",
-			IDField:       "Id",
-			RecordType:    reflect.TypeOf(domain.BuffData{}),
-			ContainerType: reflect.TypeOf(&data.Container[int32, domain.BuffData]{}),
 		},
 		// quest表
 		{

@@ -27,7 +27,7 @@ func (r *CardReward) VerifySliently(player *player.Player) bool {
 	return true
 }
 
-func (r *CardReward) Reward(player *player.Player) {
+func (r *CardReward) Reward(player *player.Player, actionType int) {
     if ops := getItemOps(); ops != nil {
         // ops.AddByModelId(player, r.CardId, r.Amount)
     }
