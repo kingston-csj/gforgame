@@ -20,4 +20,7 @@ const (
 
 	I18N_FRIEND_TIPS1 = 12001 // 已经是基友了
 	I18N_FRIEND_TIPS2 = 12002 // 已经在申请了
+
+	I18N_MONTH_CARD_TIPS1 = 21001 //月卡未激活
+	I18N_MONTH_CARD_TIPS2 = 21002 //今日奖励已领取
 )

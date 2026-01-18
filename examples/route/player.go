@@ -78,7 +78,7 @@ func (ps *PlayerRoute) ReqLogin(s *network.Session, index int32, msg *protos.Req
 	ps.service.DoLogin(msg.PlayerId, s, index)
 }
 
-func (ps *PlayerRoute) ReqLoadingFinish(s *network.Session, index int, msg *protos.ReqPlayerLoadingFinish) {
+func (ps *PlayerRoute) ReqLoadingFinish(s *network.Session, index int32, msg *protos.ReqPlayerLoadingFinish) {
 	player := network.GetPlayerBySession(s).(*playerdomain.Player)
 	context.EventBus.Publish(events.PlayerLoadingFinish, player)
 }
@@ -92,12 +92,12 @@ func (ps *PlayerRoute) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate
 	s.Send(&protos.ResPlayerCreate{Code: 0, PlayerId: player.Id}, 0)
 }
 
-func (ps *PlayerRoute) ReqPlayerUpLevel(s *network.Session, index int, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
+func (ps *PlayerRoute) ReqPlayerUpLevel(s *network.Session, index int32, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpLevel(p, msg.ToLevel)
 }
 
-func (ps *PlayerRoute) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqPlayerUpStage) *protos.ResHeroUpStage {
+func (ps *PlayerRoute) ReqPlayerUpStage(s *network.Session, index int32, msg *protos.ReqPlayerUpStage) *protos.ResPlayerUpStage {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpStage(p)
 }

@@ -20,8 +20,8 @@ func (c *AndConsume) VerifySliently(player *player.Player) bool {
 	return err == nil
 }
 
-func (c *AndConsume) Consume(player *player.Player) {
+func (c *AndConsume) Consume(player *player.Player, actionType int32) {
 	for _, consume := range c.Consumes {
-		consume.Consume(player)
+		consume.Consume(player, actionType)
 	}
 }

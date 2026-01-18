@@ -36,38 +36,45 @@ func (ps *HeroRoute) OnPlayerLogin(player *playerdomain.Player) {
 	ps.service.OnPlayerLogin(player)
 }
 
-func (ps *HeroRoute) ReqRecruit(s *network.Session, index int, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
+func (ps *HeroRoute) ReqRecruit(s *network.Session, index int32, msg *protos.ReqHeroRecruit) *protos.ResHeroRecruit {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
-	return ps.service.DoRecruit(p, msg.Times)
+	err, rewards := ps.service.DoRecruit(p, 1, msg.Counter)
+	if err != nil {
+		return &protos.ResHeroRecruit{
+			Code: int32(err.Code()),
+		}
+	}
+	return &protos.ResHeroRecruit{
+		RewardVos: rewards,
+	}
 }
- 
 
-func (ps *HeroRoute) ReqHeroLevelUp(s *network.Session, index int, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
+func (ps *HeroRoute) ReqHeroLevelUp(s *network.Session, index int32, msg *protos.ReqHeroLevelUp) *protos.ResHeroLevelUp {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoLevelUp(p, msg.HeroId, msg.ToLevel)
 }
 
-func (ps *HeroRoute) ReqHeroUpStage(s *network.Session, index int, msg *protos.ReqHeroUpStage) *protos.ResHeroUpStage {
+func (ps *HeroRoute) ReqHeroUpStage(s *network.Session, index int32, msg *protos.ReqHeroUpStage) *protos.ResHeroUpStage {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoStageUp(p, msg.HeroId)
 }
 
-func (ps *HeroRoute) ReqHeroCombine(s *network.Session, index int, msg *protos.ReqHeroCombine) *protos.ResHeroCombine {
+func (ps *HeroRoute) ReqHeroCombine(s *network.Session, index int32, msg *protos.ReqHeroCombine) *protos.ResHeroCombine {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoCombine(p, msg.HeroId)
 }
 
-func (ps *HeroRoute) ReqHeroUpFight(s *network.Session, index int, msg *protos.ReqHeroUpFight) *protos.ResHeroUpFight {
+func (ps *HeroRoute) ReqHeroUpFight(s *network.Session, index int32, msg *protos.ReqHeroUpFight) *protos.ResHeroUpFight {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpFight(p, msg.HeroId)
 }
 
-func (ps *HeroRoute) ReqHeroOffFight(s *network.Session, index int, msg *protos.ReqHeroOffFight) *protos.ResHeroOffFight {
+func (ps *HeroRoute) ReqHeroOffFight(s *network.Session, index int32, msg *protos.ReqHeroOffFight) *protos.ResHeroOffFight {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoOffFight(p, msg.HeroId)
 }
 
-func (ps *HeroRoute) ReqHeroChangePosition(s *network.Session, index int, msg *protos.ReqHeroChangePosition) *protos.ResHeroChangePosition {
+func (ps *HeroRoute) ReqHeroChangePosition(s *network.Session, index int32, msg *protos.ReqHeroChangePosition) *protos.ResHeroChangePosition {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoChangePosition(p, msg.HeroId, msg.Position)
 }

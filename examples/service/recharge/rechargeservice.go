@@ -10,6 +10,8 @@ import (
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/protos"
+	"io/github/gforgame/util"
+	"strings"
 	"sync"
 	"time"
 )
@@ -33,7 +35,20 @@ func (s *RechargeService) OnPlayerLogin(player *playerdomain.Player) {
 	io.NotifyPlayer(player, push)
 }
 
-func (s *RechargeService) GmRecharge(player *playerdomain.Player, rechargeId int32) {
+func (s *RechargeService) Recharge(player *playerdomain.Player, rechargeId int32) {
+	rechargeData := config.QueryById[configdomain.RechargeData](rechargeId)	
+	if util.IsEmptyString(rechargeData.Children) {
+		s.recharge0(player, rechargeId)
+	} else {
+		// 如果是捆绑销售的商品
+		children := strings .Split(rechargeData.Children, ",")
+		for _, child := range children {
+			s.recharge0(player, util.Int32Value(child))
+		}
+	}
+}
+
+func (s *RechargeService) recharge0(player *playerdomain.Player, rechargeId int32) {
 	rechargeData := config.QueryById[configdomain.RechargeData](rechargeId)
 	rewards := reward.ParseReward(rechargeData.Rewards)
 	rewards.Reward(player, constants.ActionType_Recharge)
@@ -61,5 +76,9 @@ func (s *RechargeService) GmRecharge(player *playerdomain.Player, rechargeId int
 	}
 
 	context.EventBus.Publish(events.PlayerEntityChange, player)
-	context.EventBus.Publish(events.Recharge, rechargeId)
+	evt := &events.RechargeEvent{
+		Player: player,
+		RechargeId: rechargeId,
+	}
+	context.EventBus.Publish(events.Recharge, evt)
 }

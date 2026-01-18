@@ -16,8 +16,6 @@ import (
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/friend"
 	"io/github/gforgame/examples/http"
-	"io/github/gforgame/examples/mail"
-	"io/github/gforgame/examples/rank"
 	"io/github/gforgame/examples/route"
 	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/system"
@@ -39,14 +37,7 @@ type GameTaskHandler struct {
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			var err error
-			switch v := r.(type) {
-			case error:
-				err = v
-			default:
-				err = fmt.Errorf("%v", v)
-			}
-			logger.Error(err)
+			logger.Error(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
@@ -129,10 +120,13 @@ func main() {
 		route.NewSceneRoute(),
 		route.NewQuestRoute(),
 		route.NewGmRoute(),
+		route.NewSignInRoute(),
 		route.NewItemRoute(),
-		
-		mail.NewMailController(),
-		rank.NewRankController(),
+		route.NewMallRoute(),
+		route.NewMonthCardRoute(),
+		route.NewMailRoute(),
+		route.NewRankRoute(),
+
 		chat.NewChatController(),
 		friend.NewFriendController(),
 	}

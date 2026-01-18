@@ -1,5 +1,5 @@
 export class ReqHeroOffFight {
-  public static cmd: number = 5014;
+  public static cmd: number = 803;
 
   public heroId: number;
 

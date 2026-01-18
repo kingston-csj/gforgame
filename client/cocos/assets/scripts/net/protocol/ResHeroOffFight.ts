@@ -1,5 +1,5 @@
 export class ResHeroOffFight {
-  public static cmd: number = 5015;
+  public static cmd: number = 853;
 
   public code: number;
 }

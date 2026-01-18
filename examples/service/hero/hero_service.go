@@ -19,6 +19,7 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/examples/service/item"
 	"io/github/gforgame/protos"
 )
@@ -75,43 +76,108 @@ func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	io.NotifyPlayer(player, resAllHeroInfo)
 }
 
-func (ps *HeroService) DoRecruit(p *player.Player, times int32) *protos.ResHeroRecruit {
-	rewardInfos := make([]*protos.RewardVo, 0)
+func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*common.BusinessRequestException, []*protos.RewardVo) {
+	itemId := constants.ITEM_RECRUIT_ID
+	if typ == 2 {
+		itemId = constants.ITEM_RECRUIT_ID2
+	}
 
-	if p.Backpack.GetItemCount(item.RecruitItemId) < times {
-		return &protos.ResHeroRecruit{
-			Code: constants.I18N_ITEM_NOT_ENOUGH,
+	maxTimes := int32(51)
+	// 检测次数
+	if typ == 1 {
+		if p.DailyReset.NormalRecruitTimes + times > maxTimes {
+			return common.NewBusinessRequestException( constants.I18N_COMMON_ILLEGAL_PARAMS), nil
+			}
+	} else {
+		if p.DailyReset.HighRecruitTimes + times > maxTimes {
+			return common.NewBusinessRequestException( constants.I18N_COMMON_ILLEGAL_PARAMS), nil
+			}
+		}
+
+	free := false
+	// heroId := 0
+
+	// 每天首次免费
+	if times == 1 {
+		if typ == 1{
+			if !p.DailyReset.NormalRecruitFreeUsed {
+				p.DailyReset.NormalRecruitFreeUsed = true
+				free = true
+			}
+		}else {
+			if !p.DailyReset.HighRecruitFreeUsed {
+				p.DailyReset.HighRecruitFreeUsed = true
+				free = true
+			}
 		}
 	}
 
-	p.Backpack.ReduceByModelId(item.RecruitItemId, times)
-
-	for i := 0; i < int(times); i++ {
-		heroData := ps.GetRandomHero()
-		// 如果已经拥有该英雄，则转为碎片
-		if p.HeroBox.HasHero(heroData.Id) {
-			rewardInfos = append(rewardInfos, &protos.RewardVo{
-				Type:  "item",
-				Value: fmt.Sprintf("%d=%d", heroData.Item, heroData.Shard),
-			})
-			item.GetItemService().AddByModelId(p, heroData.Item, heroData.Shard)
+	if !free {
+		// 优先消耗招募令
+		if p.Backpack.IsEnough(itemId, times) {
+				return common.NewBusinessRequestException( constants.I18N_ITEM_NOT_ENOUGH), nil
 		} else {
-			rewardInfos = append(rewardInfos, &protos.RewardVo{
-				Type:  "hero",
-				Value: strconv.Itoa(int(heroData.Id)),
-			})
-			ps.NewHero(p, heroData.Id)
+			// 不足扣钻石
+			itemCount := p.Backpack.GetItemCount(constants.ITEM_DIAMOND_ID)
+			if itemCount < times {
+				return common.NewBusinessRequestException( constants.I18N_ITEM_NOT_ENOUGH), nil
+			}
+			commonContainer := config.QueryContainer[configdomain.CommonData, *container.CommonContainer]()
+			// 招募消耗钻石
+			exchangeMoney := commonContainer.GetInt32Value("heroRecruitDiamond")
+			owed := times - itemCount
+			needMoney := owed * exchangeMoney
+			if needMoney > 0 {
+				itemConsume := consume.ItemConsume{
+					ItemId: itemId,
+					Amount: itemCount,
+				}
+				itemConsume.Consume(p, constants.ActionType_HeroRecruit)
+			}
+			if itemCount > 0 {
+				item.GetItemService().UseByModelId(p, itemId, itemCount)
+			}
+		}
+	
+		if typ == 1{
+			p.DailyReset.NormalRecruitTimes += times
+		}else {
+			p.DailyReset.HighRecruitTimes += times
+		}
+	}
 
-			ps.ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
+	gachaContainer := config.QueryContainer[configdomain.GachaData, *container.GachaContainer]()
+
+	rewardVos := make([]*protos.RewardVo, 0)
+	for i := 0; i < int(times); i++ {
+		gachaData := gachaContainer.RandItem(typ)
+		rewards := reward.ParseReward(gachaData.Rewards)
+		realReward := reward.GetSingleReward(rewards)
+		if realReward.(*reward.HeroReward) != nil {
+			heroReward := realReward.(*reward.HeroReward)
+			heroData := config.QueryById[configdomain.HeroData](heroReward.HeroId)
+			// 如果已经拥有该英雄，则转为碎片
+			if p.HeroBox.HasHero(heroData.Id) {
+				rewardVos = append(rewardVos, &protos.RewardVo{
+					Type:  "item",
+					Value: fmt.Sprintf("%d=%d", heroData.ShardItem, heroData.ShardAmount),
+				})
+				item.GetItemService().AddByModelId(p, heroData.ShardItem, heroData.ShardAmount)
+			} else {	
+				rewardVos = append(rewardVos, &protos.RewardVo{
+					Type:  "hero",
+					Value: strconv.Itoa(int(heroData.Id)),
+				})
+				ps.NewHero(p, heroData.Id)
+
+				// ps.ReCalculateHeroAttr(p, p.HeroBox.GetHero(heroData.Id), true)
+			}
 		}
 	}
 
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 
-	return &protos.ResHeroRecruit{
-		Code:        0,
-		RewardInfos: rewardInfos,
-	}
+	return nil, rewardVos
 }
 
 func (ps *HeroService) NewHero(p *player.Player, heroId int32) {
@@ -212,7 +278,7 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 			Code: int32(err.(*common.BusinessRequestException).Code()),
 		}
 	}
-	consume.Consume(p)
+	consume.Consume(p, constants.ActionType_HeroUpLevel)
 
 	h.Level = toLevel
 	ps.ReCalculateHeroAttr(p, h, true)
@@ -254,7 +320,7 @@ func (ps *HeroService) DoStageUp(p *player.Player, heroId int32) *protos.ResHero
 			Code: int32(err.(*common.BusinessRequestException).Code()),
 		}
 	}
-	costItem.Consume(p)
+	costItem.Consume(p, constants.ActionType_HeroUpStage)
 
 	h.Stage = h.Stage + 1
 
@@ -275,8 +341,8 @@ func (ps *HeroService) DoCombine(p *player.Player, heroId int32) *protos.ResHero
 	}
 	heroData := config.QueryById[configdomain.HeroData](heroId)
 	itemConsume := consume.ItemConsume{
-		ItemId: heroData.Item,
-		Amount: heroData.Shard,
+		ItemId: heroData.ShardItem,
+		Amount: heroData.ShardAmount,
 	}
 	err := itemConsume.Verify(p)
 	if err != nil {
@@ -284,7 +350,7 @@ func (ps *HeroService) DoCombine(p *player.Player, heroId int32) *protos.ResHero
 			Code: int32(err.(*common.BusinessRequestException).Code()),
 		}
 	}
-	itemConsume.Consume(p)
+	itemConsume.Consume(p, constants.ActionType_HeroCombine)
 
 	p.HeroBox.AddHero(&player.Hero{
 		ModelId: heroData.Id,

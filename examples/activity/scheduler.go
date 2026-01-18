@@ -2,6 +2,7 @@ package activity
 
 import (
 	"errors"
+	"fmt"
 	"io/github/gforgame/examples/config"
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/logger"
@@ -114,8 +115,8 @@ func (d *DefaultTaskScheduler) Schedule(task func(), execTime time.Time) (Cancel
 			defer func() {
 				// 捕获任务执行中的panic，避免程序崩溃
 				if r := recover(); r != nil {
-					logger.Error2("task scheduler: task panic" , r.(error))
-				}
+        			logger.Error(fmt.Errorf("task panic: %v", r))
+   				 }
 			}()
 			task()
 		}()

@@ -7,5 +7,5 @@ type Consume interface {
 
 	VerifySliently(player *player.Player) bool
 
-	Consume(player *player.Player)
+	Consume(player *player.Player, actionType int32)
 }

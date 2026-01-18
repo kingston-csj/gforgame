@@ -1,5 +1,5 @@
 export class ResHeroChangePosition {
-  public static cmd: number = 5017;
+  public static cmd: number = 859;
 
   public code: number;
   public posA: number;

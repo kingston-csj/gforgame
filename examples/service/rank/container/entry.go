@@ -1,6 +1,6 @@
 package container
 
-import "io/github/gforgame/examples/rank/model"
+import "io/github/gforgame/examples/service/rank/model"
 
 // RankEntry 排行榜条目
 type RankEntry struct {

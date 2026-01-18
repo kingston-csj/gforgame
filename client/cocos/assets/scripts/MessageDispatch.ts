@@ -10,7 +10,7 @@ import PushHeroAttrChanged from "./net/protocol/PushHeroAttrChanged";
 import { PushItemChanged } from "./net/protocol/PushItemChanged";
 import { PushPlayerFightChange } from "./net/protocol/PushPlayerFightChange";
 import PushPurseInfo from "./net/protocol/PushPurseInfo";
-import { ResAllHeroInfo } from "./net/protocol/ResAllHeroInfo";
+import { ResHeroPushInfo } from "./net/protocol/ResAllHeroInfo";
 import PushBackpackInfo from "./net/protocol/PushBackpackInfo";
 import { PushMailAll } from "./net/protocol/ResMailList";
 
@@ -21,7 +21,7 @@ function MessageHandler(cmd: number) {
   return function (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
     // 将处理器存储到待注册列表
@@ -45,7 +45,7 @@ export class MessageDispatch {
   private static handleBackpackInfo(msg: PushBackpackInfo) {
     if (msg.items) {
       BagpackModel.getInstance().reset(
-        new Map(msg.items.map((item) => [item.uid, item]))
+        new Map(msg.items.map((item) => [item.uid, item])),
       );
     }
   }
@@ -60,11 +60,11 @@ export class MessageDispatch {
     }
   }
 
-  @MessageHandler(ResAllHeroInfo.cmd)
-  private static handleAllHeroInfo(msg: ResAllHeroInfo) {
+  @MessageHandler(ResHeroPushInfo.cmd)
+  private static handleAllHeroInfo(msg: ResHeroPushInfo) {
     if (msg.heros) {
       HeroBoxModel.getInstance().reset(
-        new Map(msg.heros.map((hero) => [hero.id, hero]))
+        new Map(msg.heros.map((hero) => [hero.id, hero])),
       );
     }
   }
@@ -118,8 +118,8 @@ export class MessageDispatch {
             const mailVo = new MailVo();
             Object.assign(mailVo, mail);
             return [mail.id, mailVo];
-          })
-        )
+          }),
+        ),
       );
     }
   }

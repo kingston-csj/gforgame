@@ -1,6 +1,6 @@
-import { HeroVo } from './items/HeroVo';
+import { HeroVo } from "./items/HeroVo";
 
-export class ResAllHeroInfo {
-  public static cmd = 5003;
+export class ResHeroPushInfo {
+  public static cmd = 857;
   public heros: HeroVo[] = [];
 }

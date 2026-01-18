@@ -3,8 +3,8 @@ package handler
 import (
 	mysqldb "io/github/gforgame/db"
 	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/rank/container"
-	"io/github/gforgame/examples/rank/model"
+	"io/github/gforgame/examples/service/rank/container"
+	"io/github/gforgame/examples/service/rank/model"
 )
 
 type PlayerFightingRankHandler struct {

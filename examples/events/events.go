@@ -17,3 +17,8 @@ type ItemConsumeEvent struct {
 	ItemId int32
 	Count int32
 }
+
+type RechargeEvent struct {
+	Player domain.Player
+	RechargeId int32
+}

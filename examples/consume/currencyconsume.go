@@ -32,7 +32,7 @@ func (c *CurrencyConsume) VerifySliently(player *player.Player) bool {
 	return c.Verify(player) == nil
 }
 
-func (c *CurrencyConsume) Consume(player *player.Player) {
+func (c *CurrencyConsume) Consume(player *player.Player, actionType int32) {
 	if c.Currency == "gold" {
 		player.Purse.SubGold(c.Amount)
 	} else if c.Currency == "diamond" {

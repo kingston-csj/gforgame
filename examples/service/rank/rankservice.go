@@ -1,8 +1,9 @@
 package rank
 
 import (
-	"io/github/gforgame/examples/rank/handler"
-	"io/github/gforgame/examples/rank/model"
+	"io/github/gforgame/examples/service/player"
+	"io/github/gforgame/examples/service/rank/handler"
+	"io/github/gforgame/protos"
 	"sync"
 )
 
@@ -40,6 +41,16 @@ func (rs *RankService) init() {
 	handlers[PlayerFightingRank] = playerFightingRank
 }
 
-func (rs *RankService) QueryRank(rankType RankType, start int, end int) []model.BaseRank {
-	return handlers[rankType].QueryRanks(start, end)
+func (rs *RankService) QueryRank(rankType RankType, start int, end int) []protos.RankInfo {
+	records := handlers[rankType].QueryRanks(start, end)
+	rankInfos := make([]protos.RankInfo, 0)
+	order := int32(start)
+	for _, record := range records {
+		vo := record.AsVo()
+		vo.Name = player.GetPlayerService().GetPlayerProfileById(record.GetId()).Name
+		vo.Order = order
+		rankInfos = append(rankInfos, vo)
+		order++
+	}
+	return rankInfos
 }

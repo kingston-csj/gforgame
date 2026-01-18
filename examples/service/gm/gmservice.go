@@ -69,7 +69,7 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	
 	case "recharge":
 		rechargeId, _ := util.StringToInt32(params)
-		recharge.GetRechargeService().GmRecharge(player, rechargeId)
+		recharge.GetRechargeService().Recharge(player, rechargeId)
 	}
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 

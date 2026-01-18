@@ -198,7 +198,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *prot
 			Code: int32(err.(*common.BusinessRequestException).Code()),
 		}	
 	}
-	consume.Consume(p)
+	consume.Consume(p, constants.ActionType_HeroUpLevel)
 
 	p.Level = toLevel
 	ps.RefreshFighting(p)
@@ -209,23 +209,23 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *prot
 	}
 }
 
-func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResHeroUpStage {
+func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpStage {
 	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
 	if stageData == nil {
-		return &protos.ResHeroUpStage{
+		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP4,
 		}
 	}
-
+	
 	if p.Level < stageData.MaxLevel {
-		return &protos.ResHeroUpStage{
+		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP3,
 		}
 	}
 
 	stageData = config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage + 1)
 	if stageData == nil {
-		return &protos.ResHeroUpStage{
+		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP4,
 		}
 	}
@@ -236,23 +236,28 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResHeroUpStag
 	}
 	err := costItem.Verify(p)
 	if err != nil {
-		return &protos.ResHeroUpStage{
+		return &protos.ResPlayerUpStage{
 			Code: int32(err.(*common.BusinessRequestException).Code()),
 		}
 	}
-	costItem.Consume(p)
+	costItem.Consume(p, constants.ActionType_HeroUpStage)
 
 	p.Stage = p.Stage + 1
 
 	ps.RefreshFighting(p)
 	ps.SavePlayer(p)
 
-	return &protos.ResHeroUpStage{
+	return &protos.ResPlayerUpStage{
 		Code: 0,
 	}
 }
 
 func (ps *PlayerService) RefreshFighting(player *playerdomain.Player) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error(fmt.Errorf("panic recovered: %v", r))
+		}
+	}()
 	ps.recomputeAttribute(player)
 	fighting := 0
 	for _, hero := range player.HeroBox.Heros {

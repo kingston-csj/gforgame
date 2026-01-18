@@ -27,10 +27,10 @@ export class RecruitSettleModel {
     const promise = new Promise<ResHeroRecruit>((resolve, reject) => {
       GameContext.instance.WebSocketClient.sendMessage(
         ReqHeroRecruit.cmd,
-        { times },
+        { counter: times },
         (msg: ResHeroRecruit) => {
           resolve(msg);
-        }
+        },
       );
     });
     return promise;

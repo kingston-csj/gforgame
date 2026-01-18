@@ -1,4 +1,4 @@
 export class ReqHeroUpStage {
-  public static cmd: number = 5008;
+  public static cmd: number = 805;
   public heroId: number;
 }

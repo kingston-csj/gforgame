@@ -2,7 +2,7 @@ package container
 
 import (
 	"fmt"
-	"io/github/gforgame/examples/rank/model"
+	"io/github/gforgame/examples/service/rank/model"
 
 	"github.com/emirpasic/gods/maps/treemap"
 )

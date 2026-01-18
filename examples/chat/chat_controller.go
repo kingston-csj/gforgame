@@ -22,7 +22,7 @@ func (rs *ChatController) Init() {
 	})
 }
 
-func (rs *ChatController) ReqChat(s *network.Session, index int, msg *protos.ReqChat) *protos.ResChat {
+func (rs *ChatController) ReqChat(s *network.Session, index int32, msg *protos.ReqChat) *protos.ResChat {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	response := GetChatService().SendMessage(p, msg)
 	return response

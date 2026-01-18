@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"io/github/gforgame/examples/rank/container"
-	"io/github/gforgame/examples/rank/model"
+	"io/github/gforgame/examples/service/rank/container"
+	"io/github/gforgame/examples/service/rank/model"
 	"math"
 )
 

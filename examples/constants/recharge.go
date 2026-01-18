@@ -1,7 +1,7 @@
 package constants
 
 const (
-	// 充值积分系数
+	// 充值钻石
 	RechargeTypeDiamond int32 = 1
 	// 通行证
 	RechargeTypePass int32 = 2

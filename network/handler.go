@@ -45,6 +45,8 @@ func (r *MessageRoute) RegisterMessageHandlers(comp Module) error {
 			}
 
 			r.Handlers[cmd] = &Handler{Receiver: reflect.ValueOf(comp), Method: method, Type: mt.In(cmdFieldIndex), Indindexed: containsIndex}
+		} else {
+			
 		}
 	}
 	return nil
@@ -72,14 +74,15 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 		if mt.In(2).Kind() != reflect.Ptr {
 			return false
 		}
-		// index must be int32
-		if mt.In(2).Elem().Kind() != reflect.Int32 {
-			return false
-		}
 	}
+	// 4个参数才有index int32字段
 	if mt.NumIn() == 4 {
+		// index must be int32
+		if mt.In(2).Kind() != reflect.Int32 {
+			panic(fmt.Sprintf("method %s is not a handler method, index must be int32", method.Name))
+		}
 		if mt.In(3).Kind() != reflect.Ptr {
-			return false
+			panic(fmt.Sprintf("method %s is not a handler method, arg must be pointer", method.Name))
 		}
 	}
 

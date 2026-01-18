@@ -23,6 +23,7 @@ type ReqMailGetAllRewards struct{
 type ResMailGetAllRewards struct {
     _    struct{} `cmd_ref:"CmdMailResGetAllReward" type:"res"`
     Code int32 `json:"code"`
+    Rewards []*RewardVo `json:"rewards"`
 }
 
 type ReqMailRead struct {
@@ -43,6 +44,7 @@ type ReqMailGetReward struct {
 type ResMailGetReward struct {
     _    struct{} `cmd_ref:"CmdMailResGetReward" type:"res"`
     Code int32 `json:"code"`
+    Rewards []*RewardVo `json:"rewards"`
 }
 
 type ReqMailDeleteAll struct{

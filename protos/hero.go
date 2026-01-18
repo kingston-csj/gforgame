@@ -1,14 +1,14 @@
 package protos
 
 type ReqHeroRecruit struct {
-	_     struct{} `cmd_ref:"CmdHeroReqRecruit" type:"req"`
-	Times int32    `json:"times"`
+	_       struct{} `cmd_ref:"CmdHeroReqRecruit" type:"req"`
+	Counter int32    `json:"counter"`
 }
 
 type ResHeroRecruit struct {
-	_           struct{}    `cmd_ref:"CmdHeroResRecruit" type:"res"`
-	Code        int32       `json:"code"`
-	RewardInfos []*RewardVo `json:"rewardInfos"`
+	_         struct{}    `cmd_ref:"CmdHeroResRecruit" type:"res"`
+	Code      int32       `json:"code"`
+	RewardVos []*RewardVo `json:"rewardVos"`
 }
 
 type PushAllHeroInfo struct {

@@ -33,24 +33,25 @@ const (
 	CmdItemPushBackpackInfo = 250
 	CmdItemResPurseInfo    = 4002
 	CmdItemPushChanged     = 253
+	
+	CmdHeroReqRecruit        = 801
+	CmdHeroReqUpFight        = 802
+	CmdHeroReqOffFight       = 803
+	CmdHeroReqLevelUp        = 804
+	CmdHeroReqUpStage        = 805
+	CmdHeroReqCombine        = 807
+	CmdHeroReqChangePosition = 808
 
-	CmdHeroReqRecruit        = 5001
-	CmdHeroResRecruit        = 5002
+	CmdHeroResRecruit        = 851
+	CmdHeroResUpFight        = 852
+	CmdHeroResOffFight       = 853
+	CmdHeroResCombine        = 858
 	CmdHeroPushAllHero        = 857
-	CmdHeroReqLevelUp        = 5004
-	CmdHeroResLevelUp        = 5005
+	CmdHeroResLevelUp        = 854
 	CmdHeroPushAdd           = 5006
 	CmdHeroPushAttrChange    = 5007
-	CmdHeroReqUpStage        = 5008
-	CmdHeroResUpStage        = 5009
-	CmdHeroReqCombine        = 5010
-	CmdHeroResCombine        = 5011
-	CmdHeroReqUpFight        = 5012
-	CmdHeroResUpFight        = 5013
-	CmdHeroReqOffFight       = 5014
-	CmdHeroResOffFight       = 5015
-	CmdHeroReqChangePosition = 5016
-	CmdHeroResChangePosition = 5017
+	CmdHeroResUpStage        = 855
+	CmdHeroResChangePosition = 859
 	
 	CmdMailReqRead         = 501
 	CmdMailReqGetReward    = 502
@@ -102,6 +103,11 @@ const (
 	CmdFriendResDealApply     = 1955
 	CmdFriendResDelete        = 1956
 	CmdFriendPushApplyList    = 1997
+
+	CmdReqMonthCardGetReward = 2102
+	CmdResMonthCardGetReward = 2152
+	CmdPushMonthCardInfo = 2198
+	
 
 	CmdPushRechargePayInfo = 2298
 	CmdPushRechargePay = 2299

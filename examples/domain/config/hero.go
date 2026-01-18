@@ -15,9 +15,9 @@ type HeroData struct {
 	// 抽奖概率
 	Prob int32 `json:"prob" excel:"prob"`
 	// 对应的碎片数量
-	Shard int32 `json:"shard" excel:"shard"`
+	ShardAmount int32 `json:"shard" excel:"shardAmount"`
 	// 对应的碎片道具id
-	Item int32 `json:"item" excel:"item"`
+	ShardItem int32 `json:"shardItem" excel:"shardItem"`
 	// 生命值
 	Hp int32 `json:"hp"	 excel:"hp"`
 	// 攻击力

@@ -10,4 +10,9 @@ const (
 	ActionType_AchievementQuestProgressReward = 10007 // 领取成就任务进度奖励
 	ActionType_Signin                         = 10008 // 签到
 	ActionType_Recharge                       = 10009 // 充值
+	ActionType_MonthCardGetReward             = 10010 // 领取月卡奖励
+	ActionType_HeroRecruit                    = 10011 // 招募英雄
+	ActionType_HeroUpStage                    = 10012 // 英雄升阶
+	ActionType_HeroUpLevel                    = 10013 // 英雄升级
+	ActionType_HeroCombine                    = 10014 // 英雄合成
 )

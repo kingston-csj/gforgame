@@ -1,4 +1,4 @@
 export class ResHeroUpStage {
-  public static cmd: number = 5009;
+  public static cmd: number = 855;
   public code: number;
 }

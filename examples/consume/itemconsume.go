@@ -23,7 +23,7 @@ func (c *ItemConsume) VerifySliently(player *player.Player) bool {
 	return c.Verify(player) == nil
 }
 
-func (c *ItemConsume) Consume(player *player.Player) {
+func (c *ItemConsume) Consume(player *player.Player, actionType int32) {
 	itemOps := GetItemOps()
 	if itemOps == nil {
 		return

@@ -188,3 +188,10 @@ func multiply(sourceRewards Reward, multiple float64) Reward {
 		return modifyRewardAmount(sourceRewards, int32(math.Ceil(float64(sourceRewards.GetAmount()) * multiple)));
 	}
 }
+
+func GetSingleReward(rewards Reward) Reward {
+	if _, ok := rewards.(*AndReward); ok {
+		return rewards.(*AndReward).Rewards[0]
+	}
+	return rewards
+}

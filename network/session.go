@@ -165,17 +165,10 @@ func (s *Session) Write() {
 
 func (s *Session) Read() {
     defer func() {
-        if r := recover(); r != nil {
-            var err error
-			switch v := r.(type) {
-			case error:
-				err = v
-			default:
-				err = fmt.Errorf("%v", v)
-			}
-			logger.Error(err)
-        }
-    }()
+		if r := recover(); r != nil {
+			logger.Error(fmt.Errorf("panic recovered: %v", r))
+		}
+	}()
     // 检查是否是WebSocket连接
     if wsConn, ok := s.conn.(WebSocketConn); ok {
         // WebSocket连接，按消息处理

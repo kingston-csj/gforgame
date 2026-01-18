@@ -9,6 +9,18 @@ type DailyReset struct {
 	QuestDailyRewardIndex int32
 	// 充值累计积分
 	RechargeSum float32
+	// 银月卡奖励是否已领取
+	SilverMonthCardReward bool
+	// 金月卡奖励是否已领取
+	GoldMonthCardReward bool
+	// 普通招募免费次数是否已使用
+	NormalRecruitFreeUsed bool
+	// 普通招募免费次数
+	NormalRecruitTimes int32
+	// 高级卡免费招募次数是否已使用
+	HighRecruitFreeUsed bool
+	// 高级卡免费招募次数
+	HighRecruitTimes int32
 }
 
 func (d *DailyReset) Reset(time int64) {

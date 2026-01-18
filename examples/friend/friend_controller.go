@@ -47,7 +47,7 @@ func (c *FriendController) Init() {
 	context.CacheManager.Register("friend", dbLoader)
 }
 
-func (c *FriendController) ReqSearchPlayers(s *network.Session, index int, msg *protos.ReqFriendSearchPlayers) *protos.ResFriendSearchPlayers {
+func (c *FriendController) ReqSearchPlayers(s *network.Session, index int32, msg *protos.ReqFriendSearchPlayers) *protos.ResFriendSearchPlayers {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	items := GetFriendService().SearchByKey(msg.Key)
 	filteredItems := make([]*protos.FriendVo, 0)
@@ -64,7 +64,7 @@ func (c *FriendController) ReqSearchPlayers(s *network.Session, index int, msg *
 	return response
 }
 
-func (c *FriendController) ReqQueryFriends(s *network.Session, index int, msg *protos.ReqFriendQueryMyFriends) *protos.ResFriendQueryMyFriends {
+func (c *FriendController) ReqQueryFriends(s *network.Session, index int32, msg *protos.ReqFriendQueryMyFriends) *protos.ResFriendQueryMyFriends {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	items := GetFriendService().QueryMyFriendVos(p.Id)
 	response := &protos.ResFriendQueryMyFriends{
@@ -74,7 +74,7 @@ func (c *FriendController) ReqQueryFriends(s *network.Session, index int, msg *p
 	return response
 }
 
-func (c *FriendController) ReqApply(s *network.Session, index int, msg *protos.ReqFriendApply) *protos.ResFriendApply {
+func (c *FriendController) ReqApply(s *network.Session, index int32, msg *protos.ReqFriendApply) *protos.ResFriendApply {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	code := GetFriendService().ApplyFriend(p, msg.FriendId)
 	response := &protos.ResFriendApply{
@@ -83,7 +83,7 @@ func (c *FriendController) ReqApply(s *network.Session, index int, msg *protos.R
 	return response
 }
 
-func (c *FriendController) ReqDealApply(s *network.Session, index int, msg *protos.ReqFriendDealApplyRecord) *protos.ResFriendDealApplyRecord {
+func (c *FriendController) ReqDealApply(s *network.Session, index int32, msg *protos.ReqFriendDealApplyRecord) *protos.ResFriendDealApplyRecord {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	code := GetFriendService().DealApplyRecord(p, msg.ApplyId, msg.Status)
 	response := &protos.ResFriendDealApplyRecord{
@@ -92,7 +92,7 @@ func (c *FriendController) ReqDealApply(s *network.Session, index int, msg *prot
 	return response
 }
 
-func (c *FriendController) ReqDelete(s *network.Session, index int, msg *protos.ReqFriendDelete) *protos.ResFriendDelete {
+func (c *FriendController) ReqDelete(s *network.Session, index int32, msg *protos.ReqFriendDelete) *protos.ResFriendDelete {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	code := GetFriendService().DeleteFriend(p, msg.FriendId)
 	response := &protos.ResFriendDelete{

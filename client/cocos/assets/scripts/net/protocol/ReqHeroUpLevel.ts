@@ -1,5 +1,5 @@
 export class ReqHeroUpLevel {
-  public static cmd: number = 5004;
+  public static cmd: number = 804;
   public heroId: number;
   public toLevel: number;
 }

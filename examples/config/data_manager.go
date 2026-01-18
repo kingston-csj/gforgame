@@ -101,6 +101,20 @@ func init() {
 		// 	IDField:       "Id",
 		// 	RecordType:    reflect.TypeOf(domain.MallData{}),
 		// },
+		// // 月卡表
+		// {
+		// 	TableName:     "monthlycard",
+		// 	IDField:       "Id",
+		// 	RecordType:    reflect.TypeOf(domain.MonthlyCardData{}),
+		// },
+		// // 抽奖表
+		// {
+		// 	TableName:     "gacha",
+		// 	IDField:       "Id",
+		// 	RecordType:    reflect.TypeOf(domain.GachaData{}),
+		// 	ContainerType: reflect.TypeOf(&container.GachaContainer{}),
+		// },
+
 	}
 
 	for _, config := range tableConfigs {

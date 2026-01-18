@@ -2,7 +2,7 @@ package protos
 
 type RankInfo struct {
 	Id          string `json:"id"`
-	Order       int    `json:"order"`
+	Order       int32  `json:"order"`
 	Value       int64  `json:"value"`
 	Name        string `json:"name"`
 	SecondValue int64  `json:"secondValue"`
@@ -11,14 +11,14 @@ type RankInfo struct {
 
 type ReqRankQuery struct {
 	_        struct{} `cmd_ref:"CmdRankReqQuery" type:"req"`
-	Type     int      `json:"type"`
-	Start    int      `json:"start"`
-	PageSize int      `json:"pageSize"`
+	Type     int32    `json:"type"`
+	Start    int32    `json:"start"`
+	PageSize int32    `json:"pageSize"`
 }
 
 type ResRankQuery struct {
 	_        struct{}   `cmd_ref:"CmdRankResQuery" type:"res"`
-	Type     int        `json:"type"`
+	Type     int32      `json:"type"`
 	Records  []RankInfo `json:"records"`
 	MyRecord RankInfo   `json:"myRecord"`
 }
