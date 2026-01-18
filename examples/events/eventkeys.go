@@ -9,6 +9,8 @@ const (
 	PlayerLoadingFinish = "player_loading_finish"
 	PlayerDailyReset    = "player_daily_reset"
 
+	Recharge = "recharge"
+
 	ItemConsume = "item_consume"
 
 	HeroGain = "hero_gain"

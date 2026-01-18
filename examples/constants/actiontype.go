@@ -8,4 +8,6 @@ const (
 	ActionType_MailGetReward                  = 10005 // 领取邮件奖励
 	ActionType_DailyQuestProgressReward       = 10006 // 领取每日任务进度奖励
 	ActionType_AchievementQuestProgressReward = 10007 // 领取成就任务进度奖励
+	ActionType_Signin                         = 10008 // 签到
+	ActionType_Recharge                       = 10009 // 充值
 )

@@ -72,6 +72,10 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 		if mt.In(2).Kind() != reflect.Ptr {
 			return false
 		}
+		// index must be int32
+		if mt.In(2).Elem().Kind() != reflect.Int32 {
+			return false
+		}
 	}
 	if mt.NumIn() == 4 {
 		if mt.In(3).Kind() != reflect.Ptr {

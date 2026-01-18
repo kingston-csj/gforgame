@@ -1,4 +1,4 @@
-package item
+package route
 
 import (
 	"io/github/gforgame/examples/context"
@@ -9,21 +9,21 @@ import (
 	"io/github/gforgame/protos"
 )
 
-type ItemController struct {
+type ItemRoute struct {
 	network.Base
 }
 
-func NewItemController() *ItemController {
-	return &ItemController{}
+func NewItemRoute() *ItemRoute {
+	return &ItemRoute{}
 }
 
-func (ps *ItemController) Init() {
+func (ps *ItemRoute) Init() {
 	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }
 
-func (ps *ItemController) OnPlayerLogin(player *playerdomain.Player) {
+func (ps *ItemRoute) OnPlayerLogin(player *playerdomain.Player) {
 	// 发送背包信息
 	resBackpack := &protos.PushBackpackInfo{
 		Items: []protos.ItemInfo{},

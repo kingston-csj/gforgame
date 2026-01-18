@@ -71,6 +71,9 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int32) e
 		if file.IsDir() || !strings.HasSuffix(file.Name(), ".go") {
 			continue
 		}
+		if file.Name() == "response.go" {
+			continue
+		}
 
 		// 通用AST解析
 		filePath := b.GoDir + "\\" + file.Name()
@@ -376,7 +379,7 @@ func (b *BaseGenerator) buildMsgConstMap(filePath string) map[string]int {
     if err != nil {
         return out
     }
-    re := regexp.MustCompile(`(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([0-9]+)\s*$`)
+    re := regexp.MustCompile(`(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([-]?[0-9]+)\s*$`)
     matches := re.FindAllStringSubmatch(string(data), -1)
     for _, m := range matches {
         if len(m) >= 3 {

@@ -36,9 +36,9 @@ func init() {
 		},
 		// 道具表
 		{
-			TableName:  "item",
+			TableName:  "prop",
 			IDField:    "Id",
-			RecordType: reflect.TypeOf(domain.ItemData{}),
+			RecordType: reflect.TypeOf(domain.PropData{}),
 		},
 		// 英雄表
 		{
@@ -83,6 +83,24 @@ func init() {
 			RecordType:    reflect.TypeOf(domain.ActivityData{}),
 			ContainerType: reflect.TypeOf(&data.Container[int32, domain.ActivityData]{}),
 		},
+		// // 每日签到奖励表
+		// {
+		// 	TableName:     "signin",
+		// 	IDField:       "Id",
+		// 	RecordType:    reflect.TypeOf(domain.SigninData{}),
+		// },
+		// // 充值表
+		// {
+		// 	TableName:     "recharge",
+		// 	IDField:       "Id",
+		// 	RecordType:    reflect.TypeOf(domain.RechargeData{}),
+		// },
+		// // 商城表
+		// {
+		// 	TableName:     "mall",
+		// 	IDField:       "Id",
+		// 	RecordType:    reflect.TypeOf(domain.MallData{}),
+		// },
 	}
 
 	for _, config := range tableConfigs {

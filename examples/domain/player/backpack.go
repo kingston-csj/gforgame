@@ -37,6 +37,7 @@ var errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMO
 type Backpack struct {
 	Items map[string]*Item
 	configProvider      configcontract.ItemConfigProvider `gorm:"-"`
+	Capacity            int32 `gorm:"-"`
 }
 
 /// 基础道具配置提供器
@@ -44,7 +45,7 @@ type BaseItemConfigProvider struct {
 }
 
 func (p *BaseItemConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
-	return config.QueryById[configdomain.ItemData](itemId)
+	return config.QueryById[configdomain.PropData](itemId)
 }
 
 /// 符文配置提供器
@@ -81,17 +82,15 @@ func (r *ChangeResult) ToChangeInfos() []protos.ItemInfo {
 	return itemInfos
 }
 
-func (r *ChangeResult) addChanged(itemId int32, from int32, to int32, change int32) {
-	item := &ChangeItem{
+func (r *ChangeResult) addChanged(item *Item, from int32, to int32, change int32) {
+	changeItem := &ChangeItem{
 		from:   from,
 		to:     to,
-		change: change,
-		Item: &Item{
-			ItemId: itemId,
-		},
+		change: change,	
+		Item: item,
 	}
 	r.Succ = true
-	r.ChangedItems = append(r.ChangedItems, item)
+	r.ChangedItems = append(r.ChangedItems, changeItem)
 }
 
 /// 添加道具
@@ -115,7 +114,7 @@ func (b *Backpack) AddByModelId(itemId int32, count int32) (*ChangeResult, error
 			currNum := item.ChangeAmount(canAdd)
 			remaining -= canAdd
 			remaining -= canAdd
-			changeResult.addChanged(itemId, fromNum, currNum, canAdd)
+			changeResult.addChanged(item, fromNum, currNum, canAdd)
 			if remaining == 0 {
 				break
 			}
@@ -125,8 +124,11 @@ func (b *Backpack) AddByModelId(itemId int32, count int32) (*ChangeResult, error
 	 for remaining > 0 {
 		newItemAmount := remaining
 		if (maxOverlap == 0) {
+			newItemAmount = remaining
+		} else{
 			newItemAmount = min(remaining, maxOverlap)
 		}
+		remaining -= newItemAmount
 		newItem := &Item{
 			Uid:    util.GetNextID(),
 			ItemId: itemId,
@@ -134,7 +136,7 @@ func (b *Backpack) AddByModelId(itemId int32, count int32) (*ChangeResult, error
 			Level:  0,
 		}
 		b.Items[newItem.Uid] = newItem
-		changeResult.addChanged(itemId, 0, newItemAmount, newItemAmount)
+		changeResult.addChanged(newItem, 0, newItemAmount, newItemAmount)
 	 }
 	return changeResult, nil
 }
@@ -159,13 +161,13 @@ func (b *Backpack) ReduceByModelId(itemId int32, count int32) *ChangeResult {
 				if (curr == 0) {
 					delete(b.Items, item.Uid)
 				}
-				result.addChanged(itemId, fromNum, curr, -toRemove)
+				result.addChanged(item, fromNum, curr, -toRemove)
 			} else {
 				curr := item.Count
 				toRemove -= item.Count
 				item.ChangeAmount(-item.Count)
 				delete(b.Items, item.Uid)
-				result.addChanged(itemId, fromNum, 0, -curr)
+				result.addChanged(item, fromNum, 0, -curr)
 			}
 		}
 	}
@@ -190,7 +192,7 @@ func (b *Backpack) ReduceByUid(uid string, count int32) (*ChangeResult, error) {
 	if currNum == 0 {
 		delete(b.Items, uid)
 	}
-	result.addChanged(existed.ItemId, fromNum, currNum, -count)
+	result.addChanged(existed, fromNum, currNum, -count)
 	return result, nil
 }
 

@@ -16,7 +16,6 @@ import (
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/friend"
 	"io/github/gforgame/examples/http"
-	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/mail"
 	"io/github/gforgame/examples/rank"
 	"io/github/gforgame/examples/route"
@@ -130,7 +129,7 @@ func main() {
 		route.NewSceneRoute(),
 		route.NewQuestRoute(),
 		route.NewGmRoute(),
-		item.NewItemController(),
+		route.NewItemRoute(),
 		
 		mail.NewMailController(),
 		rank.NewRankController(),

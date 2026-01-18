@@ -7,6 +7,8 @@ type WeeklyReset struct {
 	WeeklyQuestScore int32
 	// 任务周活跃度兑换积分的档位索引（0为未领取，4为全部领取）
 	QuestWeeklyRewardIndex int32
+	// 充值累计积分
+	RechargeSum float32
 }
 
 func (d *WeeklyReset) Reset(time int64) {

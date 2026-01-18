@@ -18,7 +18,7 @@ type Container[K comparable, V any] struct {
 }
 
 // NewContainer 创建一个新的 Container 实例
-func NewContainer[K comparable, V any]() *Container[K, V] {
+func NewContainer[K int32, V any]() *Container[K, V] {
 	return &Container[K, V]{
 		data:        make(map[K]*V),
 		indexMapper: make(map[string][]*V),

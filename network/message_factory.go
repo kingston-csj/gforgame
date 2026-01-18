@@ -2,6 +2,7 @@ package network
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 )
@@ -50,7 +51,7 @@ func GetMessageCmdFromType(typ reflect.Type) (int32, error) {
 	if ok {
 		return value, nil
 	} else {
-		return 0, errors.New("GetMessageCmdFromType not found")
+		return 0, errors.New(fmt.Sprintf("GetMessageCmdFromType not found: %v", typ.Name()))
 	}
 }
 

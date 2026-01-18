@@ -18,17 +18,17 @@ type ConsumeDef struct {
 }
 
 type Mall struct {
-	Id       int64        `json:"id" excel:"id"`
-	Type     int64        `json:"type" excel:"type"`
+	Id       int32        `json:"id" excel:"id"`
+	Type     int32        `json:"type" excel:"type"`
 	Name     string       `json:"name" excel:"name"`
 	Rewards  []RewardDef  `json:"rewards" excel:"rewards"`
 	Consumes []ConsumeDef `json:"consumes" excel:"consumes"`
 }
 
 type Item struct {
-	Id      int64  `json:"id" excel:"id"`
+	Id      int32  `json:"id" excel:"id"`
 	Name    string `json:"name" excel:"name"`
-	Quality int64  `json:"quality" excel:"quality"`
+	Quality int32  `json:"quality" excel:"quality"`
 	Tips    string `json:"tips" excel:"tips"`
 	Icon    string `json:"icon" excel:"icon"`
 }
@@ -45,10 +45,10 @@ func TestDataContainer(t *testing.T) {
 	}
 
 	// 创建 Container
-	container := data.NewContainer[int64, Mall]()
+	container := data.NewContainer[int32, Mall]()
 
 	// 定义 ID 获取函数和索引函数
-	getIdFunc := func(record *Mall) int64 {
+	getIdFunc := func(record *Mall) int32 {
 		return record.Id
 	}
 	indexFuncs := map[string]func(*Mall) any{

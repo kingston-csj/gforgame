@@ -19,7 +19,7 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/item"
+	"io/github/gforgame/examples/service/item"
 	"io/github/gforgame/protos"
 )
 

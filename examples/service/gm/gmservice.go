@@ -6,9 +6,10 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/item"
 	"io/github/gforgame/examples/reward"
+	"io/github/gforgame/examples/service/item"
 	questservice "io/github/gforgame/examples/service/quest"
+	"io/github/gforgame/examples/service/recharge"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/util"
 	"strings"
@@ -36,7 +37,7 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 		}
 	}()
 	switch topic {
-	case "add_item":
+	case "add_items":
 		itemParams := strings.Split(params, "=")
 		itemId, err := util.StringToInt32(itemParams[0])
 		if err != nil {
@@ -65,6 +66,10 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	case "quest":
 		questId, _ := util.StringToInt32(params)
 		questservice.GetQuestService().GmFinish(player, questId)
+	
+	case "recharge":
+		rechargeId, _ := util.StringToInt32(params)
+		recharge.GetRechargeService().GmRecharge(player, rechargeId)
 	}
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 

@@ -34,6 +34,9 @@ type Player struct {
 	DailyResetJson string             `gorm:"dailyreset"`
 	WeeklyReset     *WeeklyReset        `gorm:"-"`
 	WeeklyResetJson string             `gorm:"weeklyreset"`
+	// 月度重置
+	MonthlyReset     *MonthlyResetBox        `gorm:"-"`
+	MonthlyResetJson string             `gorm:"monthlyreset"`
 	Fight          int32              `gorm:"player's fight"`
 	Camp           int32              `gorm:"player's camp"`
 	Mailbox        *Mailbox           `gorm:"-"`
@@ -42,6 +45,8 @@ type Player struct {
 	ExtendBoxJson  string             `gorm:"extendbox"`
 	QuestBox       *QuestBox          `gorm:"-"`
 	QuestBoxJson   string             `gorm:"questbox"`
+	RechargeBox    *RechargeBox       `gorm:"-"`
+	RechargeBoxJson string             `gorm:"rechargebox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -101,6 +106,15 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.WeeklyResetJson = string(jsonData)
 	}
+	if p.MonthlyReset == nil {
+		p.MonthlyResetJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.MonthlyReset)
+		if err != nil {
+			return err
+		}
+		p.MonthlyResetJson = string(jsonData)
+	}
 	if p.Mailbox == nil {
 		p.MailboxJson = ""
 	} else {
@@ -128,6 +142,18 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		}
 		p.QuestBoxJson = string(jsonData)
 	}
+
+	if p.RechargeBox == nil {
+		p.RechargeBoxJson = ""
+	} else {
+		jsonData, err := json.Marshal(p.RechargeBox)
+		if err != nil {
+			return err
+		}
+		p.RechargeBoxJson = string(jsonData)
+	}
+
+
 	return nil
 }
 func (p *Player) AfterFind(tx *gorm.DB) error {
@@ -135,11 +161,13 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		p.Backpack = &Backpack{
 			Items: make(map[string]*Item),
 			configProvider: BaseItemConfigProviderInstance,
+			Capacity: 9999,
 		}
 	} else {
 		backpack := &Backpack{
 			Items: make(map[string]*Item),
 			configProvider: BaseItemConfigProviderInstance,
+			Capacity: 9999,
 		}
 		json.Unmarshal([]byte(p.BackpackJson), &backpack)
 		p.Backpack = backpack
@@ -191,6 +219,14 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	} else {
 		json.Unmarshal([]byte(p.WeeklyResetJson), &p.WeeklyReset)
 	}
+	if util.IsEmptyString(p.MonthlyResetJson) {
+		p.MonthlyReset = &MonthlyResetBox{
+			ResetTime:  0,
+			SignInDays: make([]int32, 0),
+		}
+	} else {
+		json.Unmarshal([]byte(p.MonthlyResetJson), &p.MonthlyReset)
+	}
 	if util.IsEmptyString(p.MailboxJson) {
 		p.Mailbox = &Mailbox{
 			Mails: make(map[int64]*Mail),
@@ -215,6 +251,16 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 		}
 	} else {
 		json.Unmarshal([]byte(p.QuestBoxJson), &p.QuestBox)
+	}
+
+	if util.IsEmptyString(p.RechargeBoxJson) {
+		p.RechargeBox = &RechargeBox{
+			ActivatedQiRiPay: 0,
+			RechargeTimes:    make(map[int32]int32),
+			ActivatedPassPay: 0,
+		}
+	} else {
+		json.Unmarshal([]byte(p.RechargeBoxJson), &p.RechargeBox)
 	}
 
 	return nil

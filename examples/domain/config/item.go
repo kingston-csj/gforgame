@@ -1,6 +1,6 @@
 package config
 
-type ItemData struct {
+type PropData struct {
 	Id      int32  `json:"id" excel:"id"`
 	Name    string `json:"name" excel:"name"`
 	Quality int32  `json:"quality" excel:"quality"`
@@ -9,10 +9,10 @@ type ItemData struct {
 	Overlap int32  `json:"overlap" excel:"overlap"`
 }
 
-func (i *ItemData) GetMaxOverlap() int32 {
+func (i *PropData) GetMaxOverlap() int32 {
 	return i.Overlap
 }
 
-func (i *ItemData) GetId() int32 {
+func (i *PropData) GetId() int32 {
 	return i.Id
 }

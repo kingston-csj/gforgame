@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"io/github/gforgame/logger"
 	"reflect"
 )
 
@@ -19,6 +20,7 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 	if err != nil {
 		return nil, fmt.Errorf("failed to read table %s: %v", config.TableName, err)
 	}
+	logger.Info(fmt.Sprintf("processed table %s, %d records", config.TableName, len(records)))
 
 	// 创建容器实例
 	var container interface{}
@@ -36,18 +38,10 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 		if !ok {
 			return nil, fmt.Errorf("field %s not found in type %s", config.IDField, config.RecordType.Name())
 		}
-
-		// 根据字段类型创建对应的容器
-		switch field.Type.Kind() {
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			container = NewContainer[int64, any]()
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			container = NewContainer[uint64, any]()
-		case reflect.String:
-			container = NewContainer[string, any]()
-		default:
-			return nil, fmt.Errorf("unsupported ID field type: %v", field.Type)
+		if field.Type.Kind() != reflect.Int32 {
+			return nil, fmt.Errorf("ID field %s must be int32 type", config.IDField)
 		}
+		container = NewContainer[int32, any]()
 	}
 
 	// 创建 ID 获取函数

@@ -1,18 +1,13 @@
 package config
 
-import (
-	"io/github/gforgame/domain"
-)
-
 type RechargeData struct {
-	Id int `json:"id"`
+	Id int32 `json:"id" excel:"id"`
 
-	Money float32 `json:"money"`
+	Money float32 `json:"money" excel:"money"`
 
-	Type string `json:"type"`
+	Type int32 `json:"type" excel:"type"`
 
-	// 购买条件，不同的类型有不同的条件
-	Condition string `json:"condition"`
+	Condition string `json:"condition" excel:"condition"`
 
-	Rewards []domain.RewardDefLite `json:"rewards"`
+	Rewards string `json:"rewards" excel:"rewards"`
 }

@@ -51,8 +51,6 @@ const (
 	CmdHeroResOffFight       = 5015
 	CmdHeroReqChangePosition = 5016
 	CmdHeroResChangePosition = 5017
-
-	
 	
 	CmdMailReqRead         = 501
 	CmdMailReqGetReward    = 502
@@ -83,6 +81,11 @@ const (
 	CMD_PUSH_DAILY_QUEST      = 798
 	CMD_PUSH_WEEKLY_QUEST      = 799
 
+
+	CmdMallPushInfo = 1199
+	CmdReqMallBuy = 1101
+	CmdResMallBuy = 1151
+
 	CmdChaJoinRoom = 1800
 	CmdChatReqChat = 1801
 	CmdChatResChat = 1851
@@ -100,6 +103,9 @@ const (
 	CmdFriendResDelete        = 1956
 	CmdFriendPushApplyList    = 1997
 
+	CmdPushRechargePayInfo = 2298
+	CmdPushRechargePay = 2299
+
 	CmdRankReqQuery = 7001
 	CmdRankResQuery = 7002
 
@@ -109,4 +115,9 @@ const (
 
 	CmdSceneResGetData = 2801
 	CmdSceneResSetData = 2852
+
+	CmdSignInReqSignIn = 3001
+	CmdSignInResSignIn = 3002
+	CmdSignInPush = 3099
+
 )

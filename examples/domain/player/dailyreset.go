@@ -7,6 +7,8 @@ type DailyReset struct {
 	DailyQuestScore int32
 	// 任务日活跃度兑换积分的档位索引（0为未领取，4为全部领取）
 	QuestDailyRewardIndex int32
+	// 充值累计积分
+	RechargeSum float32
 }
 
 func (d *DailyReset) Reset(time int64) {
