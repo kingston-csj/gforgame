@@ -5,14 +5,22 @@ import (
 	"reflect"
 )
 
-// IContainer 定义容器的接口
-type IContainer interface {
-	AfterLoad()
+// IBaseContainer 定义容器的基础接口，不包含泛型方法
+type IBaseContainer interface {
 	Init()
+	AfterLoad()
+}
+
+// IContainer 定义容器的泛型接口
+type IContainer[K int32, V any] interface {
+	IBaseContainer
+	GetRecord(id int32) *V
+	GetAllRecords() []*V
+	GetRecordsBy(name string, index any) []*V
 }
 
 // Container 是一个通用的数据容器，支持按 ID 查询、按索引查询和查询所有记录
-type Container[K comparable, V any] struct {
+type Container[K int32, V any] struct {
 	data        map[K]*V        // 存储 ID 到记录指针的映射
 	indexMapper map[string][]*V // 存储索引到记录指针的映射
 }
@@ -26,9 +34,9 @@ func NewContainer[K int32, V any]() *Container[K, V] {
 }
 
 // Init 初始化容器，子类可以重写此方法
-func (c *Container[K, V]) Init() {
+func (c *Container[int32, V]) Init() {
 	if c.data == nil {
-		c.data = make(map[K]*V)
+		c.data = make(map[int32]*V)
 	}
 	if c.indexMapper == nil {
 		c.indexMapper = make(map[string][]*V)
@@ -36,11 +44,11 @@ func (c *Container[K, V]) Init() {
 }
 
 // AfterLoad 数据加载后的处理，子类可以重写此方法
-func (c *Container[K, V]) AfterLoad() {
+func (c *Container[int32, V]) AfterLoad() {
 }
 
 // GetRecord 根据 ID 获取单个记录
-func (c *Container[K, V]) GetRecord(id K) *V {
+func (c *Container[int32, V]) GetRecord(id int32) *V {
 	record, exists := c.data[id]
 	if !exists {
 		return nil
@@ -49,7 +57,7 @@ func (c *Container[K, V]) GetRecord(id K) *V {
 }
 
 // GetAllRecords 获取所有记录
-func (c *Container[K, V]) GetAllRecords() []*V {
+func (c *Container[int32, V]) GetAllRecords() []*V {
 	records := make([]*V, 0, len(c.data))
 	for _, record := range c.data {
 		records = append(records, record)
@@ -58,21 +66,16 @@ func (c *Container[K, V]) GetAllRecords() []*V {
 }
 
 // GetRecordsBy 根据索引名称和索引值获取记录
-func (c *Container[K, V]) GetRecordsBy(name string, index any) []*V {
+func (c *Container[int32, V]) GetRecordsBy(name string, index any) []*V {
 	key := indexKey(name, index)
 	return c.indexMapper[key]
 }
 
-// Values 返回所有记录的map
-func (c *Container[K, V]) Values() map[K]*V {
-	return c.data
-}
-
 // Inject 将数据注入容器，并构建索引
-func (c *Container[K, V]) Inject(records interface{}, getIdFunc interface{}, indexFuncs interface{}) {
+func (c *Container[int32, V]) Inject(records interface{}, getIdFunc interface{}, indexFuncs interface{}) {
 	// 确保 maps 已初始化
 	if c.data == nil {
-		c.data = make(map[K]*V)
+		c.data = make(map[int32]*V)
 	}
 	if c.indexMapper == nil {
 		c.indexMapper = make(map[string][]*V)
@@ -115,7 +118,7 @@ func (c *Container[K, V]) Inject(records interface{}, getIdFunc interface{}, ind
 
 	// 转换 ID 获取函数
 	idFunc := reflect.ValueOf(getIdFunc)
-	getTypedId := func(v *V) K {
+	getTypedId := func(v *V) int32 {
 		// 确保传递给 ID 函数的是解引用后的值
 		val := reflect.ValueOf(v).Elem().Interface()
 		results := idFunc.Call([]reflect.Value{reflect.ValueOf(val)})
@@ -123,11 +126,11 @@ func (c *Container[K, V]) Inject(records interface{}, getIdFunc interface{}, ind
 
 		// 使用反射进行类型转换
 		resultValue := reflect.ValueOf(result)
-		if !resultValue.Type().ConvertibleTo(reflect.TypeOf(*new(K))) {
-			panic(fmt.Sprintf("ID function returned %T which cannot be converted to type %T", result, *new(K)))
+		if !resultValue.Type().ConvertibleTo(reflect.TypeOf(*new(int32))) {
+			panic(fmt.Sprintf("ID function returned %T which cannot be converted to type %T", result, *new(int32)))
 		}
 
-		converted := resultValue.Convert(reflect.TypeOf(*new(K))).Interface().(K)
+		converted := resultValue.Convert(reflect.TypeOf(*new(int32))).Interface().(int32)
 		return converted
 	}
 
@@ -152,7 +155,6 @@ func (c *Container[K, V]) Inject(records interface{}, getIdFunc interface{}, ind
 	for _, record := range typedRecords {
 		id := getTypedId(record)
 		c.data[id] = record
-
 		// 构建索引
 		for name, indexFunc := range indexFuncsMap {
 			indexValue := indexFunc(record)

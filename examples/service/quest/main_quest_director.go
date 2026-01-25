@@ -22,7 +22,7 @@ func NewMainQuestDirector() *MainQuestDirector {
 /// 实现QuestDirector接口
 
 func (d *MainQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
-	firstMainQuestId := config.GetSpecificContainer[container.QuestContainer]("quest").FirstMainQuestId
+	firstMainQuestId := config.GetSpecificContainer[*container.QuestContainer]().FirstMainQuestId
 	if !player.QuestBox.HasReceivedQuest(firstMainQuestId) {
 		GetQuestService().AcceptQuest(player, firstMainQuestId)
 	}

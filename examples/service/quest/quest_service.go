@@ -58,7 +58,7 @@ func (s *QuestService) OnPlayerLogin(player *playerdomain.Player) {
 func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
 	questBox := player.QuestBox
 	questBox.ClearQuestsByCategory(catalog)
-	c := config.GetSpecificContainer[ container.QuestContainer]("quest")
+	c := config.GetSpecificContainer[*container.QuestContainer]()
 	quests := c.GetRecordsBy("Category", catalog)
 	for _, quest := range quests {
 		s.AcceptQuest(player, quest.Id)

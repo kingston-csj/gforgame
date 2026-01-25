@@ -21,8 +21,8 @@ func (c *HeroStageContainer) Init() {
 // AfterLoad 数据加载后的处理
 func (c *HeroStageContainer) AfterLoad() {
 	c.stageMap = make(map[int32]*configdomain.HeroStageData)
-	// 使用新增的Values方法来访问所有记录
-	for _, record := range c.Values() {
+	// 使用新增的GetAllRecords方法来访问所有记录
+	for _, record := range c.GetAllRecords() {
 		c.stageMap[record.Stage] = record
 	}
 }

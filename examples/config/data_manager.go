@@ -8,12 +8,13 @@ import (
 
 	"io/github/gforgame/data"
 	"io/github/gforgame/examples/config/container"
+
 	domain "io/github/gforgame/examples/domain/config"
 )
 
 // DataManager 配置数据管理器
 type DataManager struct {
-	containers map[string]interface{}
+	containers map[string]any
 }
 
 var (
@@ -21,10 +22,14 @@ var (
 	once     sync.Once
 )
 
+// table名称对应Meta
 var tableConfigMap map[string]data.TableMeta
+// 容器类型对应表名
+var containerKeys map[reflect.Type]string
 
 func init() {
 	tableConfigMap = make(map[string]data.TableMeta)
+	containerKeys = make(map[reflect.Type]string)
 	// 定义表配置
 	tableConfigs := []data.TableMeta{
 		// 公共配置表
@@ -119,6 +124,9 @@ func init() {
 
 	for _, config := range tableConfigs {
 		tableConfigMap[config.TableName] = config
+		if config.ContainerType != nil {
+			containerKeys[config.ContainerType] = config.TableName
+		}
 	}
 }
 
@@ -146,91 +154,46 @@ func GetDataManager() *DataManager {
 }
 
 // GetContainer 获取原始容器
-func (dm *DataManager) GetContainer(name string) interface{} {
-	return dm.containers[name]
+func GetContainer(name string) interface{} {
+	return GetDataManager().containers[name]
 }
 
 // GetSpecificContainer 获取特定类型的容器
-func GetSpecificContainer[C any](name string) *C {
-	container := GetDataManager().GetContainer(name)
-	if container == nil {
-		return nil
+func GetSpecificContainer[C any]() C {
+	tableName := containerKeys[reflect.TypeOf((*C)(nil)).Elem()]
+	if tableName == "" {
+		var zero C
+		return zero
 	}
-	if specific, ok := container.(*C); ok {
+	container := GetContainer(tableName)
+	if container == nil {
+		var zero C
+		return zero
+	}
+	if specific, ok := container.(C); ok {
 		return specific
 	}
-	return nil
+	var zero C
+	return zero
 }
 
 // QueryById 根据ID查询指定类型的记录
-// 这段恶心的代码先凑合着用，后续再干掉
 func QueryById[V any](id int32) *V {
 	tableName := getTableName[V]()
-	container := GetDataManager().GetContainer(tableName)
+	container := GetContainer(tableName)
 	if container == nil {
 		return nil
 	}
-	// 尝试调用GetRecord方法
-	if method := reflect.ValueOf(container).MethodByName("GetRecord"); method.IsValid() {
-		// 获取方法的参数类型
-		methodType := method.Type()
-		if methodType.NumIn() != 1 {
-			return nil
-		}
-		paramType := methodType.In(0)
-
-		// 转换id到正确的类型
-		idValue := reflect.ValueOf(id)
-		var convertedValue reflect.Value
-
-		if idValue.Type().ConvertibleTo(paramType) {
-			convertedValue = idValue.Convert(paramType)
-		}
-
-		if !convertedValue.IsValid() {
-			return nil
-		}
-
-		results := method.Call([]reflect.Value{convertedValue})
-		if len(results) > 0 && !results[0].IsNil() {
-			if record := results[0].Interface(); record != nil {
-				// 如果record是*any类型，需要先获取其指向的值
-				recordValue := reflect.ValueOf(record)
-				if recordValue.Kind() == reflect.Ptr && recordValue.Elem().Type() == reflect.TypeOf((*any)(nil)).Elem() {
-					// 获取*any指向的实际值
-					actualValue := recordValue.Elem().Interface()
-					if actualValue != nil {
-						// 将actualValue转换为*V
-						actualValuePtr := reflect.ValueOf(actualValue)
-						if actualValuePtr.Kind() == reflect.Ptr {
-							if actualValuePtr.Type().Elem() == reflect.TypeOf((*V)(nil)).Elem() {
-								return actualValue.(*V)
-							}
-						}
-						// 如果不是指针，尝试看看是不是直接就是V类型
-						if actualValuePtr.Type() == reflect.TypeOf((*V)(nil)).Elem() {
-							// 将actualValue转换为V类型，然后获取地址
-							v := actualValue.(V)
-							return &v
-						}
-					}
-				} else {
-					// 直接尝试类型转换
-					if v, ok := record.(*V); ok {
-						return v
-					}
-				}
-			}
-		}
+	if c, ok := container.(data.IContainer[int32, V]); ok {
+		return c.GetRecord(id)
 	}
-
 	return nil
 }
 
 // QueryContainer 获取指定类型的容器
 func QueryContainer[V any, C any]() C {
 	tableName := getTableName[V]()
-	container := GetDataManager().GetContainer(tableName)
+	container := GetContainer(tableName)
 	if container == nil {
 		var zero C
 		return zero

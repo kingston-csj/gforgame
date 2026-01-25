@@ -9,34 +9,6 @@ func init() {
 	network.RegisterMessage(-201, &ReqGmCommand{})
 	network.RegisterMessage(-251, &ResGmCommand{})
 
-	// ----from mall.go----
-	network.RegisterMessage(1101, &ReqMallBuy{})
-	network.RegisterMessage(1151, &ResMallBuy{})
-
-	// ----from scene.go----
-	network.RegisterMessage(2851, &ReqSceneGetData{})
-	network.RegisterMessage(2802, &ReqSceneSetData{})
-	network.RegisterMessage(2801, &ResSceneGetData{})
-	network.RegisterMessage(2852, &ResSceneSetData{})
-
-	// ----from sigin.go----
-	network.RegisterMessage(3099, &PushSigninInfo{})
-	network.RegisterMessage(3001, &ReqSignIn{})
-	network.RegisterMessage(3002, &ResSignIn{})
-
-	// ----from recharge.go----
-	network.RegisterMessage(2299, &PushRechargePay{})
-	network.RegisterMessage(2298, &PushRechargeInfo{})
-
-	// ----from rank.go----
-	network.RegisterMessage(7001, &ReqRankQuery{})
-	network.RegisterMessage(7002, &ResRankQuery{})
-
-	// ----from item.go----
-	network.RegisterMessage(250, &PushBackpackInfo{})
-	network.RegisterMessage(4002, &PushPurseInfo{})
-	network.RegisterMessage(253, &PushItemChanged{})
-
 	// ----from mail.go----
 	network.RegisterMessage(599, &PushMailAll{})
 	network.RegisterMessage(504, &ReqMailGetAllRewards{})
@@ -79,16 +51,21 @@ func init() {
 	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
 	network.RegisterMessage(754, &ResQuestTakeReward{})
 
+	// ----from rank.go----
+	network.RegisterMessage(7001, &ReqRankQuery{})
+	network.RegisterMessage(7002, &ResRankQuery{})
+
+	// ----from scene.go----
+	network.RegisterMessage(2851, &ReqSceneGetData{})
+	network.RegisterMessage(2802, &ReqSceneSetData{})
+	network.RegisterMessage(2801, &ResSceneGetData{})
+	network.RegisterMessage(2852, &ResSceneSetData{})
+
 	// ----from system.go----
 	network.RegisterMessage(-101, &ReqHeartBeat{})
 	network.RegisterMessage(-151, &ResHeartBeat{})
 	network.RegisterMessage(-102, &ReqGetServerTime{})
 	network.RegisterMessage(-152, &ResGetServerTime{})
-
-	// ----from chat.go----
-	network.RegisterMessage(1899, &PushChatNewMessage{})
-	network.RegisterMessage(1801, &ReqChat{})
-	network.RegisterMessage(1851, &ResChat{})
 
 	// ----from friend.go----
 	network.RegisterMessage(1997, &PushFriendInfo{})
@@ -126,5 +103,28 @@ func init() {
 	network.RegisterMessage(2198, &PushMonthCardInfo{})
 	network.RegisterMessage(2102, &ReqMonthCardGetReward{})
 	network.RegisterMessage(2152, &ResMonthCardGetReward{})
+
+	// ----from mall.go----
+	network.RegisterMessage(1101, &ReqMallBuy{})
+	network.RegisterMessage(1151, &ResMallBuy{})
+
+	// ----from sigin.go----
+	network.RegisterMessage(3099, &PushSigninInfo{})
+	network.RegisterMessage(3001, &ReqSignIn{})
+	network.RegisterMessage(3002, &ResSignIn{})
+
+	// ----from chat.go----
+	network.RegisterMessage(1899, &PushChatNewMessage{})
+	network.RegisterMessage(1801, &ReqChat{})
+	network.RegisterMessage(1851, &ResChat{})
+
+	// ----from item.go----
+	network.RegisterMessage(250, &PushBackpackInfo{})
+	network.RegisterMessage(4002, &PushPurseInfo{})
+	network.RegisterMessage(253, &PushItemChanged{})
+
+	// ----from recharge.go----
+	network.RegisterMessage(2299, &PushRechargePay{})
+	network.RegisterMessage(2298, &PushRechargeInfo{})
 
 }

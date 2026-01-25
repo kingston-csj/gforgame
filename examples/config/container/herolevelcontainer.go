@@ -22,7 +22,7 @@ func (c *HeroLevelContainer) Init() {
 // AfterLoad 数据加载后的处理
 func (c *HeroLevelContainer) AfterLoad() {
 	c.levelDataMap = make(map[int32]map[int32]*configdomain.HeroLevelData)
-	for _, record := range c.Values() {
+	for _, record := range c.GetAllRecords() {
 		modelMap, exists := c.levelDataMap[record.Id]
 		if !exists {
 			modelMap = make(map[int32]*configdomain.HeroLevelData)

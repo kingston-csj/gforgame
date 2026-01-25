@@ -33,26 +33,33 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 
 	var headers []CellHeader
 	var records [][]CellColumn
-
+	rowLine := 0
 	// 遍历每一行
 	for _, row := range rows {
-		firstCell := getCellValue(row.Cells[0])
-		if util.EqualsIgnoreCase(firstCell, "HEADER") {
+		rowLine++
+		if rowLine < 3  {
+			continue
+		}
+		if rowLine == 3 {
 			headers, err = r.readHeader(clazz, row.Cells)
 			if err != nil {
 				return nil, err
 			}
 			continue
 		}
-
-		if len(headers) == 0 {
-			continue
+		firstCell := getCellValue(row.Cells[0])
+		if util.EqualsIgnoreCase(firstCell, "") {
+			break
 		}
+
+		// if len(headers) == 0 {
+		// 	continue
+		// }
 
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if util.EqualsIgnoreCase(firstCell, "END") {
+		if util.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 	}
@@ -61,7 +68,6 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 }
 
 func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, error) {
-
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("panic:", clazz, rows)
@@ -108,10 +114,6 @@ func (r *ExcelDataReader) readHeader(clazz any, cells []*xlsx.Cell) ([]CellHeade
 
 	for _, cell := range cells {
 		cellValue := getCellValue(cell)
-		if util.EqualsIgnoreCase(cellValue, "HEADER") {
-			continue
-		}
-
 		header := CellHeader{
 			Column: cellValue,
 		}
@@ -133,18 +135,13 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 	var columns []CellColumn
 
 	for i, cell := range row.Cells {
-		// 忽略 header 所在的第一列
-		if i == 0 {
-			continue
-		}
 		if i > len(headers) {
 			break
 		}
 
 		cellValue := getCellValue(cell)
 		column := CellColumn{
-			// headers 从 0 开始，所以这里 -1
-			Header: headers[i-1],
+			Header: headers[i],
 			Value:  cellValue,
 		}
 		columns = append(columns, column)

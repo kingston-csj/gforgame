@@ -117,19 +117,17 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 
 	// 添加session
 	network.AddSession(s, player)
-	
-	// 离线，登录触发每日重置检测
-	dailyReset := system.GetDailyReset().GetValue().(int64)
-	if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
-		ps.dailyReset(player, dailyReset)
-	} else {
-		ps.PushDailyResetInfo(player)
-	}
-	
 
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送
 	go func(){
+		// 离线，登录触发每日重置检测
+		dailyReset := system.GetDailyReset().GetValue().(int64)
+		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
+			ps.dailyReset(player, dailyReset)
+		} else {
+			ps.PushDailyResetInfo(player)
+		}
 		context.EventBus.Publish(events.PlayerLogin, player)
 		// 客户端再切到主界面
 		s.SendWithoutIndex(&protos.PushLoadComplete{})
@@ -163,7 +161,7 @@ func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 }
 
 func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *protos.ResPlayerUpLevel {
-	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	stageData := config.GetSpecificContainer[*container.HeroStageContainer]().GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResPlayerUpLevel{
 			Code: constants.I18N_COMMON_NOT_FOUND,
@@ -210,7 +208,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *prot
 }
 
 func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpStage {
-	stageData := config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage)
+	stageData := config.GetSpecificContainer[*container.HeroStageContainer]().GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP4,
@@ -223,7 +221,7 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpSt
 		}
 	}
 
-	stageData = config.GetSpecificContainer[container.HeroStageContainer]("herostage").GetRecordByStage(p.Stage + 1)
+	stageData = config.GetSpecificContainer[*container.HeroStageContainer]().GetRecordByStage(p.Stage + 1)
 	if stageData == nil {
 		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP4,
@@ -255,7 +253,7 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpSt
 func (ps *PlayerService) RefreshFighting(player *playerdomain.Player) {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error(fmt.Errorf("panic recovered: %v", r))
+			// logger.Error(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
 	ps.recomputeAttribute(player)

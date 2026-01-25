@@ -25,7 +25,7 @@ func (c *QuestContainer) Init() {
 
 // AfterLoad 数据加载后的处理
 func (c *QuestContainer) AfterLoad() {
-	for _, record := range c.Values() {
+	for _, record := range c.GetAllRecords() {
 		if record.Category == int32(constants.QuestCategoryMain) {
 			if c.FirstMainQuestId == 0 {
 				c.FirstMainQuestId = record.Id

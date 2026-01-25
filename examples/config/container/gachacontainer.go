@@ -19,7 +19,7 @@ func (c *GachaContainer) Init() {
 func (c *GachaContainer) RandItem(gachaType int32) *config.GachaData {
 	var pool []*config.GachaData
 	var weights []int
-	for _, record := range c.Container.Values() {
+	for _, record := range c.Container.GetAllRecords() {
 		if record.Type == gachaType {
 			pool = append(pool, record)
 			weights = append(weights, int(record.Weight))

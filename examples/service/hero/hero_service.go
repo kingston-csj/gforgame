@@ -247,7 +247,7 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 		}
 	}
 
-	stageContainer := config.GetSpecificContainer[ container.HeroStageContainer]("herostage")
+	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 
 	stageData := stageContainer.GetRecordByStage(h.Stage)
 	if stageData == nil {
@@ -297,7 +297,7 @@ func (ps *HeroService) DoStageUp(p *player.Player, heroId int32) *protos.ResHero
 		}
 	}
 
-	stageContainer := config.GetSpecificContainer[container.HeroStageContainer]("herostage")
+	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 	stageData := stageContainer.GetRecordByStage(h.Stage)
 	if stageData == nil {
 		return &protos.ResHeroUpStage{

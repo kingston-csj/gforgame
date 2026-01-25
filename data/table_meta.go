@@ -29,7 +29,7 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 		container = containerValue.Interface()
 
 		// 调用Init和AfterLoad方法
-		if initializer, ok := container.(IContainer); ok {
+		if initializer, ok := container.(IBaseContainer); ok {
 			initializer.Init()
 		}
 	} else {
@@ -82,7 +82,7 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 		reflect.ValueOf(indexFuncs),
 	})
 
-	if initializer, ok := container.(IContainer); ok {
+	if initializer, ok := container.(IBaseContainer); ok {
 		initializer.AfterLoad()
 	}
 

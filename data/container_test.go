@@ -94,18 +94,18 @@ func TestMultiDataContainer(t *testing.T) {
 	}
 
 	// 处理每张表
-	containers := make(map[string]data.IContainer)
+	containers := make(map[string]interface{})
 	for _, config := range tableConfigs {
 		container, err := data.ProcessTable(reader, config.TableName+".xlsx", config)
 		if err != nil {
 			fmt.Printf("Failed to process table %s: %v\n", config.TableName, err)
 			continue
 		}
-		containers[config.TableName] = container.(data.IContainer)
+		containers[config.TableName] = container
 	}
 
 	// 查询商城记录
-	if mallContainer, ok := containers["mall"].(*data.Container[int64, Mall]); ok {
+	if mallContainer, ok := containers["mall"].(*data.Container[int32, Mall]); ok {
 		fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
 		target := mallContainer.GetRecord(1)
 		fmt.Println("Record with ID 1:", target)
@@ -113,7 +113,7 @@ func TestMultiDataContainer(t *testing.T) {
 	}
 
 	// 查询道具记录
-	if itemContainer, ok := containers["item"].(*data.Container[int64, Item]); ok {
+	if itemContainer, ok := containers["item"].(*data.Container[int32, Item]); ok {
 		fmt.Println("All records in Item table:", itemContainer.GetAllRecords())
 		target := itemContainer.GetRecord(1)
 		target2 := itemContainer.GetRecord(1)
