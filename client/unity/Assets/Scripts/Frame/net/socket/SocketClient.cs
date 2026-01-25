@@ -22,7 +22,7 @@ namespace Nova.Net.Socket
         protected Action _connectSuccessCallback;
 
         /// <summary>
-        ///     连接状态标志
+        ///     连接状态
         /// </summary>
         protected bool _isConnected;
 
@@ -38,7 +38,7 @@ namespace Nova.Net.Socket
         /// <summary>
         ///     发送消息的数据结构
         /// </summary>
-        protected SocketDataFrame _sendData;
+        protected SocketDataFrame _sendData = new();
 
         /// <summary>
         ///     异步连接到服务器
@@ -53,30 +53,30 @@ namespace Nova.Net.Socket
         /// </summary>
         /// <typeparam name="RES">响应数据类型</typeparam>
         /// <param name="request">请求体数据</param>
-        /// <param name="resCallBack">响应回调函数</param>
-        public void Send<RES>(Message request, Action<RES> resCallBack)
+        /// <param name="callback">响应回调函数</param>
+        public void Send<RES>(Message request, Action<RES> callback)
             where RES : Response
         {
             //  获取协议类的cmd;
             int reqCmd = request.GetType().GetCustomAttribute<MessageMeta>().Cmd;
             _sendData.index = idCounter++;
             _sendData.cmd = reqCmd;
-            _sendData.data = request;
+            _sendData.message = request;
 
             if (_socketLog)
             {
                 string className = request.GetType().Name;
-                LoggerUtil.Info("发送消息: " + className + " >> " + JsonUtility.ToJson(_sendData.data));
+                LoggerUtil.Info("发送消息: " + className + " >> " + JsonUtility.ToJson(_sendData.message));
             }
 
             // 设置响应处理器
             Action<Message> reqCallBack = data =>
             {
                 RES msg = (RES)data;
-                resCallBack(msg);
+                callback(msg);
             };
-            var tem = new MessageCallback(typeof(RES), reqCallBack);
-            CallbackMgr.Register(_sendData.index, tem);
+            var call = new MessageCallback(typeof(RES), reqCallBack);
+            CallbackMgr.Register(_sendData.index, call);
 
             Send(_sendData);
         }

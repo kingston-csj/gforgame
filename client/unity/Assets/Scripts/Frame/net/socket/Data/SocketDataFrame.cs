@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 namespace Nova.Net.Socket
 {
@@ -20,13 +21,18 @@ namespace Nova.Net.Socket
         /// <summary>
         /// 消息json格式
         /// </summary>
-        public string msg;
+        public string msgJson;
 
 
         /// <summary>
         /// 消息真正的对象
         /// </summary>
-        public Message data;
+        public Message message;
+        
+        /// <summary>
+        /// 消息原生数据
+        /// </summary>
+        public byte[] rawData;
 
     }
 }

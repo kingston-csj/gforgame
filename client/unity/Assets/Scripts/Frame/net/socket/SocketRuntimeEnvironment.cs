@@ -16,8 +16,11 @@ namespace Nova.Net.Socket
 
         /// <summary>
         /// 是否使用二进制帧
+        /// 仅在使用WebSocket时生效
+        /// 因为WebSocket同时支持二进制帧以及文本帧
+        /// 而Socket只能使用二进制帧
         /// </summary>
-        private bool _usedBinaryFrame = false;
+        private bool _usedWebSocketBinaryFrame = false;
 
         public SocketRuntimeEnvironment(Type messageRouterType, MessageCodec messageCodec,
             MessageFactory messageFactory)
@@ -48,8 +51,8 @@ namespace Nova.Net.Socket
         /// </summary>
         public bool UsedBinaryFrame
         {
-            get => _usedBinaryFrame;
-            set => _usedBinaryFrame = value;
+            get => _usedWebSocketBinaryFrame;
+            set => _usedWebSocketBinaryFrame = value;
         }
         
     }

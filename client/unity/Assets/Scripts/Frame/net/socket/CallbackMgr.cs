@@ -4,6 +4,9 @@ namespace Nova.Net.Socket
 {
     public class CallbackMgr
     {
+        /// <summary>
+        /// todo 定时检测，并删除超时的请求
+        /// </summary>
         private static Dictionary<int, MessageCallback> callbacks = new();
 
         public static void Register(int id, MessageCallback callback)

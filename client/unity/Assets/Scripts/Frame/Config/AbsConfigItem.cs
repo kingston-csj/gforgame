@@ -11,13 +11,12 @@ namespace Nova.Data
     public class AbsConfigItem
     {
         /// <summary>
-        ///     唯一标识ID
-        ///     用于在配置系统中唯一标识该配置项
+        ///     唯一标识
         /// </summary>
         public int id;
 
         /// <summary>
-        ///     配置项名称
+        ///    名称
         /// </summary>
         public string name;
 

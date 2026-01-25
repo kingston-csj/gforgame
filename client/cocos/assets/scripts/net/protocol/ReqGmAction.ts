@@ -1,7 +1,5 @@
-export default class ReqLogin {
-  public static cmd: number = 3001;
+export default class ReqGmAction {
+  public static cmd: number = -201;
 
-  public topic: string;
-
-  public params: string;
+  public args: string;
 }

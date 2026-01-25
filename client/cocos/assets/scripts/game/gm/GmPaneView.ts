@@ -1,12 +1,12 @@
-import { _decorator, EditBox } from 'cc';
-import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import GameContext from '../../GameContext';
-import ReqGmAction from '../../net/protocol/ReqGmAction';
-import ResGmAction from '../../net/protocol/ResGmAction';
+import { _decorator, EditBox } from "cc";
+import { BaseUiView } from "../../frame/mvc/BaseUiView";
+import GameContext from "../../GameContext";
+import ReqGmAction from "../../net/protocol/ReqGmAction";
+import ResGmAction from "../../net/protocol/ResGmAction";
 
 const { ccclass, property } = _decorator;
 
-@ccclass('GmPaneView')
+@ccclass("GmPaneView")
 export class GmPaneView extends BaseUiView {
   @property(EditBox)
   public itemIdBox: EditBox = null!;
@@ -29,10 +29,9 @@ export class GmPaneView extends BaseUiView {
     GameContext.instance.WebSocketClient.sendMessage(
       ReqGmAction.cmd,
       {
-        topic: 'add_item',
-        params: itemId + '=' + itemNum,
+        args: "add_items " + itemId + "=" + itemNum,
       },
-      (msg: ResGmAction) => {}
+      (msg: ResGmAction) => {},
     );
   }
 
@@ -42,10 +41,9 @@ export class GmPaneView extends BaseUiView {
     GameContext.instance.WebSocketClient.sendMessage(
       ReqGmAction.cmd,
       {
-        topic: 'add_gold',
-        params: gold,
+        args: "add_gold " + gold,
       },
-      (msg: ResGmAction) => {}
+      (msg: ResGmAction) => {},
     );
   }
 
@@ -55,10 +53,9 @@ export class GmPaneView extends BaseUiView {
     GameContext.instance.WebSocketClient.sendMessage(
       ReqGmAction.cmd,
       {
-        topic: 'add_diamond',
-        params: diamond,
+        args: "add_diamond " + diamond,
       },
-      (msg: ResGmAction) => {}
+      (msg: ResGmAction) => {},
     );
   }
 }

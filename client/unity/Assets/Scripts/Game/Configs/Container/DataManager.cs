@@ -81,7 +81,7 @@ namespace Game.Configs
                         field.SetValue(this, containerInstance);
 
 
-                        Debug.Log($"✅ 成功实例化容器：{field.Name}（配置文件：{fileName}）");
+                        Debug.Log($"实例化容器：{field.Name}（配置文件：{fileName}）");
                     }
                     catch (Exception e)
                     {

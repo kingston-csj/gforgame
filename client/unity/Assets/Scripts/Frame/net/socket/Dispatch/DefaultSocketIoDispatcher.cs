@@ -26,7 +26,7 @@ namespace Nova.Net.Socket
             object router = Activator.CreateInstance(messageRouterType);
             Type currentType = router.GetType();
             MethodInfo[] methods = currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            MethodInfo method_RegisterRecv =
+            MethodInfo methodInfo =
                 currentType.GetMethod("RegisterCallbackDelegate", BindingFlags.Public | BindingFlags.Instance);
             foreach (MethodInfo method in methods)
             {
@@ -49,7 +49,7 @@ namespace Nova.Net.Socket
                     Type delegateType = typeof(Action<>).MakeGenericType(responseType);
                     Delegate handler = Delegate.CreateDelegate(delegateType, router, method);
 
-                    MethodInfo genericMethod = method_RegisterRecv.MakeGenericMethod(responseType);
+                    MethodInfo genericMethod = methodInfo.MakeGenericMethod(responseType);
                     genericMethod.Invoke(router, new object[] { responseCmd, handler });
                 }
             }
@@ -70,11 +70,12 @@ namespace Nova.Net.Socket
             MessageCallback callback = CallbackMgr.Fetch(dataFrame.index);
             if (callback != null)
             {
-                callback.callback(dataFrame.data);
+                callback.callback(dataFrame.message);
             }
             else
             {
-                MessageDispatcher.Dispatch(dataFrame.cmd, dataFrame.data);
+                // 服务器主动推送的消息
+                MessageDispatcher.Dispatch(dataFrame.cmd, dataFrame.message);
             }
         }
     }

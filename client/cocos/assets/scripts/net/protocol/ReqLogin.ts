@@ -2,7 +2,7 @@
  * 登录请求
  */
 export default class ReqLogin {
-  public static cmd: number = 101;
+  public static cmd: number = 103;
 
   public playerId: string;
 

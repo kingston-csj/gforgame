@@ -35,7 +35,6 @@ namespace Nova.Net.Socket
         {
             this.address = address;
             _isConnected = false;
-            _sendData = new SocketDataFrame();
             this._runtimeEnvironment = runtimeEnvironment;
             _dispatcher = new DefaultSocketIoDispatcher(runtimeEnvironment);
         }
@@ -95,7 +94,9 @@ namespace Nova.Net.Socket
                     }
 
                     Type type = _runtimeEnvironment.MessageFactory.GetMessageType(dataFrame.cmd);
-                    dataFrame.data = (Message)_runtimeEnvironment.MessageCodec.Decode(type,  Encoding.UTF8.GetBytes(dataFrame.msg));
+                    dataFrame.message =
+                        (Message)_runtimeEnvironment.MessageCodec.Decode(type,
+                            Encoding.UTF8.GetBytes(dataFrame.msgJson));
                 }
                 else
                 {
@@ -115,8 +116,8 @@ namespace Nova.Net.Socket
                     }
 
                     Type type = _runtimeEnvironment.MessageFactory.GetMessageType(dataFrame.cmd);
-                    dataFrame.data = (Message)_runtimeEnvironment.MessageCodec.Decode(type, body);
-                    if (dataFrame.data == null)
+                    dataFrame.message = (Message)_runtimeEnvironment.MessageCodec.Decode(type, body);
+                    if (dataFrame.message == null)
                     {
                         LoggerUtil.Error($"数据解析错误: {type}");
                     }
@@ -124,7 +125,7 @@ namespace Nova.Net.Socket
 
                 if (_socketLog)
                 {
-                    LoggerUtil.Info("接收消息: " + dataFrame.msg);
+                    LoggerUtil.Info("接收消息: " + dataFrame.msgJson);
                 }
 
                 if (!_runtimeEnvironment.MessageFactory.Contains(dataFrame.cmd))
@@ -176,7 +177,7 @@ namespace Nova.Net.Socket
                 // 发送二进制消息
                 if (_runtimeEnvironment.UsedBinaryFrame)
                 {
-                    byte[] body = _runtimeEnvironment.MessageCodec.Encode(frame.data);
+                    byte[] body = _runtimeEnvironment.MessageCodec.Encode(frame.message);
                     _sendBuff.Reset();
                     int frameSize = body.Length + 12;
                     _sendBuff.WriteInt(frameSize); // 写入总长度
@@ -188,14 +189,14 @@ namespace Nova.Net.Socket
                 else
                 {
                     // 发送文本消息
-                    frame.msg = JsonUtility.ToJson(frame.data);
+                    frame.msgJson = JsonUtility.ToJson(frame.message);
                     string data = JsonUtility.ToJson(frame);
                     Send(data);
                 }
             }
             else
             {
-                LoggerUtil.Error("发送消息失败,socket为空或未连接");
+                LoggerUtil.Error("发送消息失败,socket连接失败");
             }
         }
 
@@ -237,5 +238,4 @@ namespace Nova.Net.Socket
             _connectSuccessCallback = null;
         }
     }
-    
 }

@@ -58,17 +58,17 @@ namespace Game.Core
                 runtimeEnvironment.MessageFactory.Register(cmd, item);
             }
 
-            SocketClient webSocketClient = new WebSocketClient(AppContext.gameConfig.serverUrl, runtimeEnvironment);
-            AppContext.socketClient = webSocketClient;
+            SocketClient socketClient = new TcpSocketClient(AppContext.gameConfig.serverUrl, runtimeEnvironment);
+            AppContext.socketClient = socketClient;
 
-            webSocketClient.ConnectAsync(() =>
+            socketClient.ConnectAsync(() =>
             {
                 // 连接成功
                 LoggerUtil.Info("连接成功");
 
                 // 发送登录请求
                 ReqPlayerLogin reqLogin = new ReqPlayerLogin { playerId = "1001" };
-                webSocketClient.Send(reqLogin, (ResPlayerLogin res) => Debug.Log($"登录成功，玩家名称：{res.name}"));
+                socketClient.Send(reqLogin, (ResPlayerLogin res) => Debug.Log($"登录成功，玩家名称：{res.name}"));
             });
         }
     }

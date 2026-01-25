@@ -1,5 +1,5 @@
 export default class ReqLogin {
-  public static cmd: number = 3002;
+  public static cmd: number = -251;
 
   public code: number;
 }
