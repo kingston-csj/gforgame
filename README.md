@@ -51,7 +51,7 @@ go 客户端入口：client/go/client.go
 
 ```golang
     // 消息处理器格式1： 方法第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端
-    func (rs PlayerController) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) interface{} {
+    func (rs PlayerController) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
 
     }
 ```
@@ -59,7 +59,7 @@ go 客户端入口：client/go/client.go
 ```golang
     // 消息处理器格式2： 方法第一个参数要求是session,第二个参数是一个index; 第三个参数要求是已注册的消息
     // 索引用于异步给客户端发送请求(例如另起协程)，如果是同步的话，直接通过格式1即可
-    func (rs PlayerController) ReqLogin(s *network.Session, index int, msg *protos.ReqPlayerLogin)  {
+    func (rs PlayerController) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin)  {
 
     }
 ```
@@ -72,13 +72,16 @@ go 客户端入口：client/go/client.go
 ### 功能模块
 
 每个功能以模块的形式组织业务，例如背包，任务，技能等等  
-模块需继承 Module，并在 Init()方法注册该模块的所有通信协议  
-新模块要通过 network.RegisterModule(player.NewPlayerController())进行注册（扫描消息路由）
+模块需继承 Module，该模块的所有通信协议只需在protos文件下进行定义即可，框架会自动扫描并进行注册  
+新模块通过 network.RegisterModule(player.NewPlayerRoute())进行注册，目的是为了扫描消息处理器。  
 
-### websocket
+### websocket/socket
 
 node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket  
-example/cocos 为 ws 的客户端程序
+example/cocos 为 ws 的客户端程序。
+若游戏发布平台不是小游戏，也可直接使用原生socket，  
+example/unity同时兼容websocket/socket通信方式
+
 
 ### 跨服通信方式一：基于 rpc
 
@@ -87,7 +90,7 @@ example/cocos 为 ws 的客户端程序
 
 ### 跨服通信方式二：基于 socket
 
-推荐使用原生的 socket 进行跨进程通信，无论是游戏应用作为客户端，还是跨服节点作为客户端  
+推荐使用原生的 socket 进行跨进程通信，无论是游戏app作为客户端，还是跨服节点作为客户端  
 都使用统一的调用方式，也无须引入 grpc  
 客户端消息处理支持三种方法：  
 1，类似服务器消息路由（通过方法签名）  
