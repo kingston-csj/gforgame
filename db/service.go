@@ -13,6 +13,7 @@ type AsyncDbService struct {
 
 func NewAsyncDbService() *AsyncDbService {
 	capacity := max(4, runtime.NumCPU()/2)
+	capacity = 1
 	service := &AsyncDbService{
 		workerCapacity: capacity,
 		run:            1,

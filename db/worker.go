@@ -39,51 +39,49 @@ func (w *worker) getEntity(id string) Entity {
 
 func (w *worker) processQueue() {
 	w.mu.Lock()
-	// 处理队列，失败的entity会被加入失败列表
-	var failedEntities []struct {
-		id     string
-		entity Entity
+	if len(w.data) == 0 {
+		w.mu.Unlock()
+		return
 	}
-	for id, entity := range w.data {
+
+	// 1. 将数据转移到临时 map，并清空队列，以便释放锁
+	pending := w.data
+	w.data = make(map[string]Entity)
+	atomic.StoreInt32(&w.size, 0)
+	w.mu.Unlock()
+
+	// 2. 处理数据（无锁状态）
+	var failedEntities []Entity
+	for _, entity := range pending {
+		func() {
 			defer func() {
-				w.mu.Unlock()
 				if r := recover(); r != nil {
-					var err error
-					switch v := r.(type) {
-					case error:
-						err = v
-					default:
-						err = fmt.Errorf("%v", v)
-					}
-					logger.Error(err)
-					// 单个entity处理失败，加入失败列表
-					failedEntities = append(failedEntities, struct {
-						id     string
-						entity Entity
-					}{id: id, entity: entity})
+					logger.Error(fmt.Errorf("panic recovered: %v", r))
+					failedEntities = append(failedEntities, entity)
 				}
 			}()
 
-		if entity.IsDeleted() {
-			// 删除操作
-			Db.Delete(entity)
-		} else {
-			// 保存操作
-			entity.BeforeSave(nil)
-			Db.Save(entity)
-		}
-		delete(w.data, id)
-		atomic.AddInt32(&w.size, -1)
+			if entity.IsDeleted() {
+				Db.Delete(entity)
+			} else {
+				entity.BeforeSave(nil)
+				Db.Save(entity)
+			}
+		}()
 	}
-	// 重新放入队列
+
+	// 3. 将失败的任务重新放回队列
 	if len(failedEntities) > 0 {
 		w.mu.Lock()
 		defer w.mu.Unlock()
-		for _, item := range failedEntities {
-			w.data[item.id] = item.entity
+		for _, entity := range failedEntities {
+			id := entity.GetId()
+			// 如果队列中已经有该 ID 的新数据，则放弃旧数据（避免版本回退）
+			if _, exists := w.data[id]; !exists {
+				w.data[id] = entity
+				atomic.AddInt32(&w.size, 1)
+			}
 		}
-		// 恢复size（失败数）
-		atomic.AddInt32(&w.size, int32(len(failedEntities)))
 	}
 }
 

@@ -22,14 +22,14 @@ type AttrInfo struct {
 }
 
 type HeroInfo struct {
-	Id       int32      `json:"id"`
+	Id       int32      `json:"modelId"`
 	Level    int32      `json:"level"`
 	Position int32      `json:"position"`
 	Stage    int32      `json:"stage"`
 	Exp      int32      `json:"exp"`
-	Hp       int32      `json:"hp"`
 	Attrs    []AttrInfo `json:"attrs"`
 	Fight    int32      `json:"fight"`
+	Equips   []ItemInfo `json:"equips"`
 }
 
 type ReqHeroLevelUp struct {

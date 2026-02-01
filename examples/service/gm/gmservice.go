@@ -12,7 +12,6 @@ import (
 	"io/github/gforgame/examples/service/recharge"
 	"io/github/gforgame/logger"
 	"io/github/gforgame/util"
-	"strings"
 	"sync"
 )
 
@@ -38,17 +37,13 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	}()
 	switch topic {
 	case "add_items":
-		itemParams := strings.Split(params, "=")
-		itemId, err := util.StringToInt32(itemParams[0])
+		itemIdMap, err := util.ToIntIntMap(params, ";", "=")
 		if err != nil {
 			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 		}
-		itemNum, err := util.StringToInt32(itemParams[1])
-		if err != nil {
-			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		for itemId, itemNum := range itemIdMap {
+			item.GetItemService().AddByModelId(player, itemId, itemNum)
 		}
-
-		item.GetItemService().AddByModelId(player, itemId, itemNum)
 	case "add_diamond":
 		count, _ := util.StringToInt32(params)
 		reward := &reward.CurrencyReward{
@@ -70,6 +65,26 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	case "recharge":
 		rechargeId, _ := util.StringToInt32(params)
 		recharge.GetRechargeService().Recharge(player, rechargeId)
+	case "add_scene_items":
+		// add_scene_items 1001=1;1=2
+		itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+		if err != nil {
+			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		}
+		for itemId, itemNum := range itemIdMap {
+			err := item.GetSceneItemService().AddByModelId(player, itemId, itemNum)
+			if err != nil {
+				return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+			}
+		}
+	case "remove_scene_items":
+		itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+		if err != nil {
+			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		}
+		for itemId, itemNum := range itemIdMap {
+			item.GetSceneItemService().UseByModelId(player, itemId, itemNum)
+		}
 	}
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 

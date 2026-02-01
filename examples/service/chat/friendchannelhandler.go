@@ -3,7 +3,7 @@ package chat
 import (
 	"io/github/gforgame/examples/constants"
 	playerdomain "io/github/gforgame/examples/domain/player"
-	friendservice "io/github/gforgame/examples/friend"
+	"io/github/gforgame/examples/service/friend"
 	playerservice "io/github/gforgame/examples/service/player"
 )
 
@@ -19,7 +19,7 @@ func (h *FriendChannelHandler) CheckCanSend(player *playerdomain.Player, target 
 	if playerservice.GetPlayerService().GetPlayerProfileById(target) == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
-	if friendservice.GetFriendService().IsFriend(player.Id, target) {
+	if friend.GetFriendService().IsFriend(player.Id, target) {
 		return constants.I18N_FRIEND_TIPS1
 	}
 	return 0

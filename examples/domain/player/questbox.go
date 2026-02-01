@@ -16,6 +16,15 @@ type QuestBox struct {
 	Finished map[int32]bool
 }
 
+func (q *QuestBox) AfterLoad() {
+	if q.Doing == nil {
+		q.Doing = make(map[int32]*Quest)
+	}
+	if q.Finished == nil {
+		q.Finished = make(map[int32]bool)
+	}
+}
+
 func (q *QuestBox) AcceptNewQuest(quest *Quest) error {
 	if _, ok := q.Doing[quest.Id]; ok {
 		return errors.New("quest already accepting")

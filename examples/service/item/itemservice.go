@@ -13,6 +13,7 @@ import (
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/service/catalog"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/reward"
@@ -24,7 +25,7 @@ type ItemService struct {
 }
 
 var (
-	instance           *ItemService
+	itemservice           *ItemService
 	once               sync.Once
 	errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	notEnoughError = common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
@@ -34,10 +35,10 @@ var RecruitItemId int32 = 2002
 
 func GetItemService() *ItemService {
 	once.Do(func() {
-		instance = &ItemService{}
-		instance.init()
+		itemservice = &ItemService{}
+		itemservice.init()
 	})
-	return instance
+	return itemservice
 }
 
 func (s *ItemService) init() {
@@ -56,7 +57,9 @@ func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count i
 	}
 
 	context.EventBus.Publish(events.ItemConsume, events.ItemConsumeEvent{
-		Player: p,
+		PlayerEvent: events.PlayerEvent{
+			Player: p,
+		},
 		ItemId: itemId,
 		Count:  count,
 	})
@@ -92,6 +95,9 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 	if err != nil {
 		return err
 	}
+	// 激活图鉴
+	catalog.GetCatalogService().TryUnlock(p, 1, itemId)
+
 	// 发布事件，供任务系统使用
 	context.EventBus.Publish(events.PlayerEntityChange, p)
 	

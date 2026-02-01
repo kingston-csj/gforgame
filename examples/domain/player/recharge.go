@@ -20,6 +20,12 @@ type RechargeBox struct {
 	GoldCard MonthlyCardVo `json:"goldCard"`
 }
 
+func (r *RechargeBox) AfterLoad() {
+	if r.RechargeTimes == nil {
+		r.RechargeTimes = make(map[int32]int32)
+	}
+}
+
 func (r *RechargeBox) GetOrCreateMonthlyCardVo(monthCardType int32) *MonthlyCardVo {
 	switch monthCardType {
 	case constants.MonthCardTypeSilver:

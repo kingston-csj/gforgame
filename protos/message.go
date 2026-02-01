@@ -1,5 +1,6 @@
 package protos
 
+// 该文件， 不要添加任何注释，否则，会解析出错
 const (
 	CmdHeartBeatReq = -101
 	CmdHeartBeatRes = -151
@@ -13,12 +14,16 @@ const (
 	CmdPlayerReqLogin         = 103
 	CmdPlayerReqUpLevel       = 105
 	CmdPlayerReqUpStage       = 106
+	CmdPlayerReqRefreshScore  = 110
+
+
+
 	CmdPlayerResLogin         = 154
 	CmdPlayerPushLoadComplete = 155
 	CmdPlayerResUpLevel       = 152
 	CmdPlayerResUpStage       = 153
 	CmdPlayerPushDailyResetInfo = 156
-
+	CmdPlayerResRefreshScore    = 172
 
 	CmdPlayerReqCreate        = 2003
 	CmdPlayerResCreate        = 2004
@@ -123,7 +128,24 @@ const (
 	CmdSceneResSetData = 2852
 
 	CmdSignInReqSignIn = 3001
-	CmdSignInResSignIn = 3002
+	CmdSignInReqSignInMakeup = 3002
+	CmdSignInResSignIn = 3051
+	CmdSignInResSignInMakeup = 3052
 	CmdSignInPush = 3099
+
+	CmdReqCatalogReward = 3101
+	CmdResCatalogReward = 3151
+	CmdPushCatalogAdd = 3198
+	CmdPushCatalogInfo = 3199
+
+
+	CmdReqIdleViewReward = 9902  
+	CmdReqIdleGetReward = 9903  
+	CmdReqClientUploadEvent = 9906  
+	
+	CmdResIdleViewReward = 9952 	
+	CmdResIdleGetReward = 9953  
+	CmdResClientUploadEvent = 9956  
+	CmdPushIdleInfo = 9999  
 
 )

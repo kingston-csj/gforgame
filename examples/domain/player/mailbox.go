@@ -12,6 +12,12 @@ type Mailbox struct {
 	ServerMailMaxId int64 `json:"serverMailMaxId"`
 }
 
+func (m *Mailbox) AfterLoad() {
+	if m.Mails == nil {
+		m.Mails = make(map[int64]*Mail)
+	}
+}
+
 func (m *Mailbox) AddSevMail(serverMail *ServerMail) {
 	mail := &Mail{
 		Id:      serverMail.Id,

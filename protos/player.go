@@ -1,18 +1,17 @@
 package protos
 
 type ReqPlayerLogin struct {
-    _        struct{} `cmd_ref:"CmdPlayerReqLogin" type:"req"`
+    _        struct{} `cmd_ref:"CmdPlayerReqLogin"`
     Pwd      string
     PlayerId string
 }
 
 type ReqPlayerLoadingFinish struct{
-    _        struct{} `cmd_ref:"CmdPlayerReqLoadingFinish" type:"req"`
+    _        struct{} `cmd_ref:"CmdPlayerReqLoadingFinish"`
 }
 
-// ResPlayerLogin 玩家登录响应
-type ResPlayerLogin struct {
-    _          struct{} `cmd_ref:"CmdPlayerResLogin" type:"res"`
+type ResPlayerLogin struct { // 玩家登录响应
+    _          struct{} `cmd_ref:"CmdPlayerResLogin"`
     Code       int32  `json:"code"`
     PlayerId   string `json:"playerId"`
     NewCreate  bool   `json:"newCreate"`
@@ -70,14 +69,23 @@ type ResPlayerUpStage struct {
 }
 
 type PushLoadComplete struct {
-    _     struct{} `cmd_ref:"CmdPlayerPushLoadComplete" type:"push"`
+    _     struct{} `cmd_ref:"CmdPlayerPushLoadComplete"`
 }
 
-// PushDailyResetInfo 玩家每日重置信息推送
-type PushDailyResetInfo struct {
-    _     struct{} `cmd_ref:"CmdPlayerPushDailyResetInfo" type:"push"`
+type PushDailyResetInfo struct { // 玩家每日重置信息推送
+    _     struct{} `cmd_ref:"CmdPlayerPushDailyResetInfo"`
     NormalRecruitTimes int32 `json:"normalRecruitTimes"` // 普通招募次数
     HighRecruitTimes int32 `json:"highRecruitTimes"` // 高级招募次数
     MallDailyBuyTimes int32 `json:"mallDailyBuyTimes"` // 商城每日购买次数
     DailyRechargeSum int32 `json:"dailyRechargeSum"` // 每日充值金额
+}
+
+type ReqPlayerRefreshScore struct { // 上报经营评分
+    _     struct{} `cmd_ref:"CmdPlayerReqRefreshScore"`
+    Score int32 `json:"score"`
+}
+
+type ResPlayerRefreshScore struct { // 玩家经营评分刷新响应
+    _    struct{} `cmd_ref:"CmdPlayerResRefreshScore"`
+    Code int32 `json:"code"`
 }

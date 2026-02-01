@@ -8,7 +8,6 @@ import (
 
 	"io/github/gforgame/common"
 	"io/github/gforgame/data"
-	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
@@ -40,7 +39,7 @@ func GetHeroService() *HeroService {
 
 func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	resAllHeroInfo := &protos.PushAllHeroInfo{}
-
+	heroVos := make([]*protos.HeroInfo, 0)
 	// 普通英雄
 	for _, h := range player.HeroBox.Heros {
 		ps.ReCalculateHeroAttr(player, h, false)
@@ -51,28 +50,29 @@ func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 				Value:    int32(attr.Value),
 			})
 		}
-		resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
+		heroVos = append(heroVos, &protos.HeroInfo{
 			Id:       h.ModelId,
 			Level:    h.Level,
 			Position: h.Position,
 			Stage:    h.Stage,
 			Attrs:    attrInfos,
 			Fight:    h.Fight,
+			Equips: make([]protos.ItemInfo, 0),
 		})
 	}
 
 	// 主公
-	masterId := camp.GetHeroIdByCamp(player.Camp)
-	masterAttrInfos := make([]protos.AttrInfo, 0)
-	resAllHeroInfo.Heros = append(resAllHeroInfo.Heros, &protos.HeroInfo{
-		Id:       masterId,
-		Level:    player.Level,
-		Position: 0,
-		Stage:    player.Stage,
-		Attrs:    masterAttrInfos,
-		Fight:    0,
-	})
-
+	// masterId := camp.GetHeroIdByCamp(player.Camp)
+	// masterAttrInfos := make([]protos.AttrInfo, 0)
+	// heroVos = append(heroVos, &protos.HeroInfo{
+	// 	Id:       masterId,
+	// 	Level:    player.Level,
+	// 	Position: 0,
+	// 	Stage:    player.Stage,
+	// 	Attrs:    masterAttrInfos,
+	// 	Fight:    0,
+	// })
+	resAllHeroInfo.Heros = heroVos
 	io.NotifyPlayer(player, resAllHeroInfo)
 }
 
@@ -186,7 +186,9 @@ func (ps *HeroService) NewHero(p *player.Player, heroId int32) {
 				Level:   1,
 			})
 	context.EventBus.Publish(events.HeroGain, &events.HeroGainEvent{
-		Player: p,
+		PlayerEvent: events.PlayerEvent{
+			Player: p,
+		},
 		HeroId: heroId,
 	})
 }
@@ -235,8 +237,8 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 			Code: constants.I18N_COMMON_NOT_FOUND,
 		}
 	}
-
-	if toLevel > p.Level {
+	levelContainer := config.GetSpecificContainer[*container.HeroLevelContainer]()
+	if toLevel > levelContainer.MaxLevel {
 		return &protos.ResHeroLevelUp{
 			Code: constants.I18N_HERO_TIP1,
 		}
@@ -247,19 +249,19 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 		}
 	}
 
-	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
+	// stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 
-	stageData := stageContainer.GetRecordByStage(h.Stage)
-	if stageData == nil {
-		return &protos.ResHeroLevelUp{
-			Code: constants.I18N_COMMON_NOT_FOUND,
-		}
-	}
-	if h.Level >= stageData.MaxLevel {
-		return &protos.ResHeroLevelUp{
-			Code: constants.I18N_HERO_TIP2,
-		}
-	}
+	// stageData := stageContainer.GetRecordByStage(h.Stage)
+	// if stageData == nil {
+	// 	return &protos.ResHeroLevelUp{
+	// 		Code: constants.I18N_COMMON_NOT_FOUND,
+	// 	}
+	// }
+	// if h.Level >= stageData.MaxLevel {
+	// 	return &protos.ResHeroLevelUp{
+	// 		Code: constants.I18N_HERO_TIP2,
+	// 	}
+	// }
 
 	costGold := ps.CalcTotalUpLevelConsume(h.Level, toLevel)
 	if !p.Purse.IsEnoughGold(costGold) {

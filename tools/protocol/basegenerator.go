@@ -224,9 +224,9 @@ func (b *BaseGenerator) getFieldTypeStr(expr ast.Expr) string {
 	if arrayExpr, ok := expr.(*ast.ArrayType); ok {
 		elemType := b.getFieldTypeStr(arrayExpr.Elt)
 		if arrayExpr.Len != nil {
-			return fmt.Sprintf("array<%s>", elemType)
+			return fmt.Sprintf("array<%s>", goType2CSharpType(elemType))
 		}
-		return fmt.Sprintf("slice<%s>", elemType)
+		return fmt.Sprintf("slice<%s>", goType2CSharpType(elemType))
 	}
 
     if ident, ok := expr.(*ast.Ident); ok {
@@ -237,12 +237,37 @@ func (b *BaseGenerator) getFieldTypeStr(expr ast.Expr) string {
         return "struct"
     }
 
+	if mapExpr, ok := expr.(*ast.MapType); ok {
+        keyType := b.getFieldTypeStr(mapExpr.Key)
+		elemType := b.getFieldTypeStr(mapExpr.Value)
+		return fmt.Sprintf("Dictionary<%s,%s>", keyType, goType2CSharpType(elemType))
+    }
+
     if selExpr, ok := expr.(*ast.SelectorExpr); ok {
         return selExpr.Sel.Name
     }
 
 	fmt.Printf("警告：未处理的类型节点 %T，字段类型可能解析错误", expr)
 	return ""
+}
+
+func goType2CSharpType(goType string) string {
+	switch goType {
+	case "int32":
+		return "int"
+	case "int64":
+		return "long"
+	case "string":
+		return "string"
+	case "bool":
+		return "bool"
+	case "float32":
+		return "float"
+	case "float64":
+		return "double"
+	default:
+		return goType
+	}
 }
 
 func (b *BaseGenerator) getCommentText(comment *ast.CommentGroup) string {

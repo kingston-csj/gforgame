@@ -5,8 +5,10 @@ type QuestData struct {
 	Id      int32  `json:"id" excel:"id"`
 	// 分类 1主线2日常
 	Category    int32 `json:"category" excel:"category"`
-	// 子类型
+	// 类型
 	Type        int32 `json:"type" excel:"type"`
+	// 子类型
+	SubType     int32 `json:"subType" excel:"subType"`
 	// 任务活跃度
 	Score       int32 `json:"score" excel:"score"`
 	// 贡献值（公会专用）
@@ -21,4 +23,10 @@ type QuestData struct {
 	Next        int32 `json:"next" excel:"next"`
 	// 奖励数组字符串
 	Rewards      string `json:"rewards" excel:"rewards"`
+	// 1继承历史进度（0不继承）
+	History int32 `json:"history" excel:"history"`
+}
+
+func (q *QuestData) UseHistoryProgress() bool {
+	return q.History == 1
 }

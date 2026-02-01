@@ -27,11 +27,7 @@ func NewPlayerRoute() *PlayerRoute {
 }
 
 func (ps *PlayerRoute) Init() {
-	// 自动建表
-	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
-	if err != nil {
-		panic(err)
-	}
+
 
 	// 缓存数据读取
 	dbLoader := func(key string) (interface{}, error) {
@@ -100,4 +96,11 @@ func (ps *PlayerRoute) ReqPlayerUpLevel(s *network.Session, index int32, msg *pr
 func (ps *PlayerRoute) ReqPlayerUpStage(s *network.Session, index int32, msg *protos.ReqPlayerUpStage) *protos.ResPlayerUpStage {
 	p := network.GetPlayerBySession(s).(*playerdomain.Player)
 	return ps.service.DoUpStage(p)
+}
+
+func (ps *PlayerRoute) ReqPlayerRefreshScore(s *network.Session, index int32, msg *protos.ReqPlayerRefreshScore) *protos.ResPlayerRefreshScore {
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player.ClientScore = msg.Score
+	context.EventBus.Publish(events.PlayerAttrChange, player)
+	return &protos.ResPlayerRefreshScore{Code: 0}
 }

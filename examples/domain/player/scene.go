@@ -8,7 +8,7 @@ import (
 
 type Scene struct {
 	db.BaseEntity
-	Data string `json:"data"`
+	Data string `gorm:"type:text"`
 }
 
 func (f *Scene) BeforeSave(tx *gorm.DB) error {

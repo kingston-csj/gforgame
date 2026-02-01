@@ -14,7 +14,7 @@ const (
 	I18N_HERO_TIP3 = 3003 // 暂无须突破
 	I18N_HERO_TIP4 = 3004 // 已达到最大阶数
 	I18N_HERO_TIP5 = 3005 // 已拥有该英雄，无法进行合成
-	I18N_HERO_TIP6 = 3006 // 位置已满
+	I18N_HERO_TIP6 = 5002 // 位置已满
 	I18N_HERO_TIP7 = 3007 // 英雄未上阵
 	I18N_HERO_TIP8 = 3008 // 至少上阵一名英雄
 

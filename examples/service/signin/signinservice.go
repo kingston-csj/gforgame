@@ -36,6 +36,7 @@ func (s *SignInService) OnPlayerLogin(player *playerdomain.Player) {
     // 本月总天数
     push.DaysInMonth = getDaysOfCurrMonth();
     push.NthDay = int32(time.Now().Day());
+	push.SignInMakeUp = player.MonthlyReset.SignInMakeUp
    
     io.NotifyPlayer(player, push)
 }
@@ -72,5 +73,19 @@ func (s *SignInService) SignIn(player *playerdomain.Player) *common.BusinessRequ
     rewards := reward.ParseReward(signinData.Rewards)
     rewards.Reward(player, constants.ActionType_Signin)
     context.EventBus.Publish(events.PlayerEntityChange, player)
+    return nil
+}
+
+func (s *SignInService) SignInMakeUp(player *playerdomain.Player, day int32) *common.BusinessRequestException {
+    monthlyResetBox := player.MonthlyReset
+    if _, ok := monthlyResetBox.SignInMakeUp[day]; ok {
+        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+    }
+	nthDay := int32(time.Now().Day())
+	if day < 1 || day > nthDay {
+        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+    }
+    monthlyResetBox.SignInMakeUp[day] = day
+	context.EventBus.Publish(events.PlayerEntityChange, player)
     return nil
 }

@@ -36,3 +36,14 @@ func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.Re
 	}
 	return &protos.ResSignIn{}
 }
+
+func (ps *SignInRoute) ReqSignInMakeup(s *network.Session, index int32, msg *protos.ReqSignInMakeup) *protos.ResSignInMakeup{
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	err := ps.service.SignInMakeUp(player, msg.Day)
+	if err != nil {
+		return &protos.ResSignInMakeup{
+			Code: int32(err.Code()),
+		}
+	}
+	return &protos.ResSignInMakeup{}
+}

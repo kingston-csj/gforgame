@@ -2,19 +2,13 @@ package main
 
 import (
 	"fmt"
-	_ "net/http/pprof"
-	"os"
-	"os/signal"
-	"reflect"
-	"time"
-
 	"io/github/gforgame/codec/json"
 	serverconfig "io/github/gforgame/config"
+	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/activity"
-	"io/github/gforgame/examples/chat"
 	dataconfig "io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/friend"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/http"
 	"io/github/gforgame/examples/route"
 	"io/github/gforgame/examples/service/player"
@@ -25,6 +19,12 @@ import (
 	"io/github/gforgame/network/tcp"
 	protocolexporter "io/github/gforgame/tools/protocol"
 	"io/github/gforgame/util/jsonutil"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"reflect"
+	"strings"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,11 +43,17 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
 	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
 	if err == nil {
-		fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容：", jsonStr)
+		if strings.Index(msgName, "HeartBeat") == -1 {
+			fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容：", jsonStr)
+		}
 	}
 	
 
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
+	if msgHandler == nil {
+		logger.Error3(fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
+		return false
+	}
 	var args []reflect.Value
 	if msgHandler.Indindexed {
 		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Header.Index), reflect.ValueOf(frame.Msg)}
@@ -110,6 +116,8 @@ func main() {
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
+	// 自动建表
+	autoCrreateDatabase()
 	// 开发环境，导出所有客户端协议
 	TryExportProtocols()
 
@@ -126,9 +134,11 @@ func main() {
 		route.NewMonthCardRoute(),
 		route.NewMailRoute(),
 		route.NewRankRoute(),
-
-		chat.NewChatController(),
-		friend.NewFriendController(),
+		route.NewRechargeRoute(),
+		route.NewMixtureRoute(),
+		route.NewCatalogRoute(),
+		route.NewChatRoute(),
+		route.NewFriendRoute(),
 	}
 
 	node := tcp.NewServer(
@@ -166,6 +176,11 @@ func main() {
 
 	dataconfig.GetDataManager()
 
+	// itemData := config.QueryById[configdomain.PropData](10000001) 
+	// if itemData == nil {
+	// 	panic("item data not found")
+	// }
+
 	system.StartSystemTask()
 
 	endTime := time.Now()
@@ -193,6 +208,30 @@ func main() {
 	}
 	// 执行所有关服逻辑
 	node.Stop()
+}
+
+// 自动建表
+func autoCrreateDatabase() {
+	// 玩家表
+	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
+	if err != nil {
+		panic(err)
+	}
+	// 好友表
+	err = mysqldb.Db.AutoMigrate(&playerdomain.Friend{})
+	if err != nil {
+		panic(err)
+	}
+	// 场景表
+	err = mysqldb.Db.AutoMigrate(&playerdomain.Scene{})
+	if err != nil {
+		panic(err)
+	}
+	// 系统参数表
+	err = mysqldb.Db.AutoMigrate(&system.SystemParameterEnt{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TryExportProtocols() {

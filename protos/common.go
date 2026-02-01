@@ -1,9 +1,6 @@
 package protos
 
-// 奖励vo
-// Item id_count;
-// Hero id
-type RewardVo struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
+type RewardVo struct { // 奖励vo
+	Type  string `json:"type"`  // Item id_count;
+	Value string `json:"value"` // Hero id
 }

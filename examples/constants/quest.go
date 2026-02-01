@@ -126,4 +126,10 @@ const (
 	 * 挂机结算
 	 */
 	QuestTypeIdleSettle = 16
+
+
+	/**
+	 * 客户端事件
+	 */
+	QuestTypeClientEvent = 23
 )

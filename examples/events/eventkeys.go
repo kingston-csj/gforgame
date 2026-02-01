@@ -21,4 +21,6 @@ const (
 
 	// 招募
 	Recruit = "player_recruit"
+	// 客户端事件
+	ClientDiyEvent = "client_diy_event"
 )

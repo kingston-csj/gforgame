@@ -77,7 +77,9 @@ func (s *RechargeService) recharge0(player *playerdomain.Player, rechargeId int3
 
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 	evt := &events.RechargeEvent{
-		Player: player,
+		PlayerEvent: events.PlayerEvent{
+			Player: player,
+		},
 		RechargeId: rechargeId,
 	}
 	context.EventBus.Publish(events.Recharge, evt)

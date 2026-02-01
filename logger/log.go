@@ -159,7 +159,7 @@ func createErrorLog() *logrus.Logger {
 	logger.Out = multiWriter
 
 	// 设置日志级别
-	logger.Level = logrus.ErrorLevel
+	logger.Level = logrus.InfoLevel
 
 	return logger
 }
@@ -244,6 +244,9 @@ func Error2(customMsg string, err error) {
 	}
 }
 
-func Error3(customMsg string) {
+func Error3(customMsg any) {
+	if customMsg.(string) == "" {
+		return
+	}
 	errorLog.Info(customMsg)
 }

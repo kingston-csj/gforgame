@@ -3,8 +3,10 @@ package quest
 import (
 	"io/github/gforgame/examples/config"
 	constants "io/github/gforgame/examples/constants"
+	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	events "io/github/gforgame/examples/events"
 	"io/github/gforgame/util"
 )
 var (
@@ -68,5 +70,19 @@ func (h *BaseQuestHandler) HandleEvent(player *playerdomain.Player,quest *player
 }
 
 func (h *BaseQuestHandler) SubscribeEvent() {
-	 
+
 }
+
+func (h *BaseQuestHandler) Register(handler QuestHandler, topic string) {
+	context.EventBus.Subscribe(topic, func(data interface{}) {
+		player := data.(events.IPlayerEvent).GetOwner().(*playerdomain.Player)
+		if player == nil {
+			return
+		}
+		quests := player.QuestBox.SelectUnFinishedQuestsByType(handler.GetQuestType())
+		for _, quest := range quests {
+			handler.HandleEvent(player, quest, data)
+		}
+	})
+}
+

@@ -1,11 +1,11 @@
 package quest
 
 import (
+	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/context"
+	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	events "io/github/gforgame/examples/events"
-	"io/github/gforgame/network"
 )
 
 type RecruitQuestHandler struct {
@@ -17,16 +17,18 @@ func (h *RecruitQuestHandler) GetQuestType() int32 {
 }
 
 func (h *RecruitQuestHandler) SubscribeEvent() {
-	context.EventBus.Subscribe(events.Recruit, func(data interface{}) {
-		event := data.(*events.RecruitEvent)
-		p := network.GetPlayerByPlayerId(event.Player.GetId())
-		if p == nil {
-			return
+	h.Register(h, events.Recruit)
+}
+
+func (h *RecruitQuestHandler) HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any) {
+	if evt, ok := event.(*events.RecruitEvent); ok {
+		questData := config.QueryById[configdomain.QuestData](quest.Id)
+		if questData.SubType > 0 {
+			if questData.SubType != evt.Type {
+				return
+			}
 		}
-		player := p.(*playerdomain.Player)
-		quests := player.QuestBox.SelectUnFinishedQuestsByType(h.GetQuestType())
-		for _, quest := range quests {
-			h.HandleEvent(player, quest, data)
-		}
-	})
+		quest.AddProgress(1)
+		h.CheckProgress(player, quest)
+	}
 }

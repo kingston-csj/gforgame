@@ -11,6 +11,12 @@ type IBaseContainer interface {
 	AfterLoad()
 }
 
+// IAnyContainer 定义通用的数据访问接口，返回值均为 any
+type IAnyContainer interface {
+	IBaseContainer
+	GetRecordAny(id int32) any
+}
+
 // IContainer 定义容器的泛型接口
 type IContainer[K int32, V any] interface {
 	IBaseContainer
@@ -69,6 +75,11 @@ func (c *Container[int32, V]) GetAllRecords() []*V {
 func (c *Container[int32, V]) GetRecordsBy(name string, index any) []*V {
 	key := indexKey(name, index)
 	return c.indexMapper[key]
+}
+
+// GetRecordAny 根据 ID 获取单个记录（返回 any）
+func (c *Container[K, V]) GetRecordAny(id int32) any {
+	return c.GetRecord(K(id))
 }
 
 // Inject 将数据注入容器，并构建索引

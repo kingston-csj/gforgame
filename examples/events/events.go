@@ -2,23 +2,42 @@ package events
 
 import "io/github/gforgame/domain"
 
-type RecruitEvent struct {
+type IPlayerEvent interface {
+	GetOwner() domain.Player
+}
+
+type PlayerEvent struct {
 	Player domain.Player
+}
+
+func (e *PlayerEvent) GetOwner() domain.Player {
+	return e.Player
+}
+
+
+type RecruitEvent struct {
+	PlayerEvent
 	Times int32
+	Type int32 // 招募类型 1:普通 2:高级
 }
 
 type HeroGainEvent struct {
-	Player domain.Player
+	PlayerEvent
 	HeroId int32
 }
 
 type ItemConsumeEvent struct {
-	Player domain.Player
+	PlayerEvent
 	ItemId int32
 	Count int32
 }
 
 type RechargeEvent struct {
-	Player domain.Player
+	PlayerEvent
 	RechargeId int32
+}
+
+type ClientCustomEvent struct {
+	PlayerEvent
+	EventId int32
 }

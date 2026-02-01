@@ -12,12 +12,6 @@ type SystemParameterService struct {
 }
 
 func (s *SystemParameterService) init() {
-	// 自动建表
-	err := mysqldb.Db.AutoMigrate(&SystemParameterEnt{})
-	if err != nil {
-		panic(err)
-	}
-
 	// 缓存数据读取
 	dbLoader := func(key string) (interface{}, error) {
 		var p SystemParameterEnt

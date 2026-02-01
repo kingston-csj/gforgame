@@ -40,6 +40,12 @@ type Backpack struct {
 	Capacity            int32 `gorm:"-"`
 }
 
+func (b *Backpack) AfterLoad() {
+	if b.Items == nil {
+		b.Items = make(map[string]*Item)
+	}
+}
+
 /// 基础道具配置提供器
 type BaseItemConfigProvider struct {
 }
@@ -56,9 +62,18 @@ func (p *RuneConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
 	return config.QueryById[configdomain.RuneData](itemId)
 }
 
+/// 场景道具配置提供器
+type SceneItemConfigProvider struct {
+}
+
+func (p *SceneItemConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
+	return config.QueryById[configdomain.ScenePropData](itemId)
+}
+
 var (
 	BaseItemConfigProviderInstance = &BaseItemConfigProvider{}
 	RuneConfigProviderInstance = &RuneConfigProvider{}
+	SceneItemConfigProviderInstance = &SceneItemConfigProvider{}
 )
 
 type ChangeItem struct {

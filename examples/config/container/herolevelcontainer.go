@@ -9,6 +9,7 @@ import (
 type HeroLevelContainer struct {
 	*data.Container[int32, configdomain.HeroLevelData]
 	levelDataMap map[int32]map[int32]*configdomain.HeroLevelData
+	MaxLevel int32
 }
 
 func (c *HeroLevelContainer) Init() {
@@ -29,6 +30,9 @@ func (c *HeroLevelContainer) AfterLoad() {
 			c.levelDataMap[record.Id] = modelMap
 		}
 		modelMap[record.Level] = record
+		if record.Level > c.MaxLevel {
+			c.MaxLevel = record.Level
+		}
 	}
 }
 

@@ -16,6 +16,7 @@ type Player struct {
 	db.BaseEntity
 	Name           string             `gorm:"player's name"`
 	Head           int32              `gorm:"player's head default:0"`
+	ClientScore    int32              `gorm:"player's client score"`
 	RechargeRmb    int32              `gorm:"player's recharge rmb"`
 	VipLevel       int32              `gorm:"player's vip level"`
 	CreateTime     int64              `gorm:"player's create time"`
@@ -25,6 +26,8 @@ type Player struct {
 	BackpackJson   string             `gorm:"backpack"`
 	RuneBackpack       *Backpack          `gorm:"-"`
 	RuneBackpackJson   string             `gorm:"runeBackpack"`
+	SceneBackpack       *Backpack          `gorm:"-"`
+	SceneBackpackJson   string             `gorm:"sceneBackpack"`
 	HeroBox        *HeroBox           `gorm:"-"`
 	HeroBoxJson    string             `gorm:"herobox"`
 	Purse          *Purse             `gorm:"-"`
@@ -50,221 +53,161 @@ type Player struct {
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
-	if p.Backpack == nil {
-		p.BackpackJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.Backpack)
-		if err != nil {
-			return err
-		}
-		p.BackpackJson = string(jsonData)
+	if err := saveJSON(p.Backpack, &p.BackpackJson); err != nil {
+		return err
 	}
-
-	if p.RuneBackpack == nil {
-		p.RuneBackpackJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.RuneBackpack)
-		if err != nil {
-			return err
-		}
-		p.RuneBackpackJson = string(jsonData)
+	if err := saveJSON(p.SceneBackpack, &p.SceneBackpackJson); err != nil {
+		return err
 	}
-
-	if p.HeroBox == nil {
-		p.HeroBoxJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.HeroBox)
-		if err != nil {
-			return err
-		}
-		p.HeroBoxJson = string(jsonData)
+	if err := saveJSON(p.RuneBackpack, &p.RuneBackpackJson); err != nil {
+		return err
 	}
-	if p.Purse == nil {
-		p.PurseJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.Purse)
-		if err != nil {
-			return err
-		}
-		p.PurseJson = string(jsonData)
+	if err := saveJSON(p.HeroBox, &p.HeroBoxJson); err != nil {
+		return err
 	}
-	if p.DailyReset == nil {
-		p.DailyResetJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.DailyReset)
-		if err != nil {
-			return err
-		}
-		p.DailyResetJson = string(jsonData)
+	if err := saveJSON(p.Purse, &p.PurseJson); err != nil {
+		return err
 	}
-	if p.WeeklyReset == nil {
-		p.WeeklyResetJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.WeeklyReset)
-		if err != nil {
-			return err
-		}
-		p.WeeklyResetJson = string(jsonData)
+	if err := saveJSON(p.DailyReset, &p.DailyResetJson); err != nil {
+		return err
 	}
-	if p.MonthlyReset == nil {
-		p.MonthlyResetJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.MonthlyReset)
-		if err != nil {
-			return err
-		}
-		p.MonthlyResetJson = string(jsonData)
+	if err := saveJSON(p.WeeklyReset, &p.WeeklyResetJson); err != nil {
+		return err
 	}
-	if p.Mailbox == nil {
-		p.MailboxJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.Mailbox)
-		if err != nil {
-			return err
-		}
-		p.MailboxJson = string(jsonData)
+	if err := saveJSON(p.MonthlyReset, &p.MonthlyResetJson); err != nil {
+		return err
 	}
-	if p.ExtendBox == nil {
-		p.ExtendBoxJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.ExtendBox)
-		if err != nil {
-			return err
-		}
-		p.ExtendBoxJson = string(jsonData)
+	if err := saveJSON(p.Mailbox, &p.MailboxJson); err != nil {
+		return err
 	}
-	if p.QuestBox == nil {
-		p.QuestBoxJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.QuestBox)
-		if err != nil {
-			return err
-		}
-		p.QuestBoxJson = string(jsonData)
+	if err := saveJSON(p.ExtendBox, &p.ExtendBoxJson); err != nil {
+		return err
 	}
-
-	if p.RechargeBox == nil {
-		p.RechargeBoxJson = ""
-	} else {
-		jsonData, err := json.Marshal(p.RechargeBox)
-		if err != nil {
-			return err
-		}
-		p.RechargeBoxJson = string(jsonData)
+	if err := saveJSON(p.QuestBox, &p.QuestBoxJson); err != nil {
+		return err
 	}
-
+	if err := saveJSON(p.RechargeBox, &p.RechargeBoxJson); err != nil {
+		return err
+	}
 
 	return nil
 }
+
 func (p *Player) AfterFind(tx *gorm.DB) error {
-	if util.IsEmptyString(p.BackpackJson) {
-		p.Backpack = &Backpack{
-			Items: make(map[string]*Item),
+	loadJSON(p.BackpackJson, &p.Backpack, func() *Backpack {
+		return &Backpack{
+			Items:          make(map[string]*Item),
 			configProvider: BaseItemConfigProviderInstance,
-			Capacity: 9999,
+			Capacity:       9999,
 		}
-	} else {
-		backpack := &Backpack{
-			Items: make(map[string]*Item),
-			configProvider: BaseItemConfigProviderInstance,
-			Capacity: 9999,
-		}
-		json.Unmarshal([]byte(p.BackpackJson), &backpack)
-		p.Backpack = backpack
-	}
+	})
 
-	if util.IsEmptyString(p.RuneBackpackJson) {
-		p.RuneBackpack = &Backpack{
-			Items: make(map[string]*Item),
+	loadJSON(p.SceneBackpackJson, &p.SceneBackpack, func() *Backpack {
+		return &Backpack{
+			Items:          make(map[string]*Item),
+			configProvider: SceneItemConfigProviderInstance,
+		}
+	})
+
+	loadJSON(p.RuneBackpackJson, &p.RuneBackpack, func() *Backpack {
+		return &Backpack{
+			Items:          make(map[string]*Item),
 			configProvider: RuneConfigProviderInstance,
 		}
-	} else {
-		backpack := &Backpack{
-			Items: make(map[string]*Item),
-			configProvider: RuneConfigProviderInstance,
-		}
-		json.Unmarshal([]byte(p.RuneBackpackJson), &backpack)
-		p.RuneBackpack = backpack
-	}
+	})
 
-	if util.IsEmptyString(p.HeroBoxJson) {
-		p.HeroBox = &HeroBox{
+	loadJSON(p.HeroBoxJson, &p.HeroBox, func() *HeroBox {
+		return &HeroBox{
 			Heros: make(map[int32]*Hero),
 		}
-	} else {
-		json.Unmarshal([]byte(p.HeroBoxJson), &p.HeroBox)
-	}
-	if util.IsEmptyString(p.PurseJson) {
-		p.Purse = &Purse{
+	})
+
+	loadJSON(p.PurseJson, &p.Purse, func() *Purse {
+		return &Purse{
 			Diamond: 0,
 			Gold:    0,
 		}
-	} else {
-		json.Unmarshal([]byte(p.PurseJson), &p.Purse)
-	}
+	})
+
 	p.AttrBox = attribute.NewAttrBox()
-	if util.IsEmptyString(p.DailyResetJson) {
-		p.DailyReset = &DailyReset{
-			LastDailyReset:  0,
-			DailyQuestScore: 0,
+
+	loadJSON(p.DailyResetJson, &p.DailyReset, func() *DailyReset {
+		return &DailyReset{
 		}
-	} else {
-		json.Unmarshal([]byte(p.DailyResetJson), &p.DailyReset)
-	}
-	if util.IsEmptyString(p.WeeklyResetJson) {
-		p.WeeklyReset = &WeeklyReset{
-			LastWeeklyReset:  0,
-			WeeklyQuestScore: 0,
+	})
+
+	loadJSON(p.WeeklyResetJson, &p.WeeklyReset, func() *WeeklyReset {
+		return &WeeklyReset{
 		}
-	} else {
-		json.Unmarshal([]byte(p.WeeklyResetJson), &p.WeeklyReset)
-	}
-	if util.IsEmptyString(p.MonthlyResetJson) {
-		p.MonthlyReset = &MonthlyResetBox{
-			ResetTime:  0,
-			SignInDays: make([]int32, 0),
+	})
+
+	loadJSON(p.MonthlyResetJson, &p.MonthlyReset, func() *MonthlyResetBox {
+		return &MonthlyResetBox{
 		}
-	} else {
-		json.Unmarshal([]byte(p.MonthlyResetJson), &p.MonthlyReset)
-	}
-	if util.IsEmptyString(p.MailboxJson) {
-		p.Mailbox = &Mailbox{
+	})
+
+	loadJSON(p.MailboxJson, &p.Mailbox, func() *Mailbox {
+		return &Mailbox{
 			Mails: make(map[int64]*Mail),
 		}
-	} else {
-		json.Unmarshal([]byte(p.MailboxJson), &p.Mailbox)
-	}
-	if util.IsEmptyString(p.ExtendBoxJson) {
-		p.ExtendBox = &ExtendBox{
-			PrivateChats: make(map[string][]ChatMessage),
-		}
-	} else {
-		json.Unmarshal([]byte(p.ExtendBoxJson), &p.ExtendBox)
-	}
+	})
+
+	loadJSON(p.ExtendBoxJson, &p.ExtendBox, func() *ExtendBox {
+		return &ExtendBox{}
+	})
+
 	for _, hero := range p.HeroBox.Heros {
 		hero.AttrBox = attribute.NewAttrBox()
 	}
-	if util.IsEmptyString(p.QuestBoxJson) {
-		p.QuestBox = &QuestBox{
+
+	loadJSON(p.QuestBoxJson, &p.QuestBox, func() *QuestBox {
+		return &QuestBox{
 			Doing:    make(map[int32]*Quest),
 			Finished: make(map[int32]bool),
 		}
-	} else {
-		json.Unmarshal([]byte(p.QuestBoxJson), &p.QuestBox)
-	}
+	})
 
-	if util.IsEmptyString(p.RechargeBoxJson) {
-		p.RechargeBox = &RechargeBox{
+	loadJSON(p.RechargeBoxJson, &p.RechargeBox, func() *RechargeBox {
+		return &RechargeBox{
 			ActivatedQiRiPay: 0,
 			RechargeTimes:    make(map[int32]int32),
 			ActivatedPassPay: 0,
 		}
-	} else {
-		json.Unmarshal([]byte(p.RechargeBoxJson), &p.RechargeBox)
-	}
+	})
 
 	return nil
 }
+
+// PostLoader 接口，用于在加载 JSON 后进行额外的初始化操作
+type PostLoader interface {
+	AfterLoad()
+}
+
+func saveJSON[T any](component *T, jsonTarget *string) error {
+	if component == nil {
+		*jsonTarget = ""
+		return nil
+	}
+	jsonData, err := json.Marshal(component)
+	if err != nil {
+		return err
+	}
+	*jsonTarget = string(jsonData)
+	return nil
+}
+
+func loadJSON[T any](jsonStr string, target **T, factory func() *T) {
+	val := factory()
+	if !util.IsEmptyString(jsonStr) {
+		_ = json.Unmarshal([]byte(jsonStr), val)
+	}
+	// 如果实现了 PostLoader 接口，则调用 AfterLoad 进行后处理
+	if loader, ok := any(val).(PostLoader); ok {
+		loader.AfterLoad()
+	}
+	*target = val
+}
+
 
 func (p *Player) GetId() string {
 	return p.Id

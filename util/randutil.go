@@ -43,7 +43,7 @@ func RandomValue(min, max int) (int, error) {
 // 根据概率切片计算随机索引：
 // 1. 空切片返回 -1
 // 2. 非空时计算概率总和，随机一个数，累加概率找到第一个命中的索引
-// 3. 遍历完未命中返回错误（等价于 Java 的 IllegalArgumentException）
+// 3. 遍历完未命中返回错误
 func RandomIndex(probs []int) (int, error) {
 	if len(probs) == 0 {
 		return -1, nil

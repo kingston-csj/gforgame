@@ -119,6 +119,18 @@ func init() {
 		// 	RecordType:    reflect.TypeOf(domain.GachaData{}),
 		// 	ContainerType: reflect.TypeOf(&container.GachaContainer{}),
 		// },
+		// // 场景道具表
+		// {
+		// 	TableName:  "sceneprop",
+		// 	IDField:    "Id",
+		// 	RecordType: reflect.TypeOf(domain.ScenePropData{}),
+		// },
+		// // 菜单表
+		// {
+		// 	TableName:  "menu",
+		// 	IDField:    "Id",
+		// 	RecordType: reflect.TypeOf(domain.MenuData{}),
+		// },
 
 	}
 
@@ -178,6 +190,7 @@ func GetSpecificContainer[C any]() C {
 }
 
 // QueryById 根据ID查询指定类型的记录
+// 这段恶心的代码先凑合着用，后续再干掉
 func QueryById[V any](id int32) *V {
 	tableName := getTableName[V]()
 	container := GetContainer(tableName)
@@ -187,7 +200,40 @@ func QueryById[V any](id int32) *V {
 	if c, ok := container.(data.IContainer[int32, V]); ok {
 		return c.GetRecord(id)
 	}
+
+	// 尝试作为 IAnyContainer 处理 (兼容 Container[int32, any])
+	if c, ok := container.(data.IAnyContainer); ok {
+		val := c.GetRecordAny(id)
+		if val == nil {
+			return nil
+		}
+
+		// 1. 如果容器本身存储的就是目标类型的指针 (Container[int32, V])
+		// 虽然前面的 IContainer 检查应该已经涵盖了这种情况，但为了保险起见保留
+		if v, ok := val.(*V); ok {
+			return v
+		}
+
+		// 2. 如果容器是 Container[int32, any]，则 val 是 *any
+		if ptrAny, ok := val.(*any); ok {
+			if ptrAny == nil {
+				return nil
+			}
+			inner := *ptrAny // 获取 any 内部持有的值
+
+			// 如果内部值是目标类型 V (struct)
+			if v, ok := inner.(V); ok {
+				return &v
+			}
+			// 如果内部值是目标类型的指针 *V
+			if v, ok := inner.(*V); ok {
+				return v
+			}
+		}
+	}
+
 	return nil
+
 }
 
 // QueryContainer 获取指定类型的容器

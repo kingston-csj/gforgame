@@ -22,11 +22,6 @@ func GetSceneService() *SceneService {
 	once.Do(func() {
 		instance = &SceneService{}
 
-	// 自动建表
-	err := mysqldb.Db.AutoMigrate(&player.Scene{})
-	if err != nil {
-		panic(err)
-	}
 
 	// 缓存数据读取
 	dbLoader := func(key string) (interface{}, error) {
@@ -60,18 +55,15 @@ func (ps *SceneService) GetSceneRecord(playerId string, sceneId string) *playerd
 }
 
 func (s *SceneService) GetOrCreateScene(playerId string, sceneId string) *playerdomain.Scene {
-	var p playerdomain.Scene
 	record := s.GetSceneRecord(playerId, sceneId)
 	if record == nil {
 		record = &playerdomain.Scene{}
 		// 未找到记录
 		key := playerId + "_" + sceneId
 		record.Id = key
-		mysqldb.Db.Create(&p)
-	} else {
-		p = *record
-	}
-	return &p
+		s.SaveScene(record)
+	} 
+	return record
 }
 
 func (ps *SceneService) UpdateScene(playerId string, sceneId string, data string) {

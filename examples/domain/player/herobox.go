@@ -7,6 +7,12 @@ type HeroBox struct {
 	Heros map[int32]*Hero
 }
 
+func (h *HeroBox) AfterLoad() {
+	if h.Heros == nil {
+		h.Heros = make(map[int32]*Hero)
+	}
+}
+
 func (h *HeroBox) AddHero(hero *Hero) {
 	h.Heros[hero.ModelId] = hero
 }
