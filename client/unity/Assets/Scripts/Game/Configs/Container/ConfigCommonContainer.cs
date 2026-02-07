@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using Game.Configs;
 using Nova.Data;
 using UnityEngine;
 
-namespace Game.Confi
+namespace Game.Configs
 {
-    public class ConfigCommonContainer : ConfigContainer<ConfigCommonData>
+    public class ConfigCommonContainer : ConfigContainer<CommonData>
     {
         // common.json 的映射表
         private Dictionary<string, string> mapper = new();

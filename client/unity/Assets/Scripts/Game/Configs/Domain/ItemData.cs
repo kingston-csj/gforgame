@@ -2,7 +2,10 @@
 
 namespace Game.Configs
 {
-    public class ConfigItemData : AbsConfigItem
+    /// <summary>
+    /// 道具表
+    /// </summary>
+    public class ItemData : AbsConfigData
     {
         public int id;
 

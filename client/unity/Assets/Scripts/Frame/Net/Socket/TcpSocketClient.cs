@@ -5,6 +5,10 @@ using Nova.Net.UnitySocket;
 
 namespace Nova.Net.Socket
 {
+    /// <summary>
+    ///     Socket通信客户端
+    ///     负责处理Socket连接、消息收发、回调管理等核心功能
+    /// </summary>
     public class TcpSocketClient : SocketClient, IDisposable
     {
         /// <summary>

@@ -2,7 +2,7 @@
 
 namespace Game.Configs
 {
-    public class ConfigCommonData : AbsConfigItem
+    public class CommonData : AbsConfigData
     {
         public string key;
 

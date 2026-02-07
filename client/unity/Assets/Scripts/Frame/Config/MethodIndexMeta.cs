@@ -6,7 +6,7 @@
     /// <summary>
     /// 方法索引元数据：基于方法返回值的索引实现
     /// </summary>
-    public class MethodIndexMeta<I> : IIndexMeta<I> where I : AbsConfigItem
+    public class MethodIndexMeta<I> : IIndexMeta<I> where I : AbsConfigData
     {
         private readonly MethodInfo _method;
         public string Name { get; }

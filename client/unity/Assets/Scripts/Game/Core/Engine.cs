@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using frame.Assets;
 using Game.Configs;
@@ -40,8 +42,15 @@ namespace Game.Core
             GameConfig gameConfig = new GameConfig();
             AppContext.gameConfig = gameConfig;
 
+            string excelPath = Path.Combine(Application.dataPath, "Config/common.xlsx");
+            if (!File.Exists(excelPath))
+            {
+                Debug.LogError("配置表不存在：" + excelPath);
+                return;
+            }
+
             // 网络连接
-            _CreateSocketClient();
+            // _CreateSocketClient();
         }
 
         private void _CreateSocketClient()

@@ -9,20 +9,21 @@ using UnityEngine;
 namespace Nova.Data
 {
     /// <summary>
-    ///     抽象配置类容器，用于管理对应表配置数据
-    ///     提供从JSON文件加载配置并按ID或目标ID和等级查询的功能
+    ///     基础配置类容器，用于管理对应表配置数据
+    ///     如果配置类无需二级缓存数据，直接使用该类作为配置容器即可
     /// </summary>
-    /// <typeparam name="E">配置项类型，必须继承自AbsConfigItem</typeparam>
-    public class ConfigContainer<E> : IDisposable where E : AbsConfigItem
+    public class ConfigContainer<E> : IDisposable where E : AbsConfigData
     {
         // 组件集合
         protected Dictionary<int, E> _primaryMap = new();
+
         // 索引映射
         protected Dictionary<string, List<E>> _indexMapper = new();
         protected List<IIndexMeta<E>> _indexMetas = new();
 
         /// <summary>
-        ///     配置项数组，存储所有从配置文件加载的数据项
+        ///     配置记录（相当于excel的一行记录）
+        ///  key为id主键，value为记录数据
         /// </summary>
         protected Dictionary<int, E> _items;
 
@@ -37,7 +38,7 @@ namespace Nova.Data
             _initFromJsonItems(textAsset);
         }
 
-        /// <summary>自动扫描配置项类型中标记 [Index] 的字段和方法，构建索引元数据</summary>
+        /// <summary>自动扫描记录类型中标记 [Index] 的字段和方法，构建索引元数据</summary>
         private void ScanIndexMetas()
         {
             Type itemType = typeof(E);
@@ -133,19 +134,19 @@ namespace Nova.Data
         }
 
         /// <summary>
-        ///     初始化后的回调，子类可重写此方法进行额外处理
-        ///     例如：创建索引、验证数据完整性或预处理配置项
+        ///     初始化后的钩子，子类可重写此方法进行额外处理
+        ///     例如：新建二级缓存，进行数据完整性验证等等
         /// </summary>
         protected virtual void AfterLoad()
         {
-            // 子类可重写此方法实现自定义初始化逻辑
+            // 默认为空
         }
 
         /// <summary>
-        ///     根据ID获取配置项
+        ///     根据ID获取记录
         /// </summary>
-        /// <param name="id">配置项ID</param>
-        /// <returns>匹配的配置项，未找到时返回默认值(null或默认结构)</returns>
+        /// <param name="id">记录ID</param>
+        /// <returns>匹配的记录，未找到时返回null</returns>
         public E GetItem(int id)
         {
             if (_items.TryGetValue(id, out E item))
@@ -165,7 +166,9 @@ namespace Nova.Data
             return _items.Values.ToArray();
         }
 
-        /// <summary>按索引名称查询列表</summary>
+        /// <summary>
+        /// 按索引名称查询列表
+        /// </summary>
         public List<E> GetItemsByIndex(string indexName, object indexValue)
         {
             var indexMeta = _indexMetas.FirstOrDefault(m => m.Name == indexName);
@@ -179,7 +182,9 @@ namespace Nova.Data
             return _indexMapper.TryGetValue(indexKey, out var items) ? new List<E>(items) : new List<E>();
         }
 
-        /// <summary>按唯一索引查询单个结果</summary>
+        /// <summary>
+        /// 按唯一索引查询单个结果
+        /// </summary>
         public E GetUniqueItemByIndex(string indexName, object indexValue)
         {
             var items = GetItemsByIndex(indexName, indexValue);
@@ -187,12 +192,10 @@ namespace Nova.Data
         }
 
         /// <summary>
-        ///     销毁配置对象，释放资源
-        ///     继承自AbsObject的销毁方法
+        /// 清理资源，防止内存泄漏
         /// </summary>
         public void Dispose()
         {
-            // 清理资源，防止内存泄漏
             _items = null;
             _indexMapper = null;
             _indexMetas = null;

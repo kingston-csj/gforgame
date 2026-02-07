@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using frame.Assets;
-using Game.Confi;
 using Nova.Data;
 using UnityEngine;
 using AppContext = Game.Core.AppContext;

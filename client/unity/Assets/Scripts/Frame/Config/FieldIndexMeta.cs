@@ -6,7 +6,7 @@
     /// <summary>
     /// 字段索引元数据：基于字段的索引实现
     /// </summary>
-    public class FieldIndexMeta<I> : IIndexMeta<I> where I : AbsConfigItem
+    public class FieldIndexMeta<I> : IIndexMeta<I> where I : AbsConfigData
     {
         private readonly FieldInfo _field;
         public string Name { get; }

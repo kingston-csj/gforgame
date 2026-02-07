@@ -1,10 +1,9 @@
-﻿using Game.Configs;
-using Nova.Data;
+﻿using Nova.Data;
 using UnityEngine;
 
-namespace Game.Confi
+namespace Game.Configs
 {
-    public class ConfigItemContainer:ConfigContainer<ConfigItemData>
+    public class ConfigItemContainer:ConfigContainer<ItemData>
     {
         
         public ConfigItemContainer(TextAsset textAsset):base(textAsset)
