@@ -240,12 +240,44 @@ func convertValue(value string, fieldType reflect.Type) (any, error) {
 
 // 根据 Tag 查找字段
 func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
+	// 如果传入的是指针，解引用
+	if obj.Kind() == reflect.Ptr {
+		if obj.IsNil() {
+			return reflect.Value{}, fmt.Errorf("nil pointer")
+		}
+		obj = obj.Elem()
+	}
+
 	objType := obj.Type()
+	if objType.Kind() != reflect.Struct {
+		return reflect.Value{}, fmt.Errorf("not a struct")
+	}
+
 	for i := 0; i < objType.NumField(); i++ {
 		field := objType.Field(i)
-		tag := field.Tag.Get("excel")         // 获取 Tag 值
+		tag := field.Tag.Get("excel") // 获取 Tag 值
 		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹配
 			return obj.Field(i), nil
+		}
+
+		// 递归查找匿名结构体（嵌入字段）
+		if field.Anonymous {
+			fieldVal := obj.Field(i)
+
+			// 如果是指针且为 nil，需要初始化
+			if fieldVal.Kind() == reflect.Ptr {
+				if fieldVal.IsNil() {
+					if fieldVal.CanSet() {
+						newValue := reflect.New(fieldVal.Type().Elem())
+						fieldVal.Set(newValue)
+					}
+				}
+			}
+
+			// 递归调用
+			if res, err := findFieldByTag(fieldVal, tagValue); err == nil {
+				return res, nil
+			}
 		}
 	}
 	return reflect.Value{}, fmt.Errorf("field with tag %s not found", tagValue)

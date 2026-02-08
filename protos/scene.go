@@ -23,3 +23,8 @@ type ResSceneSetData struct {
 	Code int32    `json:"code"`
 	Data string   `json:"data"`
 }
+
+type PushSceneBackpackInfo struct {
+	_     struct{}   `cmd_ref:"CmdScenePushBackpackInfo"`
+	Items []ItemInfo `json:"items"`
+}

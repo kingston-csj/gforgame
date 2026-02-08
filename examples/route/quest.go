@@ -42,3 +42,12 @@ func (ps *QuestRoute) ReqTakeProgressReward(s *network.Session, index int32, msg
 	response := ps.service.TakeProgressReward(player, msg.Type)
 	return response
 }
+
+
+func (ps *QuestRoute) ReqQuestEntrust(s *network.Session, index int32, msg *protos.ReqQuestEntrust) *protos.ResQuestEntrust {
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	err := ps.service.EntrustQuest(player, msg.QuestId, msg.HeroId)
+	return &protos.ResQuestEntrust{
+		Code: int32(err),
+	}
+}

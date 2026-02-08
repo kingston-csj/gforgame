@@ -22,7 +22,7 @@ type IContainer[K int32, V any] interface {
 	IBaseContainer
 	GetRecord(id int32) *V
 	GetAllRecords() []*V
-	GetRecordsBy(name string, index any) []*V
+	GetRecordsByIndex(name string, index any) []*V
 }
 
 // Container 是一个通用的数据容器，支持按 ID 查询、按索引查询和查询所有记录
@@ -72,7 +72,7 @@ func (c *Container[int32, V]) GetAllRecords() []*V {
 }
 
 // GetRecordsBy 根据索引名称和索引值获取记录
-func (c *Container[int32, V]) GetRecordsBy(name string, index any) []*V {
+func (c *Container[int32, V]) GetRecordsByIndex(name string, index any) []*V {
 	key := indexKey(name, index)
 	return c.indexMapper[key]
 }

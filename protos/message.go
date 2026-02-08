@@ -15,6 +15,7 @@ const (
 	CmdPlayerReqUpLevel       = 105
 	CmdPlayerReqUpStage       = 106
 	CmdPlayerReqRefreshScore  = 110
+	CmdPlayerReqEditClientData = 109
 
 
 
@@ -23,6 +24,7 @@ const (
 	CmdPlayerResUpLevel       = 152
 	CmdPlayerResUpStage       = 153
 	CmdPlayerPushDailyResetInfo = 156
+	CmdPlayerResEditClientData  = 171
 	CmdPlayerResRefreshScore    = 172
 
 	CmdPlayerReqCreate        = 2003
@@ -77,8 +79,10 @@ const (
 	CMD_REQ_QUEST_ALL_REWARD      = 706
 	CMD_REQ_QUEST_PROGRESS_REWARD      = 702
 	CMD_REQ_QUEST_REWARD      = 701
+	CmdReqQuestEntrust = 707
 
 	CMD_RES_QUEST_ALL_REWARD = 762
+	CmdResQuestEntrust = 763
 	CMD_RES_QUEST_PROGRESS_REWARD = 753
 	CMD_RES_QUEST_REWARD = 754
 	CMD_PUSH_ACHIEVEMENT      = 791

@@ -8,6 +8,8 @@ const (
 	QuestStatusFinished = int8(1)
 	// 状态--已领奖
 	QuestStatusRewarded = int8(2)
+	// 状态--进行中
+	QuestStatusDoing = int8(3)
 )
 
 // 任务分类枚举
@@ -38,6 +40,11 @@ const (
 	 * 任务分类-公会
 	 */
 	QuestCategoryGuild = int32(6)
+
+	/**
+	 * 任务分类-委托
+	 */
+	QuestCategoryEntrust = int32(7)	
 
 	/**
 	 * 任务分类-成就
@@ -126,6 +133,11 @@ const (
 	 * 挂机结算
 	 */
 	QuestTypeIdleSettle = 16
+
+	/**
+	 * 时间消耗任务
+	 */
+	QuestTime = 17
 
 
 	/**

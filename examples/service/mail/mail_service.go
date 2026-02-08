@@ -4,10 +4,14 @@ import (
 	"time"
 
 	"io/github/gforgame/domain"
+	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/reward"
+	"io/github/gforgame/util"
+	"io/github/gforgame/util/timeutil"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
@@ -16,9 +20,10 @@ import (
 
 var (
 	instance    *MailService = &MailService{}
-	serverMails              = make(map[int64]*playerdomain.ServerMail)
+	serverMails              = make(map[string]*playerdomain.ServerMail)
 )
 
+// 邮件模块
 type MailService struct{}
 
 func GetMailService() *MailService {
@@ -44,7 +49,7 @@ func (s *MailService) checkServerMails(player *playerdomain.Player) {
 	}
 }
 
-func (s *MailService) Read(player *playerdomain.Player, mailId int64) int {
+func (s *MailService) Read(player *playerdomain.Player, mailId string) int {
 	mail := player.Mailbox.GetMail(mailId)
 	if mail == nil {
 		return constants.I18N_COMMON_NOT_FOUND
@@ -55,7 +60,7 @@ func (s *MailService) Read(player *playerdomain.Player, mailId int64) int {
 	return 0
 }
 
-func (s *MailService) TakeReward(player *playerdomain.Player, mailId int64) (int, []*protos.RewardVo) {
+func (s *MailService) TakeReward(player *playerdomain.Player, mailId string) (int, []*protos.RewardVo) {
 	mail := player.Mailbox.GetMail(mailId)
 	if mail == nil {
 		return constants.I18N_COMMON_NOT_FOUND, nil
@@ -84,8 +89,8 @@ func (s *MailService) TakeAllRewards(player *playerdomain.Player) []*protos.Rewa
 	return reward.ToRewardVos(andReward)
 }
 
-func (s *MailService) DeleteAll(player *playerdomain.Player) []int64 {
-	removed := make([]int64, 0)
+func (s *MailService) DeleteAll(player *playerdomain.Player) []string {
+	removed := make([]string, 0)
 	for _, mail := range player.Mailbox.GetMailList() {
 		if mail.Status == constants.MailStatusReceived {
 			// 删除
@@ -96,41 +101,41 @@ func (s *MailService) DeleteAll(player *playerdomain.Player) []int64 {
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 	return removed
 }
+func (s *MailService) SendSimpleMail(player *playerdomain.Player,id int32) {
+	mailData := config.QueryById[configdomain.MailData](id)
+	if mailData == nil {
+		return
+	}
+	s.SendMail(player, id, "", "", nil, mailData.ValidTime)
+}
+
+func (s *MailService) SendSimpleMail2(player *playerdomain.Player,id int32, params ...string) {
+	mailData := config.QueryById[configdomain.MailData](id)
+	if mailData == nil {
+		return
+	}
+	s.SendMail(player, id, "", "", nil, mailData.ValidTime, params...)
+}
+func (s *MailService) SendMail(player *playerdomain.Player,id int32, title string, content string, rewards []domain.RewardDefLite, validHours int32, params ...string) {
+	mailId := util.GetNextID()
+	mailData := config.QueryById[configdomain.MailData](id)
+	if mailData != nil && validHours == 0{
+		validHours = mailData.ValidTime
+	}
+	player.Mailbox.AddMail(&playerdomain.Mail{
+		Id:      mailId,
+		Title:   title,
+		Content: content,
+		Time:    time.Now().UnixMilli(),
+		Status:  constants.MailStatusUnread,
+		Rewards: rewards,
+		Params: params,
+		ExpiredTime: time.Now().UnixMilli() + int64(validHours) * timeutil.MILLIS_PER_SECOND,
+	})
+}
 
 func (s *MailService) notifyMails(player *playerdomain.Player) {
 	mailList := make([]protos.MailVo, 0, 10)
-
-	if len(player.Mailbox.GetMailList()) == 0 {
-		// 加入一些测试数据
-		player.Mailbox.AddMail(&playerdomain.Mail{
-			Id:      1,
-			Title:   "测试邮件1",
-			Content: "测试邮件1内容",
-			Time:    time.Now().UnixMilli(),
-			Status:  constants.MailStatusUnread,
-            Rewards: []domain.RewardDefLite{
-                {
-                    Type:  "item",
-                    Value: "2003=1",
-                },
-            },
-        })
-
-		player.Mailbox.AddMail(&playerdomain.Mail{
-			Id:      2,
-			Title:   "测试邮件2",
-			Content: "测试邮件2内容",
-			Time:    time.Now().UnixMilli(),
-			Status:  constants.MailStatusUnread,
-            Rewards: []domain.RewardDefLite{
-                {
-                    Type:  "currency",
-                    Value: "gold=100",
-                },
-            },
-        })
-
-	}
 
 	for _, mail := range player.Mailbox.GetMailList() {
 		rewardVo := make([]protos.RewardVo, 0, len(mail.Rewards))

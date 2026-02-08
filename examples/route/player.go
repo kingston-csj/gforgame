@@ -27,8 +27,6 @@ func NewPlayerRoute() *PlayerRoute {
 }
 
 func (ps *PlayerRoute) Init() {
-
-
 	// 缓存数据读取
 	dbLoader := func(key string) (interface{}, error) {
 		var p playerdomain.Player
@@ -59,8 +57,7 @@ func (ps *PlayerRoute) Init() {
 		for _, s := range allSessions {
 			s.AsynTasks <- func() {
 				player := network.GetPlayerBySession(s).(*playerdomain.Player)
-				player.DailyReset.Reset(data.(int64))
-				ps.service.SavePlayer(player)
+				ps.service.DailyReset(player, data.(int64))
 			}
 		}
 	})
@@ -103,4 +100,11 @@ func (ps *PlayerRoute) ReqPlayerRefreshScore(s *network.Session, index int32, ms
 	player.ClientScore = msg.Score
 	context.EventBus.Publish(events.PlayerAttrChange, player)
 	return &protos.ResPlayerRefreshScore{Code: 0}
+}
+
+func (ps *PlayerRoute) ReqEditClientData	(s *network.Session, index int32, msg *protos.ReqEditClientData) *protos.ResEditClientData {
+	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player.ClientData = msg.Data
+	context.EventBus.Publish(events.PlayerAttrChange, player)
+	return &protos.ResEditClientData{Code: 0}
 }

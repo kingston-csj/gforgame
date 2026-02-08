@@ -21,9 +21,19 @@ type DailyReset struct {
 	HighRecruitFreeUsed bool
 	// 高级卡免费招募次数
 	HighRecruitTimes int32
+	// 每日商城购买次数
+	MallDailyBuy map[int32]int32
+	// 竞技场战斗次数
+	ArenaTimes int32
 }
 
 func (d *DailyReset) Reset(time int64) {
 	d.LastDailyReset = time
 	d.DailyQuestScore = 0
+}
+
+func (d *DailyReset) AfterLoad() {
+	if d.MallDailyBuy == nil {
+		d.MallDailyBuy = make(map[int32]int32)
+	}
 }

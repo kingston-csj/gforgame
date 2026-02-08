@@ -69,7 +69,7 @@ func TestDataContainer(t *testing.T) {
 	fmt.Println("All records:", container.GetAllRecords())
 	target := container.GetRecord(1)
 	fmt.Println("Record with ID 1:", target)
-	fmt.Println("Records with type 2:", container.GetRecordsBy("type", 2))
+	fmt.Println("Records with type 2:", container.GetRecordsByIndex("type", 2))
 }
 
 func TestMultiDataContainer(t *testing.T) {
@@ -109,7 +109,7 @@ func TestMultiDataContainer(t *testing.T) {
 		fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
 		target := mallContainer.GetRecord(1)
 		fmt.Println("Record with ID 1:", target)
-		fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsBy("type", 2))
+		fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsByIndex("type", 2))
 	}
 
 	// 查询道具记录

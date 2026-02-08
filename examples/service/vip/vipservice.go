@@ -31,7 +31,7 @@ func GetVipService() *VipService {
 
 func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32 ) {
 	// rechargeData := config.QueryById[configdomain.RechargeData](int64(rechargeId))
-	vipContainer := config.QueryContainer[configdomain.VipData, *container.VipContainer]()
+	vipContainer := config.GetSpecificContainer[*container.VipContainer]()
 	var result []*configdomain.VipData
 	 // 从最大开始找
 	for _, vipData := range vipContainer.GetAllRecords() {
@@ -47,7 +47,7 @@ func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32 ) {
 		}
 	}
 
-	commonContainer := config.QueryContainer[configdomain.CommonData, *container.CommonContainer]()
+	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 	// vip每个周期的充值金额
 	periodMoney := commonContainer.GetFloat32Value("vipPeriodMoney")
 	newMoney :=p.ExtendBox.AddVipPeriodMoney(periodMoney)
@@ -86,7 +86,7 @@ func (v *VipService) getEffectiveVipData(p *playerdomain.Player) *configdomain.V
 	if p.ExtendBox.VipExpiredTime < time.Now().Unix() {
 		return nil
 	}
-	vipContainer := config.QueryContainer[configdomain.VipData, *container.VipContainer]()
+	vipContainer := config.GetSpecificContainer[*container.VipContainer]()
 	vipData := vipContainer.GetRecord(p.VipLevel)
 	return vipData
 }

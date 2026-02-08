@@ -5,6 +5,8 @@ import (
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/io"
+	"io/github/gforgame/protos"
 	"sync"
 
 	"gorm.io/gorm"
@@ -39,6 +41,17 @@ func GetSceneService() *SceneService {
 	context.CacheManager.Register("scene", dbLoader)
 	})
 	return instance
+}
+
+func (ps *SceneService) OnPlayerLogin(player *playerdomain.Player) {
+	items := make([]protos.ItemInfo, 0)
+	for _, item := range player.SceneBackpack.Items {
+		items = append(items, item.ToVo())
+	}
+	push := protos.PushSceneBackpackInfo{
+		Items: items,
+	}
+	io.NotifyPlayer(player, push)
 }
 
 func (ps *SceneService) GetSceneRecord(playerId string, sceneId string) *playerdomain.Scene {

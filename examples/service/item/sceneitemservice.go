@@ -4,17 +4,18 @@ import (
 	"io/github/gforgame/protos"
 
 	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
+	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/service/catalog"
-
-	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/reward"
+	"io/github/gforgame/examples/service/catalog"
 	"io/github/gforgame/network"
 )
 
+// 场景道具模块
 type SceneItemService struct {
 	network.Base
 }
@@ -86,7 +87,10 @@ func (s *SceneItemService) AddByModelId(p *playerdomain.Player, itemId int32, co
 		return errorIllegalParams
 	}
 
-	changeResult, err := p.SceneBackpack.AddByModelId(itemId, count)
+	changeResult, err := p.SceneBackpack.AddByModelId(itemId, count, func(item *playerdomain.Item) {
+		item.Type =  constants.BackpackType_SItem
+		item.Extra = "0"
+	})
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,6 @@ func (e *PlayerEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
-
 type RecruitEvent struct {
 	PlayerEvent
 	Times int32
@@ -40,4 +39,27 @@ type RechargeEvent struct {
 type ClientCustomEvent struct {
 	PlayerEvent
 	EventId int32
+}
+
+type HeroEntrustEvent struct {
+	PlayerEvent
+}
+
+type HeroLevelUpEvent struct {
+	PlayerEvent
+	HeroId int32
+	Times int32
+}
+
+type MallBuyEvent struct {
+	PlayerEvent
+}
+
+type AreaScoreChangedEvent struct {
+	PlayerEvent
+	Score int32
+}
+
+type PassArenaEvent struct {
+	PlayerEvent
 }

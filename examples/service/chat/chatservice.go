@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// 聊天模块
 type ChatService struct {
 }
 

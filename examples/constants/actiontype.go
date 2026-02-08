@@ -16,4 +16,5 @@ const (
 	ActionType_HeroUpLevel                    = 10013 // 英雄升级
 	ActionType_HeroCombine                    = 10014 // 英雄合成
 	ActionType_CatalogActivate                = 10015 //  图鉴激活
+	ActionType_BuyMall                        = 10016 // 购买商城物品
 )

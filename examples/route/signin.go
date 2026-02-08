@@ -9,6 +9,7 @@ import (
 	"io/github/gforgame/protos"
 )
 
+// SignInRoute 签到路由
 type SignInRoute struct {
 	network.Base
 	service *signin.SignInService

@@ -34,7 +34,7 @@ func (ps *MonthCardRoute) Init() {
 
 func (ps *MonthCardRoute) ReqGetReward(s *network.Session, index int32, msg *protos.ReqMonthCardGetReward) *protos.ResMonthCardGetReward{
 	player := network.GetPlayerBySession(s).(*playerdomain.Player)
-	err := ps.service.GetReward(player, msg.Type)
+	err := ps.service.TakeReward(player, msg.Type)
 	if err != nil {
 		return &protos.ResMonthCardGetReward{
 			Code: int32(err.Code()),

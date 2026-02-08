@@ -8,10 +8,8 @@ import (
 )
 
 type QuestBox struct {
-
 	// 当前接取的任务列表
 	Doing map[int32]*Quest
-
 	// 已完成的任务列表
 	Finished map[int32]bool
 }
@@ -50,7 +48,7 @@ func (q *QuestBox) SelectUnFinishedQuestsByCategory(questCategory int32) []*Ques
 	var quests []*Quest
 	for _, quest := range q.Doing {
 		questData := config.QueryById[configdomain.QuestData](quest.Id)
-		if questData.Category == questCategory && quest.Status == constants.QuestStatusInit {
+		if questData.Category == questCategory {
 			quests = append(quests, quest)
 		}
 	}

@@ -9,6 +9,12 @@ import (
 const (
 	// LayoutYmdHms 日期时间格式：年-月-日 时:分:秒（对应示例 "1970-01-01 00:00:00"）
 	LayoutYmdHms = "2006-01-02 15:04:05"
+
+	MILLIS_PER_SECOND = int64(1000)
+	MILLIS_PER_MINUTE = int64(60) * MILLIS_PER_SECOND
+	MILLIS_PER_HOUR   = int64(60) * MILLIS_PER_MINUTE
+	MILLIS_PER_DAY    = int64(24) * MILLIS_PER_HOUR
+	MILLIS_PER_WEEK   = int64(7) * MILLIS_PER_DAY
 )
 
 // ParseLocalTime 将符合 LayoutYmdHms 格式的日期字符串，解析为本地时区（time.Local）的 time.Time

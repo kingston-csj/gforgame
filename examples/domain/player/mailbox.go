@@ -7,14 +7,14 @@ import (
 )
 
 type Mailbox struct {
-	Mails map[int64]*Mail `json:"mails"`
+	Mails map[string]*Mail `json:"mails"`
 	// 服务器邮件最大id
-	ServerMailMaxId int64 `json:"serverMailMaxId"`
+	ServerMailMaxId string `json:"serverMailMaxId"`
 }
 
 func (m *Mailbox) AfterLoad() {
 	if m.Mails == nil {
-		m.Mails = make(map[int64]*Mail)
+		m.Mails = make(map[string]*Mail)
 	}
 }
 
@@ -25,7 +25,7 @@ func (m *Mailbox) AddSevMail(serverMail *ServerMail) {
 		Content: serverMail.Content,
         Rewards: []domain.RewardDefLite{},
         Status:  constants.MailStatusUnread,
-        Time:    time.Now().Unix(),
+        Time:    time.Now().UnixMilli(),
     }
 	m.AddMail(mail)
 }
@@ -33,7 +33,7 @@ func (m *Mailbox) AddSevMail(serverMail *ServerMail) {
 func (m *Mailbox) AddMail(mail *Mail) {
 	if len(m.Mails) >= constants.MAIL_MAX_CAPACITY {
 		//从早到晚，删除第一封已读已领取/已过期
-		firstMail := m.Mails[0]
+		firstMail := m.GetMailList()[0]
 		var toRemove *Mail
 		for _, mail := range m.Mails {
 			// 如果邮件已读已领取/已过期，则删除
@@ -55,7 +55,7 @@ func (m *Mailbox) AddMail(mail *Mail) {
 	m.Mails[mail.Id] = mail
 }
 
-func (m *Mailbox) GetMail(id int64) *Mail {
+func (m *Mailbox) GetMail(id string) *Mail {
 	return m.Mails[id]
 }
 
@@ -67,14 +67,14 @@ func (m *Mailbox) GetMailList() []*Mail {
 	return mailList
 }
 
-func (m *Mailbox) MarkReceivedServerMail(id int64) {
+func (m *Mailbox) MarkReceivedServerMail(id string) {
 	m.ServerMailMaxId = id
 }
 
-func (m *Mailbox) HasReceivedServerMail(id int64) bool {
+func (m *Mailbox) HasReceivedServerMail(id string) bool {
 	return m.ServerMailMaxId >= id
 }
 
-func (m *Mailbox) DeleteMail(id int64) {
+func (m *Mailbox) DeleteMail(id string) {
 	delete(m.Mails, id)
 }

@@ -11,22 +11,26 @@ import (
 
 type GmRoute struct {
 	network.Base
-	GmService *gm.GmService
+	service *gm.GmService
 }
 
 func NewGmRoute() *GmRoute {
-	return &GmRoute{}
+	return &GmRoute{
+		service: gm.GetGmService(),
+	}
 }
 
 func (ps *GmRoute) Init() {
 }
 
 func (ps *GmRoute) ReqAction(s *network.Session, index int32, msg *protos.ReqGmCommand) interface{} {
-	
 	topic := strings.Split(msg.Args, " ")[0]
-	params := strings.Split(msg.Args, " ")[1]
+	params := ""
+	if len(strings.Split(msg.Args, " "))>=2 {
+		params = strings.Split(msg.Args, " ")[1]
+	} 
 	player := network.GetPlayerBySession(s)
-	err := ps.GmService.Dispatch(player.(*playerdomain.Player), topic, params)
+	err := ps.service.Dispatch(player.(*playerdomain.Player), topic, params)
 	if err != nil {
 		return &protos.ResGmCommand{Code: int32(err.Code())}
 	}

@@ -42,5 +42,5 @@ type MonthlyCardVo struct {
 }
 
 func (r *MonthlyCardVo) IsActivated() bool {
-	return r.ExpiredTime > time.Now().Unix()
+	return r.ExpiredTime > time.Now().UnixMilli()
 }

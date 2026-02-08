@@ -4,18 +4,21 @@ import (
 	"time"
 
 	"io/github/gforgame/domain"
-	"io/github/gforgame/examples/constants"
 )
 
 type Mail struct {
-	Id      int64            `json:"id"`
+	Id      string            `json:"id"`
 	Title   string           `json:"title"`
 	Content string           `json:"content"`
 	Rewards []domain.RewardDefLite `json:"rewards"`
 	Status  int32            `json:"status"`
+	// 接收时间（单位：秒）
 	Time    int64            `json:"time"`
+	// 过期时间（单位：秒）
+	ExpiredTime int64            `json:"expiredTime"`
+	Params []string `json:"params"`
 }
 
 func (m *Mail) IsExpired() bool {
-	return time.Now().Unix() > m.Time+constants.MAIL_EXPIRE_TIME
+	return time.Now().Unix() > m.ExpiredTime
 }

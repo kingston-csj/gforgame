@@ -1,7 +1,7 @@
 package protos
 
 type MailVo struct { // 邮件vo
-	Id         int64        `json:"id"`
+	Id         string        `json:"id"`
 	Title      string       `json:"title"`      // 邮件标题， 当TemplateId为0时，需要此字段
 	Content    string       `json:"content"`    // 邮件内容， 当TemplateId为0时，需要此字段
 	Rewards    []RewardVo `json:"rewards"`      // 邮件奖励
@@ -27,7 +27,7 @@ type ResMailGetAllRewards struct {
 
 type ReqMailRead struct {
     _  struct{} `cmd_ref:"CmdMailReqRead"`
-    Id int64 `json:"id"`
+    Id string `json:"id"`
 }
 
 type ResMailRead struct {
@@ -37,7 +37,7 @@ type ResMailRead struct {
 
 type ReqMailGetReward struct {
     _  struct{} `cmd_ref:"CmdMailReqGetReward"`
-    Id int64 `json:"id"`
+    Id string `json:"id"`
 }
 
 type ResMailGetReward struct {
@@ -52,7 +52,7 @@ type ReqMailDeleteAll struct{
 
 type ResMailDeleteAll struct {
     _       struct{} `cmd_ref:"CmdMailResDeleteAll"`
-    Removed []int64 `json:"removed"`
+    Removed []string `json:"removed"`
 }
 
 type ResMailDelete struct {

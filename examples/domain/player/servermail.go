@@ -1,7 +1,7 @@
 package player
 
 type ServerMail struct {
-	Id      int64
-	Title   string
-	Content string
+	Id      string `json:"id"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }

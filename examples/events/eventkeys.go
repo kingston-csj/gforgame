@@ -12,8 +12,10 @@ const (
 	Recharge = "recharge"
 
 	ItemConsume = "item_consume"
+	MallBuy     = "mall_buy"
 
-	HeroGain = "hero_gain"
+	HeroGain    = "hero_gain"
+	HeroLevelUp = "hero_level_up"
 
 	SystemDailyReset   = "system_daily_reset"
 	SystemWeeklyReset  = "system_weekly_reset"
@@ -23,4 +25,11 @@ const (
 	Recruit = "player_recruit"
 	// 客户端事件
 	ClientDiyEvent = "client_diy_event"
+
+	HeroEntrust = "hero_entrust"
+
+	// 竞技场积分改变
+	AreaScoreChanged = "area_score_changed"
+	// 竞技场通过
+	PassArena = "pass_arena"
 )

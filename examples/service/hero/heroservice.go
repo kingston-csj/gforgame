@@ -23,6 +23,7 @@ import (
 	"io/github/gforgame/protos"
 )
 
+// 英雄模块
 type HeroService struct{}
 
 var (
@@ -43,22 +44,7 @@ func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	// 普通英雄
 	for _, h := range player.HeroBox.Heros {
 		ps.ReCalculateHeroAttr(player, h, false)
-		attrInfos := make([]protos.AttrInfo, 0)
-		for _, attr := range h.AttrBox.GetAttrs() {
-			attrInfos = append(attrInfos, protos.AttrInfo{
-				AttrType: string(attr.AttrType),
-				Value:    int32(attr.Value),
-			})
-		}
-		heroVos = append(heroVos, &protos.HeroInfo{
-			Id:       h.ModelId,
-			Level:    h.Level,
-			Position: h.Position,
-			Stage:    h.Stage,
-			Attrs:    attrInfos,
-			Fight:    h.Fight,
-			Equips: make([]protos.ItemInfo, 0),
-		})
+		heroVos = append(heroVos, ToHeroVo(h))
 	}
 
 	// 主公
@@ -74,6 +60,24 @@ func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	// })
 	resAllHeroInfo.Heros = heroVos
 	io.NotifyPlayer(player, resAllHeroInfo)
+}
+
+func ToHeroVo(h *player.Hero) *protos.HeroInfo {
+	attrInfos := make([]protos.AttrInfo, 0)
+	for _, attr := range h.AttrBox.GetAttrs() {
+		attrInfos = append(attrInfos, protos.AttrInfo{
+			AttrType: string(attr.AttrType),
+			Value:    int32(attr.Value),
+		})
+	}
+	return &protos.HeroInfo{
+		Id:       h.ModelId,
+		Level:    h.Level,
+		Position: h.Position,
+		Stage:    h.Stage,
+		Attrs:    attrInfos,
+		Fight:    h.Fight,
+	}
 }
 
 func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*common.BusinessRequestException, []*protos.RewardVo) {
@@ -115,14 +119,18 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 	if !free {
 		// 优先消耗招募令
 		if p.Backpack.IsEnough(itemId, times) {
-				return common.NewBusinessRequestException( constants.I18N_ITEM_NOT_ENOUGH), nil
+			itemConsume := consume.ItemConsume{
+					ItemId: itemId,
+					Amount: times,
+			}
+			itemConsume.Consume(p, constants.ActionType_HeroRecruit)
 		} else {
 			// 不足扣钻石
 			itemCount := p.Backpack.GetItemCount(constants.ITEM_DIAMOND_ID)
 			if itemCount < times {
 				return common.NewBusinessRequestException( constants.I18N_ITEM_NOT_ENOUGH), nil
 			}
-			commonContainer := config.QueryContainer[configdomain.CommonData, *container.CommonContainer]()
+			commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 			// 招募消耗钻石
 			exchangeMoney := commonContainer.GetInt32Value("heroRecruitDiamond")
 			owed := times - itemCount
@@ -146,7 +154,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 		}
 	}
 
-	gachaContainer := config.QueryContainer[configdomain.GachaData, *container.GachaContainer]()
+	gachaContainer := config.GetSpecificContainer[*container.GachaContainer]()
 
 	rewardVos := make([]*protos.RewardVo, 0)
 	for i := 0; i < int(times); i++ {
@@ -160,7 +168,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 			if p.HeroBox.HasHero(heroData.Id) {
 				rewardVos = append(rewardVos, &protos.RewardVo{
 					Type:  "item",
-					Value: fmt.Sprintf("%d=%d", heroData.ShardItem, heroData.ShardAmount),
+					Value: fmt.Sprintf("%d_%d", heroData.ShardItem, heroData.ShardAmount),
 				})
 				item.GetItemService().AddByModelId(p, heroData.ShardItem, heroData.ShardAmount)
 			} else {	
@@ -218,7 +226,7 @@ func (ps *HeroService) GetRandomHero() configdomain.HeroData {
 
 // 过滤掉主公
 func (ps *HeroService) filterNormalHeros() []*configdomain.HeroData {
-	container := config.QueryContainer[configdomain.HeroData, *data.Container[int32, configdomain.HeroData]]()
+	container := config.GetSpecificContainer[*data.Container[int32, configdomain.HeroData]]()
 
 	var result []*configdomain.HeroData
 	for _, heroData := range container.GetAllRecords() {
@@ -284,7 +292,14 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 
 	h.Level = toLevel
 	ps.ReCalculateHeroAttr(p, h, true)
-	context.EventBus.Publish(events.PlayerEntityChange, p)
+	p.HeroBox.UpLevelTimes += toLevel - h.Level
+	context.EventBus.Publish(events.HeroLevelUp, &events.HeroLevelUpEvent{
+		PlayerEvent: events.PlayerEvent{
+			Player: p,
+		},
+		HeroId: heroId,
+		Times: toLevel - h.Level,
+	})
 
 	return &protos.ResHeroLevelUp{
 		Code: 0,
@@ -448,14 +463,14 @@ func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, 
 	attrContainer.AddAttrs(heroData.GetHeroAttrs())
 
 	// 英雄等级属性
-	levelContainer := config.QueryContainer[configdomain.HeroLevelData, *container.HeroLevelContainer]()
+	levelContainer := config.GetSpecificContainer[*container.HeroLevelContainer]()
 	levelData := levelContainer.GetLevelData(hero.ModelId, hero.Level)
 	if levelData != nil {
 		attrContainer.AddAttrs(levelData.GetHeroLevelAttrs())
 	}
 
 	// 英雄突破属性
-	stageContainer := config.QueryContainer[configdomain.HeroStageData, *container.HeroStageContainer]()
+	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 	stageData := stageContainer.GetRecordByStage(hero.Stage)
 	if stageData != nil {
 		attrContainer.AddAttrs(stageData.Attrs)
@@ -484,7 +499,7 @@ func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, 
 }
 
 func (ps *HeroService) CalcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {
-	levelContainer := config.QueryContainer[configdomain.HeroLevelData, *container.HeroLevelContainer]()
+	levelContainer := config.GetSpecificContainer[*container.HeroLevelContainer]()
 	total := int32(0)
 	for i := fromLevel; i < toLevel; i++ {
 		levelData := levelContainer.GetLevelData(i, i)

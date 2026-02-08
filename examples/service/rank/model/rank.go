@@ -93,3 +93,41 @@ func (r *PlayerFightingRank) CompareTo(other BaseRank) int {
 
 	return strings.Compare(r.Id, o.Id)
 }
+
+
+type PlayerArenaRank struct {
+	Id    string
+	Score int32
+}
+
+func (r *PlayerArenaRank) GetId() string {
+	return r.Id
+}
+
+func (r *PlayerArenaRank) AsVo() protos.RankInfo {
+	return protos.RankInfo{
+		Id:          r.Id,
+		Order:       0,
+		Value:       int64(r.Score),
+		SecondValue: 0,
+		ExtraInfo:   "",
+	}
+}
+
+func (r *PlayerArenaRank) CompareTo(other BaseRank) int {
+	o, ok := other.(*PlayerArenaRank)
+	if !ok {
+		return 0
+	}
+	if r.Id == o.Id {
+		return 0
+	}
+	if r.Score != o.Score {
+		if o.Score > r.Score {
+			return -1
+		}
+		return 1
+	}
+
+	return strings.Compare(r.Id, o.Id)
+}

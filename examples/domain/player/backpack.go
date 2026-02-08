@@ -11,10 +11,12 @@ import (
 )
 
 type Item struct {
+	Type   int32
 	Uid    string
 	ItemId int32
 	Count  int32
 	Level  int32
+	Extra string 
 }
 
 func (i *Item) ChangeAmount(change int32) int32 {
@@ -23,12 +25,14 @@ func (i *Item) ChangeAmount(change int32) int32 {
 }
 
 func (i *Item) ToVo() protos.ItemInfo {
-	return protos.ItemInfo{
+	vo :=  protos.ItemInfo{
 		Cf_id: i.ItemId,
 		Uid: i.Uid,
 		Count: i.Count,
 		Level: i.Level,
+		Extra:  i.Extra,
 	}
+	return vo
 }
 
 var errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
@@ -109,7 +113,7 @@ func (r *ChangeResult) addChanged(item *Item, from int32, to int32, change int32
 }
 
 /// 添加道具
-func (b *Backpack) AddByModelId(itemId int32, count int32) (*ChangeResult, error) {
+func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item)) (*ChangeResult, error) {
 	if itemId <= 0 || count <= 0 {
 		return nil, errorIllegalParams
 	}
@@ -149,6 +153,9 @@ func (b *Backpack) AddByModelId(itemId int32, count int32) (*ChangeResult, error
 			ItemId: itemId,
 			Count:  newItemAmount,
 			Level:  0,
+		}
+		if initFunc != nil {
+			initFunc(newItem)
 		}
 		b.Items[newItem.Uid] = newItem
 		changeResult.addChanged(newItem, 0, newItemAmount, newItemAmount)

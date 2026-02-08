@@ -17,11 +17,13 @@ type Player struct {
 	Name           string             `gorm:"player's name"`
 	Head           int32              `gorm:"player's head default:0"`
 	ClientScore    int32              `gorm:"player's client score"`
+	ClientData     string             `gorm:"player's client data"`
 	RechargeRmb    int32              `gorm:"player's recharge rmb"`
 	VipLevel       int32              `gorm:"player's vip level"`
 	CreateTime     int64              `gorm:"player's create time"`
 	Level          int32              `gorm:"player's' level"`
 	Stage          int32              `gorm:"player's stage"`
+	ArenaScore int32              `gorm:"player's arena score"`
 	Backpack       *Backpack          `gorm:"-"`
 	BackpackJson   string             `gorm:"backpack"`
 	RuneBackpack       *Backpack          `gorm:"-"`
@@ -50,6 +52,9 @@ type Player struct {
 	QuestBoxJson   string             `gorm:"questbox"`
 	RechargeBox    *RechargeBox       `gorm:"-"`
 	RechargeBoxJson string             `gorm:"rechargebox"`
+	// 竞技场数据
+	ArenaBox       *ArenaBox          `gorm:"-"`
+	ArenaBoxJson   string             `gorm:"arenabox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -89,9 +94,37 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 	if err := saveJSON(p.RechargeBox, &p.RechargeBoxJson); err != nil {
 		return err
 	}
+	if err := saveJSON(p.ArenaBox, &p.ArenaBoxJson); err != nil {
+		return err
+	}
 
 	return nil
 }
+
+// 数据重置，仅用于gm
+func (p *Player) Reset() {
+	p.Camp = 0
+	p.Level = 0
+	p.Stage = 0
+	p.Fight = 0
+	p.VipLevel = 0
+	p.CreateTime = 0
+	p.Name = ""
+	p.BackpackJson = ""
+	p.SceneBackpackJson = ""
+	p.RuneBackpackJson = ""
+	p.HeroBoxJson = ""
+	p.PurseJson = ""
+	p.DailyResetJson = ""
+	p.WeeklyResetJson = ""
+	p.MonthlyResetJson = ""
+	p.MailboxJson = ""
+	p.ExtendBoxJson = ""
+	p.QuestBoxJson = ""
+	p.RechargeBoxJson = ""
+	p.AfterFind(nil)
+}
+
 
 func (p *Player) AfterFind(tx *gorm.DB) error {
 	loadJSON(p.BackpackJson, &p.Backpack, func() *Backpack {
@@ -148,7 +181,7 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 
 	loadJSON(p.MailboxJson, &p.Mailbox, func() *Mailbox {
 		return &Mailbox{
-			Mails: make(map[int64]*Mail),
+			Mails: make(map[string]*Mail),
 		}
 	})
 
@@ -168,11 +201,11 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	})
 
 	loadJSON(p.RechargeBoxJson, &p.RechargeBox, func() *RechargeBox {
-		return &RechargeBox{
-			ActivatedQiRiPay: 0,
-			RechargeTimes:    make(map[int32]int32),
-			ActivatedPassPay: 0,
-		}
+		return &RechargeBox{}
+	})
+
+	loadJSON(p.ArenaBoxJson, &p.ArenaBox, func() *ArenaBox {
+		return &ArenaBox{}
 	})
 
 	return nil

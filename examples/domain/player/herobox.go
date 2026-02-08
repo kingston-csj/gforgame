@@ -5,6 +5,8 @@ type HeroBox struct {
 	RecruitSum int32
 	// 英雄列表
 	Heros map[int32]*Hero
+	// 英雄升级次数
+	UpLevelTimes int32
 }
 
 func (h *HeroBox) AfterLoad() {

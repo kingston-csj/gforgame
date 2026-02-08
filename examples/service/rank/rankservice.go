@@ -12,6 +12,7 @@ type RankType int
 const (
 	PlayerLevelRank    RankType = 1
 	PlayerFightingRank RankType = 2
+	PlayerArenaRank    RankType = 99
 )
 
 var (
@@ -20,6 +21,7 @@ var (
 	instance *RankService
 )
 
+// 排行榜模块
 type RankService struct {
 }
 
@@ -39,9 +41,13 @@ func (rs *RankService) init() {
 	playerFightingRank := handler.NewPlayerFightingRankHandler()
 	playerFightingRank.Init()
 	handlers[PlayerFightingRank] = playerFightingRank
+
+	playerArenaRank := handler.NewPlayerArenaRankHandler()
+	playerArenaRank.Init()
+	handlers[PlayerArenaRank] = playerArenaRank
 }
 
-func (rs *RankService) QueryRank(rankType RankType, start int, end int) []protos.RankInfo {
+func (rs *RankService) QueryRanks(rankType RankType, start int, end int) []protos.RankInfo {
 	records := handlers[rankType].QueryRanks(start, end)
 	rankInfos := make([]protos.RankInfo, 0)
 	order := int32(start)
@@ -53,4 +59,8 @@ func (rs *RankService) QueryRank(rankType RankType, start int, end int) []protos
 		order++
 	}
 	return rankInfos
+}
+
+func (rs *RankService) GetMyRankInfo(rankType RankType, playerId string) *protos.RankInfo {
+	return handlers[rankType].GetMyRankInfo(playerId)
 }

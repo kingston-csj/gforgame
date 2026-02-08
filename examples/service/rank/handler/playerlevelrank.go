@@ -3,8 +3,10 @@ package handler
 import (
 	mysqldb "io/github/gforgame/db"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/rank/container"
 	"io/github/gforgame/examples/service/rank/model"
+	"io/github/gforgame/protos"
 )
 
 type PlayerLevelRankHandler struct {
@@ -24,6 +26,18 @@ func (p *PlayerLevelRankHandler) Init() {
 	for _, player := range players {
 		p.rankContainer.Update(player.Id, NewPlayerLevelRank(player.Id, player.Level))
 	}
+}
+
+func (p *PlayerLevelRankHandler) GetMyRankInfo(playerId string) *protos.RankInfo {
+	player := playerservice.GetPlayerService().GetPlayer(playerId)
+	rankInfo := &protos.RankInfo{
+		Id: player.Id,
+		Order: int32(p.QueryRankOrder(player.Id)),
+		Value: int64(player.Level),
+		SecondValue: 0,
+		ExtraInfo:   "",
+	}
+	return rankInfo
 }
 
 func NewPlayerLevelRank(id string, level int32) *model.PlayerLevelRank {

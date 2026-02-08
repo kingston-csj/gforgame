@@ -15,4 +15,6 @@ type Hero struct {
 	Fight int32
 	// 位置 1-5 0为空闲位置
 	Position int32
+	// 委托任务ID
+	EntrustQuestId int32
 }

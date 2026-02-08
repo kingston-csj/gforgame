@@ -55,7 +55,7 @@ func (d *DailyQuestDirector) TakeProgressRewards(player *playerdomain.Player) []
 	}
 	canRewardIndex := myScore /20
 
-	commonContainer := config.QueryContainer[configdomain.CommonData, *container.CommonContainer]()
+	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 	rewardStr := commonContainer.GetStringValue(constants.CommonValueKeyDailyQuestProessReward)
 	rewardList := reward.ParseRewardList(rewardStr)
 	rewardVos := make([]*protos.RewardVo, 0)

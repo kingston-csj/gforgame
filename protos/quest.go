@@ -1,10 +1,11 @@
 package protos
 
 type QuestVo struct {
-	Id       int32 `json:"id"`
-	Progress int32 `json:"progress"` // 进度
-	Target   int32 `json:"target"`   // 目标
-	Status   int8  `json:"status"`   // 状态 0未完成，1已完成未领奖,2已领奖
+	Id         int32 `json:"id"`
+	Progress   int32 `json:"progress"`   // 进度
+	Target     int32 `json:"target"`     // 目标
+	Status     int8  `json:"status"`     // 状态 0未完成，1已完成未领奖,2已领奖
+	AcceptTime int64 `json:"acceptTime"` // 接受时间
 }
 
 type PushQuestAutoTakeReward struct { // 主线任务——自动领奖
@@ -17,6 +18,11 @@ type PushQuestDailyInfo struct {
 	DailyRewardIndex int32      `json:"dailyRewardIndex"` // 已领取的档位索引（0为未领取)
 	DailyScore       int32      `json:"dailyScore"`       // 今日活跃度
 	Quests           []*QuestVo `json:"quests"`           // 所有任务
+}
+
+type PushQuestEntrustInfo struct { // 委托任务主界面信息
+	_      struct{}   `cmd_ref:"CmdPushQuestEntrustInfo"`
+	Quests []*QuestVo `json:"quests"` // 所有任务
 }
 
 type PushQuestRefreshVo struct {
@@ -86,4 +92,15 @@ type ResQuestTakeReward struct { // 任务——领取达标奖
 	DailyScore  int32       `json:"dailyScore"`  // 今日活跃度
 	WeeklyScore int32       `json:"weeklyScore"` // 本周活跃度
 	RewardVos   []*RewardVo `json:"rewardVos"`   // 奖励vo
+}
+
+type ReqQuestEntrust struct { // 任务——委托任务
+	_       struct{} `cmd_ref:"CmdReqQuestEntrust"`
+	QuestId int32    `json:"questId"` // 任务id
+	HeroId  int32    `json:"heroId"`  // 英雄id
+}
+
+type ResQuestEntrust struct { // 任务——委托任务
+	_    struct{} `cmd_ref:"CmdResQuestEntrust"`
+	Code int32    `json:"code"`
 }

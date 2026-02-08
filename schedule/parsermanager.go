@@ -18,7 +18,6 @@ func AddParserAfter(parser ScheduleExpressionParser) {
 
 func init() {
 	AddParserBefore(NewCronParser())
-	AddParserBefore(&OpenServerScheduleExpressionParser{})
 }
 
 // GetNextTriggerTimeAfter 按照解析链,逐一解析表达式,如果表达式符合规则,则按当前节点解析器进行解析

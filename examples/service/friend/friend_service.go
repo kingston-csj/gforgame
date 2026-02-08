@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+// 好友模块
 type FriendService struct {
 }
 

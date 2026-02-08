@@ -123,7 +123,7 @@ func calcExpiredTime(lastDays int) (int64, error) {
 }
 
 
-func (ps *MonthCardService) GetReward( player *player.Player, typ int32) *common.BusinessRequestException {
+func (ps *MonthCardService) TakeReward( player *player.Player, typ int32) *common.BusinessRequestException {
     monthCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver) 
 	if typ == 1 {
 		monthCard = player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeGold)
@@ -147,4 +147,30 @@ func (ps *MonthCardService) GetReward( player *player.Player, typ int32) *common
 	rewards := reward.ParseReward(monthCardData.Rewards)
 	rewards.Reward(player, constants.ActionType_MonthCardGetReward)
 	return nil
+}
+
+func (ps *MonthCardService) GetEffectiveMonthCardDatas(player *player.Player) []*configdomain.MonthlyCardData {
+	monthCardDatas := make([]*configdomain.MonthlyCardData, 0)
+	silverCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver)
+	if silverCard.IsActivated() {
+		monthCardDatas = append(monthCardDatas, config.QueryById[configdomain.MonthlyCardData](constants.MonthCardTypeSilver))
+	}
+	goldCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeGold)
+	if goldCard.IsActivated() {
+		monthCardDatas = append(monthCardDatas, config.QueryById[configdomain.MonthlyCardData](constants.MonthCardTypeGold))
+	}
+	return monthCardDatas
+}
+
+// GetExtraArenaTimes 获取额外的竞技场次数
+func (ps *MonthCardService) GetExtraArenaTimes(player *player.Player) int32 {
+	monthCardDatas := ps.GetEffectiveMonthCardDatas(player)
+	if len(monthCardDatas) == 0 {
+		return 0
+	}
+	extraTimes := int32(0)
+	for _, monthCardData := range monthCardDatas {
+		extraTimes += monthCardData.ArenaTimes
+	}
+	return extraTimes
 }

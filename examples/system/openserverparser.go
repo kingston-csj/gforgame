@@ -1,8 +1,7 @@
-package schedule
+package system
 
 import (
 	"errors"
-	"io/github/gforgame/examples/system"
 	"strconv"
 	"strings"
 	"time"
@@ -61,7 +60,7 @@ func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression 
 func getOpenServerDate() (time.Time, error) {
 	// 示例：此处返回一个固定时间，实际开发中请替换为从配置/数据库获取开服时间的逻辑
 	// 若开服时间不存在，返回 error
-	openServerStr := system.GetOpenSeverTime().Data.(string) 
+	openServerStr := GetOpenSeverTime().Data.(string) 
 	if openServerStr == "" {
 		return time.Time{}, errors.New("open server time is empty")
 	}

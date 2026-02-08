@@ -89,3 +89,13 @@ type ResPlayerRefreshScore struct { // 玩家经营评分刷新响应
     _    struct{} `cmd_ref:"CmdPlayerResRefreshScore"`
     Code int32 `json:"code"`
 }
+
+type ReqEditClientData struct { // 玩家编辑客户端数据请求
+    _     struct{} `cmd_ref:"CmdPlayerReqEditClientData"`
+    Data  string `json:"data"`
+}
+
+type ResEditClientData struct { // 玩家编辑客户端数据响应
+    _    struct{} `cmd_ref:"CmdPlayerResEditClientData"`
+    Code int32 `json:"code"`
+}

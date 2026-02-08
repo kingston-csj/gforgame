@@ -4,6 +4,7 @@ const (
 	I18N_COMMON_ILLEGAL_PARAMS = 1001 // 非法参数
 	I18N_COMMON_INTERNAL_ERROR = 1002 // 服务器异常
 	I18N_COMMON_NOT_FOUND      = 1003 // 数据不存在
+	I18N_GM_UNKNOWN_COMMAND    = 1010 // 未知gm命令
 
 	I18N_ITEM_NOT_ENOUGH    = 2001 // 道具不足
 	I18N_GOLD_NOT_ENOUGH    = 2002 // 金币不足
@@ -17,6 +18,12 @@ const (
 	I18N_HERO_TIP6 = 5002 // 位置已满
 	I18N_HERO_TIP7 = 3007 // 英雄未上阵
 	I18N_HERO_TIP8 = 3008 // 至少上阵一名英雄
+	I18N_HERO_TIP9 = 3009 // 英雄繁忙
+
+	I18N_ARENA_TIPS1 = 10001 // 竞技场今日挑战次数已用完
+
+	I18N_MALL_DAILY_BUY_LIMIT     = 11001 // 每日商城购买次数已达上限
+	I18N_MALL_LIFE_TIME_BUY_LIMIT = 11002 // 终身商城购买次数已达上限
 
 	I18N_FRIEND_TIPS1 = 12001 // 已经是基友了
 	I18N_FRIEND_TIPS2 = 12002 // 已经在申请了

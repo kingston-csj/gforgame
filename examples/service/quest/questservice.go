@@ -2,6 +2,7 @@ package quest
 
 import (
 	"sync"
+	"time"
 
 	"io/github/gforgame/common"
 	"io/github/gforgame/examples/config"
@@ -14,8 +15,11 @@ import (
 	"io/github/gforgame/examples/reward"
 	handler "io/github/gforgame/examples/service/quest/handler"
 	"io/github/gforgame/protos"
+	"io/github/gforgame/util"
+	"io/github/gforgame/util/timeutil"
 )
 
+// 任务模块
 type QuestService struct {
 	directors map[int32]QuestDirector 
 	handlers map[int32]handler.QuestHandler
@@ -33,15 +37,20 @@ func GetQuestService() *QuestService {
 
 		// 注册所有任务分类
 		instance.directors = make(map[int32]QuestDirector)
-		// 注册所有任务类型
-		instance.handlers = make(map[int32]handler.QuestHandler)
-
 		instance.directors[constants.QuestCategoryDaily] = NewDailyQuestDirector()
 		instance.directors[constants.QuestCategoryMain] = NewMainQuestDirector()
 		instance.directors[constants.QuestCategoryAchievement] = NewAchievementQuestDirector()
+		instance.directors[constants.QuestCategoryEntrust] = NewEntrustQuestDirector()
 
 		// 注册所有任务类型
+		instance.handlers = make(map[int32]handler.QuestHandler)
 		instance.handlers[constants.QuestTypeRecruit] = &handler.RecruitQuestHandler{}
+		instance.handlers[constants.QuestTime] = &handler.TimeQuestHandler{}
+		instance.handlers[constants.QuestTypeHeroUpLevel] = &handler.HeroLevelUpQuestHandler{}
+		instance.handlers[constants.QuestTypeHeroSum] = &handler.HeroSumQuestHandler{}
+		instance.handlers[constants.QuestTypeGoldConsume] = &handler.GoldConsumeQuestHandler{}
+		instance.handlers[constants.QuestTypeDiamondConsume] = &handler.DiamondConsumeQuestHandler{}
+
 		for _,handler := range instance.handlers {
 			handler.SubscribeEvent()
 		}
@@ -59,7 +68,7 @@ func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
 	questBox := player.QuestBox
 	questBox.ClearQuestsByCategory(catalog)
 	c := config.GetSpecificContainer[*container.QuestContainer]()
-	quests := c.GetRecordsBy("Category", catalog)
+	quests := c.GetRecordsByIndex("Category", catalog)
 	for _, quest := range quests {
 		s.AcceptQuest(player, quest.Id)
 	}
@@ -186,10 +195,50 @@ func (s *QuestService) TakeProgressReward(player *playerdomain.Player, category 
     return response
 }
 
+func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, heroId int32) int32{
+	questBox := player.QuestBox
+	quest := questBox.GetQuest(questId)
+	if quest == nil {
+		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
+	}
+	hero := player.HeroBox.GetHero(heroId)
+	if hero == nil {
+		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
+	}
+	if hero.EntrustQuestId != 0 {
+		return int32(constants.I18N_HERO_TIP9)
+	}
+	quest.AcceptTime = time.Now().UnixMilli()
+	hero.EntrustQuestId = questId
+	quest.Status = constants.QuestStatusDoing
+	questData := config.QueryById[configdomain.QuestData](questId)
+
+	context.EventBus.Publish(events.PlayerEntityChange, player)
+
+	context.TaskScheduler.Schedule(func() {
+		handler,ok := instance.handlers[questData.Type] 
+		if ok {
+			quest.AddProgress(1)
+			handler.CheckProgress(player, quest)
+		}
+	}, timeutil.MILLIS_PER_SECOND * int64(util.Int32Value(questData.Extra)))
+	return 0
+}
+
+
 func GetQuestDirector(catalog int32) QuestDirector {
 	item,ok := instance.directors[catalog] 
     if !ok {
         panic("quest director not found")
     }
     return item
+}
+
+func GetQuestHandler(questId int32) handler.QuestHandler {
+	questData := config.QueryById[configdomain.QuestData](questId)
+	handler,ok := instance.handlers[questData.Type] 
+	if ok {
+        return handler
+    }
+    return nil
 }

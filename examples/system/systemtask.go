@@ -23,7 +23,7 @@ func StartSystemTask() {
 
 	// 添加每日23:59:59执行的任务
 	// 秒 分 时 日 月 星期
-	_, err := scheduler.AddFunc("59 59 23 * * *", performDailyUpdate)
+	_, err := scheduler.AddFunc("59 59 23 * * *", PerformDailyUpdate)
 	if err != nil {
 		log.Printf("添加每日更新任务失败: %v", err)
 	}
@@ -60,8 +60,8 @@ func StopSystemTask() {
 	}
 }
 
-// performDailyUpdate 执行每日更新操作
-func performDailyUpdate() {
+// PerformDailyUpdate 执行每日更新操作
+func PerformDailyUpdate() {
 	log.Println("执行每日更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	dailyReset := GetDailyReset()

@@ -20,6 +20,7 @@ import (
 	"io/github/gforgame/network"
 )
 
+// 普通道具模块
 type ItemService struct {
 	network.Base
 }
@@ -91,7 +92,9 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 		return errorIllegalParams
 	}
 
-	changeResult, err := p.Backpack.AddByModelId(itemId, count)
+	changeResult, err := p.Backpack.AddByModelId(itemId, count, func(item *playerdomain.Item) {
+		item.Type = constants.BackpackType_Norm
+	})
 	if err != nil {
 		return err
 	}

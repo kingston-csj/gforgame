@@ -1,11 +1,10 @@
 package activity
 
 import (
-	"sync"
-
-	"io/github/gforgame/data"
 	"io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
+	"sync"
 )
 
 type ActivityService struct {
@@ -15,8 +14,7 @@ type ActivityService struct {
 var (
 	instance *ActivityService
 	once     sync.Once
-	taskScheduler TaskScheduler = NewDefaultTaskScheduler()
-	activityScheduler *ActivityScheduler = NewActivityScheduler(taskScheduler)
+	activityScheduler *ActivityScheduler = NewActivityScheduler(context.TaskScheduler)
 )
 
 func GetActivityService() *ActivityService {
@@ -33,8 +31,7 @@ func GetActivityService() *ActivityService {
 }
 
 func (s *ActivityService) ScheduleAllActivity( ) {
-	container := config.QueryContainer[configdomain.ActivityData,*data.Container[int32, configdomain.ActivityData]]()
-	for _, activityData := range container.GetAllRecords() {
+	for _, activityData := range config.QueryAll[configdomain.ActivityData]() {
 		handler, err := GetHandler(activityData.Id)
 		if err != nil {
 			panic(err)

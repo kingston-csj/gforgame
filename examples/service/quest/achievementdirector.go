@@ -23,7 +23,7 @@ func NewAchievementQuestDirector() *AchievementQuestDirector {
 /// 实现QuestDirector接口
 func (d *AchievementQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
 	questBox := player.QuestBox
-	questContainer := config.QueryContainer[configdomain.QuestData, *container.QuestContainer]()
+	questContainer := config.GetSpecificContainer[*container.QuestContainer]()
 	for group, quests := range questContainer.AchievementsByGroup {
 		// 初始化每个分组的第一条任务
 		if !questBox.HasAppointedTypeAchievement(d.GetCategoryType(), group) {
@@ -76,7 +76,7 @@ func (d *AchievementQuestDirector) TakeProgressRewards(player *playerdomain.Play
 		return make([]*protos.RewardVo, 0)
 	}
 
-	commonContainer := config.QueryContainer[configdomain.CommonData, *container.CommonContainer]()
+	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 	rewardStr := commonContainer.GetStringValue(constants.CommonValueKeyAchievementQuestProessReward)
 	perReward := reward.ParseReward(rewardStr)
 	rewardVos := make([]*protos.RewardVo, 0)

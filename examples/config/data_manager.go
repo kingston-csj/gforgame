@@ -34,107 +34,55 @@ func init() {
 	tableConfigs := []data.TableMeta{
 		// 公共配置表
 		{
-			TableName:  "common",
-			IDField:    "Id",
 			RecordType: reflect.TypeOf(domain.CommonData{}),
 			ContainerType: reflect.TypeOf(&container.CommonContainer{}),
 		},
 		// 道具表
 		{
-			TableName:  "prop",
-			IDField:    "Id",
 			RecordType: reflect.TypeOf(domain.PropData{}),
 		},
 		// 英雄表
 		{
-			TableName:     "hero",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.HeroData{}),
 			ContainerType: reflect.TypeOf(&data.Container[int32, domain.HeroData]{}),
 		},
 		// 英雄等级表
 		{
-			TableName:     "herolevel",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.HeroLevelData{}),
 			ContainerType: reflect.TypeOf(&container.HeroLevelContainer{}),
 		},
 		// 英雄阶段表
 		{
-			TableName:     "herostage",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.HeroStageData{}),
 			ContainerType: reflect.TypeOf(&container.HeroStageContainer{}),
 		},
 		// 技能表
 		{
-			TableName:     "skill",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.SkillData{}),
 			ContainerType: reflect.TypeOf(&data.Container[int32, domain.SkillData]{}),
 		},
 		// quest表
 		{
-			TableName:     "quest",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.QuestData{}),
 			ContainerType: reflect.TypeOf(&container.QuestContainer{}),
 			IndexFuncs:    map[string]string{"Category": "Category"},
 		},
 		// 活动表
 		{
-			TableName:     "activity",
-			IDField:       "Id",
 			RecordType:    reflect.TypeOf(domain.ActivityData{}),
-			ContainerType: reflect.TypeOf(&data.Container[int32, domain.ActivityData]{}),
 		},
-		// // 每日签到奖励表
-		// {
-		// 	TableName:     "signin",
-		// 	IDField:       "Id",
-		// 	RecordType:    reflect.TypeOf(domain.SigninData{}),
-		// },
-		// // 充值表
-		// {
-		// 	TableName:     "recharge",
-		// 	IDField:       "Id",
-		// 	RecordType:    reflect.TypeOf(domain.RechargeData{}),
-		// },
-		// // 商城表
-		// {
-		// 	TableName:     "mall",
-		// 	IDField:       "Id",
-		// 	RecordType:    reflect.TypeOf(domain.MallData{}),
-		// },
-		// // 月卡表
-		// {
-		// 	TableName:     "monthlycard",
-		// 	IDField:       "Id",
-		// 	RecordType:    reflect.TypeOf(domain.MonthlyCardData{}),
-		// },
-		// // 抽奖表
-		// {
-		// 	TableName:     "gacha",
-		// 	IDField:       "Id",
-		// 	RecordType:    reflect.TypeOf(domain.GachaData{}),
-		// 	ContainerType: reflect.TypeOf(&container.GachaContainer{}),
-		// },
-		// // 场景道具表
-		// {
-		// 	TableName:  "sceneprop",
-		// 	IDField:    "Id",
-		// 	RecordType: reflect.TypeOf(domain.ScenePropData{}),
-		// },
-		// // 菜单表
-		// {
-		// 	TableName:  "menu",
-		// 	IDField:    "Id",
-		// 	RecordType: reflect.TypeOf(domain.MenuData{}),
-		// },
+	
 
 	}
 
 	for _, config := range tableConfigs {
+		if config.IDField == "" {
+			config.IDField = "Id"
+		}
+		if config.TableName == "" {
+			// 去掉"Data"后缀
+			config.TableName = strings.ToLower(strings.ReplaceAll(config.RecordType.Name(), "Data", ""))
+		}
 		tableConfigMap[config.TableName] = config
 		if config.ContainerType != nil {
 			containerKeys[config.ContainerType] = config.TableName
@@ -169,7 +117,7 @@ func GetDataManager() *DataManager {
 func GetContainer(name string) interface{} {
 	return GetDataManager().containers[name]
 }
-
+ 
 // GetSpecificContainer 获取特定类型的容器
 func GetSpecificContainer[C any]() C {
 	tableName := containerKeys[reflect.TypeOf((*C)(nil)).Elem()]
@@ -189,6 +137,43 @@ func GetSpecificContainer[C any]() C {
 	return zero
 }
 
+
+// QueryAll 查询指定类型的所有记录
+func QueryAll[V any]() []*V {
+	tableName := getTableName[V]()
+	container := GetContainer(tableName)
+	if container == nil {
+		return nil
+	}
+	// 1. 尝试直接匹配泛型容器 (针对自定义容器，如 CommonContainer)
+	if c, ok := container.(data.IContainer[int32, V]); ok {
+		return c.GetAllRecords()
+	}
+
+	// 2. 尝试作为 IAnyContainer 处理 (针对默认容器 Container[int32, any])
+	// 注意：这里必须断言为 IContainer[int32, any] 才能调用 GetAllRecords
+	if c, ok := container.(data.IContainer[int32, any]); ok {
+		anyRecords := c.GetAllRecords() // 返回 []*any
+		results := make([]*V, 0, len(anyRecords))
+
+		for _, ptrAny := range anyRecords {
+			if ptrAny == nil {
+				continue
+			}
+			val := *ptrAny // 获取 interface{}，内部可能是 V 或 *V
+
+			// 类型断言
+			if v, ok := val.(V); ok {
+				results = append(results, &v)
+			} else if vPtr, ok := val.(*V); ok {
+				results = append(results, vPtr)
+			}
+		}
+		return results
+	}
+
+	return nil
+}
 // QueryById 根据ID查询指定类型的记录
 // 这段恶心的代码先凑合着用，后续再干掉
 func QueryById[V any](id int32) *V {

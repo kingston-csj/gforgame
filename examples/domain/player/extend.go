@@ -1,7 +1,8 @@
 package player
 
 type ExtendBox struct {
-
+	// 累计登录天数
+	AccumulatedLoginDays int32
 	// 私聊消息 key为对方id，value为消息列表
 	PrivateChats map[string][]ChatMessage
 	// vip每个周期的充值金额
@@ -12,6 +13,8 @@ type ExtendBox struct {
 	AchievementScore int32
 	// 客户端事件统计
 	ClientEvents map[int32]int32
+	// 终身购买次数
+	LifeTimeBuyCount map[int32]int32
 	// 材料图鉴
 	ItemCatalogModel CatalogModel
 	// 店铺图鉴
@@ -26,6 +29,9 @@ func (b *ExtendBox) AfterLoad() {
 	}
 	if b.ClientEvents == nil {
 		b.ClientEvents = make(map[int32]int32)
+	}
+	if b.LifeTimeBuyCount == nil {
+		b.LifeTimeBuyCount = make(map[int32]int32)
 	}
 	b.ItemCatalogModel.AfterLoad()
 	b.SitemCatalogModel.AfterLoad()

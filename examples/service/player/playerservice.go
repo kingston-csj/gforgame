@@ -7,6 +7,8 @@ import (
 	"sync"
 
 	"io/github/gforgame/common"
+	"io/github/gforgame/common/trie"
+	"io/github/gforgame/container/hashmap"
 	"io/github/gforgame/db"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/camp"
@@ -33,20 +35,30 @@ var (
 	ErrCast        = errors.New("cast exception")
 	instance       *PlayerService
 	once           sync.Once
-	playerProfiles map[string]*playerdomain.PlayerProfile = make(map[string]*playerdomain.PlayerProfile)
 )
 
+// 玩家模块
 type PlayerService struct {
 	network.Base
+	playerProfiles map[string]*playerdomain.PlayerProfile
+	// 双向map, id -> name
+	idNameMapper *hashmap.SyncDualHashMap[string, string]
+	// 玩家名称字典树
+	nameDict *trie.TrieDictionary
 }
 
 func GetPlayerService() *PlayerService {
 	once.Do(func() {
-		instance = &PlayerService{}
+		instance = &PlayerService{
+			playerProfiles: make(map[string]*playerdomain.PlayerProfile),
+			idNameMapper: hashmap.NewSyncDualHashMap[string, string](),
+			nameDict: trie.NewTrieDictionary(),
+		}
 	})
 	return instance
 }
 
+// LoadPlayerProfile 加载玩家概况数据
 func (ps *PlayerService) LoadPlayerProfile() {
 	var profiles []*playerdomain.PlayerProfile
 	err := db.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
@@ -54,14 +66,14 @@ func (ps *PlayerService) LoadPlayerProfile() {
 		panic(err)
 	}
 
-	// 输出查询结果
 	for _, profile := range profiles {
-		playerProfiles[profile.Id] = profile
+		ps.playerProfiles[profile.Id] = profile
+		ps.idNameMapper.Put(profile.Id, profile.Name)
 	}
 }
 
 func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.PlayerProfile {
-	return playerProfiles[playerId]
+	return ps.playerProfiles[playerId]
 }
 
 func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
@@ -90,6 +102,7 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 	}
 	return player
 }
+
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	cache, _ := context.CacheManager.GetCache("player")
@@ -124,7 +137,7 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		// 离线，登录触发每日重置检测
 		dailyReset := system.GetDailyReset().GetValue().(int64)
 		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
-			ps.dailyReset(player, dailyReset)
+			ps.DailyReset(player, dailyReset)
 		} else {
 			ps.PushDailyResetInfo(player)
 		}
@@ -275,7 +288,7 @@ func (ps *PlayerService) recomputeAttribute(player *playerdomain.Player) {
 	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
 
 	// 主公突破属性
-	stageContainer := config.QueryContainer[configdomain.HeroStageData, *container.HeroStageContainer]()
+	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 	stageData := stageContainer.GetRecordByStage(player.Stage)
 	attrContainer.AddAttrs(stageData.GetHeroStageAttrs())
 
@@ -294,11 +307,11 @@ func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 	}
 	return 1004
 }
-
+ 
 // 模糊搜索玩家(名字包含关键字)
 func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	playerIds := make([]string, 0)
-	for _, profile := range playerProfiles {
+	for _, profile := range ps.playerProfiles {
 		if strings.Contains(profile.Name, name) {
 			playerIds = append(playerIds, profile.Id)
 		}
@@ -306,19 +319,31 @@ func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	return playerIds
 }
 
- func (ps *PlayerService) dailyReset(player *playerdomain.Player, resetTime int64) {
-	box := &playerdomain.DailyReset{
+ func (ps *PlayerService) DailyReset(player *playerdomain.Player, resetTime int64) {
+	// 直接用新的数据替换，就不用为每个字段写重置逻辑了
+	player.DailyReset = &playerdomain.DailyReset{
 		LastDailyReset: resetTime,
 	}
-	player.DailyReset = box
+	player.DailyReset.AfterLoad()
+	player.ExtendBox.AccumulatedLoginDays++
 	context.EventBus.Publish(events.PlayerDailyReset, player)
 	ps.SavePlayer(player)
 	ps.PushDailyResetInfo(player)
  }
 
-  func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
+func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
 	io.NotifyPlayer(player, &protos.PushDailyResetInfo{
 		NormalRecruitTimes: player.HeroBox.RecruitSum,
 	})
-  }
+}
 
+ func (ps *PlayerService) RandomName() string {
+	 nameContainer := config.GetSpecificContainer[*container.NameContainer]()
+	 for i := 0; i < 10; i++ {
+		name := nameContainer.GetRandomName()
+		if _, ok := ps.idNameMapper.GetByKey(name); !ok {
+			return name
+		}
+	 }
+	 return util.GetNextID()
+ }

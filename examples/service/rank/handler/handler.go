@@ -3,6 +3,7 @@ package handler
 import (
 	"io/github/gforgame/examples/service/rank/container"
 	"io/github/gforgame/examples/service/rank/model"
+	"io/github/gforgame/protos"
 	"math"
 )
 
@@ -11,6 +12,7 @@ type RankHandler interface {
 	QueryRanks(start int, end int) []model.BaseRank
 	QueryRankOrder(key any) int
 	UpdateRank(rank model.BaseRank)
+	GetMyRankInfo(playerId string) *protos.RankInfo
 }
 
 // BaseRankHandler 排行榜处理器

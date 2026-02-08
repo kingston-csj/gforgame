@@ -25,6 +25,8 @@ type QuestData struct {
 	Rewards      string `json:"rewards" excel:"rewards"`
 	// 1继承历史进度（0不继承）
 	History int32 `json:"history" excel:"history"`
+	// 额外参数 
+	Extra string `json:"extra" excel:"extra"`
 }
 
 func (q *QuestData) UseHistoryProgress() bool {
