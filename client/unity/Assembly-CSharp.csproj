@@ -45,7 +45,6 @@
     <Analyzer Include="D:\Program Files\Tuanjie\Hub\Editor\2022.3.61t5\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Frame\Commons\Convert\StringToShortConvertor.cs" />
     <Compile Include="Assets\Scripts\Frame\Commons\Utils\NumberUtil.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\WebGL\WebSocket.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\IWebSocket.cs" />
@@ -87,13 +86,12 @@
     <Compile Include="Assets\Scripts\Frame\Net\Socket\UnitySocket\UnitySocket.cs" />
     <Compile Include="Assets\Scripts\Frame\Config\MethodIndexMeta.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\UnitySocket\events\OpenEventArgs.cs" />
-    <Compile Include="Assets\Scripts\Game\Configs\Domain\ItemData.cs" />
     <Compile Include="Assets\Scripts\Frame\UI\ResourceItem.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\ArrayCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Implementation\NoWebGL\WebSocketManager.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Data\Message.cs" />
     <Compile Include="Assets\Scripts\Frame\Assets\AssetResourceItem.cs" />
-    <Compile Include="Assets\Scripts\Game\Configs\Domain\CommonData.cs" />
+    <Compile Include="Assets\Scripts\Frame\Config\ConfigEditorBinding.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\MapCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\MessageCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Dispatch\SocketIoDispatcher.cs" />
@@ -112,6 +110,7 @@
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\CloseEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\UnitySocket\events\CloseEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Commons\Utils\JsonUtil.cs" />
+    <Compile Include="Assets\Scripts\Frame\Config\AbsConfigData.cs" />
     <Compile Include="Assets\Scripts\Game\Configs\Container\DataManager.cs" />
     <Compile Include="Assets\Scripts\Frame\Assets\AssetResourceFactory.cs" />
     <Compile Include="Assets\Scripts\Frame\Mvc\BaseController.cs" />
@@ -127,19 +126,22 @@
     <Compile Include="Assets\Scripts\Game\Core\GameConfig.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Data\SocketDataFrame.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\WebSocketState.cs" />
+    <Compile Include="Assets\Scripts\Frame\Config\DataTable.cs" />
     <Compile Include="Assets\Scripts\Frame\Config\IIndexMeta.cs" />
     <Compile Include="Assets\Scripts\Game\Core\AppContext.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\Codec.cs" />
+    <Compile Include="Assets\Scripts\Frame\Commons\Convert\StringToShortConvertor.cs" />
     <Compile Include="Assets\Scripts\Frame\Net\Socket\Dispatch\DefaultSocketIoDispatcher.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Domain\ItemData.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\CollectionCodec.cs" />
     <Compile Include="Assets\Scripts\Frame\Config\ConfigContainer.cs" />
     <Compile Include="Assets\Scripts\Frame\Assets\AssetTextItem.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\LongCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\ErrorEventArgs.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\BeanCodec.cs" />
-    <Compile Include="Assets\Scripts\Frame\Config\AbsConfigData.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\BeanAutoCodec.cs" />
     <Compile Include="Assets\Scripts\plugins\UnityWebSocket\Scripts\Runtime\Core\OpenEventArgs.cs" />
+    <Compile Include="Assets\Scripts\Game\Configs\Domain\CommonData.cs" />
     <Compile Include="Assets\Scripts\Frame\Codec\Bean\ShortCodec.cs" />
     <None Include="Assets\Resources\config\i18nData.json" />
     <None Include="Assets\Resources\config\heroData.json" />

@@ -7,11 +7,6 @@ namespace frame.Assets
     /// <summary>
     /// 资源工厂
     /// </summary>
-    [CreateAssetMenu(
-        fileName = "NewAssetResource", // 新建 .asset 文件的默认名称
-        menuName = "Game/资源工厂", // 右键菜单路径（Assets → Game → 资源工厂）
-        order = 10 // 菜单排序（越小越靠上，避免和其他菜单冲突）
-    )]
     public class AssetResourceFactory : ScriptableObject
     {
         public List<AssetTextItem> textItems;

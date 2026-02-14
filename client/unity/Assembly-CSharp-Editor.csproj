@@ -342,6 +342,9 @@
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>D:\go_projects\gforgame\client\unity\Library\PackageCache\com.unity.collab-proxy@2.10.2\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>D:\go_projects\gforgame\client\unity\Assets\Scripts\Frame\Editor\ThirdParty\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
       <HintPath>D:\go_projects\gforgame\client\unity\Library\PackageCache\com.unity.collab-proxy@2.10.2\Lib\Editor\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -371,9 +374,6 @@
     </Reference>
     <Reference Include="ExcelDataReader">
       <HintPath>D:\go_projects\gforgame\client\unity\Assets\Scripts\Frame\Editor\ThirdParty\ExcelDataReader.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>D:\go_projects\gforgame\client\unity\Assets\Scripts\Frame\Editor\ThirdParty\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework">
       <HintPath>D:\go_projects\gforgame\client\unity\Library\PackageCache\com.unity.ext.nunit@1.0.6\net35\unity-custom\nunit.framework.dll</HintPath>

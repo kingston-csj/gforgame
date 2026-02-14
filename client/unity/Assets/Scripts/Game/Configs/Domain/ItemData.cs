@@ -1,7 +1,9 @@
 ﻿using Nova.Data;
+using Nova.Net.Socket;
 
 namespace Game.Configs
 {
+    [DataTable(name = "item")]
     /// <summary>
     /// 道具表
     /// </summary>
@@ -13,6 +15,6 @@ namespace Game.Configs
 
         public int type;
 
-        public string name;
+        public int quality;
     }
 }
