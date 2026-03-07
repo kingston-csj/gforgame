@@ -14,6 +14,9 @@ var (
 	id2MsgName map[int32]string = make(map[int32]string)
 )
 
+// RegisterMessage 注册消息
+// @param cmd 消息命令
+// @param msg 消息结构体指针，必须指向结构体
 func RegisterMessage(cmd int32, msg any) {
 	typeOf := reflect.TypeOf(msg)
 	if typeOf.Kind() != reflect.Ptr {
@@ -37,13 +40,24 @@ func RegisterMessage(cmd int32, msg any) {
 	msgName2Id[structName] = cmd
 }
 
+// GetMessageCmd 获取消息命令
+// @param msg 消息结构体，或指向结构体的指针
+// @return 消息命令
 func GetMessageCmd(msg any) (int32, error) {
-	value, ok := msg2Id[reflect.TypeOf(msg)]
-	if ok {
-		return int32(value), nil
-	} else {
+	typ := reflect.TypeOf(msg)
+	if typ == nil {
 		return 0, errors.New("GetMessageCmd not found")
 	}
+	if value, ok := msg2Id[typ]; ok {
+		return value, nil
+	}
+	if typ.Kind() == reflect.Struct {
+		ptrType := reflect.PtrTo(typ)
+		if value, ok := msg2Id[ptrType]; ok {
+			return value, nil
+		}
+	}
+	return 0, errors.New("GetMessageCmd not found")
 }
 
 func GetMessageCmdFromType(typ reflect.Type) (int32, error) {
@@ -51,9 +65,10 @@ func GetMessageCmdFromType(typ reflect.Type) (int32, error) {
 	if ok {
 		return value, nil
 	} else {
-		return 0, errors.New(fmt.Sprintf("GetMessageCmdFromType not found: %v", typ.Name()))
+		return 0, errors.New(fmt.Sprintf("GetMessageCmdFromType not found: %s", typ.String()))
 	}
 }
+
 
 func GetMessageType(cmd int32) (reflect.Type, error) {
 	value, ok := id2Msg[cmd]

@@ -36,6 +36,20 @@ func valueOfField(sf reflect.StructField) (FieldCodecMeta, error) {
 
 // getFieldCodec 根据反射类型返回对应的字段编解码器
 func getFieldCodec(t reflect.Type) (FieldCodec, error) {
+    if t == nil {
+        return nil, errors.New("unsupported type: <nil>")
+    }
+
+    orig := t
+    ptrDepth := 0
+    for t.Kind() == reflect.Ptr {
+        ptrDepth++
+        t = t.Elem()
+    }
+    if ptrDepth > 0 && t.Kind() != reflect.Struct {
+        return nil, errors.New("unsupported type: " + orig.String())
+    }
+
     switch t.Kind() {
     case reflect.Bool:
         return &BoolCodec{}, nil
@@ -78,22 +92,34 @@ func readShort(r *bytes.Reader) (uint16, error) {
     return v, err
 }
 
-// writeUtf8 以 uint16 长度前缀写入 UTF-8 字符串
+// writeInt 以大端序写入 uint32
+func writeInt(w *bytes.Buffer, v uint32) error {
+    return binary.Write(w, binary.BigEndian, v)
+}
+
+// readInt 以大端序读取 uint32
+func readInt(r *bytes.Reader) (uint32, error) {
+    var v uint32
+    err := binary.Read(r, binary.BigEndian, &v)
+    return v, err
+}
+
+// writeUtf8 以 uint32 长度前缀写入 UTF-8 字符串
 func writeUtf8(w *bytes.Buffer, s string) error {
     b := []byte(s)
-    if len(b) > int(^uint16(0)) {
-        return errors.New("string length exceed max uint16 value")
+    if len(b) > int(^uint32(0)) {
+        return errors.New("string length exceed max uint32 value")
     }
-    if err := writeShort(w, uint16(len(b))); err != nil {
+    if err := writeInt(w, uint32(len(b))); err != nil {
         return err
     }
     _, err := w.Write(b)
     return err
 }
 
-// readUtf8 读取以 uint16 长度前缀编码的 UTF-8 字符串
+// readUtf8 读取以 uint32 长度前缀编码的 UTF-8 字符串
 func readUtf8(r *bytes.Reader) (string, error) {
-    n, err := readShort(r)
+    n, err := readInt(r)
     if err != nil {
         return "", err
     }

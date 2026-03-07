@@ -40,6 +40,13 @@ func buildBeanMeta(t reflect.Type) ([]FieldCodecMeta, error) {
 
 // Decode 逐字段解码并返回结构体值
 func (*BeanCodec) Decode(r *bytes.Reader, typ reflect.Type) (any, error) {
+    origType := typ
+    ptrDepth := 0
+    for typ.Kind() == reflect.Ptr {
+        ptrDepth++
+        typ = typ.Elem()
+    }
+
     metas, err := buildBeanMeta(typ)
     if err != nil {
         return nil, err
@@ -52,12 +59,31 @@ func (*BeanCodec) Decode(r *bytes.Reader, typ reflect.Type) (any, error) {
         }
         ptr.Elem().Field(m.index).Set(reflect.ValueOf(val))
     }
-    return ptr.Elem().Interface(), nil
+    if ptrDepth == 0 {
+        return ptr.Elem().Interface(), nil
+    }
+
+    v := ptr
+    for i := 1; i < ptrDepth; i++ {
+        p := reflect.New(v.Type())
+        p.Elem().Set(v)
+        v = p
+    }
+    if !v.Type().AssignableTo(origType) {
+        return nil, errors.New("bean codec type mismatch: " + origType.String())
+    }
+    return v.Interface(), nil
 }
 
 // Encode 逐字段编码结构体值
 func (*BeanCodec) Encode(w *bytes.Buffer, value any) error {
     rv := reflect.ValueOf(value)
+    for rv.Kind() == reflect.Ptr {
+        if rv.IsNil() {
+            return errors.New("bean codec on nil pointer")
+        }
+        rv = rv.Elem()
+    }
     if rv.Kind() != reflect.Struct {
         return errors.New("bean codec on non struct")
     }
