@@ -37,7 +37,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 遍历每一行
 	for _, row := range rows {
 		rowLine++
-		if rowLine < 3  {
+		if rowLine < 3 {
 			continue
 		}
 		if rowLine == 3 {
@@ -48,10 +48,6 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 			continue
 		}
 		firstCell := getCellValue(row.Cells[0])
-		if util.EqualsIgnoreCase(firstCell, "") {
-			break
-		}
-
 		// if len(headers) == 0 {
 		// 	continue
 		// }
@@ -59,7 +55,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if util.EqualsIgnoreCase(firstCell, "") {
+		if util.EqualsIgnoreCase(firstCell, "End") {
 			break
 		}
 	}
@@ -255,7 +251,7 @@ func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
 
 	for i := 0; i < objType.NumField(); i++ {
 		field := objType.Field(i)
-		tag := field.Tag.Get("excel") // 获取 Tag 值
+		tag := field.Tag.Get("excel")         // 获取 Tag 值
 		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹配
 			return obj.Field(i), nil
 		}

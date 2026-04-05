@@ -1,6 +1,6 @@
 server:
   id: 1001
-  addr: 192.168.1.61:8010
+  addr: 127.0.0.1:8010
   rpcAddr: :50051
   httpAddr: 0.0.0.0:8090
   pprofAddr: :6060

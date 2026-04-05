@@ -16,7 +16,7 @@ import (
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/network/tcp"
+	"io/github/gforgame/network/ws"
 	protocolexporter "io/github/gforgame/tools/protocol"
 	"io/github/gforgame/util/jsonutil"
 	_ "net/http/pprof"
@@ -47,7 +47,6 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容：", jsonStr)
 		}
 	}
-	
 
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	if msgHandler == nil {
@@ -141,14 +140,23 @@ func main() {
 		route.NewFriendRoute(),
 	}
 
-	node := tcp.NewServer(
-		tcp.WithAddress(serverconfig.ServerConfig.ServerUrl),
-		tcp.WithRouter(router),
-		tcp.WithIoDispatch(ioDispatcher),
-		tcp.WithCodec(codec),
-		tcp.WithModules(modules...),
+	// node := tcp.NewServer(
+	// 	tcp.WithAddress(serverconfig.ServerConfig.ServerUrl),
+	// 	tcp.WithRouter(router),
+	// 	tcp.WithIoDispatch(ioDispatcher),
+	// 	tcp.WithCodec(codec),
+	// 	tcp.WithModules(modules...),
+	// )
+
+	node := ws.NewServer(
+		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
+		ws.WithRouter(router),
+		ws.WithIoDispatch(ioDispatcher),
+		ws.WithCodec(codec),
+		ws.WithModules(modules...),
+		ws.WithWsPath("ws"),
 	)
-	context.TcpServer = node
+	context.WsServer = node
 
 	err := node.Start()
 	if err != nil {
@@ -176,7 +184,7 @@ func main() {
 
 	dataconfig.GetDataManager()
 
-	// itemData := config.QueryById[configdomain.PropData](10000001) 
+	// itemData := config.QueryById[configdomain.PropData](10000001)
 	// if itemData == nil {
 	// 	panic("item data not found")
 	// }
@@ -189,7 +197,7 @@ func main() {
 	// rank.GetRankService().QueryRank(rank.PlayerLevelRank, 0, 10)
 
 	// fight.GetFightService().Test()
- 
+
 	// 各自业务初始化
 	player.GetPlayerService().LoadPlayerProfile()
 
@@ -251,8 +259,8 @@ func TryExportProtocols() {
 			"tools\\protocol\\output\\csharp\\",
 			"tools\\protocol\\templates\\csharptemplate.tpl",
 		)
-		
-		error := generator.Generate(network.GetMsgName2IdMapper())	
+
+		error := generator.Generate(network.GetMsgName2IdMapper())
 		if error != nil {
 			panic(error)
 		}
