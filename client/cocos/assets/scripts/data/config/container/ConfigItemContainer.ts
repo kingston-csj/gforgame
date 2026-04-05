@@ -1,8 +1,8 @@
 import ConfigContainer from '../ConfigContainer';
-import ItemData from '../model/ItemData';
+import PropData from '../model/PropData';
 
-export default class ConfigItemContainer extends ConfigContainer<ItemData> {
+export default class ConfigItemContainer extends ConfigContainer<PropData> {
   public constructor() {
-    super(ItemData, ItemData.fileName);
+    super(PropData, PropData.fileName);
   }
 }

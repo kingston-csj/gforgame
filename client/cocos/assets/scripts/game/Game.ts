@@ -44,7 +44,7 @@ export class LoginScene extends Component {
     MessageDispatch.init();
 
     // 连接服务器
-    GameContext.instance.WebSocketClient.connect("ws://192.168.1.61:8010/ws");
+    GameContext.instance.WebSocketClient.connect("ws://127.0.0.1:8010/ws");
 
     // 创建登录界面
     UiViewFactory.createUi(R.Prefabs.LoginPane, LayerIdx.layer1, () => {});

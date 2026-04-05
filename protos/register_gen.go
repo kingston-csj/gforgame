@@ -5,19 +5,11 @@ import (
 )
 
 func init() {
-	// ----from rank.go----
-	network.RegisterMessage(7001, &ReqRankQuery{})
-	network.RegisterMessage(7002, &ResRankQuery{})
-
-	// ----from recharge.go----
-	network.RegisterMessage(2299, &PushRechargePay{})
-	network.RegisterMessage(2298, &PushRechargeInfo{})
-
-	// ----from scene.go----
-	network.RegisterMessage(2851, &ReqSceneGetData{})
-	network.RegisterMessage(2802, &ReqSceneSetData{})
-	network.RegisterMessage(2801, &ResSceneGetData{})
-	network.RegisterMessage(2852, &ResSceneSetData{})
+	// ----from system.go----
+	network.RegisterMessage(-101, &ReqHeartBeat{})
+	network.RegisterMessage(-151, &ResHeartBeat{})
+	network.RegisterMessage(-102, &ReqGetServerTime{})
+	network.RegisterMessage(-152, &ResGetServerTime{})
 
 	// ----from catalog.go----
 	network.RegisterMessage(3101, &ReqCatalogReward{})
@@ -25,38 +17,10 @@ func init() {
 	network.RegisterMessage(3199, &PushCatalogInfo{})
 	network.RegisterMessage(3198, &PushCatalogAdd{})
 
-	// ----from gm.go----
-	network.RegisterMessage(-201, &ReqGmCommand{})
-	network.RegisterMessage(-251, &ResGmCommand{})
-
-	// ----from item.go----
-	network.RegisterMessage(250, &PushBackpackInfo{})
-	network.RegisterMessage(4002, &PushPurseInfo{})
-	network.RegisterMessage(253, &PushItemChanged{})
-
-	// ----from mixture.go----
-	network.RegisterMessage(9999, &PushIdleInfo{})
-	network.RegisterMessage(9906, &ReqClientUploadEvent{})
-	network.RegisterMessage(9956, &ResClientUploadEvent{})
-	network.RegisterMessage(9903, &ReqIdleGetReward{})
-	network.RegisterMessage(9953, &ResIdleGetReward{})
-	network.RegisterMessage(9902, &ReqIdleViewReward{})
-
-	// ----from quest.go----
-	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
-	network.RegisterMessage(798, &PushQuestDailyInfo{})
-	network.RegisterMessage(795, &PushQuestRefreshVo{})
-	network.RegisterMessage(760, &PushQuestReplace{})
-	network.RegisterMessage(799, &PushQuestWeeklyInfo{})
-	network.RegisterMessage(791, &PushAchievementInfo{})
-	network.RegisterMessage(706, &ReqQuestTakeAllRewards{})
-	network.RegisterMessage(702, &ReqQuestTakeProgressReward{})
-	network.RegisterMessage(701, &ReqQuestTakeReward{})
-	network.RegisterMessage(762, &ResQuestTakeAllRewards{})
-	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
-	network.RegisterMessage(754, &ResQuestTakeReward{})
-	network.RegisterMessage(707, &ReqQuestEntrust{})
-	network.RegisterMessage(763, &ResQuestEntrust{})
+	// ----from chat.go----
+	network.RegisterMessage(1899, &PushChatNewMessage{})
+	network.RegisterMessage(1801, &ReqChat{})
+	network.RegisterMessage(1851, &ResChat{})
 
 	// ----from friend.go----
 	network.RegisterMessage(1997, &PushFriendInfo{})
@@ -71,53 +35,17 @@ func init() {
 	network.RegisterMessage(1953, &ResFriendQueryMyFriends{})
 	network.RegisterMessage(1952, &ResFriendSearchPlayers{})
 
-	// ----from sigin.go----
-	network.RegisterMessage(3099, &PushSigninInfo{})
-	network.RegisterMessage(3001, &ReqSignIn{})
-	network.RegisterMessage(3051, &ResSignIn{})
-	network.RegisterMessage(3002, &ReqSignInMakeup{})
-	network.RegisterMessage(3052, &ResSignInMakeup{})
-
-	// ----from chat.go----
-	network.RegisterMessage(1899, &PushChatNewMessage{})
-	network.RegisterMessage(1801, &ReqChat{})
-	network.RegisterMessage(1851, &ResChat{})
-
-	// ----from mail.go----
-	network.RegisterMessage(599, &PushMailAll{})
-	network.RegisterMessage(504, &ReqMailGetAllRewards{})
-	network.RegisterMessage(554, &ResMailGetAllRewards{})
-	network.RegisterMessage(501, &ReqMailRead{})
-	network.RegisterMessage(551, &ResMailRead{})
-	network.RegisterMessage(502, &ReqMailGetReward{})
-	network.RegisterMessage(552, &ResMailGetReward{})
-	network.RegisterMessage(505, &ReqMailDeleteAll{})
-	network.RegisterMessage(555, &ResMailDeleteAll{})
-	network.RegisterMessage(6009, &ReqMailReadAll{})
-	network.RegisterMessage(6010, &ResMailReadAll{})
+	// ----from gm.go----
+	network.RegisterMessage(-201, &ReqGmCommand{})
+	network.RegisterMessage(-251, &ResGmCommand{})
 
 	// ----from mall.go----
 	network.RegisterMessage(1101, &ReqMallBuy{})
 	network.RegisterMessage(1151, &ResMallBuy{})
 
-	// ----from hero.go----
-	network.RegisterMessage(801, &ReqHeroRecruit{})
-	network.RegisterMessage(851, &ResHeroRecruit{})
-	network.RegisterMessage(857, &PushAllHeroInfo{})
-	network.RegisterMessage(804, &ReqHeroLevelUp{})
-	network.RegisterMessage(854, &ResHeroLevelUp{})
-	network.RegisterMessage(805, &ReqHeroUpStage{})
-	network.RegisterMessage(855, &ResHeroUpStage{})
-	network.RegisterMessage(5006, &PushHeroAdd{})
-	network.RegisterMessage(5007, &PushHeroAttrChange{})
-	network.RegisterMessage(807, &ReqHeroCombine{})
-	network.RegisterMessage(858, &ResHeroCombine{})
-	network.RegisterMessage(802, &ReqHeroUpFight{})
-	network.RegisterMessage(852, &ResHeroUpFight{})
-	network.RegisterMessage(803, &ReqHeroOffFight{})
-	network.RegisterMessage(853, &ResHeroOffFight{})
-	network.RegisterMessage(808, &ReqHeroChangePosition{})
-	network.RegisterMessage(859, &ResHeroChangePosition{})
+	// ----from recharge.go----
+	network.RegisterMessage(2299, &PushRechargePay{})
+	network.RegisterMessage(2298, &PushRechargeInfo{})
 
 	// ----from monthcard.go----
 	network.RegisterMessage(2198, &PushMonthCardInfo{})
@@ -143,10 +71,82 @@ func init() {
 	network.RegisterMessage(109, &ReqEditClientData{})
 	network.RegisterMessage(171, &ResEditClientData{})
 
-	// ----from system.go----
-	network.RegisterMessage(-101, &ReqHeartBeat{})
-	network.RegisterMessage(-151, &ResHeartBeat{})
-	network.RegisterMessage(-102, &ReqGetServerTime{})
-	network.RegisterMessage(-152, &ResGetServerTime{})
+	// ----from quest.go----
+	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
+	network.RegisterMessage(798, &PushQuestDailyInfo{})
+	network.RegisterMessage(795, &PushQuestRefreshVo{})
+	network.RegisterMessage(760, &PushQuestReplace{})
+	network.RegisterMessage(799, &PushQuestWeeklyInfo{})
+	network.RegisterMessage(791, &PushAchievementInfo{})
+	network.RegisterMessage(706, &ReqQuestTakeAllRewards{})
+	network.RegisterMessage(702, &ReqQuestTakeProgressReward{})
+	network.RegisterMessage(701, &ReqQuestTakeReward{})
+	network.RegisterMessage(762, &ResQuestTakeAllRewards{})
+	network.RegisterMessage(753, &ResQuestTakeProgressReward{})
+	network.RegisterMessage(754, &ResQuestTakeReward{})
+	network.RegisterMessage(707, &ReqQuestEntrust{})
+	network.RegisterMessage(763, &ResQuestEntrust{})
+
+	// ----from scene.go----
+	network.RegisterMessage(2851, &ReqSceneGetData{})
+	network.RegisterMessage(2802, &ReqSceneSetData{})
+	network.RegisterMessage(2801, &ResSceneGetData{})
+	network.RegisterMessage(2852, &ResSceneSetData{})
+
+	// ----from item.go----
+	network.RegisterMessage(250, &PushBackpackInfo{})
+	network.RegisterMessage(4002, &PushPurseInfo{})
+	network.RegisterMessage(253, &PushItemChanged{})
+
+	// ----from mixture.go----
+	network.RegisterMessage(9999, &PushIdleInfo{})
+	network.RegisterMessage(9906, &ReqClientUploadEvent{})
+	network.RegisterMessage(9956, &ResClientUploadEvent{})
+	network.RegisterMessage(9903, &ReqIdleGetReward{})
+	network.RegisterMessage(9953, &ResIdleGetReward{})
+	network.RegisterMessage(9902, &ReqIdleViewReward{})
+
+	// ----from rank.go----
+	network.RegisterMessage(7001, &ReqRankQuery{})
+	network.RegisterMessage(7002, &ResRankQuery{})
+
+	// ----from sigin.go----
+	network.RegisterMessage(3099, &PushSigninInfo{})
+	network.RegisterMessage(3001, &ReqSignIn{})
+	network.RegisterMessage(3051, &ResSignIn{})
+	network.RegisterMessage(3002, &ReqSignInMakeup{})
+	network.RegisterMessage(3052, &ResSignInMakeup{})
+
+	// ----from hero.go----
+	network.RegisterMessage(801, &ReqHeroRecruit{})
+	network.RegisterMessage(851, &ResHeroRecruit{})
+	network.RegisterMessage(857, &PushAllHeroInfo{})
+	network.RegisterMessage(804, &ReqHeroLevelUp{})
+	network.RegisterMessage(854, &ResHeroLevelUp{})
+	network.RegisterMessage(805, &ReqHeroUpStage{})
+	network.RegisterMessage(855, &ResHeroUpStage{})
+	network.RegisterMessage(5006, &PushHeroAdd{})
+	network.RegisterMessage(5007, &PushHeroAttrChange{})
+	network.RegisterMessage(807, &ReqHeroCombine{})
+	network.RegisterMessage(858, &ResHeroCombine{})
+	network.RegisterMessage(802, &ReqHeroUpFight{})
+	network.RegisterMessage(852, &ResHeroUpFight{})
+	network.RegisterMessage(803, &ReqHeroOffFight{})
+	network.RegisterMessage(853, &ResHeroOffFight{})
+	network.RegisterMessage(808, &ReqHeroChangePosition{})
+	network.RegisterMessage(859, &ResHeroChangePosition{})
+
+	// ----from mail.go----
+	network.RegisterMessage(599, &PushMailAll{})
+	network.RegisterMessage(504, &ReqMailGetAllRewards{})
+	network.RegisterMessage(554, &ResMailGetAllRewards{})
+	network.RegisterMessage(501, &ReqMailRead{})
+	network.RegisterMessage(551, &ResMailRead{})
+	network.RegisterMessage(502, &ReqMailGetReward{})
+	network.RegisterMessage(552, &ResMailGetReward{})
+	network.RegisterMessage(505, &ReqMailDeleteAll{})
+	network.RegisterMessage(555, &ResMailDeleteAll{})
+	network.RegisterMessage(6009, &ReqMailReadAll{})
+	network.RegisterMessage(6010, &ResMailReadAll{})
 
 }

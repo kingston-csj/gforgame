@@ -1,5 +1,5 @@
 import { _decorator, Component, Label, Node } from 'cc';
-import ItemData from '../../data/config/model/ItemData';
+import PropData from '../../data/config/model/PropData';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import R from '../../ui/R';
 import { UiUtil } from '../../utils/UiUtil';
@@ -16,7 +16,7 @@ export class BagItemInfo extends Component {
   @property(Label)
   public itemDesc: Label;
 
-  public fillData(item: ItemData) {
+  public fillData(item: PropData) {
     this.itemName.string = item.name;
     this.itemDesc.string = item.tips;
 

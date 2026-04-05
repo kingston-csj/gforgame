@@ -10,19 +10,17 @@ const (
 
 	CmdGmReqCommand = -201
 	CmdGmResCommand = -251
-		
-	CmdPlayerReqLogin         = 103
-	CmdPlayerReqUpLevel       = 105
-	CmdPlayerReqUpStage       = 106
-	CmdPlayerReqRefreshScore  = 110
+
+	CmdPlayerReqLogin          = 103
+	CmdPlayerReqUpLevel        = 105
+	CmdPlayerReqUpStage        = 106
+	CmdPlayerReqRefreshScore   = 110
 	CmdPlayerReqEditClientData = 109
 
-
-
-	CmdPlayerResLogin         = 154
-	CmdPlayerPushLoadComplete = 155
-	CmdPlayerResUpLevel       = 152
-	CmdPlayerResUpStage       = 153
+	CmdPlayerResLogin           = 154
+	CmdPlayerPushLoadComplete   = 155
+	CmdPlayerResUpLevel         = 152
+	CmdPlayerResUpStage         = 153
 	CmdPlayerPushDailyResetInfo = 156
 	CmdPlayerResEditClientData  = 171
 	CmdPlayerResRefreshScore    = 172
@@ -32,15 +30,13 @@ const (
 	CmdPlayerReqLoadingFinish = 2005
 	CmdPlayerPushFightChange  = 2008
 
-	
-
 	CmdGmReqAction = 3001
 	CmdGmResAction = 3002
 
-	CmdItemPushBackpackInfo = 250
-	CmdItemResPurseInfo    = 4002
-	CmdItemPushChanged     = 253
-	
+	CmdPushBackpackInfo = 250
+	CmdItemResPurseInfo = 4002
+	CmdItemPushChanged  = 253
+
 	CmdHeroReqRecruit        = 801
 	CmdHeroReqUpFight        = 802
 	CmdHeroReqOffFight       = 803
@@ -53,19 +49,19 @@ const (
 	CmdHeroResUpFight        = 852
 	CmdHeroResOffFight       = 853
 	CmdHeroResCombine        = 858
-	CmdHeroPushAllHero        = 857
+	CmdHeroPushAllHero       = 857
 	CmdHeroResLevelUp        = 854
 	CmdHeroPushAdd           = 5006
 	CmdHeroPushAttrChange    = 5007
 	CmdHeroResUpStage        = 855
 	CmdHeroResChangePosition = 859
-	
+
 	CmdMailReqRead         = 501
 	CmdMailReqGetReward    = 502
 	CmdMailReqGetAllReward = 504
 	CmdMailReqDeleteAll    = 505
-	
-	CmdMailResRead         = 551	
+
+	CmdMailResRead         = 551
 	CmdMailResGetReward    = 552
 	CmdMailResGetAllReward = 554
 	CmdMailResDeleteAll    = 555
@@ -73,28 +69,25 @@ const (
 	CmdMailResReadAll      = 6010
 	CmdMailPushAll         = 599
 
-
-	
-	CMD_RES_REPLACE_QUEST      = 760
+	CMD_RES_REPLACE_QUEST         = 760
 	CMD_REQ_QUEST_ALL_REWARD      = 706
-	CMD_REQ_QUEST_PROGRESS_REWARD      = 702
-	CMD_REQ_QUEST_REWARD      = 701
-	CmdReqQuestEntrust = 707
+	CMD_REQ_QUEST_PROGRESS_REWARD = 702
+	CMD_REQ_QUEST_REWARD          = 701
+	CmdReqQuestEntrust            = 707
 
-	CMD_RES_QUEST_ALL_REWARD = 762
-	CmdResQuestEntrust = 763
+	CMD_RES_QUEST_ALL_REWARD      = 762
+	CmdResQuestEntrust            = 763
 	CMD_RES_QUEST_PROGRESS_REWARD = 753
-	CMD_RES_QUEST_REWARD = 754
-	CMD_PUSH_ACHIEVEMENT      = 791
-	CMD_PUSH_UPDATE_QUEST      = 795
-	CMD_PUSH_QUEST_AUTO_REWARD = 797
-	CMD_PUSH_DAILY_QUEST      = 798
-	CMD_PUSH_WEEKLY_QUEST      = 799
-
+	CMD_RES_QUEST_REWARD          = 754
+	CMD_PUSH_ACHIEVEMENT          = 791
+	CMD_PUSH_UPDATE_QUEST         = 795
+	CMD_PUSH_QUEST_AUTO_REWARD    = 797
+	CMD_PUSH_DAILY_QUEST          = 798
+	CMD_PUSH_WEEKLY_QUEST         = 799
 
 	CmdMallPushInfo = 1199
-	CmdReqMallBuy = 1101
-	CmdResMallBuy = 1151
+	CmdReqMallBuy   = 1101
+	CmdResMallBuy   = 1151
 
 	CmdChaJoinRoom = 1800
 	CmdChatReqChat = 1801
@@ -115,15 +108,13 @@ const (
 
 	CmdReqMonthCardGetReward = 2102
 	CmdResMonthCardGetReward = 2152
-	CmdPushMonthCardInfo = 2198
-	
+	CmdPushMonthCardInfo     = 2198
 
 	CmdPushRechargePayInfo = 2298
-	CmdPushRechargePay = 2299
+	CmdPushRechargePay     = 2299
 
 	CmdRankReqQuery = 7001
 	CmdRankResQuery = 7002
-
 
 	CmdSceneReqGetData = 2851
 	CmdSceneReqSetData = 2802
@@ -131,25 +122,23 @@ const (
 	CmdSceneResGetData = 2801
 	CmdSceneResSetData = 2852
 
-	CmdSignInReqSignIn = 3001
+	CmdSignInReqSignIn       = 3001
 	CmdSignInReqSignInMakeup = 3002
-	CmdSignInResSignIn = 3051
+	CmdSignInResSignIn       = 3051
 	CmdSignInResSignInMakeup = 3052
-	CmdSignInPush = 3099
+	CmdSignInPush            = 3099
 
 	CmdReqCatalogReward = 3101
 	CmdResCatalogReward = 3151
-	CmdPushCatalogAdd = 3198
-	CmdPushCatalogInfo = 3199
+	CmdPushCatalogAdd   = 3198
+	CmdPushCatalogInfo  = 3199
 
+	CmdReqIdleViewReward    = 9902
+	CmdReqIdleGetReward     = 9903
+	CmdReqClientUploadEvent = 9906
 
-	CmdReqIdleViewReward = 9902  
-	CmdReqIdleGetReward = 9903  
-	CmdReqClientUploadEvent = 9906  
-	
-	CmdResIdleViewReward = 9952 	
-	CmdResIdleGetReward = 9953  
-	CmdResClientUploadEvent = 9956  
-	CmdPushIdleInfo = 9999  
-
+	CmdResIdleViewReward    = 9952
+	CmdResIdleGetReward     = 9953
+	CmdResClientUploadEvent = 9956
+	CmdPushIdleInfo         = 9999
 )

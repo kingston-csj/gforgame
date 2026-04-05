@@ -2,12 +2,10 @@ package hero
 
 import (
 	"fmt"
-	"math/rand"
 	"strconv"
 	"sync"
 
 	"io/github/gforgame/common"
-	"io/github/gforgame/data"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
@@ -89,26 +87,26 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 	maxTimes := int32(51)
 	// 检测次数
 	if typ == 1 {
-		if p.DailyReset.NormalRecruitTimes + times > maxTimes {
-			return common.NewBusinessRequestException( constants.I18N_COMMON_ILLEGAL_PARAMS), nil
-			}
-	} else {
-		if p.DailyReset.HighRecruitTimes + times > maxTimes {
-			return common.NewBusinessRequestException( constants.I18N_COMMON_ILLEGAL_PARAMS), nil
-			}
+		if p.DailyReset.NormalRecruitTimes+times > maxTimes {
+			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
 		}
+	} else {
+		if p.DailyReset.HighRecruitTimes+times > maxTimes {
+			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
+		}
+	}
 
 	free := false
 	// heroId := 0
 
 	// 每天首次免费
 	if times == 1 {
-		if typ == 1{
+		if typ == 1 {
 			if !p.DailyReset.NormalRecruitFreeUsed {
 				p.DailyReset.NormalRecruitFreeUsed = true
 				free = true
 			}
-		}else {
+		} else {
 			if !p.DailyReset.HighRecruitFreeUsed {
 				p.DailyReset.HighRecruitFreeUsed = true
 				free = true
@@ -120,15 +118,15 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 		// 优先消耗招募令
 		if p.Backpack.IsEnough(itemId, times) {
 			itemConsume := consume.ItemConsume{
-					ItemId: itemId,
-					Amount: times,
+				ItemId: itemId,
+				Amount: times,
 			}
 			itemConsume.Consume(p, constants.ActionType_HeroRecruit)
 		} else {
 			// 不足扣钻石
 			itemCount := p.Backpack.GetItemCount(constants.ITEM_DIAMOND_ID)
 			if itemCount < times {
-				return common.NewBusinessRequestException( constants.I18N_ITEM_NOT_ENOUGH), nil
+				return common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH), nil
 			}
 			commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 			// 招募消耗钻石
@@ -146,10 +144,10 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 				item.GetItemService().UseByModelId(p, itemId, itemCount)
 			}
 		}
-	
-		if typ == 1{
+
+		if typ == 1 {
 			p.DailyReset.NormalRecruitTimes += times
-		}else {
+		} else {
 			p.DailyReset.HighRecruitTimes += times
 		}
 	}
@@ -171,7 +169,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 					Value: fmt.Sprintf("%d_%d", heroData.ShardItem, heroData.ShardAmount),
 				})
 				item.GetItemService().AddByModelId(p, heroData.ShardItem, heroData.ShardAmount)
-			} else {	
+			} else {
 				rewardVos = append(rewardVos, &protos.RewardVo{
 					Type:  "hero",
 					Value: strconv.Itoa(int(heroData.Id)),
@@ -190,52 +188,15 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 
 func (ps *HeroService) NewHero(p *player.Player, heroId int32) {
 	p.HeroBox.AddHero(&player.Hero{
-				ModelId: heroId,
-				Level:   1,
-			})
+		ModelId: heroId,
+		Level:   1,
+	})
 	context.EventBus.Publish(events.HeroGain, &events.HeroGainEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: p,
 		},
 		HeroId: heroId,
 	})
-}
-
-func (ps *HeroService) GetRandomHero() configdomain.HeroData {
-	heroDatas := ps.filterNormalHeros()
-	// 根据HeroData的Prob进行抽奖
-	var totalProb int32 = 0
-	for _, heroData := range heroDatas {
-		totalProb += heroData.Prob
-	}
-
-	randProb := rand.Int31n(totalProb)
-	var currentProb int32 = 0
-	var selectedHero configdomain.HeroData
-
-	for _, heroData := range heroDatas {
-		currentProb += heroData.Prob
-		if randProb < currentProb {
-			selectedHero = *heroData
-			break
-		}
-	}
-
-	return selectedHero
-}
-
-// 过滤掉主公
-func (ps *HeroService) filterNormalHeros() []*configdomain.HeroData {
-	container := config.GetSpecificContainer[*data.Container[int32, configdomain.HeroData]]()
-
-	var result []*configdomain.HeroData
-	for _, heroData := range container.GetAllRecords() {
-		// 主公概率为0
-		if heroData.Prob > 0 {
-			result = append(result, heroData)
-		}
-	}
-	return result
 }
 
 func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) *protos.ResHeroLevelUp {
@@ -279,8 +240,8 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 	}
 
 	consume := consume.CurrencyConsume{
-		Currency:   "gold",
-		Amount: costGold,
+		Currency: "gold",
+		Amount:   costGold,
 	}
 	err := consume.Verify(p)
 	if err != nil {
@@ -298,7 +259,7 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 			Player: p,
 		},
 		HeroId: heroId,
-		Times: toLevel - h.Level,
+		Times:  toLevel - h.Level,
 	})
 
 	return &protos.ResHeroLevelUp{

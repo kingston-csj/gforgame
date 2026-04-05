@@ -1,7 +1,7 @@
 import { _decorator, Label, Node, Sprite } from "cc";
 import { ConfigContext } from "../../data/config/container/ConfigContext";
 import ConfigItemContainer from "../../data/config/container/ConfigItemContainer";
-import ItemData from "../../data/config/model/ItemData";
+import PropData from "../../data/config/model/PropData";
 import { BaseUiView } from "../../frame/mvc/BaseUiView";
 import AssetResourceFactory from "../../ui/AssetResourceFactory";
 import R from "../../ui/R";
@@ -24,7 +24,7 @@ export class BagItem extends BaseUiView {
   @property(Node)
   public icon: Node;
 
-  private itemData: ItemData;
+  private itemData: PropData;
 
   protected start(): void {
     this.registerClickEvent(this.kuang.node, this.showItemDetail, this);

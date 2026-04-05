@@ -49,7 +49,7 @@ export class RecruitPaneController extends BaseController {
     // }
     this.recruitModel.doRecruit(times).then((msg: ResHeroRecruit) => {
       if (msg.code === 0) {
-        RecruitSettleModel.getInstance().setRewardItems(msg.rewardInfos);
+        RecruitSettleModel.getInstance().setRewardItems(msg.rewardVos);
         RecruitSettlePaneController.openUi();
       } else {
         TipsPaneController.showI18nContent(msg.code);

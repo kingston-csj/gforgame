@@ -2,7 +2,7 @@ import { _decorator, Label, Node, Sprite, UITransform } from "cc";
 import { ConfigContext } from "../../data/config/container/ConfigContext";
 import ConfigItemContainer from "../../data/config/container/ConfigItemContainer";
 import HeroData from "../../data/config/model/HeroData";
-import ItemData from "../../data/config/model/ItemData";
+import PropData from "../../data/config/model/PropData";
 import { BaseUiView } from "../../frame/mvc/BaseUiView";
 import RewardVo from "../../net/protocol/items/RewardVo";
 import AssetResourceFactory from "../../ui/AssetResourceFactory";
@@ -25,7 +25,7 @@ export class RewardItem extends BaseUiView {
   @property(Node)
   public icon: Node;
 
-  private itemData: ItemData;
+  private itemData: PropData;
 
   private heroData: HeroData;
 

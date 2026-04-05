@@ -1,7 +1,7 @@
 import { _decorator, instantiate, Node, Prefab, Toggle } from "cc";
 import { ConfigContext } from "../../data/config/container/ConfigContext";
 import ConfigItemContainer from "../../data/config/container/ConfigItemContainer";
-import ItemData from "../../data/config/model/ItemData";
+import PropData from "../../data/config/model/PropData";
 import { BaseUiView } from "../../frame/mvc/BaseUiView";
 import { BagItem } from "./BagItem";
 import BagpackModel, { Item } from "./BagpackModel";
@@ -81,7 +81,7 @@ export class BagPanelView extends BaseUiView {
       filterItems = items;
     } else {
       for (let i = 0; i < items.length; i++) {
-        let itemData: ItemData = itemContianer.getRecord(items[i].cf_id);
+        let itemData: PropData = itemContianer.getRecord(items[i].cf_id);
         if (itemData.type === this.selectedType) {
           filterItems.push(items[i]);
         }

@@ -24,6 +24,7 @@ var (
 
 // table名称对应Meta
 var tableConfigMap map[string]data.TableMeta
+
 // 容器类型对应表名
 var containerKeys map[reflect.Type]string
 
@@ -34,12 +35,17 @@ func init() {
 	tableConfigs := []data.TableMeta{
 		// 公共配置表
 		{
-			RecordType: reflect.TypeOf(domain.CommonData{}),
+			RecordType:    reflect.TypeOf(domain.CommonData{}),
 			ContainerType: reflect.TypeOf(&container.CommonContainer{}),
 		},
 		// 道具表
 		{
 			RecordType: reflect.TypeOf(domain.PropData{}),
+		},
+		// 抽奖表
+		{
+			RecordType:    reflect.TypeOf(domain.GachaData{}),
+			ContainerType: reflect.TypeOf(&container.GachaContainer{}),
 		},
 		// 英雄表
 		{
@@ -69,10 +75,8 @@ func init() {
 		},
 		// 活动表
 		{
-			RecordType:    reflect.TypeOf(domain.ActivityData{}),
+			RecordType: reflect.TypeOf(domain.ActivityData{}),
 		},
-	
-
 	}
 
 	for _, config := range tableConfigs {
@@ -117,7 +121,7 @@ func GetDataManager() *DataManager {
 func GetContainer(name string) interface{} {
 	return GetDataManager().containers[name]
 }
- 
+
 // GetSpecificContainer 获取特定类型的容器
 func GetSpecificContainer[C any]() C {
 	tableName := containerKeys[reflect.TypeOf((*C)(nil)).Elem()]
@@ -136,7 +140,6 @@ func GetSpecificContainer[C any]() C {
 	var zero C
 	return zero
 }
-
 
 // QueryAll 查询指定类型的所有记录
 func QueryAll[V any]() []*V {
@@ -174,6 +177,7 @@ func QueryAll[V any]() []*V {
 
 	return nil
 }
+
 // QueryById 根据ID查询指定类型的记录
 // 这段恶心的代码先凑合着用，后续再干掉
 func QueryById[V any](id int32) *V {

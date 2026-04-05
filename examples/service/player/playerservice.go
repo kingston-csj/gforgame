@@ -31,10 +31,10 @@ import (
 )
 
 var (
-	ErrNotFound    = errors.New("record not found")
-	ErrCast        = errors.New("cast exception")
-	instance       *PlayerService
-	once           sync.Once
+	ErrNotFound = errors.New("record not found")
+	ErrCast     = errors.New("cast exception")
+	instance    *PlayerService
+	once        sync.Once
 )
 
 // 玩家模块
@@ -51,8 +51,8 @@ func GetPlayerService() *PlayerService {
 	once.Do(func() {
 		instance = &PlayerService{
 			playerProfiles: make(map[string]*playerdomain.PlayerProfile),
-			idNameMapper: hashmap.NewSyncDualHashMap[string, string](),
-			nameDict: trie.NewTrieDictionary(),
+			idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
+			nameDict:       trie.NewTrieDictionary(),
 		}
 	})
 	return instance
@@ -94,15 +94,18 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 	if player == nil {
 		player = &playerdomain.Player{}
 		player.Id = playerId
-		player.Name = ""
-		player.Level = 1
-		player.Camp = camp.Camp_Hao
 		player.AfterFind(nil)
+		ps.initPlayer(player)
 		ps.SavePlayer(player)
 	}
 	return player
 }
 
+func (ps *PlayerService) initPlayer(player *playerdomain.Player) {
+	player.Name = instance.RandomName()
+	player.Level = 1
+	player.Camp = camp.Camp_Hao
+}
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	cache, _ := context.CacheManager.GetCache("player")
@@ -133,7 +136,7 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送
-	go func(){
+	go func() {
 		// 离线，登录触发每日重置检测
 		dailyReset := system.GetDailyReset().GetValue().(int64)
 		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
@@ -155,7 +158,7 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		Level:      player.Level,
 		Name:       player.Name,
 		Fighting:   player.Fight,
-		Camp:       player.Camp,
+		Camp:       1,
 	}, index)
 }
 
@@ -173,7 +176,7 @@ func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 	return player
 }
 
-func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *protos.ResPlayerUpLevel {
+func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32) *protos.ResPlayerUpLevel {
 	stageData := config.GetSpecificContainer[*container.HeroStageContainer]().GetRecordByStage(p.Stage)
 	if stageData == nil {
 		return &protos.ResPlayerUpLevel{
@@ -207,7 +210,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32)  *prot
 	if err != nil {
 		return &protos.ResPlayerUpLevel{
 			Code: int32(err.(*common.BusinessRequestException).Code()),
-		}	
+		}
 	}
 	consume.Consume(p, constants.ActionType_HeroUpLevel)
 
@@ -227,7 +230,7 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpSt
 			Code: constants.I18N_HERO_TIP4,
 		}
 	}
-	
+
 	if p.Level < stageData.MaxLevel {
 		return &protos.ResPlayerUpStage{
 			Code: constants.I18N_HERO_TIP3,
@@ -307,7 +310,7 @@ func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 	}
 	return 1004
 }
- 
+
 // 模糊搜索玩家(名字包含关键字)
 func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	playerIds := make([]string, 0)
@@ -319,7 +322,7 @@ func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	return playerIds
 }
 
- func (ps *PlayerService) DailyReset(player *playerdomain.Player, resetTime int64) {
+func (ps *PlayerService) DailyReset(player *playerdomain.Player, resetTime int64) {
 	// 直接用新的数据替换，就不用为每个字段写重置逻辑了
 	player.DailyReset = &playerdomain.DailyReset{
 		LastDailyReset: resetTime,
@@ -329,7 +332,7 @@ func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	context.EventBus.Publish(events.PlayerDailyReset, player)
 	ps.SavePlayer(player)
 	ps.PushDailyResetInfo(player)
- }
+}
 
 func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
 	io.NotifyPlayer(player, &protos.PushDailyResetInfo{
@@ -337,13 +340,13 @@ func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
 	})
 }
 
- func (ps *PlayerService) RandomName() string {
-	 nameContainer := config.GetSpecificContainer[*container.NameContainer]()
-	 for i := 0; i < 10; i++ {
+func (ps *PlayerService) RandomName() string {
+	nameContainer := config.GetSpecificContainer[*container.NameContainer]()
+	for i := 0; i < 10; i++ {
 		name := nameContainer.GetRandomName()
 		if _, ok := ps.idNameMapper.GetByKey(name); !ok {
 			return name
 		}
-	 }
-	 return util.GetNextID()
- }
+	}
+	return util.GetNextID()
+}

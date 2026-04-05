@@ -1,8 +1,8 @@
 
        import BaseConfigItem from '../BaseConfigItem';
             
-        export default class ItemData extends BaseConfigItem {
-          public static fileName:string = "itemData";
+        export default class PropData extends BaseConfigItem {
+          public static fileName:string = "propData";
         
             private _type: number;
             public get type():number {return this._type;}

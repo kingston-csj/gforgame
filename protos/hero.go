@@ -22,7 +22,7 @@ type AttrInfo struct {
 }
 
 type HeroInfo struct {
-	Id       int32      `json:"modelId"`
+	Id       int32      `json:"id"`
 	Level    int32      `json:"level"`
 	Position int32      `json:"position"`
 	Stage    int32      `json:"stage"`

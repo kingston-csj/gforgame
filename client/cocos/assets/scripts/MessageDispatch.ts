@@ -73,7 +73,7 @@ export class MessageDispatch {
   private static handleItemChanged(msg: PushItemChanged) {
     if (msg.type == "item") {
       msg.changed.forEach((item) => {
-        BagpackModel.getInstance().changeItemByModelId(item.cf_id, item.count);
+        BagpackModel.getInstance().changeItemByModelId([item]);
       });
     }
   }

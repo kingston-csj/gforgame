@@ -12,8 +12,6 @@ type HeroData struct {
 	Icon    string `json:"icon" excel:"icon"`
 	// 技能
 	Skills []int32 `json:"skills" excel:"skills"`
-	// 抽奖概率
-	Prob int32 `json:"prob" excel:"prob"`
 	// 对应的碎片数量
 	ShardAmount int32 `json:"shard" excel:"shardAmount"`
 	// 对应的碎片道具id

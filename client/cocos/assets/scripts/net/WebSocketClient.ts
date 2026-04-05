@@ -13,10 +13,9 @@ export class WebSocketClient {
   public sendMessage(
     msgId: number,
     msg: any,
-    callback: Function | null = null
-  ): void {
+    callback: Function | null = null): void {
     this._index++;
-
+    console.log("send >> "+msgId + " " + JSON.stringify(msg));  
     if (callback) {
       this.handles.set(this._index, callback);
     }
@@ -100,7 +99,7 @@ export class WebSocketClient {
         const decoder = new TextDecoder();
         const msgStr = decoder.decode(msgBytes);
         const body = JSON.parse(msgStr);
-
+        console.log("receive << "+cmd + " " + msgStr);
         const callback = this.handles.get(index);
         if (callback) {
           // 属于客户端回调
@@ -117,7 +116,7 @@ export class WebSocketClient {
       let cmd = frame.cmd;
       let index = frame.index;
       let body = JSON.parse(frame.msg);
-
+      console.log("receive << "+cmd + " " + frame.msg);
       const callback = this.handles.get(index);
       if (callback) {
         callback(body);

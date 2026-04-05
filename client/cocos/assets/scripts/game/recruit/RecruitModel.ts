@@ -17,7 +17,7 @@ export class RecruitModel {
       GameContext.instance.WebSocketClient.sendMessage(
         ReqHeroRecruit.cmd,
         {
-          times: times,
+          counter: times,
         },
         (msg: ResHeroRecruit) => {
           resolve(msg);
