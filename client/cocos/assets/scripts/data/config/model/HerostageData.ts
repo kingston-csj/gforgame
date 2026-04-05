@@ -2,7 +2,7 @@
        import BaseConfigItem from '../BaseConfigItem';
             
         export default class HerostageData extends BaseConfigItem {
-          public static fileName:string = "herostageData";
+          public static fileName:string = "herostage";
         
             private _max_level: number;
             public get max_level():number {return this._max_level;}

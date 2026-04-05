@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from "cc";
+import { _decorator, Component, director, Node, profiler  } from "cc";
 import GameContext from "../GameContext";
 
 import { LayerIdx } from "../ui/LayerIds";
@@ -28,6 +28,8 @@ export class LoginScene extends Component {
   layer5: Node;
 
   start() {
+      profiler.hideStats();
+
     // 挂载备份节点
     UiContext.init(
       this.layer1,

@@ -6,6 +6,14 @@ export default class GameConstants {
     UpStage: 2003,
   };
 
+  static readonly Quest = {
+    // 任务类型
+    Category: {
+      // 主线任务
+      MAIN: 1,
+    },
+  };
+
   static readonly I18N = {
     ILLEGAL_PARAMS: 1001,
     INTERNAL_ERROR: 1002,

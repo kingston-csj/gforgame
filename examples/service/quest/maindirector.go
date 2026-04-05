@@ -26,6 +26,7 @@ func (d *MainQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
 	if !player.QuestBox.HasReceivedQuest(firstMainQuestId) {
 		GetQuestService().AcceptQuest(player, firstMainQuestId)
 	}
+	d.notifyMainQuest(player)
 }
 
 // 玩家完成任务后触发
@@ -34,7 +35,7 @@ func (d *MainQuestDirector) AfterTakeReward(player *playerdomain.Player, quest *
 	d.notifyMainQuest(player)
 }
 
-func (d *MainQuestDirector) AcceptNextQuest(player *playerdomain.Player, quest *playerdomain.Quest)  {
+func (d *MainQuestDirector) AcceptNextQuest(player *playerdomain.Player, quest *playerdomain.Quest) {
 	questData := config.QueryById[configdomain.QuestData](quest.Id)
 	player.QuestBox.AddFinishedQuest(quest.Id)
 	if questData.Next != 0 {
@@ -46,10 +47,10 @@ func (d *MainQuestDirector) AcceptNextQuest(player *playerdomain.Player, quest *
 // 任务进度变更触发
 func (d *MainQuestDirector) OnQuestProgressChanged(player *playerdomain.Player, quest *playerdomain.Quest) {
 	questData := config.QueryById[configdomain.QuestData](quest.Id)
-	 // 自动领奖
-	 if questData.Auto> 0 && quest.IsComplete() {
+	// 自动领奖
+	if questData.Auto > 0 && quest.IsComplete() {
 		// 暂时不处理
-	 }
+	}
 }
 
 func (d *MainQuestDirector) notifyMainQuest(player *playerdomain.Player) {
@@ -68,11 +69,3 @@ func (d *MainQuestDirector) notifyMainQuest(player *playerdomain.Player) {
 func (d *MainQuestDirector) GetCategoryType() int32 {
 	return constants.QuestCategoryMain
 }
- 
-
-
-
-
-
-
-

@@ -13,6 +13,14 @@ import PushPurseInfo from "./net/protocol/PushPurseInfo";
 import { ResHeroPushInfo } from "./net/protocol/ResAllHeroInfo";
 import PushBackpackInfo from "./net/protocol/PushBackpackInfo";
 import { PushMailAll } from "./net/protocol/ResMailList";
+import PushQuestRefreshVo from "./net/protocol/PushQuestRefreshVo";
+import { QuestModel } from "./game/quest/QuestModel";
+import { ConfigContext } from "./data/config/container/ConfigContext";
+import GameConstants from "./game/constants/GameConstants";
+import eventBus from "./frame/commons/eventbus/EventBus";
+import GameEvent from "./game/constants/GameEvent";
+import { PushLoadComplete } from "./net/protocol/PushLoadComplete";
+import { MainPaneController } from "./game/main/MainPaneController";
 
 // 存储待注册的处理器
 const pendingHandlers: Array<{ cmd: number; handler: Function }> = [];
@@ -122,6 +130,26 @@ export class MessageDispatch {
         ),
       );
     }
+  }
+
+  @MessageHandler(PushQuestRefreshVo.cmd)
+  private static handleQuestRefresh(msg: PushQuestRefreshVo) {
+    if (msg.quest) {
+      const quest = msg.quest;
+      // 更新任务
+      QuestModel.instance.refreshQuest(quest);
+      let questData = ConfigContext.configQuestContainer.getRecord(quest.id);
+      if (questData.category == GameConstants.Quest.Category.MAIN) {
+        eventBus.emit(GameEvent.MainQuestRefresh);
+      }
+    }
+  }
+
+  @MessageHandler(PushLoadComplete.cmd)
+  private static handleLoadComplete(msg: PushLoadComplete) {
+    // 加载完成
+    MainPaneController.openUi();
+    // eventBus.emit(GameEvent.LoadComplete);
   }
 
   /**

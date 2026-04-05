@@ -5,23 +5,6 @@ import (
 )
 
 func init() {
-	// ----from system.go----
-	network.RegisterMessage(-101, &ReqHeartBeat{})
-	network.RegisterMessage(-151, &ResHeartBeat{})
-	network.RegisterMessage(-102, &ReqGetServerTime{})
-	network.RegisterMessage(-152, &ResGetServerTime{})
-
-	// ----from catalog.go----
-	network.RegisterMessage(3101, &ReqCatalogReward{})
-	network.RegisterMessage(3151, &ResCatalogReward{})
-	network.RegisterMessage(3199, &PushCatalogInfo{})
-	network.RegisterMessage(3198, &PushCatalogAdd{})
-
-	// ----from chat.go----
-	network.RegisterMessage(1899, &PushChatNewMessage{})
-	network.RegisterMessage(1801, &ReqChat{})
-	network.RegisterMessage(1851, &ResChat{})
-
 	// ----from friend.go----
 	network.RegisterMessage(1997, &PushFriendInfo{})
 	network.RegisterMessage(1902, &ReqFriendSearchPlayers{})
@@ -35,6 +18,17 @@ func init() {
 	network.RegisterMessage(1953, &ResFriendQueryMyFriends{})
 	network.RegisterMessage(1952, &ResFriendSearchPlayers{})
 
+	// ----from rank.go----
+	network.RegisterMessage(7001, &ReqRankQuery{})
+	network.RegisterMessage(7002, &ResRankQuery{})
+
+	// ----from sigin.go----
+	network.RegisterMessage(3099, &PushSigninInfo{})
+	network.RegisterMessage(3001, &ReqSignIn{})
+	network.RegisterMessage(3051, &ResSignIn{})
+	network.RegisterMessage(3002, &ReqSignInMakeup{})
+	network.RegisterMessage(3052, &ResSignInMakeup{})
+
 	// ----from gm.go----
 	network.RegisterMessage(-201, &ReqGmCommand{})
 	network.RegisterMessage(-251, &ResGmCommand{})
@@ -43,14 +37,13 @@ func init() {
 	network.RegisterMessage(1101, &ReqMallBuy{})
 	network.RegisterMessage(1151, &ResMallBuy{})
 
-	// ----from recharge.go----
-	network.RegisterMessage(2299, &PushRechargePay{})
-	network.RegisterMessage(2298, &PushRechargeInfo{})
-
-	// ----from monthcard.go----
-	network.RegisterMessage(2198, &PushMonthCardInfo{})
-	network.RegisterMessage(2102, &ReqMonthCardGetReward{})
-	network.RegisterMessage(2152, &ResMonthCardGetReward{})
+	// ----from mixture.go----
+	network.RegisterMessage(9999, &PushIdleInfo{})
+	network.RegisterMessage(9906, &ReqClientUploadEvent{})
+	network.RegisterMessage(9956, &ResClientUploadEvent{})
+	network.RegisterMessage(9903, &ReqIdleGetReward{})
+	network.RegisterMessage(9953, &ResIdleGetReward{})
+	network.RegisterMessage(9902, &ReqIdleViewReward{})
 
 	// ----from player.go----
 	network.RegisterMessage(103, &ReqPlayerLogin{})
@@ -70,6 +63,28 @@ func init() {
 	network.RegisterMessage(172, &ResPlayerRefreshScore{})
 	network.RegisterMessage(109, &ReqEditClientData{})
 	network.RegisterMessage(171, &ResEditClientData{})
+
+	// ----from recharge.go----
+	network.RegisterMessage(2299, &PushRechargePay{})
+	network.RegisterMessage(2298, &PushRechargeInfo{})
+
+	// ----from item.go----
+	network.RegisterMessage(250, &PushBackpackInfo{})
+	network.RegisterMessage(4002, &PushPurseInfo{})
+	network.RegisterMessage(253, &PushItemChanged{})
+
+	// ----from mail.go----
+	network.RegisterMessage(599, &PushMailAll{})
+	network.RegisterMessage(504, &ReqMailGetAllRewards{})
+	network.RegisterMessage(554, &ResMailGetAllRewards{})
+	network.RegisterMessage(501, &ReqMailRead{})
+	network.RegisterMessage(551, &ResMailRead{})
+	network.RegisterMessage(502, &ReqMailGetReward{})
+	network.RegisterMessage(552, &ResMailGetReward{})
+	network.RegisterMessage(505, &ReqMailDeleteAll{})
+	network.RegisterMessage(555, &ResMailDeleteAll{})
+	network.RegisterMessage(6009, &ReqMailReadAll{})
+	network.RegisterMessage(6010, &ResMailReadAll{})
 
 	// ----from quest.go----
 	network.RegisterMessage(797, &PushQuestAutoTakeReward{})
@@ -93,29 +108,16 @@ func init() {
 	network.RegisterMessage(2801, &ResSceneGetData{})
 	network.RegisterMessage(2852, &ResSceneSetData{})
 
-	// ----from item.go----
-	network.RegisterMessage(250, &PushBackpackInfo{})
-	network.RegisterMessage(4002, &PushPurseInfo{})
-	network.RegisterMessage(253, &PushItemChanged{})
+	// ----from catalog.go----
+	network.RegisterMessage(3101, &ReqCatalogReward{})
+	network.RegisterMessage(3151, &ResCatalogReward{})
+	network.RegisterMessage(3199, &PushCatalogInfo{})
+	network.RegisterMessage(3198, &PushCatalogAdd{})
 
-	// ----from mixture.go----
-	network.RegisterMessage(9999, &PushIdleInfo{})
-	network.RegisterMessage(9906, &ReqClientUploadEvent{})
-	network.RegisterMessage(9956, &ResClientUploadEvent{})
-	network.RegisterMessage(9903, &ReqIdleGetReward{})
-	network.RegisterMessage(9953, &ResIdleGetReward{})
-	network.RegisterMessage(9902, &ReqIdleViewReward{})
-
-	// ----from rank.go----
-	network.RegisterMessage(7001, &ReqRankQuery{})
-	network.RegisterMessage(7002, &ResRankQuery{})
-
-	// ----from sigin.go----
-	network.RegisterMessage(3099, &PushSigninInfo{})
-	network.RegisterMessage(3001, &ReqSignIn{})
-	network.RegisterMessage(3051, &ResSignIn{})
-	network.RegisterMessage(3002, &ReqSignInMakeup{})
-	network.RegisterMessage(3052, &ResSignInMakeup{})
+	// ----from chat.go----
+	network.RegisterMessage(1899, &PushChatNewMessage{})
+	network.RegisterMessage(1801, &ReqChat{})
+	network.RegisterMessage(1851, &ResChat{})
 
 	// ----from hero.go----
 	network.RegisterMessage(801, &ReqHeroRecruit{})
@@ -136,17 +138,15 @@ func init() {
 	network.RegisterMessage(808, &ReqHeroChangePosition{})
 	network.RegisterMessage(859, &ResHeroChangePosition{})
 
-	// ----from mail.go----
-	network.RegisterMessage(599, &PushMailAll{})
-	network.RegisterMessage(504, &ReqMailGetAllRewards{})
-	network.RegisterMessage(554, &ResMailGetAllRewards{})
-	network.RegisterMessage(501, &ReqMailRead{})
-	network.RegisterMessage(551, &ResMailRead{})
-	network.RegisterMessage(502, &ReqMailGetReward{})
-	network.RegisterMessage(552, &ResMailGetReward{})
-	network.RegisterMessage(505, &ReqMailDeleteAll{})
-	network.RegisterMessage(555, &ResMailDeleteAll{})
-	network.RegisterMessage(6009, &ReqMailReadAll{})
-	network.RegisterMessage(6010, &ResMailReadAll{})
+	// ----from monthcard.go----
+	network.RegisterMessage(2198, &PushMonthCardInfo{})
+	network.RegisterMessage(2102, &ReqMonthCardGetReward{})
+	network.RegisterMessage(2152, &ResMonthCardGetReward{})
+
+	// ----from system.go----
+	network.RegisterMessage(-101, &ReqHeartBeat{})
+	network.RegisterMessage(-151, &ResHeartBeat{})
+	network.RegisterMessage(-102, &ReqGetServerTime{})
+	network.RegisterMessage(-152, &ResGetServerTime{})
 
 }

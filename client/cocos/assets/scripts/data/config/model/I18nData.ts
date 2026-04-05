@@ -2,7 +2,7 @@
        import BaseConfigItem from '../BaseConfigItem';
             
         export default class I18nData extends BaseConfigItem {
-          public static fileName:string = "i18nData";
+          public static fileName:string = "i18n";
         
             private _content: string;
             public get content():string {return this._content;}

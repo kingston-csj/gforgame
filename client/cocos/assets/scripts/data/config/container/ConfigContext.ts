@@ -5,6 +5,7 @@ import ConfigHeroStageContainer from './ConfigHeroStageContainer';
 import { ConfigI18nContainer } from './ConfigI18nContainer';
 import ConfigItemContainer from './ConfigItemContainer';
 import ConfigSkillContainer from './ConfigSkillContainer';
+import ConfigQuestContainer from './ConfigQuestContainer';
 
 export class ConfigContext {
   public static configItemContainer: ConfigItemContainer;
@@ -13,6 +14,7 @@ export class ConfigContext {
   public static configSkillContainer: ConfigSkillContainer;
   public static configI18nContainer: ConfigI18nContainer;
   public static configHeroStageContainer: ConfigHeroStageContainer;
+  public static configQuestContainer: ConfigQuestContainer;
 
   private static readonly containerTypes = [
     ConfigItemContainer,
@@ -21,6 +23,7 @@ export class ConfigContext {
     ConfigHeroStageContainer,
     ConfigSkillContainer,
     ConfigI18nContainer,
+    ConfigQuestContainer,
   ];
 
   public static init() {

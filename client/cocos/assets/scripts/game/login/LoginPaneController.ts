@@ -39,7 +39,6 @@ export class LoginPaneController extends BaseController {
           PlayerData.instance.name = response.name;
           PlayerData.instance.fighting = response.fighting;
           PlayerData.instance.camp = response.camp;
-          MainPaneController.openUi();
         } else {
           TipsPaneController.showI18nContent(response.code);
         }

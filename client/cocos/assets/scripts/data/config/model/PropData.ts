@@ -2,13 +2,11 @@
        import BaseConfigItem from '../BaseConfigItem';
             
         export default class PropData extends BaseConfigItem {
-          public static fileName:string = "propData";
+          public static fileName:string = "prop";
         
             private _type: number;
             public get type():number {return this._type;}
-            
-            private _name: string;
-            public get name():string {return this._name;}
+ 
             
             private _quality: number;
             public get quality():number {return this._quality;}
@@ -22,7 +20,6 @@
         public constructor(data:any) {
             super(data);
                 this._type = data['type']
-        this._name = data['name']
         this._quality = data['quality']
         this._tips = data['tips']
         this._icon = data['icon']

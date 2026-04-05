@@ -1,4 +1,4 @@
-import { _decorator, EventKeyboard, Input, input, KeyCode, Label, Node } from 'cc';
+import { _decorator, EventKeyboard, Input, input, KeyCode, Label, Node, RichText } from 'cc';
 
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { BagPanelController } from '../item/BagPanelController';
@@ -15,6 +15,10 @@ import { MailManager } from '../mail/MailManager';
 import { MailPaneController } from '../mail/MailPaneController';
 import { RankPanelController } from '../rank/RankPanelController';
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
+import eventBus from '../../frame/commons/eventbus/EventBus';
+import GameEvent from '../constants/GameEvent';
+import { QuestModel } from '../quest/QuestModel';
+import { ConfigContext } from '../../data/config/container/ConfigContext';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneView')
@@ -52,11 +56,15 @@ export class MainPaneView extends BaseUiView {
   @property(Label)
   nameLabel: Label;
 
+  @property(RichText)
+  mainQuestInfo: RichText;
+
   private _isAltPressed: boolean = false;
   private _isGPressed: boolean = false;
   private _isMPressed: boolean = false;
 
   protected onDisplay(): void {
+    this.onMainQuestRefresh();
     // 临时处理
     MailManager.getInstance().refreshRedDots();
     HeroManager.getInstance().refreshRedDots();
@@ -69,6 +77,7 @@ export class MainPaneView extends BaseUiView {
     this.registerClickEvent(this.mainPane, this.onMainClick, this);
     this.registerClickEvent(this.mailPane, this.onMailClick, this);
     this.registerClickEvent(this.rankPane, this.onRankClick, this);
+    eventBus.on(GameEvent.MainQuestRefresh, this.onMainQuestRefresh);
 
     this.nameLabel.string = PlayerData.instance.name;
     this.fightingLabel.string = '战力：' + NumberUtils.formatNumber(PlayerData.instance.fighting);
@@ -81,6 +90,15 @@ export class MainPaneView extends BaseUiView {
     // 监听键盘 同时按下alt+g+m 打开gm命令
     input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
     input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
+  }
+
+  private onMainQuestRefresh() {
+    let mainQuest = QuestModel.instance.getMainQuest();
+    if (mainQuest) {
+      let questData = ConfigContext.configQuestContainer.getRecord(mainQuest.id);
+      this.mainQuestInfo.string =      
+`<color=#ffd700>${questData.desc}(</color><color=#ffffff>${mainQuest.progress}</color><color=#ffd700>/</color><color=#32cd32>${questData.target}</color><color=#ffd700>)</color>`;
+    }
   }
 
   private onKeyDown(event: EventKeyboard) {

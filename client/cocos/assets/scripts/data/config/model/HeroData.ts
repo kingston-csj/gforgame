@@ -2,10 +2,8 @@
        import BaseConfigItem from '../BaseConfigItem';
             
         export default class HeroData extends BaseConfigItem {
-          public static fileName:string = "heroData";
+          public static fileName:string = "hero";
         
-            private _name: string;
-            public get name():string {return this._name;}
             
             private _quality: number;
             public get quality():number {return this._quality;}
@@ -45,7 +43,6 @@
             
         public constructor(data:any) {
             super(data);
-                this._name = data['name']
         this._quality = data['quality']
         this._camp = data['camp']
         this._tips = data['tips']
