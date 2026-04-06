@@ -7,6 +7,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/friend"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 
@@ -46,7 +47,7 @@ func (r *FriendRoute) Init() {
 }
 
 func (r *FriendRoute) ReqSearchPlayers(s *network.Session, index int32, msg *protos.ReqFriendSearchPlayers) *protos.ResFriendSearchPlayers {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	items := r.service.SearchByKey(msg.Key)
 	filteredItems := make([]*protos.FriendVo, 0)
 	for _, item := range items {
@@ -63,7 +64,7 @@ func (r *FriendRoute) ReqSearchPlayers(s *network.Session, index int32, msg *pro
 }
 
 func (r *FriendRoute) ReqQueryFriends(s *network.Session, index int32, msg *protos.ReqFriendQueryMyFriends) *protos.ResFriendQueryMyFriends {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	items := r.service.QueryMyFriendVos(p.Id)
 	response := &protos.ResFriendQueryMyFriends{
 		Code:  0,
@@ -73,7 +74,7 @@ func (r *FriendRoute) ReqQueryFriends(s *network.Session, index int32, msg *prot
 }
 
 func (r *FriendRoute) ReqApply(s *network.Session, index int32, msg *protos.ReqFriendApply) *protos.ResFriendApply {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	code := r.service.ApplyFriend(p, msg.FriendId)
 	response := &protos.ResFriendApply{
 		Code: code,
@@ -82,7 +83,7 @@ func (r *FriendRoute) ReqApply(s *network.Session, index int32, msg *protos.ReqF
 }
 
 func (r *FriendRoute) ReqDealApply(s *network.Session, index int32, msg *protos.ReqFriendDealApplyRecord) *protos.ResFriendDealApplyRecord {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	code := r.service.DealApplyRecord(p, msg.ApplyId, msg.Status)
 	response := &protos.ResFriendDealApplyRecord{
 		Code: code,
@@ -91,7 +92,7 @@ func (r *FriendRoute) ReqDealApply(s *network.Session, index int32, msg *protos.
 }
 
 func (r *FriendRoute) ReqDelete(s *network.Session, index int32, msg *protos.ReqFriendDelete) *protos.ResFriendDelete {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	code := r.service.DeleteFriend(p, msg.FriendId)
 	response := &protos.ResFriendDelete{
 		Code: code,

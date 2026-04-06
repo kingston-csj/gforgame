@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 	"io/github/gforgame/codec"
 	"io/github/gforgame/logger"
@@ -9,6 +10,8 @@ import (
 	"log"
 	"net"
 	"reflect"
+	"strings"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -42,12 +45,15 @@ type Session struct {
 	AsynTasks chan func()
 	// 协议类型
 	protocolType protocol.ProtocolType
+	// 关闭只执行一次
+	closeOnce sync.Once
 }
 
 func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 	return &Session{conn: conn,
 		ProtocolCodec: protocol.NewBinaryProtocolAdapter(),
 		MessageCodec:  messageCodec,
+		Die:           make(chan bool, 1),
 		dataToSend:    make(chan []byte, 128),
 		DataReceived:  make(chan *protocol.RequestDataFrame, 128),
 		Attrs:         map[string]interface{}{},
@@ -66,6 +72,7 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 	return &Session{conn: conn,
 		ProtocolCodec: protocolAdapter,
 		MessageCodec:  messageCodec,
+		Die:           make(chan bool, 1),
 		dataToSend:    make(chan []byte, 128),
 		DataReceived:  make(chan *protocol.RequestDataFrame, 128),
 		Attrs:         map[string]interface{}{},
@@ -99,16 +106,36 @@ func (s *Session) Send(msg any, index int32) error {
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)
 	}
 	jsonStr, err := jsonutil.StructToJSON(msg)
+	id, ok := s.GetAttr("id")
+	if !ok {
+		id = ""
+	}
 	if err == nil {
-		fmt.Println("发送消息: cmd:", cmd, " name:", msgName, " 内容：", jsonStr)
+		if !strings.Contains(msgName, "Heartbeat") {
+			logger.Info(fmt.Sprintf("id:%s 发送消息: cmd:%d, name:%s, 内容：%s", id, cmd, msgName, jsonStr))
+		}
 	}
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
-	s.dataToSend <- frame
-	return nil
+	select {
+	case <-s.Die:
+		return errors.New("session closed")
+	case s.dataToSend <- frame:
+		return nil
+	}
 }
 
 func (s *Session) SendWithoutIndex(msg any) error {
 	return s.Send(msg, 0)
+}
+
+func (s *Session) SetAttr(key string, value any) error {
+	s.Attrs[key] = value
+	return nil
+}
+
+func (s *Session) GetAttr(key string) (any, bool) {
+	value, ok := s.Attrs[key]
+	return value, ok
 }
 
 // SendAndClose 发送消息并关闭连接
@@ -133,7 +160,11 @@ func (s *Session) SendAndClose(msg any) error {
 	if e3 != nil {
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)
 	}
-	fmt.Println("发送消息: cmd:", cmd, " name:", msgName, " 内容：", msg)
+	id, ok := s.GetAttr("id")
+	if !ok {
+		id = ""
+	}
+	fmt.Println(fmt.Sprintf("id:%s 发送消息: cmd:%d, name:%s, 内容：%s", id, cmd, msgName, msg))
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(-1), msgData)
 	_, err = s.conn.Write(frame)
 	if err != nil {
@@ -148,13 +179,13 @@ func (s *Session) SendAndClose(msg any) error {
 }
 
 func (s *Session) Write() {
-	defer close(s.dataToSend)
-
 	for {
 		select {
 		case data := <-s.dataToSend:
 			if _, err := s.conn.Write(data); err != nil {
-				log.Println(err.Error())
+				logger.Error(err)
+				s.Close()
+				return
 			}
 		case <-s.Die:
 			return
@@ -162,21 +193,30 @@ func (s *Session) Write() {
 	}
 }
 
-
 func (s *Session) Read() {
-    defer func() {
+	defer func() {
+		// 一旦关闭，onClientConnected 就会收到断开信号
+		s.Close()
 		if r := recover(); r != nil {
 			logger.Error(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-    // 检查是否是WebSocket连接
-    if wsConn, ok := s.conn.(WebSocketConn); ok {
-        // WebSocket连接，按消息处理
-        s.readWebSocketMessages(wsConn)
-    } else {
-        // TCP连接，按字节流处理
-        s.readTCPStream()
-    }
+	// 检查是否是WebSocket连接
+	if wsConn, ok := s.conn.(WebSocketConn); ok {
+		// WebSocket连接，按消息处理
+		s.readWebSocketMessages(wsConn)
+	} else {
+		// TCP连接，按字节流处理
+		s.readTCPStream()
+	}
+}
+
+// Close 关闭会话（幂等）
+func (s *Session) Close() {
+	s.closeOnce.Do(func() {
+		close(s.Die)
+		_ = s.conn.Close()
+	})
 }
 
 // readWebSocketMessages 处理WebSocket消息
@@ -187,18 +227,29 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 		// 读取一条完整的WebSocket消息
 		messageType, messageData, err := wsConn.ReadMessage()
 		if err != nil {
-			log.Println(err.Error())
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived) {
+				logger.Debugf("websocket normal close: %v", err)
+				return
+			}
+			// Unity 直接关闭进程时常见 1006/unexpected EOF，按正常断链处理
+			errMsg := err.Error()
+			if strings.Contains(errMsg, "close 1006") || strings.Contains(errMsg, "unexpected EOF") {
+				logger.Debugf("websocket peer disconnected: %v", err)
+				return
+			}
+			logger.Error(err)
 			return
 		}
 
 		// 检查是否关闭，结束该goroutine
 		select {
 		case <-s.Die:
+			// 关闭连接
 			return
 		default:
 		}
 
-		logger.Info(fmt.Sprintf("收到WebSocket消息，类型: %d, 长度: %d", messageType, len(messageData)))
+		// logger.Info(fmt.Sprintf("收到WebSocket消息，类型: %d, 长度: %d", messageType, len(messageData)))
 
 		// 第一次收到消息时确定协议类型并调整协议适配器
 		if !protocolDetermined {
@@ -289,4 +340,13 @@ func (s *Session) readTCPStream() {
 			s.DataReceived <- ioFrame
 		}
 	}
+}
+
+func (s *Session) ToString() string {
+	id, ok := s.GetAttr("id")
+	if !ok {
+		id = "anonymous"
+	}
+	// id + remoteAddr
+	return fmt.Sprintf("id:%s, remoteAddr:%s", id, s.conn.RemoteAddr().String())
 }

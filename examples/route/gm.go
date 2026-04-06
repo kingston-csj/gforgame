@@ -1,8 +1,8 @@
 package route
 
 import (
-	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/service/gm"
+	playerservice "io/github/gforgame/examples/service/player"
 	"strings"
 
 	"io/github/gforgame/network"
@@ -29,8 +29,8 @@ func (ps *GmRoute) ReqAction(s *network.Session, index int32, msg *protos.ReqGmC
 	if len(strings.Split(msg.Args, " "))>=2 {
 		params = strings.Split(msg.Args, " ")[1]
 	} 
-	player := network.GetPlayerBySession(s)
-	err := ps.service.Dispatch(player.(*playerdomain.Player), topic, params)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	err := ps.service.Dispatch(player, topic, params)
 	if err != nil {
 		return &protos.ResGmCommand{Code: int32(err.Code())}
 	}

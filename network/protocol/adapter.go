@@ -57,11 +57,11 @@ func NewJSONProtocolAdapter() *JSONProtocolAdapter {
 
 // WebSocketJsonFrame JSON格式的数据包
 type WebSocketJsonFrame struct {
-	Type  string `json:"$type,omitempty"` // 消息类型标识
-	Cmd   int32  `json:"cmd"`             // 消息类型
-	Index int32  `json:"index"`           // 客户端消息索引
-	Msg   string `json:"msg,omitempty"`   // 消息数据
-	Data  string `json:"data,omitempty"`  // 兼容data字段
+	Type  string          `json:"$type,omitempty"` // 消息类型标识
+	Cmd   int32           `json:"cmd"`             // 消息类型
+	Index int32           `json:"index"`           // 客户端消息索引
+	Msg   json.RawMessage `json:"msg,omitempty"`   // 消息数据（支持字符串和对象）
+	Data  json.RawMessage `json:"data,omitempty"`  // 兼容data字段
 }
 
 // Decode 解码JSON格式的数据
@@ -71,30 +71,22 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 		return nil, fmt.Errorf("unmarshal json failed: %v", err)
 	}
 
-	// 将消息数据转换为字节数组
+	// 将消息数据转换为字节数组：兼容两种格式
+	// 1) "msg":"{\"mapper\":{\"2012\":1}}"
+	// 2) "msg":{"mapper":{"2012":1}}
 	var dataBytes []byte
-	var msgData interface{}
-
-	// 优先使用Msg字段，如果没有则使用Data字段
-	if len(jsonPacket.Msg) > 0 {
-		msgData = jsonPacket.Msg
-	} else if len(jsonPacket.Data) > 0 {
-		msgData = jsonPacket.Data
+	rawMsg := jsonPacket.Msg
+	if len(rawMsg) == 0 {
+		rawMsg = jsonPacket.Data
 	}
-
-	if msgData != nil {
-		var err error
-
-		// 检查msgData是否是字符串（JSON字符串）
-		if msgStr, ok := msgData.(string); ok {
-			// 如果是字符串，直接使用字符串的字节数组
+	if len(rawMsg) > 0 {
+		var msgStr string
+		// 如果是 JSON 字符串，先解出字符串内容
+		if err := json.Unmarshal(rawMsg, &msgStr); err == nil {
 			dataBytes = []byte(msgStr)
 		} else {
-			// 如果是对象，序列化为JSON字节数组
-			dataBytes, err = json.Marshal(msgData)
-			if err != nil {
-				return nil, fmt.Errorf("marshal msg failed: %v", err)
-			}
+			// 否则直接按 JSON 对象字节使用
+			dataBytes = rawMsg
 		}
 	}
 
@@ -113,16 +105,10 @@ func (j *JSONProtocolAdapter) Decode(data []byte) ([]*Packet, error) {
 
 // Encode 编码为JSON格式
 func (j *JSONProtocolAdapter) Encode(cmd int32, index int32, data []byte) ([]byte, error) {
-	// 尝试将data解析为JSON对象
-	var dataObj = ""
-	if len(data) > 0 {
-		dataObj = string(data)
-	}
-
 	jsonPacket := WebSocketJsonFrame{
 		Cmd:   cmd,
 		Index: index,
-		Msg:   dataObj,
+		Msg:   json.RawMessage(data),
 	}
 
 	return json.Marshal(jsonPacket)

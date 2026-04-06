@@ -5,6 +5,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/mall"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -27,7 +28,7 @@ func (ps *MallRoute) Init() {
 }
 
 func (ps *MallRoute) ReqMallBuy(s *network.Session, index int32, msg *protos.ReqMallBuy) *protos.ResMallBuy{
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	err := ps.service.Buy(player, msg.ProductId, msg.Count)
 	if err != nil {
 		return &protos.ResMallBuy{

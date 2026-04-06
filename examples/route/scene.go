@@ -1,7 +1,7 @@
 package route
 
 import (
-	playerdomain "io/github/gforgame/examples/domain/player"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/scene"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -27,7 +27,7 @@ func (ps *SceneRoute) ReqQuery(s *network.Session, index int32, msg *protos.ReqS
 }
 
 func (ps *SceneRoute) ReqUpdate(s *network.Session, index int32, msg *protos.ReqSceneSetData) *protos.ResSceneSetData {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	sceneId := msg.SceneId
 	  scene.GetSceneService().UpdateScene(player.Id, sceneId, msg.Data)
 	return &protos.ResSceneSetData{

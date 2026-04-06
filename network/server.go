@@ -6,5 +6,5 @@ type Server interface {
 	// Start 启动服务器
 	Start() error
 	// Stop 关闭服务器
-	Stop() error
+	Stop()
 }

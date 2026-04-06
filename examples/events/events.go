@@ -14,15 +14,24 @@ func (e PlayerEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
+type LoginEvent struct {
+	PlayerEvent
+}
+
+func (e LoginEvent) GetOwner() domain.Player {
+	return e.Player
+}
+
 type RecruitEvent struct {
 	PlayerEvent
 	Times int32
-	Type  int32 // 招募类型 1:普通 2:高级
+	Type int32 // 招募类型 1:普通 2:高级
 }
 
 func (e RecruitEvent) GetOwner() domain.Player {
 	return e.Player
 }
+
 
 type HeroGainEvent struct {
 	PlayerEvent
@@ -33,10 +42,12 @@ func (e HeroGainEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
+
+
 type ItemConsumeEvent struct {
 	PlayerEvent
 	ItemId int32
-	Count  int32
+	Count int32
 }
 
 func (e ItemConsumeEvent) GetOwner() domain.Player {
@@ -72,17 +83,24 @@ func (e HeroEntrustEvent) GetOwner() domain.Player {
 type HeroLevelUpEvent struct {
 	PlayerEvent
 	HeroId int32
-	Times  int32
+	Times int32
+}
+func (e HeroLevelUpEvent) GetOwner() domain.Player {
+	return e.Player
 }
 
-func (e HeroLevelUpEvent) GetOwner() domain.Player {
+type EquipLevelUpEvent struct {
+	PlayerEvent
+	EquipId int32
+	Times int32
+}
+func (e EquipLevelUpEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
 type MallBuyEvent struct {
 	PlayerEvent
 }
-
 func (e MallBuyEvent) GetOwner() domain.Player {
 	return e.Player
 }
@@ -91,7 +109,6 @@ type AreaScoreChangedEvent struct {
 	PlayerEvent
 	Score int32
 }
-
 func (e AreaScoreChangedEvent) GetOwner() domain.Player {
 	return e.Player
 }
@@ -101,5 +118,22 @@ type PassArenaEvent struct {
 }
 
 func (e PassArenaEvent) GetOwner() domain.Player {
+	return e.Player
+}
+
+type PassGuankaEvent struct {
+	PlayerEvent
+}
+
+func (e PassGuankaEvent) GetOwner() domain.Player {
+	return e.Player
+}
+
+
+type PassFubenEvent struct {
+	PlayerEvent
+}
+
+func (e PassFubenEvent) GetOwner() domain.Player {
 	return e.Player
 }

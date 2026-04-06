@@ -5,6 +5,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/chat"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -27,7 +28,7 @@ func (rs *ChatRouter) Init() {
 }
 
 func (rs *ChatRouter) ReqChat(s *network.Session, index int32, msg *protos.ReqChat) *protos.ResChat {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	response := rs.service.SendMessage(p, msg)
 	return response
 }

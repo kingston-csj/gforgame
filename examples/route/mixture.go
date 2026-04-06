@@ -1,8 +1,8 @@
 package route
 
 import (
-	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/service/mixture"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"time"
@@ -29,7 +29,7 @@ func (ps *MixtureRoute) ReqIdleViewReward(s *network.Session, index int32, msg *
 }
 
 func (ps *MixtureRoute) ReqClientUploadEvent(s *network.Session, index int32, msg *protos.ReqClientUploadEvent) *protos.ResClientUploadEvent {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	ps.service.OnClientUploadEvent(player, msg.Type)
 	return &protos.ResClientUploadEvent{
 		Code: 0,

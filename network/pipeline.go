@@ -35,7 +35,7 @@ func (d *BaseIoDispatch) OnSessionCreated(session *Session) {
 func (d *BaseIoDispatch) OnMessageReceived(session *Session, msg *protocol.RequestDataFrame) {
 	for _, d := range d.Pipeline {
 		// 只要有一个返回false，则终止执行
-		if d.MessageReceived(session, msg) {
+		if !d.MessageReceived(session, msg) {
 			break
 		}
 	}

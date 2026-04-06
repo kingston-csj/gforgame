@@ -5,6 +5,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/mail"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -31,7 +32,7 @@ func (c *MailRoute) OnPlayerLogin(player *playerdomain.Player) {
 }
 
 func (c *MailRoute) ReqGetAllRewards(s *network.Session, index int32, msg *protos.ReqMailGetAllRewards) *protos.ResMailGetAllRewards {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	rewardVos := c.service.TakeAllRewards(player)
 	return &protos.ResMailGetAllRewards{
 		Code: 0,
@@ -40,7 +41,7 @@ func (c *MailRoute) ReqGetAllRewards(s *network.Session, index int32, msg *proto
 }
 
 func (c *MailRoute) ReqDeleteAll(s *network.Session, index int32, msg *protos.ReqMailDeleteAll) *protos.ResMailDeleteAll {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	removed := c.service.DeleteAll(player)
 	return &protos.ResMailDeleteAll{
 		Removed: removed,
@@ -48,7 +49,7 @@ func (c *MailRoute) ReqDeleteAll(s *network.Session, index int32, msg *protos.Re
 }
 
 func (c *MailRoute) ReqGetReward(s *network.Session, index int32, msg *protos.ReqMailGetReward) *protos.ResMailGetReward {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	code, rewardVos := c.service.TakeReward(player, msg.Id)
 	if code != 0 {
 		return &protos.ResMailGetReward{
@@ -61,7 +62,7 @@ func (c *MailRoute) ReqGetReward(s *network.Session, index int32, msg *protos.Re
 }
 
 func (c *MailRoute) ReqRead(s *network.Session, index int32, msg *protos.ReqMailRead) *protos.ResMailRead {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	code := c.service.Read(player, msg.Id)
 	return &protos.ResMailRead{
 		Code: int32(code),

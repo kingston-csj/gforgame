@@ -15,3 +15,7 @@ func (d *WeeklyReset) Reset(time int64) {
 	d.LastWeeklyReset = time
 	d.WeeklyQuestScore = 0
 }
+
+func (d *WeeklyReset) AfterLoad() {
+
+}

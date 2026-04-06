@@ -206,7 +206,7 @@ func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, 
 		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	if hero.EntrustQuestId != 0 {
-		return int32(constants.I18N_HERO_TIP9)
+		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	quest.AcceptTime = time.Now().UnixMilli()
 	hero.EntrustQuestId = questId

@@ -6,12 +6,15 @@ import (
 	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"net"
+	"sync"
 )
 
 type TcpServer struct {
 	Options
-	Name    string // 服务器名称
-	Running chan bool
+	Name     string // 服务器名称
+	Running  chan bool
+	listener net.Listener
+	stopOnce sync.Once
 }
 
 func NewServer(opts ...Option) *TcpServer {
@@ -38,9 +41,15 @@ func (s *TcpServer) Start() error {
 		c.Init()
 		err := s.Router.RegisterMessageHandlers(c)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
+
+	listener, err := net.Listen("tcp", s.ServiceAddr)
+	if err != nil {
+		return err
+	}
+	s.listener = listener
 
 	go func() {
 		s.startListen()
@@ -55,17 +64,23 @@ func (s *TcpServer) Addr() string {
 
 // Enable current server accept connection
 func (s *TcpServer) startListen() {
-	listener, err := net.Listen("tcp", s.ServiceAddr)
-	if err != nil {
-		logger.Error(err)
+	if s.listener == nil {
+		logger.Error(errors.New("tcp listener is nil"))
+		return
 	}
 
-	defer listener.Close()
+	defer func() {
+		_ = s.listener.Close()
+	}()
 	for {
-		conn, err := listener.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
+			// listener 被关闭时会返回错误，此时应退出 accept 循环
+			if errors.Is(err, net.ErrClosed) {
+				return
+			}
 			logger.Error(fmt.Errorf("new tcp conn failed %v", err))
-			continue
+			return
 		}
 		go onClientConnected(s, conn)
 	}
@@ -78,10 +93,7 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 		s := network.GetSession(conn)
 		node.IoDispatch.OnSessionClosed(s)
 		network.UnregisterSession(conn)
-		err := conn.Close()
-		if err != nil {
-			logger.Error(fmt.Errorf("close tcp conn failed %v", err))
-		}
+		_ = conn.Close()
 	}()
 
 	ioSession := network.NewSession(conn, node.MessageCodec)
@@ -104,13 +116,19 @@ func onClientConnected(node *TcpServer, conn net.Conn) {
 			node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
 		case <-ioSession.Die:
 			// 关闭session，执行defer函数
-			break
+			return
 		}
 	}
 }
 
 func (n *TcpServer) Stop() {
-	for _, c := range n.modules {
-		c.Shutdown()
-	}
+	n.stopOnce.Do(func() {
+		if n.listener != nil {
+			_ = n.listener.Close()
+		}
+		network.CloseAllSessions()
+		for _, c := range n.modules {
+			c.Shutdown()
+		}
+	})
 }

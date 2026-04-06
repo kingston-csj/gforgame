@@ -28,7 +28,7 @@ func GetOrCreateClient(sid uint32) (RpcClient, error) {
 		s, found = clients[sid]
 		// 双重检测
 		if !found {
-			conn, err := grpc.NewClient(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+			conn, err := grpc.NewClient(fmt.Sprintf(":%d", sid), grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
 				return nil, fmt.Errorf("new rpc client failed %v", err)
 			}

@@ -7,7 +7,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/player"
-
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 	"io/github/gforgame/util"
@@ -56,7 +56,7 @@ func (ps *PlayerRoute) Init() {
 		allSessions := network.GetAllOnlinePlayerSessions()
 		for _, s := range allSessions {
 			s.AsynTasks <- func() {
-				player := network.GetPlayerBySession(s).(*playerdomain.Player)
+				player := playerservice.GetPlayerService().GetPlayerBySession(s)
 				ps.service.DailyReset(player, data.(int64))
 			}
 		}
@@ -72,7 +72,7 @@ func (ps *PlayerRoute) ReqLogin(s *network.Session, index int32, msg *protos.Req
 }
 
 func (ps *PlayerRoute) ReqLoadingFinish(s *network.Session, index int32, msg *protos.ReqPlayerLoadingFinish) {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	context.EventBus.Publish(events.PlayerLoadingFinish, player)
 }
 
@@ -86,24 +86,24 @@ func (ps *PlayerRoute) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate
 }
 
 func (ps *PlayerRoute) ReqPlayerUpLevel(s *network.Session, index int32, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	return ps.service.DoUpLevel(p, msg.ToLevel)
 }
 
 func (ps *PlayerRoute) ReqPlayerUpStage(s *network.Session, index int32, msg *protos.ReqPlayerUpStage) *protos.ResPlayerUpStage {
-	p := network.GetPlayerBySession(s).(*playerdomain.Player)
+	p := playerservice.GetPlayerService().GetPlayerBySession(s)
 	return ps.service.DoUpStage(p)
 }
 
 func (ps *PlayerRoute) ReqPlayerRefreshScore(s *network.Session, index int32, msg *protos.ReqPlayerRefreshScore) *protos.ResPlayerRefreshScore {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	player.ClientScore = msg.Score
 	context.EventBus.Publish(events.PlayerAttrChange, player)
 	return &protos.ResPlayerRefreshScore{Code: 0}
 }
 
 func (ps *PlayerRoute) ReqEditClientData	(s *network.Session, index int32, msg *protos.ReqEditClientData) *protos.ResEditClientData {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	player.ClientData = msg.Data
 	context.EventBus.Publish(events.PlayerAttrChange, player)
 	return &protos.ResEditClientData{Code: 0}

@@ -4,6 +4,7 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/signin"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -28,7 +29,7 @@ func (ps *SignInRoute) Init() {
 }
 
 func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.ReqSignIn) *protos.ResSignIn{
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	err := ps.service.SignIn(player)
 	if err != nil {
 		return &protos.ResSignIn{
@@ -39,7 +40,7 @@ func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.Re
 }
 
 func (ps *SignInRoute) ReqSignInMakeup(s *network.Session, index int32, msg *protos.ReqSignInMakeup) *protos.ResSignInMakeup{
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	err := ps.service.SignInMakeUp(player, msg.Day)
 	if err != nil {
 		return &protos.ResSignInMakeup{

@@ -5,6 +5,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/service/monthcard"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
 )
@@ -33,7 +34,7 @@ func (ps *MonthCardRoute) Init() {
 
 
 func (ps *MonthCardRoute) ReqGetReward(s *network.Session, index int32, msg *protos.ReqMonthCardGetReward) *protos.ResMonthCardGetReward{
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	err := ps.service.TakeReward(player, msg.Type)
 	if err != nil {
 		return &protos.ResMonthCardGetReward{

@@ -8,6 +8,7 @@ const (
 	// 客户端加载完成
 	PlayerLoadingFinish = "player_loading_finish"
 	PlayerDailyReset    = "player_daily_reset"
+	PlayerWeeklyReset   = "player_weekly_reset"
 
 	Recharge = "recharge"
 
@@ -16,6 +17,8 @@ const (
 
 	HeroGain    = "hero_gain"
 	HeroLevelUp = "hero_level_up"
+
+	EquipLevelUp = "equip_level_up"
 
 	SystemDailyReset   = "system_daily_reset"
 	SystemWeeklyReset  = "system_weekly_reset"
@@ -32,4 +35,8 @@ const (
 	AreaScoreChanged = "area_score_changed"
 	// 竞技场通过
 	PassArena = "pass_arena"
+
+	PassGuanka = "pass_guanka"
+
+	PassFuben = "pass_fuben"
 )

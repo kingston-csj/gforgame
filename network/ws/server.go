@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/github/gforgame/logger"
@@ -8,20 +9,29 @@ import (
 	"io/github/gforgame/network/protocol"
 	"net"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
 type WsServer struct {
 	Options
-	Name    string // 服务器名称
-	Running chan bool
+	Name     string // 服务器名称
+	Running  chan bool
+	server   *http.Server
+	listener net.Listener
+	stopOnce sync.Once
 }
 
 func NewServer(opts ...Option) *WsServer {
 	opt := Options{}
 	for _, option := range opts {
 		option(&opt)
+	}
+
+	if opt.wsPath == "" {
+		panic("ws path cannot be empty")
 	}
 
 	s := &WsServer{
@@ -42,13 +52,13 @@ func (n *WsServer) Start() error {
 		c.Init()
 		err := n.Router.RegisterMessageHandlers(c)
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 
-	go func() {
-		n.startListen()
-	}()
+	if err := n.startListen(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -58,7 +68,7 @@ func (n *WsServer) Addr() string {
 }
 
 // Enable current server accept connection
-func (n *WsServer) startListen() {
+func (n *WsServer) startListen() error {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -71,7 +81,8 @@ func (n *WsServer) startListen() {
 	if len(n.wsPath) > 0 {
 		path = n.wsPath
 	}
-	http.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			logger.Error(fmt.Errorf("websocket conn failed %v", err))
@@ -85,27 +96,33 @@ func (n *WsServer) startListen() {
 		}
 		go onClientConnected(n, c)
 	})
-	if err := http.ListenAndServe(n.ServiceAddr, nil); err != nil {
-		panic(err)
+
+	listener, err := net.Listen("tcp", n.ServiceAddr)
+	if err != nil {
+		return err
 	}
+	n.listener = listener
+	n.server = &http.Server{
+		Addr:    n.ServiceAddr,
+		Handler: mux,
+	}
+	go func() {
+		if err := n.server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error(fmt.Errorf("websocket server failed %v", err))
+		}
+	}()
+	return nil
 }
 
 // 处理客户端连接，包括socket,websocket
 func onClientConnected(node *WsServer, conn net.Conn) {
 	defer func() {
+		logger.Debugf("客户端连接关闭 %s", conn.RemoteAddr().String())
 		// 处理客户端网络断开
-		// s := network.GetSession(conn)
-		// node.IoDispatch.OnSessionCreated(s)
-		// network.UnregisterSession(conn)
-		// err := conn.Close()
-		// if err != nil {
-		// 	logger.Error(fmt.Errorf("close ws conn failed %v", err))
-		// }
-		if r := recover(); r != nil {
-			logger.Error(fmt.Errorf("Recovered from panic: %v", r))
-			// 可能的话发送错误响应到客户端
-			// 记录详细错误日志
-		}
+		s := network.GetSession(conn)
+		node.IoDispatch.OnSessionClosed(s)
+		network.UnregisterSession(conn)
+		_ = conn.Close()
 	}()
 
 	// 先创建默认的Session，协议类型会在第一次收到消息时确定
@@ -131,14 +148,35 @@ func onClientConnected(node *WsServer, conn net.Conn) {
 	go ioSession.Read()
 	go ioSession.Write()
 
-	// read loop
-	for ioFrame := range ioSession.DataReceived {
-		node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
+	//  轮询，保证异步任务和客户端消息的执行是线程安全的
+	for {
+		select {
+		case task := <-ioSession.AsynTasks:
+			task()
+		case ioFrame := <-ioSession.DataReceived:
+			node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
+		case <-ioSession.Die:
+			// 关闭session，执行defer函数
+			return
+		}
 	}
 }
 
 func (n *WsServer) Stop() {
-	for _, c := range n.modules {
-		c.Shutdown()
-	}
+	n.stopOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		if n.server != nil {
+			_ = n.server.Shutdown(ctx)
+		}
+		if n.listener != nil {
+			_ = n.listener.Close()
+		}
+
+		network.CloseAllSessions()
+		for _, c := range n.modules {
+			c.Shutdown()
+		}
+	})
 }

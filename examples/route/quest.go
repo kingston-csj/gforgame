@@ -4,6 +4,7 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	playerservice "io/github/gforgame/examples/service/player"
 	quest "io/github/gforgame/examples/service/quest"
 	"io/github/gforgame/network"
 	"io/github/gforgame/protos"
@@ -27,7 +28,7 @@ func (c *QuestRoute) Init() {
 }
 
 func (ps *QuestRoute) ReqTakeReward(s *network.Session, index int32, msg *protos.ReqQuestTakeReward) *protos.ResQuestTakeReward {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	response, err := ps.service.TakeReward(player, msg.Id)
 	if err != nil {
 		return &protos.ResQuestTakeReward{
@@ -38,14 +39,14 @@ func (ps *QuestRoute) ReqTakeReward(s *network.Session, index int32, msg *protos
 }
 
 func (ps *QuestRoute) ReqTakeProgressReward(s *network.Session, index int32, msg *protos.ReqQuestTakeProgressReward) *protos.ResQuestTakeProgressReward {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	response := ps.service.TakeProgressReward(player, msg.Type)
 	return response
 }
 
 
 func (ps *QuestRoute) ReqQuestEntrust(s *network.Session, index int32, msg *protos.ReqQuestEntrust) *protos.ResQuestEntrust {
-	player := network.GetPlayerBySession(s).(*playerdomain.Player)
+	player := playerservice.GetPlayerService().GetPlayerBySession(s)
 	err := ps.service.EntrustQuest(player, msg.QuestId, msg.HeroId)
 	return &protos.ResQuestEntrust{
 		Code: int32(err),

@@ -18,6 +18,7 @@ type ResPlayerLogin struct { // 玩家登录响应
     CreateTime int64  `json:"createTime"`
     Head       int32  `json:"head"`
     Level      int32  `json:"level"`
+    Stage      int32  `json:"stage"`
     Name       string `json:"name"`
     Fighting   int32  `json:"fighting"`
     Camp       int32  `json:"camp"`
@@ -78,6 +79,14 @@ type PushDailyResetInfo struct { // 玩家每日重置信息推送
     HighRecruitTimes int32 `json:"highRecruitTimes"` // 高级招募次数
     MallDailyBuyTimes int32 `json:"mallDailyBuyTimes"` // 商城每日购买次数
     DailyRechargeSum int32 `json:"dailyRechargeSum"` // 每日充值金额
+}
+
+type PushWeeklyResetInfo struct { // 玩家每周重置信息推送
+	_ struct{} `cmd_ref:"CmdPushWeeklyResetInfo"`
+
+	WeeklyRechargeSum float32 `json:"weeklyRechargeSum"` // 充值累计积分
+	WeeklyGiftRewards string  `json:"weeklyGiftRewards"` // 充值礼包奖励领取状态, 格式为 id1=status,id2=status
+	RechargeBuyTimes  string  `json:"rechargeBuyTimes"`  // 充值每周限购商品信息, 格式为 id1=次数1,id2=次数2
 }
 
 type ReqPlayerRefreshScore struct { // 上报经营评分

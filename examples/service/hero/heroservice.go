@@ -209,7 +209,7 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 	levelContainer := config.GetSpecificContainer[*container.HeroLevelContainer]()
 	if toLevel > levelContainer.MaxLevel {
 		return &protos.ResHeroLevelUp{
-			Code: constants.I18N_HERO_TIP1,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 	if toLevel <= h.Level {
@@ -284,7 +284,7 @@ func (ps *HeroService) DoStageUp(p *player.Player, heroId int32) *protos.ResHero
 	}
 	if h.Level < stageData.MaxLevel {
 		return &protos.ResHeroUpStage{
-			Code: constants.I18N_HERO_TIP3,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 
@@ -378,7 +378,7 @@ func (ps *HeroService) DoOffFight(p *player.Player, heroId int32) *protos.ResHer
 
 	if h.Position == 0 {
 		return &protos.ResHeroOffFight{
-			Code: constants.I18N_HERO_TIP7,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 
@@ -402,7 +402,7 @@ func (ps *HeroService) DoChangePosition(p *player.Player, heroId int32, position
 
 	if h.Position == position {
 		return &protos.ResHeroChangePosition{
-			Code: constants.I18N_HERO_TIP8,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 

@@ -31,10 +31,9 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("record not found")
-	ErrCast     = errors.New("cast exception")
-	instance    *PlayerService
-	once        sync.Once
+	ErrCast  = errors.New("cast exception")
+	instance *PlayerService
+	once     sync.Once
 )
 
 // 玩家模块
@@ -89,22 +88,35 @@ func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
 	return player
 }
 
+func (ps *PlayerService) GetPlayerBySession(session *network.Session) *playerdomain.Player {
+	playerID, ok := network.GetPlayerIDBySession(session)
+	if !ok {
+		return nil
+	}
+	return ps.GetPlayer(playerID)
+}
+
+func (ps *PlayerService) GetPlayerByPlayerId(playerID string) *playerdomain.Player {
+	return ps.GetPlayer(playerID)
+}
+
 func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player {
 	player := ps.GetPlayer(playerId)
 	if player == nil {
 		player = &playerdomain.Player{}
 		player.Id = playerId
+		player.Camp = camp.Camp_Hao
 		player.AfterFind(nil)
-		ps.initPlayer(player)
+		initPlayer(player)
 		ps.SavePlayer(player)
 	}
 	return player
 }
 
-func (ps *PlayerService) initPlayer(player *playerdomain.Player) {
+func initPlayer(player *playerdomain.Player) {
 	player.Name = instance.RandomName()
 	player.Level = 1
-	player.Camp = camp.Camp_Hao
+	player.Stage = 1
 }
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
@@ -130,9 +142,10 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		}
 	}
 	fmt.Println("登录成功，id为：", player.Id)
+	s.SetAttr("id", player.Id)
 
 	// 添加session
-	network.AddSession(s, player)
+	network.AddSession(s, player.Id)
 
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送
@@ -142,7 +155,13 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
 			ps.DailyReset(player, dailyReset)
 		} else {
-			ps.PushDailyResetInfo(player)
+			ps.refreshDailyInfo(player)
+		}
+		weeklyReset := system.GetWeeklyReset().GetValue().(int64)
+		if player.WeeklyReset.LastWeeklyReset > 0 && player.WeeklyReset.LastWeeklyReset < weeklyReset {
+			ps.WeeklyReset(player, weeklyReset)
+		} else {
+			ps.refreshWeeklyInfo(player)
 		}
 		context.EventBus.Publish(events.PlayerLogin, player)
 		// 客户端再切到主界面
@@ -157,13 +176,15 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		Head:       player.Head,
 		Level:      player.Level,
 		Name:       player.Name,
-		Fighting:   player.Fight,
-		Camp:       1,
+		Stage:      player.Stage,
 	}, index)
 }
 
 func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 	id := util.GetNextID()
+	if util.IsEmptyString(name) {
+		name = ps.RandomName()
+	}
 	player := &playerdomain.Player{}
 	player.Id = id
 	player.Name = name
@@ -185,7 +206,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32) *proto
 	}
 	if p.Level >= stageData.MaxLevel {
 		return &protos.ResPlayerUpLevel{
-			Code: constants.I18N_HERO_TIP2,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 
@@ -233,7 +254,7 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpSt
 
 	if p.Level < stageData.MaxLevel {
 		return &protos.ResPlayerUpStage{
-			Code: constants.I18N_HERO_TIP3,
+			Code: constants.I18N_COMMON_ILLEGAL_PARAMS,
 		}
 	}
 
@@ -331,15 +352,31 @@ func (ps *PlayerService) DailyReset(player *playerdomain.Player, resetTime int64
 	player.ExtendBox.AccumulatedLoginDays++
 	context.EventBus.Publish(events.PlayerDailyReset, player)
 	ps.SavePlayer(player)
-	ps.PushDailyResetInfo(player)
+	ps.refreshDailyInfo(player)
 }
 
-func (ps *PlayerService) PushDailyResetInfo(player *playerdomain.Player) {
-	io.NotifyPlayer(player, &protos.PushDailyResetInfo{
-		NormalRecruitTimes: player.HeroBox.RecruitSum,
-	})
+func (ps *PlayerService) refreshDailyInfo(player *playerdomain.Player) {
+	push := &protos.PushDailyResetInfo{}
+	io.NotifyPlayer(player, push)
 }
 
+func (ps *PlayerService) WeeklyReset(player *playerdomain.Player, resetTime int64) {
+	// 直接用新的数据替换，就不用为每个字段写重置逻辑了
+	player.WeeklyReset = &playerdomain.WeeklyReset{
+		LastWeeklyReset: resetTime,
+	}
+	player.WeeklyReset.AfterLoad()
+	context.EventBus.Publish(events.PlayerWeeklyReset, player)
+	ps.SavePlayer(player)
+	ps.refreshWeeklyInfo(player)
+}
+
+func (ps *PlayerService) refreshWeeklyInfo(player *playerdomain.Player) {
+	push := &protos.PushWeeklyResetInfo{
+		WeeklyRechargeSum: player.WeeklyReset.RechargeSum,
+	}
+	io.NotifyPlayer(player, push)
+}
 func (ps *PlayerService) RandomName() string {
 	nameContainer := config.GetSpecificContainer[*container.NameContainer]()
 	for i := 0; i < 10; i++ {
@@ -349,4 +386,22 @@ func (ps *PlayerService) RandomName() string {
 		}
 	}
 	return util.GetNextID()
+}
+
+func (ps *PlayerService) EditPlayer(p *playerdomain.Player, head int32, name string) int32 {
+	if p.Name != name {
+		if _, ok := ps.idNameMapper.GetByKey(name); ok {
+			return constants.I18N_PLAYER_NAME_REPEATED
+		}
+		oldName := p.Name
+		p.Name = name
+		ps.idNameMapper.Put(p.Id, name)
+		ps.nameDict.DeleteNode(oldName)
+		ps.nameDict.AddNode(name)
+	}
+
+	ps.playerProfiles[p.Id].Name = name
+	p.Head = head
+	ps.SavePlayer(p)
+	return 0
 }

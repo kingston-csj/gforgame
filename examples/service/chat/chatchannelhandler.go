@@ -45,9 +45,9 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 	// 广播消息
 	for _, receiver := range receivers {
 		if network.IsOnline(receiver) {
-			player := network.GetPlayerByPlayerId(receiver)
+			player := playerservice.GetPlayerService().GetPlayerByPlayerId(receiver)
 			if player != nil {
-				onlines = append(onlines, player.(*playerdomain.Player))
+				onlines = append(onlines, player)
 			}
 		}
 	}
