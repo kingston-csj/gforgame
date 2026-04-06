@@ -40,7 +40,7 @@ export class RankModel extends BaseModel {
 
   public queryRank(type: number): Promise<ResRankQuery> {
     return new Promise<ResRankQuery>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqRankQuery.cmd,
         { type: type, start: 1, pageSize: 100 },
         (msg: ResRankQuery) => {

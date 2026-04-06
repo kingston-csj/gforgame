@@ -46,7 +46,7 @@ export class MailDetailView extends BaseUiView {
   private onRewardBtnClick(): void {
     let req = new ReqMailGetReward();
     req.id = this.selectedMailId;
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqMailGetReward.cmd,
       req,
       (res: ResMailGetReward) => {

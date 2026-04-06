@@ -17,8 +17,9 @@ import { RankPanelController } from '../rank/RankPanelController';
 import { RecruitPaneController } from '../recruit/RecruitPaneController';
 import eventBus from '../../frame/commons/eventbus/EventBus';
 import GameEvent from '../constants/GameEvent';
-import { QuestModel } from '../quest/QuestModel';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
+import QuestPanelController from '../quest/QuestPanelController';
+import { QuestBoxModel } from '../quest/QuestBoxModel';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneView')
@@ -40,6 +41,10 @@ export class MainPaneView extends BaseUiView {
 
   @property(Node)
   mainPane: Node;
+
+  
+  @property(Node)
+  questPane: Node;
 
   @property(Label)
   diamondLabel: Label;
@@ -77,6 +82,7 @@ export class MainPaneView extends BaseUiView {
     this.registerClickEvent(this.mainPane, this.onMainClick, this);
     this.registerClickEvent(this.mailPane, this.onMailClick, this);
     this.registerClickEvent(this.rankPane, this.onRankClick, this);
+    this.registerClickEvent(this.questPane, this.onQuestClick, this);
     eventBus.on(GameEvent.MainQuestRefresh, this.onMainQuestRefresh);
 
     this.nameLabel.string = PlayerData.instance.name;
@@ -93,7 +99,7 @@ export class MainPaneView extends BaseUiView {
   }
 
   private onMainQuestRefresh() {
-    let mainQuest = QuestModel.instance.getMainQuest();
+    let mainQuest = QuestBoxModel.instance.getMainQuest();
     if (mainQuest) {
       let questData = ConfigContext.configQuestContainer.getRecord(mainQuest.id);
       this.mainQuestInfo.string =      
@@ -164,5 +170,9 @@ export class MainPaneView extends BaseUiView {
 
   onRankClick() {
     RankPanelController.openUi();
+  }
+
+  onQuestClick() {
+    QuestPanelController.openUi();
   }
 }

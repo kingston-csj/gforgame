@@ -16,7 +16,8 @@ const { ccclass, property } = _decorator;
 export class MailView extends BaseUiView {
   @property(Node)
   mailContainer: Node;
-
+  @property(Node)
+  closeBtn: Node;
   @property(Prefab)
   mailItemPrefab: Prefab;
 
@@ -31,8 +32,6 @@ export class MailView extends BaseUiView {
   @property(Node)
   deleteBtn: Node;
 
-  @property(Node)
-  closeBtn: Node;
 
   protected start(): void {
     this.registerClickEvent(this.rewardBtn, this.onRewardBtnClick, this);
@@ -41,7 +40,7 @@ export class MailView extends BaseUiView {
   }
 
   private onRewardBtnClick(): void {
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqMailGetAllReward.cmd,
       new ReqMailGetAllReward(),
       (res: ResMailGetAllReward) => {
@@ -60,7 +59,7 @@ export class MailView extends BaseUiView {
   }
 
   private onDeleteBtnClick(): void {
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqMailDeleteAll.cmd,
       new ReqMailDeleteAll(),
       (res: ResMailDeleteAll) => {

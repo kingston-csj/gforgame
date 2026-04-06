@@ -71,6 +71,10 @@ export default class R {
       name: 'rankPane',
       path: 'prefabs/panel/rank/RankPane',
     },
+    QuestPanel: {
+      name: 'questPanel',
+      path: 'prefabs/panel/quest/QuestPane',
+    },
   };
 
   // 图片纹理图集枚举

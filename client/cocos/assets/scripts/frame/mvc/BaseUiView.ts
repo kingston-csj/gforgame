@@ -2,6 +2,9 @@ import { _decorator, Button, Component, Node, Toggle } from 'cc';
 const { ccclass, property } = _decorator;
 @ccclass('BaseUiView')
 export class BaseUiView extends Component {
+
+
+
   public display() {
     this.node.active = true;
     this.onDisplay();

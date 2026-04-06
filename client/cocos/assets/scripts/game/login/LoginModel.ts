@@ -38,7 +38,7 @@ export class LoginModel {
       return Promise.reject(new Error('用户名或密码不能为空'));
     }
     return new Promise<RespLogin>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqLogin.cmd,
         {
           PlayerId: this.userId,

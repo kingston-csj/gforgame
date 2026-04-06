@@ -14,13 +14,14 @@ import { ResHeroPushInfo } from "./net/protocol/ResAllHeroInfo";
 import PushBackpackInfo from "./net/protocol/PushBackpackInfo";
 import { PushMailAll } from "./net/protocol/ResMailList";
 import PushQuestRefreshVo from "./net/protocol/PushQuestRefreshVo";
-import { QuestModel } from "./game/quest/QuestModel";
+import { QuestBoxModel } from "./game/quest/QuestBoxModel";
 import { ConfigContext } from "./data/config/container/ConfigContext";
 import GameConstants from "./game/constants/GameConstants";
 import eventBus from "./frame/commons/eventbus/EventBus";
 import GameEvent from "./game/constants/GameEvent";
 import { PushLoadComplete } from "./net/protocol/PushLoadComplete";
 import { MainPaneController } from "./game/main/MainPaneController";
+import PushQuestDailyInfo from "./net/protocol/PushQuestDailyInfo";
 
 // 存储待注册的处理器
 const pendingHandlers: Array<{ cmd: number; handler: Function }> = [];
@@ -50,7 +51,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushBackpackInfo.cmd)
-  private static handleBackpackInfo(msg: PushBackpackInfo) {
+  private static onReceivePushBackpackInfo(msg: PushBackpackInfo) {
     if (msg.items) {
       BagpackModel.getInstance().reset(
         new Map(msg.items.map((item) => [item.uid, item])),
@@ -59,7 +60,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushPurseInfo.cmd)
-  private static handlePurseInfo(msg: PushPurseInfo) {
+  private static onReceivePushPurseInfo(msg: PushPurseInfo) {
     if (msg.diamond) {
       PurseModel.getInstance().diamond = msg.diamond;
     }
@@ -69,7 +70,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(ResHeroPushInfo.cmd)
-  private static handleAllHeroInfo(msg: ResHeroPushInfo) {
+  private static onReceiveResHeroPushInfo(msg: ResHeroPushInfo) {
     if (msg.heros) {
       HeroBoxModel.getInstance().reset(
         new Map(msg.heros.map((hero) => [hero.id, hero])),
@@ -78,7 +79,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushItemChanged.cmd)
-  private static handleItemChanged(msg: PushItemChanged) {
+  private static onReceivePushItemChanged(msg: PushItemChanged) {
     if (msg.type == "item") {
       msg.changed.forEach((item) => {
         BagpackModel.getInstance().changeItemByModelId([item]);
@@ -87,7 +88,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushHeroAttrChanged.cmd)
-  private static handleHeroAttrChanged(msg: PushHeroAttrChanged) {
+  private static onReceivePushHeroAttrChanged(msg: PushHeroAttrChanged) {
     const hero = HeroBoxModel.getInstance().getHero(msg.heroId);
     if (hero) {
       // 更新英雄属性
@@ -107,7 +108,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushPlayerFightChange.cmd)
-  private static handlePlayerFightChange(msg: PushPlayerFightChange) {
+  private static onReceivePushPlayerFightChange(msg: PushPlayerFightChange) {
     let from = PlayerData.instance.fighting;
     let add = msg.fight - from;
     if (add > 0 && from > 0) {
@@ -117,7 +118,7 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushMailAll.cmd)
-  private static handleMailAll(msg: PushMailAll) {
+  private static onReceivePushMailAll(msg: PushMailAll) {
     if (msg.mails) {
       MailBoxModel.getInstance().reset(
         new Map(
@@ -133,11 +134,11 @@ export class MessageDispatch {
   }
 
   @MessageHandler(PushQuestRefreshVo.cmd)
-  private static handleQuestRefresh(msg: PushQuestRefreshVo) {
+  private static onReceivePushQuestRefreshVo(msg: PushQuestRefreshVo) {
     if (msg.quest) {
       const quest = msg.quest;
       // 更新任务
-      QuestModel.instance.refreshQuest(quest);
+      QuestBoxModel.instance.refreshQuest(quest);
       let questData = ConfigContext.configQuestContainer.getRecord(quest.id);
       if (questData.category == GameConstants.Quest.Category.MAIN) {
         eventBus.emit(GameEvent.MainQuestRefresh);
@@ -145,8 +146,20 @@ export class MessageDispatch {
     }
   }
 
+  @MessageHandler(PushQuestDailyInfo.cmd)
+  private static onReceivePushQuestDailyInfo(msg: PushQuestDailyInfo) {
+      msg.quests.forEach((quest) => {
+        // 更新任务
+        QuestBoxModel.instance.refreshQuest(quest);
+      });
+      // 更新每日任务奖励积分
+      QuestBoxModel.instance.dailyScore = msg.dailyScore;
+      // 更新每日任务奖励索引
+      QuestBoxModel.instance.dailyRewardIndex = msg.dailyRewardIndex;
+  }
+
   @MessageHandler(PushLoadComplete.cmd)
-  private static handleLoadComplete(msg: PushLoadComplete) {
+  private static onReceivePushLoadComplete(msg: PushLoadComplete) {
     // 加载完成
     MainPaneController.openUi();
     // eventBus.emit(GameEvent.LoadComplete);

@@ -26,7 +26,7 @@ export class GmPaneView extends BaseUiView {
     const itemId = this.itemIdBox.string;
     const itemNum = this.itemNumBox.string;
 
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqGmAction.cmd,
       {
         args: "add_items " + itemId + "=" + itemNum,
@@ -38,7 +38,7 @@ export class GmPaneView extends BaseUiView {
   public onAddGoldBtnClick() {
     const gold = this.goldBox.string;
 
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqGmAction.cmd,
       {
         args: "add_gold " + gold,
@@ -50,7 +50,7 @@ export class GmPaneView extends BaseUiView {
   public onAddDiamondBtnClick() {
     const diamond = this.diamondBox.string;
 
-    GameContext.instance.WebSocketClient.sendMessage(
+    GameContext.wsClient.sendMessage(
       ReqGmAction.cmd,
       {
         args: "add_diamond " + diamond,

@@ -10,7 +10,7 @@ type PlayerEvent struct {
 	Player domain.Player
 }
 
-func (e *PlayerEvent) GetOwner() domain.Player {
+func (e PlayerEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -20,7 +20,7 @@ type RecruitEvent struct {
 	Type  int32 // 招募类型 1:普通 2:高级
 }
 
-func (e *RecruitEvent) GetOwner() domain.Player {
+func (e RecruitEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -29,7 +29,7 @@ type HeroGainEvent struct {
 	HeroId int32
 }
 
-func (e *HeroGainEvent) GetOwner() domain.Player {
+func (e HeroGainEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -39,7 +39,7 @@ type ItemConsumeEvent struct {
 	Count  int32
 }
 
-func (e *ItemConsumeEvent) GetOwner() domain.Player {
+func (e ItemConsumeEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -48,7 +48,7 @@ type RechargeEvent struct {
 	RechargeId int32
 }
 
-func (e *RechargeEvent) GetOwner() domain.Player {
+func (e RechargeEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -57,7 +57,7 @@ type ClientCustomEvent struct {
 	EventId int32
 }
 
-func (e *ClientCustomEvent) GetOwner() domain.Player {
+func (e ClientCustomEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -65,7 +65,7 @@ type HeroEntrustEvent struct {
 	PlayerEvent
 }
 
-func (e *HeroEntrustEvent) GetOwner() domain.Player {
+func (e HeroEntrustEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -75,7 +75,7 @@ type HeroLevelUpEvent struct {
 	Times  int32
 }
 
-func (e *HeroLevelUpEvent) GetOwner() domain.Player {
+func (e HeroLevelUpEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -83,7 +83,7 @@ type MallBuyEvent struct {
 	PlayerEvent
 }
 
-func (e *MallBuyEvent) GetOwner() domain.Player {
+func (e MallBuyEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -92,7 +92,7 @@ type AreaScoreChangedEvent struct {
 	Score int32
 }
 
-func (e *AreaScoreChangedEvent) GetOwner() domain.Player {
+func (e AreaScoreChangedEvent) GetOwner() domain.Player {
 	return e.Player
 }
 
@@ -100,6 +100,6 @@ type PassArenaEvent struct {
 	PlayerEvent
 }
 
-func (e *PassArenaEvent) GetOwner() domain.Player {
+func (e PassArenaEvent) GetOwner() domain.Player {
 	return e.Player
 }

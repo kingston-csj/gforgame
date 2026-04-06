@@ -27,7 +27,7 @@ export class MainPaneController extends BaseController {
     this.getInstance().then((controller) => {
       if (controller.mainView) {
         controller.mainView.display();
-        GameContext.instance.WebSocketClient.sendMessage(ReqLoadingFinish.cmd, {});
+        GameContext.wsClient.sendMessage(ReqLoadingFinish.cmd, {});
       }
     });
   }

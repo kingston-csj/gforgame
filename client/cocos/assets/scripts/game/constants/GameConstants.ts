@@ -11,6 +11,9 @@ export default class GameConstants {
     Category: {
       // 主线任务
       MAIN: 1,
+
+      // 日常任务
+      DAILY: 2,
     },
   };
 

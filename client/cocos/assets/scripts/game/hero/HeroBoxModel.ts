@@ -178,7 +178,7 @@ export class HeroBoxModel {
 
     return new Promise<number>((resolve, reject) => {
       if (heroData.quality == 0) {
-        GameContext.instance.WebSocketClient.sendMessage(
+        GameContext.wsClient.sendMessage(
           ReqPlayerUpLevel.cmd,
           {
             heroId: heroId,
@@ -189,7 +189,7 @@ export class HeroBoxModel {
           }
         );
       } else {
-        GameContext.instance.WebSocketClient.sendMessage(
+        GameContext.wsClient.sendMessage(
           ReqHeroUpLevel.cmd,
           {
             heroId: heroId,
@@ -208,7 +208,7 @@ export class HeroBoxModel {
 
     return new Promise<number>((resolve, reject) => {
       if (heroData.quality === 0) {
-        GameContext.instance.WebSocketClient.sendMessage(
+        GameContext.wsClient.sendMessage(
           ReqPlayerUpStage.cmd,
           {},
           (msg: ResPlayerUpStage) => {
@@ -216,7 +216,7 @@ export class HeroBoxModel {
           }
         );
       } else {
-        GameContext.instance.WebSocketClient.sendMessage(
+        GameContext.wsClient.sendMessage(
           ReqHeroUpStage.cmd,
           { heroId: heroId },
           (msg: ResHeroUpStage) => {
@@ -229,7 +229,7 @@ export class HeroBoxModel {
 
   public requestCombine(heroId: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqHeroCombine.cmd,
         { heroId: heroId },
         (msg: ResHeroCombine) => {
@@ -241,7 +241,7 @@ export class HeroBoxModel {
 
   public requestUpFight(heroId: number, position: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqHeroUpFight.cmd,
         { heroId: heroId, position: position },
         (msg: ResHeroUpFight) => {
@@ -253,7 +253,7 @@ export class HeroBoxModel {
 
   public requestOffFight(heroId: number): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqHeroOffFight.cmd,
         { heroId: heroId },
         (msg: ResHeroOffFight) => {
@@ -268,7 +268,7 @@ export class HeroBoxModel {
     position: number
   ): Promise<ResHeroChangePosition> {
     return new Promise<ResHeroChangePosition>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqHeroChangePosition.cmd,
         { heroId: heroId, position: position },
         (msg: ResHeroChangePosition) => {

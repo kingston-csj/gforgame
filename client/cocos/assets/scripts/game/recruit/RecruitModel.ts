@@ -14,7 +14,7 @@ export class RecruitModel {
 
   public doRecruit(times: number): Promise<ResHeroRecruit> {
     return new Promise<ResHeroRecruit>((resolve, reject) => {
-      GameContext.instance.WebSocketClient.sendMessage(
+      GameContext.wsClient.sendMessage(
         ReqHeroRecruit.cmd,
         {
           counter: times,

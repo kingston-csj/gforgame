@@ -3,12 +3,18 @@ import { BaseModel } from "../../frame/mvc/BaseModel";
 import QuestVo from "../../net/protocol/items/QuestVo";
 import GameConstants from "../constants/GameConstants";
 import GameEvent from "../constants/GameEvent";
-export class QuestModel extends BaseModel {
-  private static _instance: QuestModel = new QuestModel();
+export class QuestBoxModel extends BaseModel {
+  private static _instance: QuestBoxModel = new QuestBoxModel();
 
   private quests: Map<number, QuestVo> = new Map();
 
-  public static get instance(): QuestModel {
+  // 每日任务奖励积分
+  public dailyScore: number = 0;
+
+  // 每日任务奖励索引
+  public dailyRewardIndex: number = 0;
+
+  public static get instance(): QuestBoxModel {
     return this._instance;
   }
 
@@ -28,5 +34,16 @@ export class QuestModel extends BaseModel {
       }
     }
     return null;
+  }
+
+  public getQuestsByCategory(category: number): QuestVo[] {
+    let quests: QuestVo[] = [];
+    for (let quest of this.quests.values()) {
+      let questData = ConfigContext.configQuestContainer.getRecord(quest.id);
+      if (questData.category == category) {
+        quests.push(quest);
+      }
+    }
+    return quests;
   }
 }

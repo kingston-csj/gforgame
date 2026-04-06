@@ -26,10 +26,10 @@ type ItemService struct {
 }
 
 var (
-	itemservice           *ItemService
+	itemservice        *ItemService
 	once               sync.Once
 	errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	notEnoughError = common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
+	notEnoughError     = common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
 )
 
 var RecruitItemId int32 = 2002
@@ -43,7 +43,7 @@ func GetItemService() *ItemService {
 }
 
 func (s *ItemService) init() {
-	reward.SetItemOps( s)
+	reward.SetItemOps(s)
 	consume.SetItemOps(s)
 }
 
@@ -53,11 +53,11 @@ func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count i
 	}
 	backpack := p.Backpack
 	changeResult := backpack.ReduceByModelId(itemId, count)
-	if !changeResult.Succ  {
+	if !changeResult.Succ {
 		return notEnoughError
 	}
 
-	context.EventBus.Publish(events.ItemConsume, events.ItemConsumeEvent{
+	context.EventBus.Publish(events.ItemConsume, &events.ItemConsumeEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: p,
 		},
@@ -65,8 +65,8 @@ func (s *ItemService) UseByModelId(p *playerdomain.Player, itemId int32, count i
 		Count:  count,
 	})
 
-	notify :=  &protos.PushItemChanged{
-		Type: "item",
+	notify := &protos.PushItemChanged{
+		Type:    "item",
 		Changed: changeResult.ToChangeInfos(),
 	}
 	io.NotifyPlayer(p, notify)
@@ -103,17 +103,17 @@ func (s *ItemService) AddByModelId(p *playerdomain.Player, itemId int32, count i
 
 	// 发布事件，供任务系统使用
 	context.EventBus.Publish(events.PlayerEntityChange, p)
-	
+
 	itemInfos := make([]protos.ItemInfo, 0, len(changeResult.ChangedItems))
 	for _, item := range changeResult.ChangedItems {
 		itemInfos = append(itemInfos, item.Item.ToVo())
 	}
 
 	notify := &protos.PushItemChanged{
-		Type: "item",
+		Type:    "item",
 		Changed: itemInfos,
 	}
 	io.NotifyPlayer(p, notify)
-	
+
 	return nil
 }

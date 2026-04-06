@@ -7,6 +7,12 @@ export default class QuestData extends BaseConfigItem {
 
   private _target: string;
 
+  private _rewards: string;
+
+  public get rewards(): string {
+    return this._rewards;
+  }
+
   public get category(): number {
     return this._category;
   }
@@ -26,6 +32,7 @@ export default class QuestData extends BaseConfigItem {
             this._category = data.category;
             this._type = data.type;
             this._target = data.target;
+            this._rewards = data.rewards;
   }
 
 }
