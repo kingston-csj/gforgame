@@ -1,6 +1,7 @@
 package arena
 
 import (
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
@@ -8,13 +9,12 @@ import (
 	player "io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/protos"
 	heroService "io/github/gforgame/examples/service/hero"
 	mailService "io/github/gforgame/examples/service/mail"
 	"io/github/gforgame/examples/service/monthcard"
 	playerService "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/rank"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
 	"math"
 	"sync"
 )

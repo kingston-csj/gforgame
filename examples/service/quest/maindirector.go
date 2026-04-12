@@ -7,7 +7,7 @@ import (
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 )
 
 // 主线任务类别

@@ -3,7 +3,7 @@ package schedule
 import (
 	"errors"
 	"fmt"
-	"io/github/gforgame/logger"
+	"io/github/gforgame/common/logger"
 	"sync/atomic"
 	"time"
 )
@@ -15,26 +15,29 @@ type Cancellable interface {
 }
 
 // 定义错误常量，方便外部判断
+// 例如：if err := scheduler.Schedule(task, delay); err != nil {
+//     logger.Errorf("schedule task failed: %v", err)
+// }
 var (
 	ErrInvalidTask     = errors.New("task scheduler: task function is nil")
 	ErrInvalidExecTime = errors.New("task scheduler: execution time is invalid (zero time)")
 )
 
-// timerCancellable 是 Cancellable 接口的具体实现，包装 time.Timer 实现取消逻辑
+// timerCancellable 实现 Cancellable 接口的具体实现，包装 time.Timer 实现取消逻辑
 type timerCancellable struct {
-	timer    *time.Timer       // 底层定时器
-	canceled atomic.Bool       // 标记是否已取消（原子变量保证并发安全）
-	done     chan struct{}     // 标记任务是否已执行
+		timer    *time.Timer       // 底层定时器
+		canceled atomic.Bool       // 标记是否已取消（原子变量保证并发安全）
+		done     chan struct{}     // 标记任务是否已执
 }
 
 // Cancel 实现 Cancellable 接口的 Cancel 方法
-// 返回值：true=成功取消（任务未执行），false=任务已执行/已取消/定时器已触发
+// 返回值：true=成功取消（任务未执行），false=任务已执行或定时器已触发
 func (tc *timerCancellable) Cancel() bool {
-	// 双重检查+原子操作，避免重复取消
+	// 双重检查原子操作，避免重复取消
 	if tc.canceled.CompareAndSwap(false, true) {
-		// 停止定时器：Stop() 返回true表示定时器未触发，false表示已触发/已停止
+		// 停止定时器：Stop() 返回true表示定时器未触发，false表示已触发
 		stopped := tc.timer.Stop()
-		// 关闭一个无缓冲通道后，所有监听该通道的 case <-chan 会立即触发（即使通道中没有数据）
+		// 关闭一个无缓冲通道后，所有监听该通道?case <-chan 会立即触发（即使通道中没有数据）
 		close(tc.done) 
 		return stopped
 	}
@@ -46,9 +49,9 @@ type TaskScheduler interface {
 	// Schedule 调度一次性任务，在指定延迟（毫秒）后执行
 	// 参数：
 	//   - task: 要执行的任务函数（不能为 nil）
-	//   - delay: 任务执行延迟时间（毫秒），必须大于0
+	//   - delay: 任务执行延迟时间（毫秒），必须大于等于0
 	// 返回值：
-	//   - Cancellable: 任务取消器，可调用 Cancel() 取消未执行的任务
+	//   - Cancellable: 任务取消器，可调用 Cancel() 取消未执行的任务		
 	//   - error: 入参非法时返回非 nil 错误
 	Schedule(task func(), delay int64) (Cancellable, error)
 }
@@ -62,7 +65,7 @@ func newTimerCancellable(timer *time.Timer) *timerCancellable {
 }
 
 
-// DefaultTaskScheduler 是 TaskScheduler 接口的默认实现
+// DefaultTaskScheduler 实现 TaskScheduler 接口的默认实现
 // 基于 time.Timer 实现一次性定时任务调度，支持任务取消、并发安全
 type DefaultTaskScheduler struct{}
 
@@ -84,9 +87,9 @@ func (d *DefaultTaskScheduler) Schedule(task func(), delay int64) (Cancellable, 
 		// 异步执行任务，避免阻塞当前goroutine
 		go func() {
 			defer func() {
-				// 捕获任务执行中的panic，避免程序崩溃
+				// 捕获任务执行中的panic，避免程序崩溃	
 				if r := recover(); r != nil {
-					logger.Error(fmt.Errorf("task panic: %v", r))
+					logger.Error("", fmt.Errorf("task scheduler: task panic: %v", r)) 
 				}
 			}()
 			task()
@@ -99,6 +102,7 @@ func (d *DefaultTaskScheduler) Schedule(task func(), delay int64) (Cancellable, 
 	}
 
 	// 延迟执行：创建定时器，调度任务
+	
 	timer := time.NewTimer(time.Duration(delay) * time.Millisecond)
 	cancellable := newTimerCancellable(timer)
 
@@ -107,7 +111,7 @@ func (d *DefaultTaskScheduler) Schedule(task func(), delay int64) (Cancellable, 
 		defer func() {
 			// 捕获任务执行中的panic
 			if r := recover(); r != nil {
-				logger.Error2("task scheduler: task panic", r.(error))
+				logger.Error("", fmt.Errorf("task scheduler: task panic: %v", r))
 			}
 		}()
 

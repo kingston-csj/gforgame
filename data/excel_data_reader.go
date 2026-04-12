@@ -3,7 +3,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
-	"io/github/gforgame/util"
+	"io/github/gforgame/common/util"
 	"reflect"
 	"strconv"
 	"strings"

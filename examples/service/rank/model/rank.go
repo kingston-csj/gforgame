@@ -1,7 +1,7 @@
 package model
 
 import (
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 	"strings"
 )
 

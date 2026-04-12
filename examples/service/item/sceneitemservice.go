@@ -1,7 +1,7 @@
 package item
 
 import (
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"

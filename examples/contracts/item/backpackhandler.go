@@ -2,7 +2,7 @@ package item
 
 import (
 	playerdomain "io/github/gforgame/examples/domain/player"
-	protos "io/github/gforgame/protos"
+	protos "io/github/gforgame/examples/protos"
 )
 
 type BackpackHandler interface {

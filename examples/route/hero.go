@@ -5,10 +5,10 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 
+	"io/github/gforgame/examples/protos"
 	heroService "io/github/gforgame/examples/service/hero"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type HeroRoute struct {

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"io/github/gforgame/schedule"
+	"io/github/gforgame/common/schedule"
 )
 var (
 	dailyReset   *DailyReset

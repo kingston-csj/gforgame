@@ -3,6 +3,9 @@ package gm
 import (
 	"fmt"
 	"io/github/gforgame/common"
+	"io/github/gforgame/common/logger"
+	"io/github/gforgame/common/util"
+	"io/github/gforgame/common/util/jsonutil"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
@@ -17,9 +20,6 @@ import (
 	"io/github/gforgame/examples/service/recharge"
 	"io/github/gforgame/examples/service/scene"
 	"io/github/gforgame/examples/system"
-	"io/github/gforgame/logger"
-	"io/github/gforgame/util"
-	"io/github/gforgame/util/jsonutil"
 	"sort"
 	"strings"
 	"sync"
@@ -83,13 +83,13 @@ func (s *GmService) Register(topic, desc, example string, handler GmHandler) {
 func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params string) *common.BusinessRequestException {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Error2("gm dispatch fail", err.(error))
+			logger.Error("gm dispatch fail", err.(error))
 		}
 	}()
 
 	cmd, ok := s.commands[topic]
 	if !ok {
-		logger.Error3(fmt.Sprintf("gm command not found: %s", topic))
+		logger.ErrorNoStack(fmt.Sprintf("gm command not found: %s", topic))
 		return common.NewBusinessRequestException(constants.I18N_GM_UNKNOWN_COMMAND)
 	}
 
@@ -127,7 +127,7 @@ func handleReset(player *playerdomain.Player, params string) *common.BusinessReq
 	var scenes []playerdomain.Scene
 	err := mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
 	if err != nil {
-		logger.Error2("gm reset scene fail", err)
+		logger.Error("gm reset scene fail", err)
 		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	for _, item := range scenes {
@@ -266,7 +266,7 @@ func handleClone(player *playerdomain.Player, params string) *common.BusinessReq
 	var scenes []playerdomain.Scene
 	err = mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
 	if err != nil {
-		logger.Error2("gm reset scene fail", err)
+		logger.Error("gm reset scene fail", err)
 		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	for _, item := range scenes {

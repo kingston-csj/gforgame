@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/github/gforgame/codec/json"
+	"io/github/gforgame/common/logger"
+	"io/github/gforgame/common/util/jsonutil"
 	serverconfig "io/github/gforgame/config"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/activity"
@@ -13,12 +15,10 @@ import (
 	"io/github/gforgame/examples/route"
 	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/system"
-	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
 	protocolexporter "io/github/gforgame/tools/protocol"
-	"io/github/gforgame/util/jsonutil"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -37,7 +37,7 @@ type GameTaskHandler struct {
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error(fmt.Errorf("panic recovered: %v", r))
+			logger.Error("", fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
@@ -50,7 +50,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	if msgHandler == nil {
-		logger.Error3(fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
+		logger.Error("", fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
 		return false
 	}
 	var args []reflect.Value
@@ -65,7 +65,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	if len(values) > 0 {
 		err := session.Send(values[0].Interface(), frame.Header.Index)
 		if err != nil {
-			logger.Error(fmt.Errorf("session.Send: %v", err))
+			logger.Error("", fmt.Errorf("session.Send: %v", err))
 			return false
 		}
 	}
@@ -255,7 +255,7 @@ func TryExportProtocols() {
 		// 	"tools\\protocol\\templates\\tstemplate.tpl",
 		// )
 		generator := protocolexporter.NewCSharpGenerator(
-			"protos",
+			"examples\\protos",
 			"tools\\protocol\\output\\csharp\\",
 			"tools\\protocol\\templates\\csharptemplate.tpl",
 		)
@@ -264,7 +264,7 @@ func TryExportProtocols() {
 		if error != nil {
 			panic(error)
 		}
-		err2 := generator.BaseGenerator.GenerateRegisterFromTags("protos", "protos\\register_gen.go", nil)
+		err2 := generator.BaseGenerator.GenerateRegisterFromTags("examples\\protos", "examples\\protos\\register_gen.go", nil)
 		if err2 != nil {
 			panic(err2)
 		}

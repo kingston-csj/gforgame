@@ -3,11 +3,11 @@ package player
 import (
 	"encoding/json"
 
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
+	"io/github/gforgame/examples/protos"
 
 	"gorm.io/gorm"
 )
@@ -55,6 +55,8 @@ type Player struct {
 	// 竞技场数据
 	ArenaBox       *ArenaBox          `gorm:"-"`
 	ArenaBoxJson   string             `gorm:"arenabox"`
+	ActivityBox     *ActivityBox `gorm:"-"`
+	ActivityBoxJson string       `gorm:"activitybox"`
 }
 
 func (p *Player) BeforeSave(tx *gorm.DB) error {
@@ -95,6 +97,9 @@ func (p *Player) BeforeSave(tx *gorm.DB) error {
 		return err
 	}
 	if err := saveJSON(p.ArenaBox, &p.ArenaBoxJson); err != nil {
+		return err
+	}
+	if err := saveJSON(p.ActivityBox, &p.ActivityBoxJson); err != nil {
 		return err
 	}
 
@@ -206,6 +211,9 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 
 	loadJSON(p.ArenaBoxJson, &p.ArenaBox, func() *ArenaBox {
 		return &ArenaBox{}
+	})
+	loadJSON(p.ActivityBoxJson, &p.ActivityBox, func() *ActivityBox {
+		return &ActivityBox{}
 	})
 
 	return nil

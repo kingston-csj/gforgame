@@ -3,10 +3,10 @@ package handler
 import (
 	mysqldb "io/github/gforgame/db"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/rank/container"
 	"io/github/gforgame/examples/service/rank/model"
-	"io/github/gforgame/protos"
 )
 
 type PlayerLevelRankHandler struct {

@@ -2,9 +2,9 @@ package system
 
 import (
 	"fmt"
+	"io/github/gforgame/common/util/timeutil"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/events"
-	"io/github/gforgame/util/timeutil"
 	"log"
 	"time"
 

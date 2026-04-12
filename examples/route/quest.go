@@ -4,10 +4,10 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	quest "io/github/gforgame/examples/service/quest"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type QuestRoute struct {

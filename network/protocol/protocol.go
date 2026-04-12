@@ -2,7 +2,7 @@ package protocol
 
 import (
 	"errors"
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/buffer"
 )
 
 // Protocol constants.
@@ -21,13 +21,13 @@ type MessageHeader struct {
 var ErrPacketSizeExceed = errors.New("protocol: packet size exceed")
 
 type Protocol struct {
-	buf *common.ByteBuffer
+	buf *buffer.ByteBuffer
 }
 
 // NewDecoder returns a new decoder that used for decode network bytes slice.
 func NewDecoder() *Protocol {
 	return &Protocol{
-		buf: common.NewByteBuffer(4096, MaxPacketSize),
+		buf: buffer.NewByteBuffer(4096, MaxPacketSize),
 	}
 }
 

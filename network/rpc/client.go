@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"fmt"
-	"io/github/gforgame/logger"
+	"io/github/gforgame/common/logger"
 	"sync"
 
 	"google.golang.org/grpc"

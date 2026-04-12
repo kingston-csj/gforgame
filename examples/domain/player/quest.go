@@ -1,11 +1,11 @@
 package player
 
 import (
+	"io/github/gforgame/common/util/timeutil"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util/timeutil"
+	"io/github/gforgame/examples/protos"
 )
 
 

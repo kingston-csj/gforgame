@@ -4,10 +4,10 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/chat"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type ChatRouter struct {

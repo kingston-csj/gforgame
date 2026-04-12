@@ -1,9 +1,9 @@
 package route
 
 import (
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/rank"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type RankRoute struct {

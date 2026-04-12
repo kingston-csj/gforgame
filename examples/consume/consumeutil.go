@@ -1,7 +1,7 @@
 package consume
 
 import (
-	"io/github/gforgame/util"
+	"io/github/gforgame/common/util"
 	"strings"
 )
 

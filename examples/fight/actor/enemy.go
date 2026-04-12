@@ -3,8 +3,8 @@ package actor
 import (
 	"io/github/gforgame/examples/fight/attribute"
 
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/fight/state"
-	"io/github/gforgame/util"
 )
 
 type Enemy struct {

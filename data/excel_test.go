@@ -2,8 +2,8 @@ package data_test
 
 import (
 	"fmt"
+	"io/github/gforgame/common/logger"
 	"io/github/gforgame/data"
-	"io/github/gforgame/logger"
 	"testing"
 )
 
@@ -31,7 +31,7 @@ func TestExcelReader(t *testing.T) {
 	// 读取 Excel 文件
 	result, err := reader.Read("mall.xlsx", &Name{})
 	if err != nil {
-		logger.Error(fmt.Errorf("session.Send: %v", err))
+		logger.Error("", fmt.Errorf("session.Send: %v", err))
 	}
 
 	// 打印结果

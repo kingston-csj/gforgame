@@ -2,7 +2,7 @@ package set_test
 
 import (
 	"encoding/json"
-	"io/github/gforgame/container/set"
+	"io/github/gforgame/common/container/set"
 	"testing"
 )
 

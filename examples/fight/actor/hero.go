@@ -1,13 +1,13 @@
 package actor
 
 import (
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/fight/buff"
 	"io/github/gforgame/examples/fight/state"
-	"io/github/gforgame/util"
 )
 
 type Hero struct {

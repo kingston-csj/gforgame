@@ -1,10 +1,10 @@
 package buff
 
 import (
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/fight/attribute"
-	"io/github/gforgame/util"
 	"strings"
 )
 

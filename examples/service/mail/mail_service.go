@@ -3,6 +3,8 @@ package mail
 import (
 	"time"
 
+	"io/github/gforgame/common/util"
+	"io/github/gforgame/common/util/timeutil"
 	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
@@ -10,12 +12,10 @@ import (
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/reward"
-	"io/github/gforgame/util"
-	"io/github/gforgame/util/timeutil"
 
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 )
 
 var (

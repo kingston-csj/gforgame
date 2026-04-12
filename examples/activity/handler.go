@@ -3,6 +3,7 @@ package activity
 import (
 	"errors"
 	"io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/protos"
 	"reflect"
 	"time"
 )
@@ -21,7 +22,7 @@ const (
 type ActivityHandler interface {
 
 	// LoadActivityInfo 加载玩家活动信息
-	LoadActivityInfo(player *player.Player)
+	LoadActivityInfo(player *player.Player) *protos.ActivityVo
 
 	// IsInActivity 判断玩家是否在活动中
 	// 同时判断是否在活动期间，以及是否有参与资格

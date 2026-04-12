@@ -7,14 +7,14 @@ import (
 	"reflect"
 
 	"io/github/gforgame/codec/json"
+	"io/github/gforgame/common/logger"
 	"io/github/gforgame/db"
 	"io/github/gforgame/examples/cross"
 	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/logger"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/client"
 	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/protos"
 )
 
 // 实现 RequestCallback 接口的匿名对象
@@ -35,7 +35,7 @@ type GameTaskHandler struct {
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error(r.(error))
+			logger.Error("", r.(error))
 		}
 	}()
 
@@ -52,7 +52,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			if len(values) > 0 {
 				err := session.Send(values[0].Interface(), frame.Header.Index)
 				if err != nil {
-					logger.Error(fmt.Errorf("session.Send: %v", err))
+					logger.Error("",fmt.Errorf("session.Send: %v", err))
 					return false
 				}
 			}

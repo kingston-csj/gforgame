@@ -1,10 +1,10 @@
 package route
 
 import (
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/mixture"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 	"time"
 )
 

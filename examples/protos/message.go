@@ -89,6 +89,8 @@ const (
 	CmdReqMallBuy   = 1101
 	CmdResMallBuy   = 1151
 
+	CmdPushActivityLoadAll = 1651
+
 	CmdChaJoinRoom = 1800
 	CmdChatReqChat = 1801
 	CmdChatResChat = 1851

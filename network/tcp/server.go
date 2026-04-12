@@ -3,8 +3,8 @@ package tcp
 import (
 	"errors"
 	"fmt"
-	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
+	"log/slog"
 	"net"
 	"sync"
 )
@@ -65,7 +65,7 @@ func (s *TcpServer) Addr() string {
 // Enable current server accept connection
 func (s *TcpServer) startListen() {
 	if s.listener == nil {
-		logger.Error(errors.New("tcp listener is nil"))
+		slog.Error("tcp listener is nil")
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *TcpServer) startListen() {
 			if errors.Is(err, net.ErrClosed) {
 				return
 			}
-			logger.Error(fmt.Errorf("new tcp conn failed %v", err))
+			slog.Error(fmt.Sprintf("new tcp conn failed %v", err))
 			return
 		}
 		go onClientConnected(s, conn)

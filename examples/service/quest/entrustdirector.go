@@ -1,15 +1,15 @@
 package quest
 
 import (
+	"io/github/gforgame/common/util"
+	"io/github/gforgame/common/util/timeutil"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
-	"io/github/gforgame/util/timeutil"
+	"io/github/gforgame/examples/protos"
 	"time"
 )
 

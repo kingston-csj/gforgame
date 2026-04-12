@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
+	"log/slog"
 	"net"
 	"net/http"
 	"sync"
@@ -85,13 +85,13 @@ func (n *WsServer) startListen() error {
 	mux.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			logger.Error(fmt.Errorf("websocket conn failed %v", err))
+			slog.Error(fmt.Sprintf("websocket conn failed %v", err))
 			return
 		}
 
 		c, err := newWSConn(conn)
 		if err != nil {
-			logger.Error(fmt.Errorf("new websocket conn failed %v", err))
+			slog.Error(fmt.Sprintf("new websocket conn failed %v", err))
 			return
 		}
 		go onClientConnected(n, c)
@@ -108,7 +108,7 @@ func (n *WsServer) startListen() error {
 	}
 	go func() {
 		if err := n.server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error(fmt.Errorf("websocket server failed %v", err))
+			slog.Error(fmt.Sprintf("websocket server failed %v", err))
 		}
 	}()
 	return nil
@@ -117,7 +117,7 @@ func (n *WsServer) startListen() error {
 // 处理客户端连接，包括socket,websocket
 func onClientConnected(node *WsServer, conn net.Conn) {
 	defer func() {
-		logger.Debugf("客户端连接关闭 %s", conn.RemoteAddr().String())
+		slog.Debug(fmt.Sprintf("客户端连接关闭: %s", conn.RemoteAddr().String()))
 		// 处理客户端网络断开
 		s := network.GetSession(conn)
 		node.IoDispatch.OnSessionClosed(s)
@@ -130,11 +130,11 @@ func onClientConnected(node *WsServer, conn net.Conn) {
 	if _, ok := conn.(*wsConn); ok {
 		// WebSocket连接，先使用二进制协议，后续会根据消息类型调整
 		protocolType = protocol.ProtocolTypeBinary
-		logger.Debugf("WebSocket客户端连接，等待确定协议类型")
+		slog.Debug("WebSocket客户端连接，等待确定协议类型")
 	} else {
 		// TCP连接，默认使用二进制协议
 		protocolType = protocol.ProtocolTypeBinary
-		logger.Debugf("TCP客户端使用二进制协议")
+		slog.Debug("TCP客户端使用二进制协议")
 	}
 
 	// 创建Session

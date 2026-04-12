@@ -2,11 +2,11 @@ package reward
 
 import (
 	"errors"
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
+	"io/github/gforgame/examples/protos"
 	"math"
 	"strings"
 )

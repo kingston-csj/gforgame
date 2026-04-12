@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/rank/container"
 	"io/github/gforgame/examples/service/rank/model"
-	"io/github/gforgame/protos"
 	"math"
 )
 

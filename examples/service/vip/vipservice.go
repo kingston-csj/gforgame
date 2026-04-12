@@ -8,7 +8,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 	"sync"
 	"time"
 ) 

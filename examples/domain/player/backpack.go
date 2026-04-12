@@ -2,12 +2,12 @@ package player
 
 import (
 	"io/github/gforgame/common"
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	configcontract "io/github/gforgame/examples/config/contracts"
 	"io/github/gforgame/examples/constants"
 	configdomain "io/github/gforgame/examples/domain/config"
-	protos "io/github/gforgame/protos"
-	"io/github/gforgame/util"
+	protos "io/github/gforgame/examples/protos"
 )
 
 type Item struct {

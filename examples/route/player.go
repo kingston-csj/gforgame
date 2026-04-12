@@ -1,16 +1,16 @@
 package route
 
 import (
+	"io/github/gforgame/common/util"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/player"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
 
 	"gorm.io/gorm"
 )

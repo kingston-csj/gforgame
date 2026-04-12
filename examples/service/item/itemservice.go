@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"io/github/gforgame/common"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"

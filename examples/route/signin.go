@@ -4,10 +4,10 @@ import (
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/signin"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 // SignInRoute 签到路由

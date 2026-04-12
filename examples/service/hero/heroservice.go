@@ -16,9 +16,9 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/examples/service/item"
-	"io/github/gforgame/protos"
 )
 
 // 英雄模块

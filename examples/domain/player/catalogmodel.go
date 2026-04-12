@@ -1,7 +1,7 @@
 package player
 
 import (
-	"io/github/gforgame/container/set"
+	"io/github/gforgame/common/container/set"
 )
 
 type CatalogModel struct {

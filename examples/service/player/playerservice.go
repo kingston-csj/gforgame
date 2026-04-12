@@ -3,12 +3,11 @@ package player
 import (
 	"errors"
 	"fmt"
-	"strings"
-	"sync"
-
 	"io/github/gforgame/common"
+	"io/github/gforgame/common/container/hashmap"
+	"io/github/gforgame/common/logger"
 	"io/github/gforgame/common/trie"
-	"io/github/gforgame/container/hashmap"
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/db"
 	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/camp"
@@ -22,12 +21,12 @@ import (
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/hero"
 	"io/github/gforgame/examples/system"
-	"io/github/gforgame/logger"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
+	"strings"
+	"sync"
 )
 
 var (
@@ -191,7 +190,7 @@ func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 	player.Camp = camp
 	mysqldb.Db.Create(&player)
 
-	logger.Log(logger.Player, "Id", player.Id, "name", player.Name)
+	logger.Log(constants.LoggerPlayer, "Id", player.Id, "name", player.Name)
 	fmt.Printf(player.Name)
 
 	return player

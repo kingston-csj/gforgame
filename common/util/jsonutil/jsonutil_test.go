@@ -1,7 +1,7 @@
 package jsonutil_test
 
 import (
-	"io/github/gforgame/util/jsonutil"
+	"io/github/gforgame/common/util/jsonutil"
 	"testing"
 )
 

@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/github/gforgame/codec"
-	"io/github/gforgame/logger"
+	"io/github/gforgame/common/logger"
+	"io/github/gforgame/common/util/jsonutil"
 	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/util/jsonutil"
 	"log"
+	"log/slog"
 	"net"
 	"reflect"
 	"strings"
@@ -112,7 +113,7 @@ func (s *Session) Send(msg any, index int32) error {
 	}
 	if err == nil {
 		if !strings.Contains(msgName, "Heartbeat") {
-			logger.Info(fmt.Sprintf("id:%s 发送消息: cmd:%d, name:%s, 内容：%s", id, cmd, msgName, jsonStr))
+			logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
 		}
 	}
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
@@ -164,7 +165,7 @@ func (s *Session) SendAndClose(msg any) error {
 	if !ok {
 		id = ""
 	}
-	fmt.Println(fmt.Sprintf("id:%s 发送消息: cmd:%d, name:%s, 内容：%s", id, cmd, msgName, msg))
+	fmt.Println(fmt.Sprintf("id:%s 发送消息 cmd:%d, name:%s, 内容:%v", id, cmd, msgName, msg))
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(-1), msgData)
 	_, err = s.conn.Write(frame)
 	if err != nil {
@@ -183,7 +184,7 @@ func (s *Session) Write() {
 		select {
 		case data := <-s.dataToSend:
 			if _, err := s.conn.Write(data); err != nil {
-				logger.Error(err)
+				slog.Error("session write failed", "error", err)
 				s.Close()
 				return
 			}
@@ -198,7 +199,7 @@ func (s *Session) Read() {
 		// 一旦关闭，onClientConnected 就会收到断开信号
 		s.Close()
 		if r := recover(); r != nil {
-			logger.Error(fmt.Errorf("panic recovered: %v", r))
+			slog.Error(fmt.Sprintf("panic recovered: %v", r))
 		}
 	}()
 	// 检查是否是WebSocket连接
@@ -228,16 +229,16 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 		messageType, messageData, err := wsConn.ReadMessage()
 		if err != nil {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived) {
-				logger.Debugf("websocket normal close: %v", err)
+				slog.Debug(fmt.Sprintf("websocket normal close: %v", err))
 				return
 			}
 			// Unity 直接关闭进程时常见 1006/unexpected EOF，按正常断链处理
 			errMsg := err.Error()
 			if strings.Contains(errMsg, "close 1006") || strings.Contains(errMsg, "unexpected EOF") {
-				logger.Debugf("websocket peer disconnected: %v", err)
+				slog.Debug(fmt.Sprintf("websocket peer disconnected: %v", err))
 				return
 			}
-			logger.Error(err)
+			slog.Error("websocket read failed", "error", err)
 			return
 		}
 
@@ -249,17 +250,15 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 		default:
 		}
 
-		// logger.Info(fmt.Sprintf("收到WebSocket消息，类型: %d, 长度: %d", messageType, len(messageData)))
-
 		// 第一次收到消息时确定协议类型并调整协议适配器
 		if !protocolDetermined {
 			var newProtocolType protocol.ProtocolType
 			if messageType == websocket.TextMessage {
 				newProtocolType = protocol.ProtocolTypeJSON
-				logger.Debugf("WebSocket客户端使用JSON协议")
+				slog.Debug("WebSocket客户端使用JSON协议")
 			} else {
 				newProtocolType = protocol.ProtocolTypeBinary
-				logger.Debugf("WebSocket客户端使用二进制协议")
+				slog.Debug("WebSocket客户端使用二进制协议")
 			}
 
 			// 如果协议类型发生变化，创建新的协议适配器
@@ -267,7 +266,7 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 				factory := &protocol.ProtocolFactory{}
 				s.ProtocolCodec = factory.NewProtocolAdapter(newProtocolType)
 				s.protocolType = newProtocolType
-				logger.Debugf("协议适配器已切换到: %v", newProtocolType)
+				slog.Debug(fmt.Sprintf("协议适配器已切换: %v", newProtocolType))
 			}
 			protocolDetermined = true
 		}
@@ -276,20 +275,21 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 		packets, err := s.ProtocolCodec.Decode(messageData)
 		if err != nil {
 			log.Println(fmt.Errorf("decode protocol failed %v", err))
-			continue // WebSocket消息错误时继续处理下一条消息
+			// WebSocket消息错误时继续处理下一条消息
+			continue
 		}
 
-		// 处理解码后的数据包
+		// 处理解码后的数据
 		for _, p := range packets {
 			typ, _ := GetMessageType(p.Header.Cmd)
 			if typ == nil {
-				logger.Error(fmt.Errorf("message type not found %v", p.Header.Cmd))
+				slog.Error(fmt.Sprintf("message type not found %v", p.Header.Cmd))
 				continue
 			}
 			msg := reflect.New(typ.Elem()).Interface()
 			err := s.MessageCodec.Decode(p.Data, msg)
 			if err != nil {
-				logger.Error(fmt.Errorf("decode message failed %v", err))
+				slog.Error(fmt.Sprintf("decode message failed %v", err))
 				continue
 			}
 			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
@@ -327,13 +327,13 @@ func (s *Session) readTCPStream() {
 		for _, p := range packets {
 			typ, _ := GetMessageType(p.Header.Cmd)
 			if typ == nil {
-				logger.Error3(fmt.Sprintf("message type not found %v", p.Header.Cmd))
+				slog.Error(fmt.Sprintf("message type not found %v", p.Header.Cmd))
 				continue
 			}
 			msg := reflect.New(typ.Elem()).Interface()
 			err := s.MessageCodec.Decode(p.Data, msg)
 			if err != nil {
-				logger.Error(fmt.Errorf("decode message failed %v", err))
+				slog.Error(fmt.Sprintf("decode message failed %v", err))
 				continue
 			}
 			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}

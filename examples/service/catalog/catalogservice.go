@@ -8,8 +8,8 @@ import (
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/reward"
-	"io/github/gforgame/protos"
 )
 
 type CatalogService struct {

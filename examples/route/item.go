@@ -5,8 +5,8 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type ItemRoute struct {

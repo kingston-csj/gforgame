@@ -4,7 +4,7 @@ import (
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 	"strconv"
 )
 

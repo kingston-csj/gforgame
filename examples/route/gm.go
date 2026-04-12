@@ -5,8 +5,8 @@ import (
 	playerservice "io/github/gforgame/examples/service/player"
 	"strings"
 
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
 )
 
 type GmRoute struct {

@@ -3,7 +3,7 @@ package quest
 import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 )
 
 // 任务类型切面控制器

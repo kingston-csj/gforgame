@@ -1,9 +1,9 @@
 package rank
 
 import (
+	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/rank/handler"
-	"io/github/gforgame/protos"
 	"sync"
 )
 

@@ -5,16 +5,15 @@ import (
 	"fmt"
 
 	"io/github/gforgame/codec/json"
+	"io/github/gforgame/common/logger"
 	"io/github/gforgame/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/logger"
 	"io/github/gforgame/network/rpc"
 )
 
 func PlayerLoginRemote(p *playerdomain.Player, kind TransferType) {
 	t, err := GetTransfer(kind)
 	if err != nil {
-		logger.Error(err)
 		return
 	}
 	if result := t.CanTransfer(p); result > 0 {
@@ -22,7 +21,7 @@ func PlayerLoginRemote(p *playerdomain.Player, kind TransferType) {
 	}
 	err = transferToRemote(p, t)
 	if err != nil {
-		logger.Error(err)
+		logger.Error("PlayerLoginRemote fail", err)
 		return
 	}
 }

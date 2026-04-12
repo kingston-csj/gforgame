@@ -1,13 +1,13 @@
 package quest
 
 import (
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	constants "io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	events "io/github/gforgame/examples/events"
-	"io/github/gforgame/util"
 )
 var (
 	// 绑定各种类型的任务处理器

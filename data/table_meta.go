@@ -2,17 +2,8 @@ package data
 
 import (
 	"fmt"
-	"io/github/gforgame/logger"
-	"io/github/gforgame/util/jsonutil"
-	"os"
-	"path/filepath"
+	"io/github/gforgame/common/logger"
 	"reflect"
-)
-
-var (
-	// 容器类型
-	EnableJSONOutput bool   = false
-	JSONOutputDir    string = "json" // JSON输出目录
 )
 
 type TableMeta struct {
@@ -31,13 +22,6 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 	}
 	logger.Info(fmt.Sprintf("processed table %s, %d records", config.TableName, len(records)))
 
-	// 输出为 JSON 文件
-	if EnableJSONOutput {
-		if err := writeRecordsToJSON(records, config.TableName, JSONOutputDir); err != nil {
-			logger.Error3(fmt.Sprintf("failed to write JSON for table %s: %v", config.TableName, err))
-		}
-	}
-
 	// 创建容器实例
 	var container interface{}
 	if config.ContainerType != nil {
@@ -49,7 +33,7 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 			initializer.Init()
 		}
 	} else {
-		// 获取ID字段的类型
+		// 获取ID字段的类?
 		field, ok := config.RecordType.FieldByName(config.IDField)
 		if !ok {
 			return nil, fmt.Errorf("field %s not found in type %s", config.IDField, config.RecordType.Name())
@@ -103,29 +87,4 @@ func ProcessTable(reader *ExcelDataReader, filePath string, config TableMeta) (i
 	}
 
 	return container, nil
-}
-
-// writeRecordsToJSON 将记录写入 JSON 文件
-func writeRecordsToJSON(records []interface{}, tableName, outputDir string) error {
-	// 确保输出目录存在
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("failed to create output directory: %v", err)
-	}
-
-	// 生成 JSON 字符串
-	jsonStr, err := jsonutil.StructToPrettyJSON(records)
-	if err != nil {
-		return fmt.Errorf("failed to convert records to JSON: %v", err)
-	}
-
-	// 构建输出文件路径
-	outputPath := filepath.Join(outputDir, tableName+".json")
-
-	// 写入文件
-	if err := os.WriteFile(outputPath, []byte(jsonStr), 0644); err != nil {
-		return fmt.Errorf("failed to write JSON file: %v", err)
-	}
-
-	logger.Info(fmt.Sprintf("written table %s to JSON file: %s", tableName, outputPath))
-	return nil
 }

@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"io/github/gforgame/logger"
+	"io/github/gforgame/common/logger"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -56,7 +56,7 @@ func (w *worker) processQueue() {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					logger.Error(fmt.Errorf("panic recovered: %v", r))
+					logger.Error("", fmt.Errorf("panic recovered: %v", r))
 					failedEntities = append(failedEntities, entity)
 				}
 			}()
@@ -76,7 +76,7 @@ func (w *worker) processQueue() {
 		defer w.mu.Unlock()
 		for _, entity := range failedEntities {
 			id := entity.GetId()
-			// 如果队列中已经有该 ID 的新数据，则放弃旧数据（避免版本回退）
+			// 如果队列中已经有相同 ID 的新数据，则放弃旧数据（避免版本回退）
 			if _, exists := w.data[id]; !exists {
 				w.data[id] = entity
 				atomic.AddInt32(&w.size, 1)

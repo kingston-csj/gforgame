@@ -1,7 +1,7 @@
 package schedule_test
 
 import (
-	"io/github/gforgame/schedule"
+	"io/github/gforgame/common/schedule"
 	"testing"
 	"time"
 )

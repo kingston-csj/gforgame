@@ -1,12 +1,12 @@
 package chat
 
 import (
+	"io/github/gforgame/common/util"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
 )
 
 type ChatChannelHandler interface {

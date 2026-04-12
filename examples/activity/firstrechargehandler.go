@@ -1,7 +1,10 @@
 package activity
 
 import (
-	"io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/common/util"
+	"io/github/gforgame/common/util/timeutil"
+	playerdomain "io/github/gforgame/examples/domain/player"
+	"io/github/gforgame/examples/protos"
 )
 
 type FirstRechargeActivityHandler struct {
@@ -12,9 +15,46 @@ func (d *FirstRechargeActivityHandler) GetBaseHandler() *BaseActivityHandler {
 	return d.BaseActivityHandler
 }
 
-func (d *FirstRechargeActivityHandler) LoadActivityInfo(player *player.Player) {
-	 
+func (d *FirstRechargeActivityHandler) LoadActivityInfo(p *playerdomain.Player) *protos.ActivityVo {
+	activityInfo := p.ActivityBox.Data[d.ActivityId]
+	activityRewards := GetActivityRewards(d.ActivityId)
+	
+	if activityInfo == nil {
+		activityInfo = &playerdomain.ActivityInfo{
+			Rewards: make(map[int32]string),
+		}
+		p.ActivityBox.Data[d.ActivityId] = activityInfo
+		for _, rewardData := range activityRewards {
+			activityInfo.Rewards[rewardData.Id] = "0"
+		}
+	} else {
+		firstReward := p.RechargeBox.FirstRechargeTime>0
+		if firstReward {
+			dayDiff := timeutil.GetDayDiffFromToday(p.RechargeBox.FirstRechargeTime)
+			for _, rewardData := range activityRewards {
+				if dayDiff >= util.Int32Value(rewardData.Condition) {
+					if activityInfo.Rewards[rewardData.Id] != "2" {
+						activityInfo.Rewards[rewardData.Id] = "1"
+					}
+				}
+			}
+		}
+	}
+	activityVo := &protos.ActivityVo{
+		ActivityId: d.ActivityId,
+		RewardVos: make([]*protos.ActivityRewardVo, 0),
+	}
+	for rewardId, rewardStatus := range activityInfo.Rewards {
+		activityRewardVo := &protos.ActivityRewardVo{
+			Id: rewardId,
+			Value: rewardStatus,
+		}
+		activityVo.RewardVos = append(activityVo.RewardVos, activityRewardVo)
+	}
+	return activityVo
 }
+
+
 
 func NewFirstRechargeActivityHandler(sched *ActivityScheduler) *FirstRechargeActivityHandler {
 	baseHandler := &BaseActivityHandler{

@@ -1,15 +1,15 @@
 package friend
 
 import (
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
+	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
-	"io/github/gforgame/protos"
-	"io/github/gforgame/util"
 	"sync"
 	"time"
 )

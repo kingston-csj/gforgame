@@ -3,12 +3,12 @@ package chat
 import (
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/io"
-	"io/github/gforgame/protos"
+	"io/github/gforgame/examples/protos"
 	"sync"
 
+	"io/github/gforgame/common/util"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	playerservice "io/github/gforgame/examples/service/player"
-	"io/github/gforgame/util"
 	"time"
 )
 
