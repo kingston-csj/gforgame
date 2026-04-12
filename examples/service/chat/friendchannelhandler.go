@@ -8,11 +8,17 @@ import (
 )
 
 type FriendChannelHandler struct {
-	BaseChatChannelHandler
+	*BaseChatChannelHandler
 }
 
 func (h *FriendChannelHandler) Init() {
 
+}
+
+func NewFriendChatChannelHandler() *FriendChannelHandler {
+	h := &FriendChannelHandler{}
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h)
+	return h
 }
 
 func (h *FriendChannelHandler) CheckCanSend(player *playerdomain.Player, target string, content string) int {

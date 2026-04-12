@@ -28,7 +28,7 @@ func (c *ItemConsume) Consume(player *player.Player, actionType int32) {
 	if itemOps == nil {
 		return
 	}
-	if err := itemOps.UseByModelId(player, c.ItemId, c.Amount); err != nil {
+	if err := itemOps.UseByModelId(player.Id, c.ItemId, c.Amount); err != nil {
 		return
 	}
 }

@@ -29,7 +29,7 @@ func (r *RuneReward) VerifySliently(player *player.Player) bool {
 
 func (r *RuneReward) Reward(player *player.Player, actionType int) {
     if ops := getItemOps(); ops != nil {
-        ops.AddByModelId(player, r.ItemId, r.Amount)
+        ops.AddByModelId(player.Id, r.ItemId, r.Amount)
     }
 }
 

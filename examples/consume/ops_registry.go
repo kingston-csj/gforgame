@@ -1,7 +1,7 @@
 package consume
 
 import (
-	itemcontract "io/github/gforgame/examples/contracts/item"
+	itemcontract "io/github/gforgame/examples/contract"
 	"sync"
 )
 

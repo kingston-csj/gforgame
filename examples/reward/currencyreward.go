@@ -38,7 +38,7 @@ func (r *CurrencyReward) VerifySliently(player *player.Player) bool {
 
 func (r *CurrencyReward) Reward(player *player.Player, actionType int) {
     if ops := getCurrencyOps(); ops != nil {
-        ops.Add(player, r.Currency, r.Amount)
+        ops.Add(player.Id, r.Currency, r.Amount)
         return
     }
     if r.Currency == "gold" {

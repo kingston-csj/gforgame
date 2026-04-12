@@ -1,16 +1,16 @@
 package events
 
-import "io/github/gforgame/domain"
+import "io/github/gforgame/examples/contract"
 
 type IPlayerEvent interface {
-	GetOwner() domain.Player
+	GetOwner() contract.Player
 }
 
 type PlayerEvent struct {
-	Player domain.Player
+	Player contract.Player
 }
 
-func (e PlayerEvent) GetOwner() domain.Player {
+func (e PlayerEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -18,7 +18,7 @@ type LoginEvent struct {
 	PlayerEvent
 }
 
-func (e LoginEvent) GetOwner() domain.Player {
+func (e LoginEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -28,7 +28,7 @@ type RecruitEvent struct {
 	Type int32 // 招募类型 1:普通 2:高级
 }
 
-func (e RecruitEvent) GetOwner() domain.Player {
+func (e RecruitEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -38,7 +38,7 @@ type HeroGainEvent struct {
 	HeroId int32
 }
 
-func (e HeroGainEvent) GetOwner() domain.Player {
+func (e HeroGainEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -50,7 +50,7 @@ type ItemConsumeEvent struct {
 	Count int32
 }
 
-func (e ItemConsumeEvent) GetOwner() domain.Player {
+func (e ItemConsumeEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -59,7 +59,7 @@ type RechargeEvent struct {
 	RechargeId int32
 }
 
-func (e RechargeEvent) GetOwner() domain.Player {
+func (e RechargeEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -68,7 +68,7 @@ type ClientCustomEvent struct {
 	EventId int32
 }
 
-func (e ClientCustomEvent) GetOwner() domain.Player {
+func (e ClientCustomEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -76,7 +76,7 @@ type HeroEntrustEvent struct {
 	PlayerEvent
 }
 
-func (e HeroEntrustEvent) GetOwner() domain.Player {
+func (e HeroEntrustEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -85,7 +85,7 @@ type HeroLevelUpEvent struct {
 	HeroId int32
 	Times int32
 }
-func (e HeroLevelUpEvent) GetOwner() domain.Player {
+func (e HeroLevelUpEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -94,14 +94,14 @@ type EquipLevelUpEvent struct {
 	EquipId int32
 	Times int32
 }
-func (e EquipLevelUpEvent) GetOwner() domain.Player {
+func (e EquipLevelUpEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
 type MallBuyEvent struct {
 	PlayerEvent
 }
-func (e MallBuyEvent) GetOwner() domain.Player {
+func (e MallBuyEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -109,7 +109,7 @@ type AreaScoreChangedEvent struct {
 	PlayerEvent
 	Score int32
 }
-func (e AreaScoreChangedEvent) GetOwner() domain.Player {
+func (e AreaScoreChangedEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -117,7 +117,7 @@ type PassArenaEvent struct {
 	PlayerEvent
 }
 
-func (e PassArenaEvent) GetOwner() domain.Player {
+func (e PassArenaEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -125,7 +125,7 @@ type PassGuankaEvent struct {
 	PlayerEvent
 }
 
-func (e PassGuankaEvent) GetOwner() domain.Player {
+func (e PassGuankaEvent) GetOwner() contract.Player {
 	return e.Player
 }
 
@@ -134,6 +134,6 @@ type PassFubenEvent struct {
 	PlayerEvent
 }
 
-func (e PassFubenEvent) GetOwner() domain.Player {
+func (e PassFubenEvent) GetOwner() contract.Player {
 	return e.Player
 }

@@ -6,12 +6,14 @@ import (
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/contract"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/reward"
 	"io/github/gforgame/examples/service/catalog"
+	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/network"
 )
 
@@ -36,11 +38,12 @@ func (s *SceneItemService) init() {
 	reward.SetSceneItemOps( s)
 }
 
-func (s *SceneItemService) UseByModelId(p *playerdomain.Player, itemId int32, count int32) error {
+func (s *SceneItemService) UseByModelId(playerId string, itemId int32, count int32) error {
+	p := playerservice.GetPlayerService().GetPlayer(playerId)
+	backpack := p.SceneBackpack
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
 	}
-	backpack := p.SceneBackpack
 	changeResult := backpack.ReduceByModelId(itemId, count)
 	if !changeResult.Succ  {
 		return notEnoughError
@@ -55,7 +58,8 @@ func (s *SceneItemService) UseByModelId(p *playerdomain.Player, itemId int32, co
 	return nil
 }
 
-func (s *SceneItemService) UseByUid(p *playerdomain.Player, itemUid string, count int32) (error, []protos.RewardVo) {
+func (s *SceneItemService) UseByUid(playerId string, itemUid string, count int32) (error, []contract.RewardDefLite) {
+	p := playerservice.GetPlayerService().GetPlayer(playerId)
 	if itemUid == "" || count <= 0 {
 		return errorIllegalParams, nil
 	}
@@ -74,10 +78,11 @@ func (s *SceneItemService) UseByUid(p *playerdomain.Player, itemUid string, coun
 	}
 	io.NotifyPlayer(p, notify)
 	// 场景道具没有使用效果，直接返回空奖励
-	return nil, make([]protos.RewardVo, 0)
+	return nil, make([]contract.RewardDefLite, 0)
 }
 
-func (s *SceneItemService) AddByModelId(p *playerdomain.Player, itemId int32, count int32) error {
+func (s *SceneItemService) AddByModelId(playerId string, itemId int32, count int32) error {
+	p := playerservice.GetPlayerService().GetPlayer(playerId)
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
 	}

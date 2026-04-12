@@ -34,12 +34,18 @@ type ChatChannelHandler interface {
 }
 
 type BaseChatChannelHandler struct {
-	ChatChannelHandler
+	self ChatChannelHandler
+}
+
+func NewBaseChatChannelHandler(self ChatChannelHandler) *BaseChatChannelHandler {
+	return &BaseChatChannelHandler{
+		self: self,
+	}
 }
 
 func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 	// 过滤不在线的玩家
-	receivers := b.Receivers(message)
+	receivers := b.self.Receivers(message)
 
 	onlines := make([]*playerdomain.Player, 0)
 	// 广播消息

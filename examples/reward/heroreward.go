@@ -29,7 +29,7 @@ func (r *HeroReward) VerifySliently(player *player.Player) bool {
 
 func (r *HeroReward) Reward(player *player.Player, actionType int) {
     if ops := getItemOps(); ops != nil {
-        ops.AddByModelId(player, r.HeroId, r.Amount)
+        ops.AddByModelId(player.Id, r.HeroId, r.Amount)
     }
 }
 

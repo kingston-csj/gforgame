@@ -25,8 +25,8 @@ var (
 func GetChatService() *ChatService {
 	once.Do(func() {
 		instance = &ChatService{}
-		ChatChannelHandlers[constants.ChannelTypeFriend] = &FriendChannelHandler{}
-		ChatChannelHandlers[constants.ChannelTypeWorld] = &WorldChannelHandler{}
+		ChatChannelHandlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler()
+		ChatChannelHandlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler()
 		for _, handler := range ChatChannelHandlers {
 			handler.Init()
 		}

@@ -3,9 +3,9 @@ package reward
 import (
 	"errors"
 	"io/github/gforgame/common/util"
-	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
+	"io/github/gforgame/examples/contract"
 	"io/github/gforgame/examples/protos"
 	"math"
 	"strings"
@@ -81,11 +81,11 @@ func ParseRewardList(config string) []Reward {
 }
 
 
-func ParseRewards(rewards []domain.RewardDefLite) *AndReward {
+func ParseRewards(rewards []contract.RewardDefLite) *AndReward {
     andReward := NewAndReward()
 
     for _, rewardItem := range rewards {
-        split := strings.Split(rewardItem.Value, "=")
+        split := strings.Split(rewardItem.Value, "_")
         switch rewardItem.Type {
 		case "item":
 			itemId, _ := util.StringToInt32(split[0])
@@ -103,6 +103,17 @@ func ParseRewards(rewards []domain.RewardDefLite) *AndReward {
     return andReward
 }
 
+func Serialize(andReward *AndReward) []contract.RewardDefLite {
+	result := make([]contract.RewardDefLite, 0)
+	for _, reward := range andReward.Rewards {
+		result = append(result, contract.RewardDefLite{
+			Type:  reward.GetType(),
+			Value: reward.Serial(),
+		})
+	}
+	return result
+}
+
 func FromConsumes(consumes []consume.Consume) *AndReward {
 	andReward := NewAndReward()
 	for _, c := range consumes {
@@ -116,7 +127,7 @@ func FromConsumes(consumes []consume.Consume) *AndReward {
 }
 
 func consume2Reward(c consume.Consume) (Reward, error) {
-    // 如果类型是 CurrencyConsume
+    // 如果类型是CurrencyConsume，直接返回CurrencyReward
     if currencyConsume, ok := c.(*consume.CurrencyConsume); ok {
         return &CurrencyReward{
             Currency: currencyConsume.Currency,
@@ -152,7 +163,7 @@ func ToRewardVo(reward Reward) *protos.RewardVo {
 	}
 }
 
-func MultiplyAndReward(sourceRewards *AndReward, multiple float64) *AndReward {
+func multiplyAndReward(sourceRewards *AndReward, multiple float64) *AndReward {
 	andReward := NewAndReward()
 	for _, reward := range sourceRewards.Rewards {
 		// 数量全部向上取整
@@ -181,9 +192,9 @@ func modifyRewardAmount(reward Reward, amount int32) Reward {
 }
 
 // 奖励加倍（数量为向上取整）
-func multiply(sourceRewards Reward, multiple float64) Reward {
+func Multiply(sourceRewards Reward, multiple float64) Reward {
 	if _, ok := sourceRewards.(*AndReward); ok {
-		return MultiplyAndReward(sourceRewards.(*AndReward), multiple);
+		return multiplyAndReward(sourceRewards.(*AndReward), multiple);
 	} else {
 		return modifyRewardAmount(sourceRewards, int32(math.Ceil(float64(sourceRewards.GetAmount()) * multiple)));
 	}

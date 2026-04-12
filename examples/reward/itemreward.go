@@ -32,7 +32,7 @@ func (r *ItemReward) Reward(player *player.Player, actionType int) {
 	if itemOps == nil {
 		return
 	}
-	if err := itemOps.AddByModelId(player, r.ItemId, r.Amount); err != nil {
+	if err := itemOps.AddByModelId(player.Id, r.ItemId, r.Amount); err != nil {
 		return
 	}
 }

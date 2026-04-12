@@ -1,14 +1,14 @@
 package mail
 
 import (
-	"time"
-
 	"io/github/gforgame/common/util"
 	"io/github/gforgame/common/util/timeutil"
-	"io/github/gforgame/domain"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
+	"io/github/gforgame/examples/contract"
+	"time"
+
 	configdomain "io/github/gforgame/examples/domain/config"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/reward"
@@ -116,7 +116,7 @@ func (s *MailService) SendSimpleMail2(player *playerdomain.Player,id int32, para
 	}
 	s.SendMail(player, id, "", "", nil, mailData.ValidTime, params...)
 }
-func (s *MailService) SendMail(player *playerdomain.Player,id int32, title string, content string, rewards []domain.RewardDefLite, validHours int32, params ...string) {
+func (s *MailService) SendMail(player *playerdomain.Player,id int32, title string, content string, rewards []contract.RewardDefLite, validHours int32, params ...string) {
 	mailId := util.GetNextID()
 	mailData := config.QueryById[configdomain.MailData](id)
 	if mailData != nil && validHours == 0{

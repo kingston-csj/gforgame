@@ -141,7 +141,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 				itemConsume.Consume(p, constants.ActionType_HeroRecruit)
 			}
 			if itemCount > 0 {
-				item.GetItemService().UseByModelId(p, itemId, itemCount)
+				item.GetItemService().UseByModelId(p.Id, itemId, itemCount)
 			}
 		}
 
@@ -168,7 +168,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 					Type:  "item",
 					Value: fmt.Sprintf("%d_%d", heroData.ShardItem, heroData.ShardAmount),
 				})
-				item.GetItemService().AddByModelId(p, heroData.ShardItem, heroData.ShardAmount)
+				item.GetItemService().AddByModelId(p.Id, heroData.ShardItem, heroData.ShardAmount)
 			} else {
 				rewardVos = append(rewardVos, &protos.RewardVo{
 					Type:  "hero",

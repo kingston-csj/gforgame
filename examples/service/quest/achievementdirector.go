@@ -80,9 +80,9 @@ func (d *AchievementQuestDirector) TakeProgressRewards(player *playerdomain.Play
 	rewardStr := commonContainer.GetStringValue(constants.CommonValueKeyAchievementQuestProessReward)
 	perReward := reward.ParseReward(rewardStr)
 	rewardVos := make([]*protos.RewardVo, 0)
-	andReward := reward.MultiplyAndReward(perReward, float64(canRewardTimes))
+	andReward := reward.Multiply(perReward, float64(canRewardTimes))
 	andReward.Reward(player, constants.ActionType_AchievementQuestProgressReward)
-
+	
 	return rewardVos
 }
  

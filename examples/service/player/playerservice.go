@@ -22,7 +22,6 @@ import (
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/service/hero"
 	"io/github/gforgame/examples/system"
 	"io/github/gforgame/network"
 	"strings"
@@ -215,7 +214,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32) *proto
 		}
 	}
 
-	costGold := hero.GetHeroService().CalcTotalUpLevelConsume(p.Level, toLevel)
+	costGold := calcTotalUpLevelConsume(p.Level, toLevel)
 	if !p.Purse.IsEnoughGold(costGold) {
 		return &protos.ResPlayerUpLevel{
 			Code: constants.I18N_GOLD_NOT_ENOUGH,
@@ -241,6 +240,18 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32) *proto
 	return &protos.ResPlayerUpLevel{
 		Code: 0,
 	}
+}
+
+func calcTotalUpLevelConsume(fromLevel int32, toLevel int32) int32 {
+	levelContainer := config.GetSpecificContainer[*container.PlayerLevelContainer]()
+	total := int32(0)
+	for i := fromLevel; i < toLevel; i++ {
+		levelData := levelContainer.GetLevelData(i, i)
+		if levelData != nil {
+			total += levelData.Cost
+		}
+	}
+	return total
 }
 
 func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpStage {

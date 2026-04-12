@@ -29,7 +29,7 @@ func (r *TicketReward) VerifySliently(player *player.Player) bool {
 
 func (r *TicketReward) Reward(player *player.Player, actionType int) {
     if ops := getItemOps(); ops != nil {
-        ops.AddByModelId(player, r.MapId, r.Amount)
+        ops.AddByModelId(player.Id, r.MapId, r.Amount)
     }
 }
 

@@ -9,13 +9,19 @@ import (
 )
 
 type WorldChannelHandler struct {
-	BaseChatChannelHandler
+	*BaseChatChannelHandler
 	MsgQueue *list.LimitedList[*playerdomain.ChatMessage]
 }
 
-func (h *WorldChannelHandler) Init() {
-	h.MsgQueue = list.NewLimitedList[*playerdomain.ChatMessage](100)
+func NewWorldChatChannelHandler() *WorldChannelHandler {
+	h := &WorldChannelHandler{
+		MsgQueue: list.NewLimitedList[*playerdomain.ChatMessage](100),
+	}
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h)
+	return h
+}
 
+func (h *WorldChannelHandler) Init() {
 	msg := &playerdomain.ChatMessage{
 		Id:         "1",
 		Channel:    constants.ChannelTypeWorld,

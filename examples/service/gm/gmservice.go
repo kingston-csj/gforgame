@@ -151,7 +151,7 @@ func handleAddItems(player *playerdomain.Player, params string) *common.Business
 		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
-		item.GetItemService().AddByModelId(player, itemId, itemNum)
+		item.GetItemService().AddByModelId(player.Id, itemId, itemNum)
 	}
 	return nil
 }
@@ -213,7 +213,7 @@ func handleAddSceneItems(player *playerdomain.Player, params string) *common.Bus
 		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
-		err := item.GetSceneItemService().AddByModelId(player, itemId, itemNum)
+		err := item.GetSceneItemService().AddByModelId(player.Id, itemId, itemNum)
 		if err != nil {
 			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 		}
@@ -227,7 +227,7 @@ func handleRemoveSceneItems(player *playerdomain.Player, params string) *common.
 		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
-		item.GetSceneItemService().UseByModelId(player, itemId, itemNum)
+		item.GetSceneItemService().UseByModelId(player.Id, itemId, itemNum)
 	}
 	return nil
 }

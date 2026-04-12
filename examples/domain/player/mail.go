@@ -3,14 +3,14 @@ package player
 import (
 	"time"
 
-	"io/github/gforgame/domain"
+	"io/github/gforgame/examples/contract"
 )
 
 type Mail struct {
 	Id      string            `json:"id"`
 	Title   string           `json:"title"`
 	Content string           `json:"content"`
-	Rewards []domain.RewardDefLite `json:"rewards"`
+	Rewards []contract.RewardDefLite `json:"rewards"`
 	Status  int32            `json:"status"`
 	// 接收时间（单位：秒）
 	Time    int64            `json:"time"`
