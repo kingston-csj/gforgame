@@ -1,8 +1,8 @@
 package handler
 
 import (
-	mysqldb "io/github/gforgame/db"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/protos"
 	playerservice "io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/service/rank/container"

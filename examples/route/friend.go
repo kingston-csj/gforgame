@@ -1,11 +1,11 @@
 package route
 
 import (
-	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/service/friend"
 	playerservice "io/github/gforgame/examples/service/player"

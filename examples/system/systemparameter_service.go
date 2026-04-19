@@ -1,8 +1,8 @@
 package system
 
 import (
-	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"sync"
 
 	"gorm.io/gorm"

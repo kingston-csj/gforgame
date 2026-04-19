@@ -7,12 +7,12 @@ import (
 	"io/github/gforgame/network/tcp"
 	"io/github/gforgame/network/ws"
 
-	mysqldb "io/github/gforgame/db"
+	"io/github/gforgame/examples/infra/persistence"
 )
 
 var (
 	CacheManager *cache.Manager
-	DbService    *mysqldb.AsyncDbService
+	DbService    *persistence.AsyncDBService
 	TcpServer    *tcp.TcpServer
 	WsServer     *ws.WsServer
 	// HttpServer   *gin.Engine
@@ -22,7 +22,7 @@ var (
 
 func init() {
 	CacheManager = cache.NewCacheManager()
-	DbService = mysqldb.NewAsyncDbService()
+	DbService = persistence.NewAsyncDbService()
 	EventBus = eventbus.NewEventBus()
 	TaskScheduler = schedule.NewDefaultTaskScheduler()
 }

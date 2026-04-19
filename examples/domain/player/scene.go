@@ -1,13 +1,13 @@
 package player
 
 import (
-	"io/github/gforgame/db"
+	"io/github/gforgame/persist"
 
 	"gorm.io/gorm"
 )
 
 type Scene struct {
-	db.BaseEntity
+	persist.BaseEntity
 	Data string `gorm:"type:text"`
 }
 

@@ -8,13 +8,13 @@ import (
 
 	"io/github/gforgame/codec/json"
 	"io/github/gforgame/common/logger"
-	"io/github/gforgame/db"
 	"io/github/gforgame/examples/cross"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/client"
 	"io/github/gforgame/network/protocol"
+	"io/github/gforgame/persist"
 )
 
 // 实现 RequestCallback 接口的匿名对象
@@ -68,7 +68,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 
 func main() {
 	p := &playerdomain.Player{
-		BaseEntity: db.BaseEntity{Id: "123456"},
+		BaseEntity: persist.BaseEntity{Id: "123456"},
 		Name:       "gforgame",
 		Level:      999,
 	}

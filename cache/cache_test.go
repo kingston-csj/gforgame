@@ -3,7 +3,7 @@ package cache_test
 import (
 	"fmt"
 	"io/github/gforgame/cache"
-	mysqldb "io/github/gforgame/db"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"testing"
 )
 

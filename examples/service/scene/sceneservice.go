@@ -1,10 +1,10 @@
 package scene
 
 import (
-	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/context"
 	"io/github/gforgame/examples/domain/player"
 	playerdomain "io/github/gforgame/examples/domain/player"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/protos"
 	"sync"

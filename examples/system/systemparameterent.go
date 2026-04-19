@@ -1,13 +1,13 @@
 package system
 
 import (
-	"io/github/gforgame/db"
+	"io/github/gforgame/persist"
 
 	"gorm.io/gorm"
 )
 
 type SystemParameterEnt struct {
-	db.BaseEntity
+	persist.BaseEntity
 	Data string `gorm:"column:data"`
 }
 

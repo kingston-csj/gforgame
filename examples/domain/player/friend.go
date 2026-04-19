@@ -3,13 +3,13 @@ package player
 import (
 	"encoding/json"
 
-	"io/github/gforgame/db"
+	"io/github/gforgame/persist"
 
 	"gorm.io/gorm"
 )
 
 type Friend struct {
-	db.BaseEntity
+	persist.BaseEntity
 	Id         string                      `gorm:"player_id"`
 	FriendJson string                      `gorm:"friend_json"`
 	ApplyJson  string                      `gorm:"apply_json"`

@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 
 	"io/github/gforgame/common/util"
-	"io/github/gforgame/db"
 	"io/github/gforgame/examples/fight/attribute"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/protos"
+	"io/github/gforgame/persist"
 
 	"gorm.io/gorm"
 )
 
 type Player struct {
-	db.BaseEntity
+	persist.BaseEntity
 	Name           string             `gorm:"player's name"`
 	Head           int32              `gorm:"player's head default:0"`
 	ClientScore    int32              `gorm:"player's client score"`
@@ -263,4 +263,19 @@ func (p *Player) NotifyPurseChange() {
 	resPurse.Diamond = p.Purse.Diamond
 	resPurse.Gold = p.Purse.Gold
 	io.NotifyPlayer(p, resPurse)
+}
+
+func (p *Player) SnapshotEntity() (persist.Entity, error) {
+	data, err := json.Marshal(p)
+	if err != nil {
+		return nil, err
+	}
+	snapshot := &Player{}
+	if err = json.Unmarshal(data, snapshot); err != nil {
+		return nil, err
+	}
+	if err = snapshot.BeforeSave(nil); err != nil {
+		return nil, err
+	}
+	return snapshot, nil
 }

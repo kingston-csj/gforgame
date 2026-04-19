@@ -8,8 +8,6 @@ import (
 	"io/github/gforgame/common/logger"
 	"io/github/gforgame/common/trie"
 	"io/github/gforgame/common/util"
-	"io/github/gforgame/db"
-	mysqldb "io/github/gforgame/db"
 	"io/github/gforgame/examples/camp"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
@@ -20,6 +18,7 @@ import (
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/events"
 	"io/github/gforgame/examples/fight/attribute"
+	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/io"
 	"io/github/gforgame/examples/protos"
 	"io/github/gforgame/examples/system"
@@ -58,7 +57,7 @@ func GetPlayerService() *PlayerService {
 // LoadPlayerProfile 加载玩家概况数据
 func (ps *PlayerService) LoadPlayerProfile() {
 	var profiles []*playerdomain.PlayerProfile
-	err := db.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
+	err := mysqldb.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
 	if err != nil {
 		panic(err)
 	}
