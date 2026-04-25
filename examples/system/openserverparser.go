@@ -27,7 +27,7 @@ func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression 
 
 	splits := strings.Split(expression, " ")
 	if len(splits) != 5 {
-		return time.Time{}, nil // 非合法表达式，返回零值时间 
+		return time.Time{}, nil // 非合法表达式，返回零值时间
 	}
 
 	second, err := strconv.Atoi(splits[0])
@@ -48,10 +48,10 @@ func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression 
 	}
 
 	nextTime := openServerTime.
-		AddDate(0, 0, day).     
-		Add(time.Hour * time.Duration(hour)).   
-		Add(time.Minute * time.Duration(minute)).  
-		Add(time.Second * time.Duration(second)) 
+		AddDate(0, 0, day).
+		Add(time.Hour * time.Duration(hour)).
+		Add(time.Minute * time.Duration(minute)).
+		Add(time.Second * time.Duration(second))
 
 	return nextTime, nil
 }
@@ -60,11 +60,11 @@ func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression 
 func getOpenServerDate() (time.Time, error) {
 	// 示例：此处返回一个固定时间，实际开发中请替换为从配置/数据库获取开服时间的逻辑
 	// 若开服时间不存在，返回 error
-	openServerStr := GetOpenSeverTime().Data.(string) 
+	openServerStr := GetOpenSeverTime().GetValue().(string)
 	if openServerStr == "" {
 		return time.Time{}, errors.New("open server time is empty")
 	}
-		
+
 	openServerTime, err := time.Parse("2006-01-02 15:04:05", openServerStr)
 	if err != nil {
 		return time.Time{}, err

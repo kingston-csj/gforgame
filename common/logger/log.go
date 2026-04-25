@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -53,6 +54,31 @@ var (
 	errorLog   *slog.Logger
 )
 
+type stackTracer interface {
+	StackTrace() string
+}
+
+type panicWithStack struct {
+	value any
+	stack []byte
+}
+
+func (p *panicWithStack) Error() string {
+	return fmt.Sprintf("%v", p.value)
+}
+
+func (p *panicWithStack) StackTrace() string {
+	return string(p.stack)
+}
+
+// PanicToError converts a recovered panic value into an error with the original panic stack.
+func PanicToError(p any) error {
+	return &panicWithStack{
+		value: p,
+		stack: debug.Stack(),
+	}
+}
+
 func init() {
 	logs = make(map[string]*slog.Logger)
 	// 创建一个新的Logger
@@ -65,7 +91,7 @@ func createBusinessLog(name string) *slog.Logger {
 	name = strings.ToLower(name)
 	writer, _ := rotatelogs.New(
 		"logs/"+name+"/"+name+".%Y%m%d",
-		rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
+		rotatelogs.WithMaxAge(30 * time.Duration(24)*time.Hour),
 	)
 	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{Level: slog.LevelInfo})
 	return slog.New(handler).With("biz", name)
@@ -75,7 +101,7 @@ func createConsoleLog() *slog.Logger {
 	// 设置Logger的输出
 	writer, _ := rotatelogs.New(
 		"logs/app/"+"app.%Y%m%d",
-		rotatelogs.WithMaxAge(time.Duration(24)*time.Hour),
+		rotatelogs.WithMaxAge(7*time.Duration(24)*time.Hour),
 	)
 	// 创建多输出目标：同时输出到文件和控制台
 	multiWriter := io.MultiWriter(writer, os.Stdout)
@@ -145,7 +171,7 @@ func createErrorLog() *slog.Logger {
 	// 创建 rotatelogs 实例
 	writer, err := rotatelogs.New(
 		filepath.Join(logDir, "error.%Y%m%d"),
-		rotatelogs.WithMaxAge(24*time.Hour),
+		rotatelogs.WithMaxAge(7*time.Duration(24)*time.Hour),
 	)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to create rotatelogs: %v", err))
@@ -153,8 +179,9 @@ func createErrorLog() *slog.Logger {
 
 	// 创建多输出目标：同时输出到文件和控制台
 	multiWriter := io.MultiWriter(writer, os.Stdout)
-	handler := slog.NewTextHandler(multiWriter, &slog.HandlerOptions{Level: slog.LevelInfo})
-	return slog.New(handler).With("biz", "error")
+	// 错误日志使用纯文本 handler，避免 stack 中换行被转义成 \n
+	handler := &plainTextHandler{out: multiWriter, level: slog.LevelInfo}
+	return slog.New(handler)
 }
 
 // Error 记录带自定义异常内容、原始错误和调用栈的错误日志
@@ -163,10 +190,15 @@ func createErrorLog() *slog.Logger {
 //   - err: 原始错误对象，若为nil则不记录日志
 func Error(customMsg string, err error) {
 	if err != nil {
-		// 获取调用栈信息
-		stack := make([]byte, 1024)
-		n := runtime.Stack(stack, false)
-		stackStr := string(stack[:n])
+		stackStr := ""
+		if st, ok := err.(stackTracer); ok {
+			stackStr = st.StackTrace()
+		} else {
+			// 回退：记录当前调用栈，增大容量减少截断概率
+			stack := make([]byte, 64*1024)
+			n := runtime.Stack(stack, false)
+			stackStr = string(stack[:n])
+		}
 
 		// 优化调用栈输出（保留原有逻辑）
 		stackLines := strings.Split(stackStr, "\n")
@@ -184,18 +216,14 @@ func Error(customMsg string, err error) {
 			}
 		}
 
-		// 拼接自定义异常内容（为空则不显示，避免多余字符）
-		var msgPrefix string
+		// 拼接多行日志，堆栈按真实换行输出，便于排查
+		message := "ERROR EXCEPTION"
 		if customMsg != "" {
-			msgPrefix = fmt.Sprintf("%s - ", customMsg)
+			message += "\ncustom: " + customMsg
 		}
-
-		// 记录日志（整合自定义内容、原始错误、调用栈）
-		errorLog.Error("ERROR EXCEPTION",
-			"custom", msgPrefix,
-			"error", err.Error(),
-			"stack", strings.Join(optimizedStack, "\n"),
-		)
+		message += "\nerror: " + err.Error()
+		message += "\nstack:\n" + strings.Join(optimizedStack, "\n")
+		errorLog.Error(message)
 	}
 }
 
@@ -216,5 +244,5 @@ func ErrorNoStack(customMsg any) {
 		return
 	}
 	// 重要错误单行日志：写入 error 文件，不带调用栈
-	errorLog.Error("ERROR", "message", message)
+	errorLog.Error("ERROR: " + message)
 }

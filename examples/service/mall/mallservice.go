@@ -1,7 +1,7 @@
 package mall
 
 import (
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/consume"
@@ -32,10 +32,10 @@ func GetMallService() *MallService {
 func (s *MallService) OnPlayerLogin(player *playerdomain.Player) {
 }
 
-func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32) *common.BusinessRequestException {
+func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32) *errors.BusinessError {
 	mallData := config.QueryById[configdomain.MallData](mallId)
 	if mallData == nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	andConsume := &consume.AndConsume{}
 	for i := 0; i < int(count); i++ {
@@ -44,13 +44,13 @@ func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32
 	andConsume = andConsume.Merge()
 	err := andConsume.Verify(player)
 	if err != nil {
-		return err.(*common.BusinessRequestException)
+		return err.(*errors.BusinessError)
 	}
 	// 每日限购
 	if mallData.DailyBuy > 0 {
 		// 检查是否超过每日限购
 		if player.DailyReset.MallDailyBuy[mallId] >= mallData.DailyBuy {
-			return common.NewBusinessRequestException(constants.I18N_MALL_DAILY_BUY_LIMIT)
+			return errors.NewBusinessError(constants.I18N_MALL_DAILY_BUY_LIMIT)
 		}
 		// 增加每日购买次数
 		player.DailyReset.MallDailyBuy[mallId]++
@@ -59,7 +59,7 @@ func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32
 	if mallData.LifeTimeBuy > 0 {
 		// 检查是否超过终身限购
 		if player.ExtendBox.LifeTimeBuyCount[mallId] >= mallData.LifeTimeBuy {
-			return common.NewBusinessRequestException(constants.I18N_MALL_LIFE_TIME_BUY_LIMIT)
+			return errors.NewBusinessError(constants.I18N_MALL_LIFE_TIME_BUY_LIMIT)
 		}
 		// 增加终身购买次数
 		player.ExtendBox.LifeTimeBuyCount[mallId]++

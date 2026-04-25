@@ -3,7 +3,7 @@ package system
 type SystemParameter interface {
 	DoParse() interface{}
 	DoSave() string
-	GetID() int
+	GetID() string
 	GetValue() interface{}
 	Save(data interface{})
 }

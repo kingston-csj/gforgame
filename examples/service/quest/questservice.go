@@ -4,7 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
+	commonerrors "io/github/gforgame/common/errors"
 	"io/github/gforgame/common/util"
 	"io/github/gforgame/common/util/timeutil"
 	"io/github/gforgame/examples/config"
@@ -77,11 +78,11 @@ func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
 
 func (s *QuestService) AcceptQuest(player *playerdomain.Player, questId int32) (*playerdomain.Quest, error) {
 	if player.QuestBox.HasReceivedQuest(questId) {
-		return nil, common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return nil, errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	questData := config.QueryById[configdomain.QuestData](questId)
 	if questData == nil {
-		return nil, common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return nil, errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
    
 	quest := &playerdomain.Quest{
@@ -101,10 +102,10 @@ func (s *QuestService) AcceptQuest(player *playerdomain.Player, questId int32) (
 	return quest, nil
 }
 
-func (s *QuestService) TakeReward(player *playerdomain.Player, questId int32) (*protos.ResQuestTakeReward, *common.BusinessRequestException) {
+func (s *QuestService) TakeReward(player *playerdomain.Player, questId int32) (*protos.ResQuestTakeReward, *commonerrors.BusinessError) {
 	quest := player.QuestBox.GetQuest(questId)
 	if quest == nil || quest.Status == constants.QuestStatusRewarded{
-		return nil, common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return nil, errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	questData := config.QueryById[configdomain.QuestData](questId)
 	rewards := reward.ParseReward(questData.Rewards)
@@ -144,7 +145,7 @@ func (s *QuestService) TakeAllReward(player *playerdomain.Player, catalog int32)
 	}
 	rewards.Merge()
 	if err := rewards.Verify(player); err != nil {
-		return nil, common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return nil, errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 
 	finishedIds := make([]int32, 0)

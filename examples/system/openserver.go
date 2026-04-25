@@ -1,18 +1,31 @@
 package system
 
 import (
-	"io/github/gforgame/examples/context"
+	"sync"
+	"sync/atomic"
 )
 
 type OpenSeverTime struct {
-	ID        string `json:"id"`
-	Date string  `json:"date"`
-	Data interface{}
+	baseStringParameter
+	Date     string `json:"date"`
+	Data     interface{}
+	value    atomic.Value `json:"-"`
+	loadOnce sync.Once    `json:"-"`
+}
+
+func NewOpenServerTime() *OpenSeverTime {
+	o := &OpenSeverTime{}
+	o.baseStringParameter.init(SystemParamIDOpenServer)
+	return o
 }
 
 // DoParse 方法用于解析数据
 func (d *OpenSeverTime) DoParse() interface{} {
-	return d.loadFromDb()
+	value := d.baseStringParameter.parseFromStore(func() string {
+		return d.loadFromDb()
+	})
+	d.Date = value
+	return value
 }
 
 // DoSave 方法用于保存数据
@@ -22,32 +35,25 @@ func (d *OpenSeverTime) DoSave() string {
 
 // GetID 方法用于获取参数 ID
 func (d *OpenSeverTime) GetID() string {
-	return d.ID
+	d.baseStringParameter.init(SystemParamIDOpenServer)
+	return d.baseStringParameter.getID()
 }
 
 // GetValue 方法用于获取参数值
 func (d *OpenSeverTime) GetValue() interface{} {
-	if d.Data == nil {
-		d.Data = d.DoParse()
-	}
-	return d.Data
+	v := d.baseStringParameter.getValue(func() string {
+		return d.loadFromDb()
+	})
+	return v
 }
 
 // Save 方法用于保存参数
 func (d *OpenSeverTime) Save(data interface{}) {
 	d.Date = data.(string)
-	cache, _ := context.CacheManager.GetCache("systemparameter")
-	cache.Set(d.GetID(), d)
-	record := GetSystemParameterService().GetOrCreateSystemParameterRecord("1004")
-	record.Data = d.DoSave()
-	context.DbService.SaveToDb(record)
+	d.baseStringParameter.saveValue(d.DoSave(), d)
 }
 
 // loadFromDb 方法用于从数据库加载数据
 func (d *OpenSeverTime) loadFromDb() string {
-	record := GetSystemParameterService().GetOrCreateSystemParameterRecord("1004")
-	if record == nil {
-		return ""
-	}
-	return record.GetData()
+	return loadSystemParameterValue(d.GetID())	
 }

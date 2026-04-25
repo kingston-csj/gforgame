@@ -2,7 +2,7 @@ package monthcard
 
 import (
 	"fmt"
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	configdomain "io/github/gforgame/examples/domain/config"
@@ -123,24 +123,24 @@ func calcExpiredTime(lastDays int) (int64, error) {
 }
 
 
-func (ps *MonthCardService) TakeReward( player *player.Player, typ int32) *common.BusinessRequestException {
+func (ps *MonthCardService) TakeReward( player *player.Player, typ int32) *errors.BusinessError {
     monthCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver) 
 	if typ == 1 {
 		monthCard = player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeGold)
 	}
 	if monthCard.IsActivated() {
-		return common.NewBusinessRequestException(constants.I18N_MONTH_CARD_TIPS1)
+		return errors.NewBusinessError(constants.I18N_MONTH_CARD_TIPS1)
 	}
 	monthCardData := config.QueryById[configdomain.MonthlyCardData](typ)
 
 	if typ == 1 {
 		if player.DailyReset.SilverMonthCardReward {
-			return common.NewBusinessRequestException(constants.I18N_MONTH_CARD_TIPS2)
+			return errors.NewBusinessError(constants.I18N_MONTH_CARD_TIPS2)
 		}
 		player.DailyReset.SilverMonthCardReward = true
 	} else {
 		if player.DailyReset.GoldMonthCardReward {
-			return common.NewBusinessRequestException(constants.I18N_MONTH_CARD_TIPS2)
+			return errors.NewBusinessError(constants.I18N_MONTH_CARD_TIPS2)
 		}
 		player.DailyReset.GoldMonthCardReward = true
 	}

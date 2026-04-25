@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"sync"
 
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/config/container"
 	"io/github/gforgame/examples/constants"
@@ -78,7 +78,7 @@ func ToHeroVo(h *player.Hero) *protos.HeroInfo {
 	}
 }
 
-func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*common.BusinessRequestException, []*protos.RewardVo) {
+func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*errors.BusinessError, []*protos.RewardVo) {
 	itemId := constants.ITEM_RECRUIT_ID
 	if typ == 2 {
 		itemId = constants.ITEM_RECRUIT_ID2
@@ -88,11 +88,11 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 	// 检测次数
 	if typ == 1 {
 		if p.DailyReset.NormalRecruitTimes+times > maxTimes {
-			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
+			return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
 		}
 	} else {
 		if p.DailyReset.HighRecruitTimes+times > maxTimes {
-			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
+			return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS), nil
 		}
 	}
 
@@ -126,7 +126,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*com
 			// 不足扣钻石
 			itemCount := p.Backpack.GetItemCount(constants.ITEM_DIAMOND_ID)
 			if itemCount < times {
-				return common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH), nil
+				return errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH), nil
 			}
 			commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 			// 招募消耗钻石
@@ -246,7 +246,7 @@ func (ps *HeroService) DoLevelUp(p *player.Player, heroId int32, toLevel int32) 
 	err := consume.Verify(p)
 	if err != nil {
 		return &protos.ResHeroLevelUp{
-			Code: int32(err.(*common.BusinessRequestException).Code()),
+			Code: int32(err.(*errors.BusinessError).Code()),
 		}
 	}
 	consume.Consume(p, constants.ActionType_HeroUpLevel)
@@ -295,7 +295,7 @@ func (ps *HeroService) DoStageUp(p *player.Player, heroId int32) *protos.ResHero
 	err := costItem.Verify(p)
 	if err != nil {
 		return &protos.ResHeroUpStage{
-			Code: int32(err.(*common.BusinessRequestException).Code()),
+			Code: int32(err.(*errors.BusinessError).Code()),
 		}
 	}
 	costItem.Consume(p, constants.ActionType_HeroUpStage)
@@ -325,7 +325,7 @@ func (ps *HeroService) DoCombine(p *player.Player, heroId int32) *protos.ResHero
 	err := itemConsume.Verify(p)
 	if err != nil {
 		return &protos.ResHeroCombine{
-			Code: int32(err.(*common.BusinessRequestException).Code()),
+			Code: int32(err.(*errors.BusinessError).Code()),
 		}
 	}
 	itemConsume.Consume(p, constants.ActionType_HeroCombine)

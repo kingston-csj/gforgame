@@ -23,10 +23,25 @@ func (s *SystemParameterEnt) GetId() string {
 	return s.Id
 }
 
-func (s *SystemParameterEnt) BeforeSave(tx *gorm.DB) error {
+func (s *SystemParameterEnt) BeforePersist() error {
 	return nil
 }
 
-func (s *SystemParameterEnt) AfterFind(tx *gorm.DB) error {
+func (s *SystemParameterEnt) AfterLoad() error {
 	return nil
+}
+
+func (s *SystemParameterEnt) BeforeSave(tx *gorm.DB) error {
+	return s.BeforePersist()
+}
+
+func (s *SystemParameterEnt) AfterFind(tx *gorm.DB) error {
+	return s.AfterLoad()
+}
+
+func (s *SystemParameterEnt) SnapshotEntity() (persist.Entity, error) {
+	return &SystemParameterEnt{
+		BaseEntity: s.BaseEntity,
+		Data:       s.Data,
+	}, nil
 }

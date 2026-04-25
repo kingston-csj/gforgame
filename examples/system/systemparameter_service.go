@@ -25,7 +25,7 @@ func (s *SystemParameterService) init() {
 
 		return &p, nil
 	}
-	context.CacheManager.Register("systemparameter", dbLoader)
+	context.CacheManager.Register(systemParameterCacheTable, dbLoader)
 }
 
 var once sync.Once
@@ -36,8 +36,8 @@ func GetSystemParameterService() *SystemParameterService {
 }
 
 func (ps *SystemParameterService) GetSystemParameterRecord(id string) *SystemParameterEnt {
-	cache, _ := context.CacheManager.GetCache("systemparameter")
-	cacheEntity, err := cache.Get(string(id))
+	cache, _ := context.CacheManager.GetCache(systemParameterCacheTable)
+	cacheEntity, err := cache.Get(id)
 	if err != nil {
 		return nil
 	}
@@ -52,7 +52,7 @@ func (ps *SystemParameterService) GetOrCreateSystemParameterRecord(id string) *S
 	record := ps.GetSystemParameterRecord(id)
 	if record == nil {
 		record = &SystemParameterEnt{}
-		record.Id = string(id)
+		record.Id = id
 	}
 	return record
 }

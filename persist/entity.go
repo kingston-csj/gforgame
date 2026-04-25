@@ -1,16 +1,16 @@
 package persist
 
-import "gorm.io/gorm"
-
 type Entity interface {
+	// 获取实体的唯一标识符
 	GetId() string
+	// 是否为逻辑已删除状态
 	IsDeleted() bool
+	// 设置为等删除状态（逻辑已删除，物理上待删除）
 	SetDeleted()
-
-	// 在保存之前调用 直接使用 gorm 的钩子
-	BeforeSave(tx *gorm.DB) error
-	// 在查询之后调用 直接使用 gorm 的钩子
-	AfterFind(tx *gorm.DB) error
+	// 在持久化前调用（与 ORM 无关）
+	BeforePersist() error
+	// 在加载后调用（与 ORM 无关）
+	AfterLoad() error
 }
 
 type BaseEntity struct {

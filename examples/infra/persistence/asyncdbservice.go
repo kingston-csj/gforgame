@@ -5,13 +5,13 @@ import (
 	"io/github/gforgame/persist"
 )
 type AsyncDBService struct {
-	playerWorker *persist.QueueContainer
-	commonWorker *persist.QueueContainer
+	playerWorker persist.PersistContainer
+	commonWorker persist.PersistContainer
 }
 
 func NewAsyncDbService() *AsyncDBService {
 	return &AsyncDBService{
-		playerWorker: persist.NewQueueContainer("player", &EntitySavingStrategy{}),
+		playerWorker: persist.NewDelayContainer("player", 10, &EntitySavingStrategy{}),
 		commonWorker: persist.NewQueueContainer("common", &EntitySavingStrategy{}),
 	}
 }

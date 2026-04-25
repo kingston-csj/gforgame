@@ -3,6 +3,7 @@ package system
 import (
 	"io/github/gforgame/common/schedule"
 )
+
 var (
 	dailyReset   *DailyReset
 	weeklyReset  *WeeklyReset
@@ -14,10 +15,10 @@ func init() {
 	once.Do(func() {
 		// 从数据库加载数据
 		GetSystemParameterService().init()
-		dailyReset = &DailyReset{}
-		weeklyReset = &WeeklyReset{}
-		monthlyReset = &MonthlyReset{}
-		openSever = &OpenSeverTime{}
+		dailyReset = NewDailyReset()
+		weeklyReset = NewWeeklyReset()
+		monthlyReset = NewMonthlyReset()
+		openSever = NewOpenServerTime()
 
 		schedule.AddParserAfter(&OpenServerScheduleExpressionParser{})
 	})

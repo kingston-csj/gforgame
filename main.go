@@ -8,6 +8,7 @@ import (
 	serverconfig "io/github/gforgame/config"
 	"io/github/gforgame/examples/activity"
 	dataconfig "io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/http"
@@ -37,20 +38,25 @@ type GameTaskHandler struct {
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("", fmt.Errorf("panic recovered: %v", r))
+			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
 	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
 	if err == nil {
 		if strings.Index(msgName, "HeartBeat") == -1 {
-			fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容：", jsonStr)
+			id, ok := session.GetAttr("id")
+			if !ok {
+				id = "anonymous"
+			}
+			// fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容:", jsonStr)
+			logger.Info(fmt.Sprintf("[%s] 接收消息: cmd:%d, name:%s, 内容:%s", id, frame.Header.Cmd, msgName, jsonStr))
 		}
 	}
 
 	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
 	if msgHandler == nil {
-		logger.Error("", fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
+		logger.ErrorNoStack(fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
 		return false
 	}
 	var args []reflect.Value
@@ -60,16 +66,56 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
 	}
 
-	// 反射
-	values := msgHandler.Method.Func.Call(args)
+	// 反射调用路由处理器，并捕获处理器内部 panic
+	values, panicErr := callRouteHandlerSafely(msgHandler, args)
+	if panicErr != nil {
+		logger.Error(fmt.Sprintf("route handler panic: cmd=%d method=%s", frame.Header.Cmd, msgHandler.Method.Name), panicErr)
+		if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
+			if err := session.Send(resp, frame.Header.Index); err != nil {
+				// logger.Error(fmt.Errorf("session.Send error response failed: %v", err))
+				return false
+			}
+			return true
+		}
+		return false
+	}
+
 	if len(values) > 0 {
 		err := session.Send(values[0].Interface(), frame.Header.Index)
 		if err != nil {
-			logger.Error("", fmt.Errorf("session.Send: %v", err))
+			logger.Error("session.Send: %v", fmt.Errorf("session.Send: %v", err))
 			return false
 		}
 	}
 	return true
+}
+
+func callRouteHandlerSafely(msgHandler *network.Handler, args []reflect.Value) (values []reflect.Value, panicErr error) {
+	defer func() {
+		if r := recover(); r != nil {
+			panicErr = logger.PanicToError(r)
+		}
+	}()
+	values = msgHandler.Method.Func.Call(args)
+	return values, nil
+}
+
+func buildErrorResponse(msgHandler *network.Handler, code int32) (any, bool) {
+	mt := msgHandler.Method.Type
+	if mt.NumOut() == 0 {
+		return nil, false
+	}
+	outType := mt.Out(0)
+	if outType.Kind() != reflect.Ptr || outType.Elem().Kind() != reflect.Struct {
+		return nil, false
+	}
+	resp := reflect.New(outType.Elem())
+	codeField := resp.Elem().FieldByName("Code")
+	if !codeField.IsValid() || !codeField.CanSet() || codeField.Kind() != reflect.Int32 {
+		return nil, false
+	}
+	codeField.SetInt(int64(code))
+	return resp.Interface(), true
 }
 
 func NewHttpServer() *gin.Engine {

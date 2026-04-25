@@ -3,8 +3,8 @@ package player
 import (
 	"errors"
 	"fmt"
-	"io/github/gforgame/common"
 	"io/github/gforgame/common/container/hashmap"
+	commonerrors "io/github/gforgame/common/errors"
 	"io/github/gforgame/common/logger"
 	"io/github/gforgame/common/trie"
 	"io/github/gforgame/common/util"
@@ -227,7 +227,7 @@ func (ps *PlayerService) DoUpLevel(p *playerdomain.Player, toLevel int32) *proto
 	err := consume.Verify(p)
 	if err != nil {
 		return &protos.ResPlayerUpLevel{
-			Code: int32(err.(*common.BusinessRequestException).Code()),
+			Code: int32(err.(*commonerrors.BusinessError).Code()),
 		}
 	}
 	consume.Consume(p, constants.ActionType_HeroUpLevel)
@@ -281,7 +281,7 @@ func (ps *PlayerService) DoUpStage(p *playerdomain.Player) *protos.ResPlayerUpSt
 	err := costItem.Verify(p)
 	if err != nil {
 		return &protos.ResPlayerUpStage{
-			Code: int32(err.(*common.BusinessRequestException).Code()),
+			Code: int32(err.(*commonerrors.BusinessError).Code()),
 		}
 	}
 	costItem.Consume(p, constants.ActionType_HeroUpStage)

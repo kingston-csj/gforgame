@@ -1,7 +1,8 @@
 package signin
 
 import (
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
+	commonerrors "io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/config"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
@@ -59,17 +60,17 @@ func IntSliceContains(slice []int32, target int32) bool {
 	return false
 }
 
-func (s *SignInService) SignIn(player *playerdomain.Player) *common.BusinessRequestException {
+func (s *SignInService) SignIn(player *playerdomain.Player) *commonerrors.BusinessError {
     nthDay := int32(time.Now().Day())
     monthlyResetBox := player.MonthlyReset
     if IntSliceContains(monthlyResetBox.SignInDays, nthDay) {
-        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+        return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
     }
     monthlyResetBox.SignInDays = append(monthlyResetBox.SignInDays, nthDay);
 
     signinData := config.QueryById[configdomain.SigninData](nthDay)
     if (signinData == nil) {
-        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+        return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
     }
     rewards := reward.ParseReward(signinData.Rewards)
     rewards.Reward(player, constants.ActionType_Signin)
@@ -77,14 +78,14 @@ func (s *SignInService) SignIn(player *playerdomain.Player) *common.BusinessRequ
     return nil
 }
 
-func (s *SignInService) SignInMakeUp(player *playerdomain.Player, day int32) *common.BusinessRequestException {
+func (s *SignInService) SignInMakeUp(player *playerdomain.Player, day int32) *commonerrors.BusinessError {
     monthlyResetBox := player.MonthlyReset
     if _, ok := monthlyResetBox.SignInMakeUp[day]; ok {
-        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+        return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
     }
 	nthDay := int32(time.Now().Day())
 	if day < 1 || day > nthDay {
-        return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+        return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
     }
     monthlyResetBox.SignInMakeUp[day] = day
 	context.EventBus.Publish(events.PlayerEntityChange, player)

@@ -3,6 +3,7 @@ package player
 import (
 	"encoding/json"
 
+	"io/github/gforgame/common/util"
 	"io/github/gforgame/persist"
 
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ type Friend struct {
 	Applies    map[string]*FriendApplyItem `gorm:"-"`
 }
 
-func (f *Friend) BeforeSave(tx *gorm.DB) error {
+func (f *Friend) BeforePersist() error {
 	jsonData, err := json.Marshal(f.Friends)
 	if err != nil {
 		return err
@@ -31,10 +32,27 @@ func (f *Friend) BeforeSave(tx *gorm.DB) error {
 	return nil
 }
 
-func (f *Friend) AfterFind(tx *gorm.DB) error {
-	json.Unmarshal([]byte(f.FriendJson), &f.Friends)
-	json.Unmarshal([]byte(f.ApplyJson), &f.Applies)
+func (f *Friend) AfterLoad() error {
+	if !util.IsEmptyString(f.FriendJson) {
+		_ = json.Unmarshal([]byte(f.FriendJson), &f.Friends)
+	} else {
+		f.Friends = make(map[string]bool)
+	}
+	if !util.IsEmptyString(f.ApplyJson) {
+		_ = json.Unmarshal([]byte(f.ApplyJson), &f.Applies)
+	} else {
+		f.Applies = make(map[string]*FriendApplyItem)
+	}
+
 	return nil
+}
+
+func (f *Friend) BeforeSave(tx *gorm.DB) error {
+	return f.BeforePersist()
+}
+
+func (f *Friend) AfterFind(tx *gorm.DB) error {
+	return f.AfterLoad()
 }
 
 func (f *Friend) IsFriend(playerId string) bool {
@@ -81,4 +99,17 @@ func (f *Friend) ClearApply(id1 string, id2 string) {
 			delete(f.Applies, apply.Id)
 		}
 	}
+}
+
+func (f *Friend) SnapshotEntity() (persist.Entity, error) {
+	snapshot := &Friend{
+		BaseEntity: f.BaseEntity,
+		Id:         f.Id,
+		FriendJson: f.FriendJson,
+		ApplyJson:  f.ApplyJson,
+	}
+	if err := snapshot.AfterLoad(); err != nil {
+		return nil, err
+	}
+	return snapshot, nil
 }

@@ -1,7 +1,7 @@
 package player
 
 import (
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
 	configcontract "io/github/gforgame/examples/config/contracts"
@@ -35,7 +35,7 @@ func (i *Item) ToVo() protos.ItemInfo {
 	return vo
 }
 
-var errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+var errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 
 /// 背包
 type Backpack struct {

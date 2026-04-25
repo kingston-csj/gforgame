@@ -1,7 +1,7 @@
 package consume
 
 import (
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
 )
@@ -14,7 +14,7 @@ type ItemConsume struct {
 func (c *ItemConsume) Verify(player *player.Player) error {
 	count := player.Backpack.GetItemCount(c.ItemId)
 	if count < c.Amount {
-		return common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
+		return errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
 	}
 	return nil
 }

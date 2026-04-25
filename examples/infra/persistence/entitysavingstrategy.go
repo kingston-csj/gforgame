@@ -10,9 +10,9 @@ func (s *EntitySavingStrategy) DoSave(entity persist.Entity) error {
 		return Db.Delete(entity).Error
 	}
 
-	if err := entity.BeforeSave(nil); err != nil {
-		return err
-	}
+	// if err := entity.BeforePersist(); err != nil {
+	// 	return err
+	// }
 
 	return Db.Save(entity).Error
 }

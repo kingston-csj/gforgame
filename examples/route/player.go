@@ -37,7 +37,7 @@ func (ps *PlayerRoute) Init() {
 				return nil, nil
 			}
 		}
-		p.AfterFind(nil)
+		p.AfterLoad()
 		context.EventBus.Publish(events.PlayerAfterLoad, &p)
 		return &p, nil
 	}

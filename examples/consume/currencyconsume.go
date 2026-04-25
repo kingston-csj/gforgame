@@ -1,7 +1,7 @@
 package consume
 
 import (
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/io"
@@ -17,11 +17,11 @@ func (c *CurrencyConsume) Verify(player *player.Player) error {
 	purse := player.Purse
 	if c.Currency == "gold" {
 		if !purse.IsEnoughGold(c.Amount) {
-			return common.NewBusinessRequestException(constants.I18N_GOLD_NOT_ENOUGH)
+			return errors.NewBusinessError(constants.I18N_GOLD_NOT_ENOUGH)
 		}
 	} else if c.Currency == "diamond" {	
 		if !purse.IsEnoughDiamond(c.Amount) {
-			return common.NewBusinessRequestException(constants.I18N_DIAMOND_NOT_ENOUGH)
+			return errors.NewBusinessError(constants.I18N_DIAMOND_NOT_ENOUGH)
 		}
 	}
 

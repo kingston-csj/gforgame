@@ -59,7 +59,7 @@ type Player struct {
 	ActivityBoxJson string       `gorm:"activitybox"`
 }
 
-func (p *Player) BeforeSave(tx *gorm.DB) error {
+func (p *Player) BeforePersist() error {
 	if err := saveJSON(p.Backpack, &p.BackpackJson); err != nil {
 		return err
 	}
@@ -127,11 +127,11 @@ func (p *Player) Reset() {
 	p.ExtendBoxJson = ""
 	p.QuestBoxJson = ""
 	p.RechargeBoxJson = ""
-	p.AfterFind(nil)
+	p.AfterLoad()
 }
 
 
-func (p *Player) AfterFind(tx *gorm.DB) error {
+func (p *Player) AfterLoad() error {
 	loadJSON(p.BackpackJson, &p.Backpack, func() *Backpack {
 		return &Backpack{
 			Items:          make(map[string]*Item),
@@ -219,6 +219,16 @@ func (p *Player) AfterFind(tx *gorm.DB) error {
 	return nil
 }
 
+// GORM hook adapter: keep ORM callback compatibility.
+func (p *Player) BeforeSave(tx *gorm.DB) error {
+	return p.BeforePersist()
+}
+
+// GORM hook adapter: keep ORM callback compatibility.
+func (p *Player) AfterFind(tx *gorm.DB) error {
+	return p.AfterLoad()
+}
+
 // PostLoader 接口，用于在加载 JSON 后进行额外的初始化操作
 type PostLoader interface {
 	AfterLoad()
@@ -274,7 +284,7 @@ func (p *Player) SnapshotEntity() (persist.Entity, error) {
 	if err = json.Unmarshal(data, snapshot); err != nil {
 		return nil, err
 	}
-	if err = snapshot.BeforeSave(nil); err != nil {
+	if err = snapshot.BeforePersist(); err != nil {
 		return nil, err
 	}
 	return snapshot, nil

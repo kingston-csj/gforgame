@@ -3,7 +3,7 @@ package item
 import (
 	"sync"
 
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/examples/protos"
 
 	"io/github/gforgame/examples/config"
@@ -30,8 +30,8 @@ type ItemService struct {
 var (
 	itemservice           *ItemService
 	once               sync.Once
-	errorIllegalParams = common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	notEnoughError = common.NewBusinessRequestException(constants.I18N_ITEM_NOT_ENOUGH)
+	errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
+	notEnoughError = errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
 )
 
 var RecruitItemId int32 = 2002

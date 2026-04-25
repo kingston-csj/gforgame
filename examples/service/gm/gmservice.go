@@ -2,7 +2,7 @@ package gm
 
 import (
 	"fmt"
-	"io/github/gforgame/common"
+	"io/github/gforgame/common/errors"
 	"io/github/gforgame/common/logger"
 	"io/github/gforgame/common/util"
 	"io/github/gforgame/common/util/jsonutil"
@@ -25,7 +25,7 @@ import (
 	"sync"
 )
 
-type GmHandler func(player *playerdomain.Player, params string) *common.BusinessRequestException
+type GmHandler func(player *playerdomain.Player, params string) *errors.BusinessError
 
 type GmCommand struct {
 	Topic       string
@@ -80,7 +80,7 @@ func (s *GmService) Register(topic, desc, example string, handler GmHandler) {
 	}
 }
 
-func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params string) *common.BusinessRequestException {
+func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params string) *errors.BusinessError {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Error("gm dispatch fail", err.(error))
@@ -90,7 +90,7 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	cmd, ok := s.commands[topic]
 	if !ok {
 		logger.ErrorNoStack(fmt.Sprintf("gm command not found: %s", topic))
-		return common.NewBusinessRequestException(constants.I18N_GM_UNKNOWN_COMMAND)
+		return errors.NewBusinessError(constants.I18N_GM_UNKNOWN_COMMAND)
 	}
 
 	err := cmd.Handler(player, params)
@@ -103,7 +103,7 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 
 // ================= GM Handlers =================
 
-func (s *GmService) handleHelp(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func (s *GmService) handleHelp(player *playerdomain.Player, params string) *errors.BusinessError {
 	var sb strings.Builder
 	sb.WriteString("\n=== GM Commands ===\n")
 	
@@ -122,13 +122,13 @@ func (s *GmService) handleHelp(player *playerdomain.Player, params string) *comm
 	return nil
 }
 
-func handleReset(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleReset(player *playerdomain.Player, params string) *errors.BusinessError {
 	player.Reset()
 	var scenes []playerdomain.Scene
 	err := mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
 	if err != nil {
 		logger.Error("gm reset scene fail", err)
-		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
+		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	for _, item := range scenes {
 		sceneId := item.Id[len(player.Id)+1:]
@@ -139,16 +139,16 @@ func handleReset(player *playerdomain.Player, params string) *common.BusinessReq
 	return nil
 }
 
-func handleLevel(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleLevel(player *playerdomain.Player, params string) *errors.BusinessError {
 	player.Level = util.Int32Value(params)
 	playerservice.GetPlayerService().GetPlayerProfileById(player.Id)
 	return nil
 }
 
-func handleAddItems(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleAddItems(player *playerdomain.Player, params string) *errors.BusinessError {
 	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
 		item.GetItemService().AddByModelId(player.Id, itemId, itemNum)
@@ -156,10 +156,10 @@ func handleAddItems(player *playerdomain.Player, params string) *common.Business
 	return nil
 }
 
-func handleRemoveItems(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleRemoveItems(player *playerdomain.Player, params string) *errors.BusinessError {
 	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	consums := &consume.AndConsume{}
 	for itemId, itemNum := range itemIdMap {
@@ -169,13 +169,13 @@ func handleRemoveItems(player *playerdomain.Player, params string) *common.Busin
 		})
 	}
 	if err := consums.Verify(player); err != nil {
-		return err.(*common.BusinessRequestException)
+		return err.(*errors.BusinessError)
 	}
 	consums.Consume(player, constants.ActionType_Gm)
 	return nil
 }
 
-func handleAddDiamond(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleAddDiamond(player *playerdomain.Player, params string) *errors.BusinessError {
 	count, _ := util.StringToInt32(params)
 	reward := &reward.CurrencyReward{
 		Currency: "diamond",
@@ -185,7 +185,7 @@ func handleAddDiamond(player *playerdomain.Player, params string) *common.Busine
 	return nil
 }
 
-func handleAddGold(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleAddGold(player *playerdomain.Player, params string) *errors.BusinessError {
 	count, _ := util.StringToInt32(params)
 	reward := &reward.CurrencyReward{
 		Currency: "gold",
@@ -195,36 +195,36 @@ func handleAddGold(player *playerdomain.Player, params string) *common.BusinessR
 	return nil
 }
 
-func handleQuest(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleQuest(player *playerdomain.Player, params string) *errors.BusinessError {
 	questId, _ := util.StringToInt32(params)
 	questservice.GetQuestService().GmFinish(player, questId)
 	return nil
 }
 
-func handleRecharge(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleRecharge(player *playerdomain.Player, params string) *errors.BusinessError {
 	rechargeId, _ := util.StringToInt32(params)
 	recharge.GetRechargeService().Recharge(player, rechargeId)
 	return nil
 }
 
-func handleAddSceneItems(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleAddSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
 	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
 		err := item.GetSceneItemService().AddByModelId(player.Id, itemId, itemNum)
 		if err != nil {
-			return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+			return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 		}
 	}
 	return nil
 }
 
-func handleRemoveSceneItems(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleRemoveSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
 	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	for itemId, itemNum := range itemIdMap {
 		item.GetSceneItemService().UseByModelId(player.Id, itemId, itemNum)
@@ -232,31 +232,31 @@ func handleRemoveSceneItems(player *playerdomain.Player, params string) *common.
 	return nil
 }
 
-func handleDailyReset(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleDailyReset(player *playerdomain.Player, params string) *errors.BusinessError {
 	system.PerformDailyUpdate()
 	return nil
 }
 
 
-func handleAddMail(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleAddMail(player *playerdomain.Player, params string) *errors.BusinessError {
 	mail.GetMailService().SendSimpleMail(player, util.Int32Value(params))
 	return nil
 }
 
-func handleClone(player *playerdomain.Player, params string) *common.BusinessRequestException {
+func handleClone(player *playerdomain.Player, params string) *errors.BusinessError {
 	targetId := params
 	if player.Id == targetId {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_ILLEGAL_PARAMS)
+		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	// 复制玩家数据
 	var to playerdomain.Player
 	json, err := jsonutil.StructToJSON(player)
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
+		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	err = jsonutil.JsonToStruct(json, &to)
 	if err != nil {
-		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
+		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	to.Id = targetId
 	to.Name = playerservice.GetPlayerService().RandomName()
@@ -267,7 +267,7 @@ func handleClone(player *playerdomain.Player, params string) *common.BusinessReq
 	err = mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
 	if err != nil {
 		logger.Error("gm reset scene fail", err)
-		return common.NewBusinessRequestException(constants.I18N_COMMON_INTERNAL_ERROR)
+		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
 	}
 	for _, item := range scenes {
 		sceneId := item.Id[len(player.Id)+1:]
