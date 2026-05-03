@@ -14,7 +14,7 @@ type QuestData struct {
 	// 贡献值（公会专用）
 	Contribution int32 `json:"contribution" excel:"contribution"`
 	// 任务目标，不同类型自行解析
-	Target string `json:"target" excel:"target"`
+	Target int32 `json:"target" excel:"target"`
 	// 自动领奖 0手动1自动
 	Auto int32 `json:"auto" excel:"auto"`
 	// 前置任务Id (程序动态计算)

@@ -1,46 +1,16 @@
-package quest
+package handler
 
 import (
-	"io/github/gforgame/common/util"
 	"io/github/gforgame/examples/config"
-	constants "io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	configdomain "io/github/gforgame/examples/domain/config"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	events "io/github/gforgame/examples/events"
+	qcore "io/github/gforgame/examples/service/quest/core"
 )
-var (
-	// 绑定各种类型的任务处理器
-	handlers = map[int32]QuestHandler{}
-)
-
-func init() {
-	handlers[constants.QuestTypeHeroSum] = &HeroSumQuestHandler{}
-	// 初始化，订阅事件
-	for _, h := range handlers {
-		h.SubscribeEvent()
-	}
-}
-
-type QuestHandler interface {
-	// 任务初始化，主要是进度相关
-	Init(player *playerdomain.Player,quest *playerdomain.Quest)
-
-	GetQuestType() int32
-	// 任务完成时调用
-	OnQuestFinish(player *playerdomain.Player,quest *playerdomain.Quest)
-
-	// 检查任务进度
-	CheckProgress(player *playerdomain.Player,quest *playerdomain.Quest) 
-
-	// 订阅事件
-	SubscribeEvent()
-
-	// 处理事件
-	HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any)
-}
 
 type BaseQuestHandler struct {
+	resolver qcore.Resolver
 }
 
 func (h *BaseQuestHandler) Init(player *playerdomain.Player, quest *playerdomain.Quest) {
@@ -48,34 +18,53 @@ func (h *BaseQuestHandler) Init(player *playerdomain.Player, quest *playerdomain
 	if prototype == nil {
 		return
 	}
-	target, _ := util.StringToInt32(prototype.Target)
-	quest.Target = target
+	quest.Target = prototype.Target
 }
 
 func (h *BaseQuestHandler) GetQuestType() int32 {
 	return 0
 }
 
+func (h *BaseQuestHandler) OnQuestFinish(player *playerdomain.Player, quest *playerdomain.Quest) {
 
-func (h *BaseQuestHandler) OnQuestFinish(player *playerdomain.Player,quest *playerdomain.Quest) {
-	 
 }
 
-func (h *BaseQuestHandler) CheckProgress(player *playerdomain.Player,quest *playerdomain.Quest) {
-	 
+func (h *BaseQuestHandler) CheckProgress(player *playerdomain.Player, quest *playerdomain.Quest) {
+	questData := config.QueryById[configdomain.QuestData](quest.Id)
+	if questData == nil || h.resolver == nil {
+		return
+	}
+	questDirector := h.resolver.GetQuestDirector(questData.Category)
+	if questDirector == nil {
+		return
+	}
+	questDirector.OnQuestProgressChanged(player, quest)
 }
 
-func (h *BaseQuestHandler) HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any) {
-	 
+func (h *BaseQuestHandler) HandleEvent(player *playerdomain.Player, quest *playerdomain.Quest, event any) {
+
 }
 
 func (h *BaseQuestHandler) SubscribeEvent() {
 
 }
 
-func (h *BaseQuestHandler) Register(handler QuestHandler, topic string) {
+func (h *BaseQuestHandler) SetResolver(resolver qcore.Resolver) {
+	h.resolver = resolver
+}
+
+func (h *BaseQuestHandler) Register(handler qcore.QuestHandler, topic string) {
 	context.EventBus.Subscribe(topic, func(data interface{}) {
-		player := data.(events.IPlayerEvent).GetOwner().(*playerdomain.Player)
+		var player *playerdomain.Player
+		switch v := data.(type) {
+		case *playerdomain.Player:
+			player = v
+		case events.IPlayerEvent:
+			typedPlayer, ok := v.GetOwner().(*playerdomain.Player)
+			if ok {
+				player = typedPlayer
+			}
+		}
 		if player == nil {
 			return
 		}
@@ -85,4 +74,3 @@ func (h *BaseQuestHandler) Register(handler QuestHandler, topic string) {
 		}
 	})
 }
-

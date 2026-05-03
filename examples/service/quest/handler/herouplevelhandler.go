@@ -1,4 +1,4 @@
-package quest
+package handler
 
 import (
 	"io/github/gforgame/examples/constants"
@@ -18,11 +18,12 @@ func (h *HeroLevelUpQuestHandler) SubscribeEvent() {
 	h.Register(h, events.HeroLevelUp)
 }
 
-func (h *HeroLevelUpQuestHandler) Init(player *playerdomain.Player,quest *playerdomain.Quest) {
+func (h *HeroLevelUpQuestHandler) Init(player *playerdomain.Player, quest *playerdomain.Quest) {
+	h.BaseQuestHandler.Init(player, quest)
 	quest.Progress = player.HeroBox.UpLevelTimes
 }
 
-func (h *HeroLevelUpQuestHandler) HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any) {
+func (h *HeroLevelUpQuestHandler) HandleEvent(player *playerdomain.Player, quest *playerdomain.Quest, event any) {
 	if _, ok := event.(*events.HeroLevelUpEvent); ok {
 		quest.Progress = player.HeroBox.UpLevelTimes
 		h.CheckProgress(player, quest)

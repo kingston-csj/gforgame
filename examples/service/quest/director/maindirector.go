@@ -1,4 +1,4 @@
-package quest
+package director
 
 import (
 	"io/github/gforgame/examples/config"
@@ -12,11 +12,13 @@ import (
 
 // 主线任务类别
 type MainQuestDirector struct {
-	baseQuestDirector
+	*baseQuestDirector
 }
 
 func NewMainQuestDirector() *MainQuestDirector {
-	return &MainQuestDirector{}
+	d := &MainQuestDirector{}
+	d.baseQuestDirector = NewBaseQuestDirector(d)
+	return d
 }
 
 /// 实现QuestDirector接口
@@ -24,9 +26,8 @@ func NewMainQuestDirector() *MainQuestDirector {
 func (d *MainQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
 	firstMainQuestId := config.GetSpecificContainer[*container.QuestContainer]().FirstMainQuestId
 	if !player.QuestBox.HasReceivedQuest(firstMainQuestId) {
-		GetQuestService().AcceptQuest(player, firstMainQuestId)
+		_, _ = d.resolver.AcceptQuest(player, firstMainQuestId)
 	}
-	d.notifyMainQuest(player)
 }
 
 // 玩家完成任务后触发
@@ -40,7 +41,7 @@ func (d *MainQuestDirector) AcceptNextQuest(player *playerdomain.Player, quest *
 	player.QuestBox.AddFinishedQuest(quest.Id)
 	if questData.Next != 0 {
 		nextQuestData := config.QueryById[configdomain.QuestData](questData.Next)
-		GetQuestService().AcceptQuest(player, nextQuestData.Id)
+		_, _ = d.resolver.AcceptQuest(player, nextQuestData.Id)
 	}
 }
 

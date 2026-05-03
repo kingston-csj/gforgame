@@ -8,7 +8,6 @@ import (
 	"io/github/gforgame/examples/protos"
 )
 
-
 type Quest struct {
 	Id int32
 
@@ -35,7 +34,6 @@ func (q *Quest) SetProgress(progress int32) {
 	q.Progress = progress
 }
 
-
 func (q *Quest) Reset() {
 	q.Progress = 0
 	q.Status = int8(constants.QuestStatusInit)
@@ -44,10 +42,10 @@ func (q *Quest) Reset() {
 
 func (q *Quest) ToVo() *protos.QuestVo {
 	return &protos.QuestVo{
-		Id:       int32(q.Id),
-		Progress: int32(q.Progress),
-		Target:   int32(q.Target),
-		Status:   q.Status,
+		Id:         int32(q.Id),
+		Progress:   int32(q.Progress),
+		Target:     int32(q.Target),
+		Status:     q.Status,
 		AcceptTime: q.AcceptTime * timeutil.MILLIS_PER_SECOND,
 	}
 }

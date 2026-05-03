@@ -21,6 +21,8 @@ type ExtendBox struct {
 	SitemCatalogModel CatalogModel
 	// 菜单图鉴
 	MenuCatalogModel CatalogModel
+	// 装备升级次数
+	EquipUpLevelTimes int32
 }
 
 func (b *ExtendBox) AfterLoad() {

@@ -1,4 +1,4 @@
-package quest
+package director
 
 import (
 	"io/github/gforgame/examples/config"
@@ -13,11 +13,13 @@ import (
 
 // 每日任务类别
 type DailyQuestDirector struct {
-	baseQuestDirector
+	*baseQuestDirector
 }
 
 func NewDailyQuestDirector() *DailyQuestDirector {
-	return &DailyQuestDirector{}
+	d := &DailyQuestDirector{}
+	d.baseQuestDirector = NewBaseQuestDirector(d)
+	return d
 }
 
 /// 实现QuestDirector接口
@@ -26,7 +28,7 @@ func (d *DailyQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
 	anyQuests := questBox.SelectUnFinishedQuestsByCategory(constants.QuestCategoryDaily)
 	if len(anyQuests) == 0 {
 		// 重置任务
-		GetQuestService().ResetQuests(player, constants.QuestCategoryDaily)
+		d.resolver.ResetQuests(player, constants.QuestCategoryDaily)
 	}
 	quests := questBox.SelectUnFinishedQuestsByCategory(constants.QuestCategoryDaily)
 	questVos := make([]*protos.QuestVo, 0, len(quests))
@@ -50,14 +52,16 @@ func (d *DailyQuestDirector) AfterTakeReward(player *playerdomain.Player, quest 
 func (d *DailyQuestDirector) TakeProgressRewards(player *playerdomain.Player) []*protos.RewardVo {
 	rewardIndex := player.DailyReset.QuestDailyRewardIndex
 	myScore := player.DailyReset.DailyQuestScore
-	if myScore > 100 {
-		myScore = 100
-	}
-	canRewardIndex := myScore /20
-
 	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
+	// 2012_1,2012_1
+	maxScoreSum := commonContainer.GetInt32Value(constants.CommonValueKeyDailyQuestScoreSum)
+	if myScore > maxScoreSum {
+		myScore = maxScoreSum
+	}
+	
 	rewardStr := commonContainer.GetStringValue(constants.CommonValueKeyDailyQuestProessReward)
 	rewardList := reward.ParseRewardList(rewardStr)
+	canRewardIndex := myScore / (maxScoreSum /int32(len(rewardList)))
 	rewardVos := make([]*protos.RewardVo, 0)
 	andReward := reward.NewAndReward()
 	for i:=rewardIndex+1;i<=canRewardIndex;i++{

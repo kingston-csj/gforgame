@@ -1,4 +1,4 @@
-package quest
+package handler
 
 import (
 	"io/github/gforgame/examples/constants"
@@ -18,7 +18,7 @@ func (h *DiamondConsumeQuestHandler) SubscribeEvent() {
 	h.Register(h, events.ItemConsume)
 }
 
-func (h *DiamondConsumeQuestHandler) HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any) {
+func (h *DiamondConsumeQuestHandler) HandleEvent(player *playerdomain.Player, quest *playerdomain.Quest, event any) {
 	if evt, ok := event.(*events.ItemConsumeEvent); ok {
 		if evt.ItemId == constants.ITEM_DIAMOND_ID {
 			quest.Progress += evt.Count

@@ -1,4 +1,4 @@
-package quest
+package handler
 
 import (
 	"io/github/gforgame/examples/config"
@@ -20,8 +20,7 @@ func (h *ClientEventQuestHandler) SubscribeEvent() {
 	h.Register(h, events.ClientDiyEvent)
 }
 
-
-func (h *ClientEventQuestHandler) HandleEvent(player *playerdomain.Player,quest *playerdomain.Quest, event any) {
+func (h *ClientEventQuestHandler) HandleEvent(player *playerdomain.Player, quest *playerdomain.Quest, event any) {
 	if evt, ok := event.(*events.ClientCustomEvent); ok {
 		questData := config.QueryById[configdomain.QuestData](quest.Id)
 		if questData.SubType <= 0 {
