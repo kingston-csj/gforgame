@@ -15,8 +15,8 @@ type ActivityService struct {
 }
 
 var (
-	instance *ActivityService
-	once     sync.Once
+	instance          *ActivityService
+	once              sync.Once
 	activityScheduler *ActivityScheduler = NewActivityScheduler(context.TaskScheduler)
 )
 
@@ -26,7 +26,7 @@ func GetActivityService() *ActivityService {
 			activityScheduler: activityScheduler,
 		}
 
-		firstRechargeHandler := NewFirstRechargeActivityHandler(activityScheduler);
+		firstRechargeHandler := NewFirstRechargeActivityHandler(activityScheduler)
 		registerHandler(1001, firstRechargeHandler)
 		registerHandler(1002, firstRechargeHandler)
 
@@ -34,7 +34,7 @@ func GetActivityService() *ActivityService {
 	return instance
 }
 
-func (s *ActivityService) ScheduleAllActivity( ) {
+func (s *ActivityService) ScheduleAllActivity() {
 	for _, activityData := range config.QueryAll[configdomain.ActivityData]() {
 		handler, err := GetHandler(activityData.Id)
 		if err != nil {
@@ -55,7 +55,7 @@ func (sv *ActivityService) OnPlayerLogin(p *playerdomain.Player) {
 			activityVo := handler.LoadActivityInfo(p)
 			activityVos = append(activityVos, activityVo)
 		}
-		
+
 	}
 	push := &protos.PushActivityLoadAll{
 		ActivityVos: activityVos,

@@ -6,15 +6,13 @@ import (
 	"io/github/gforgame/common/logger"
 	"io/github/gforgame/common/util/jsonutil"
 	serverconfig "io/github/gforgame/config"
-	"io/github/gforgame/examples/activity"
-	dataconfig "io/github/gforgame/examples/config"
+	"io/github/gforgame/examples/bootstrap"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
 	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/http"
 	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/route"
-	"io/github/gforgame/examples/service/player"
 	"io/github/gforgame/examples/system"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
@@ -25,6 +23,7 @@ import (
 	"os/signal"
 	"reflect"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -162,9 +161,17 @@ func main() {
 	codec := json.NewSerializer()
 
 	// 自动建表
-	autoCrreateDatabase()
+	bootstrap.InitMysqlDdl()
 	// 开发环境，导出所有客户端协议
-	TryExportProtocols()
+	bootstrap.DevOnlyExportProtocols()
+	// 加载配置数据
+	bootstrap.InitConfig()
+	// 预热服务并完成跨模块注册（避免首次请求时懒初始化副作用）
+	bootstrap.InitServices()
+	// 各自业务初始化
+	bootstrap.InitBusiness()
+	// 启动系统任务
+	bootstrap.StartSchedulers()
 
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
@@ -228,32 +235,11 @@ func main() {
 	// 	http.ListenAndServe(serverconfig.ServerConfig.PprofAddr, mux)
 	// }()
 
-	dataconfig.GetDataManager()
-
-	// itemData := config.QueryById[configdomain.PropData](10000001)
-	// if itemData == nil {
-	// 	panic("item data not found")
-	// }
-
-	system.StartSystemTask()
-
 	endTime := time.Now()
 	logger.Info("game server is starting at " + serverconfig.ServerConfig.ServerUrl + ", cost " + endTime.Sub(startTime).String())
 
-	// rank.GetRankService().QueryRank(rank.PlayerLevelRank, 0, 10)
-
-	// fight.GetFightService().Test()
-
-	// 各自业务初始化
-	player.GetPlayerService().LoadPlayerProfile()
-
-	activity.GetActivityService().ScheduleAllActivity()
-
-	// p := player.GetPlayerService().GetPlayer("111")
-	// logger.Info(p.Name)
-
 	sg := make(chan os.Signal)
-	signal.Notify(sg, os.Interrupt, os.Kill)
+	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)
 	select {
 	case sig := <-sg:
 		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
