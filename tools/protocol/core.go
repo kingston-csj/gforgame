@@ -10,6 +10,7 @@ type structField struct {
 
 // structInfo 存储单个结构体信息
 type structInfo struct {
+	SourceFile string // 源文件路径，用于生成文件名
 	Name    string        // 结构体名（如 ReqChat）
 	Comment string        // 结构体注释（如 聊天请求）
 	Fields  []structField // 字段列表
