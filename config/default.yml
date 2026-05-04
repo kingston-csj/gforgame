@@ -1,2 +1,1 @@
-db:
-  url: root:123456@tcp(localhost:3306)/gforgame?charset=utf8mb4&parseTime=True&loc=Local
+

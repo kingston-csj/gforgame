@@ -1,9 +1,9 @@
 package protos
 
 type ReqPlayerLogin struct {
-    _        struct{} `cmd_ref:"CmdPlayerReqLogin"`
-    Pwd      string
-    PlayerId string
+	_        struct{} `cmd_ref:"CmdPlayerReqLogin"`
+	Pwd      string `validate:"required"`
+	PlayerId string `validate:"required"`
 }
 
 type ReqPlayerLoadingFinish struct{

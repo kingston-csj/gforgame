@@ -1,10 +1,11 @@
 package constants
 
 const (
-	I18N_COMMON_ILLEGAL_PARAMS = 1001 // 非法参数
-	I18N_COMMON_INTERNAL_ERROR = 1002 // 服务器异常
-	I18N_COMMON_NOT_FOUND      = 1003 // 数据不存在
-	I18N_GM_UNKNOWN_COMMAND    = 1010 // 未知gm命令
+	I18N_COMMON_ILLEGAL_PARAMS             = 1001 // 非法参数
+	I18N_COMMON_INTERNAL_ERROR             = 1002 // 服务器异常
+	I18N_COMMON_NOT_FOUND                  = 1003 // 数据不存在
+	I18N_COMMON_PROTOCOL_VALIDATION_FAILED = 1004 // 协议校验失败
+	I18N_GM_UNKNOWN_COMMAND                = 1010 // 未知gm命令
 
 	I18N_ITEM_NOT_ENOUGH    = 2001 // 道具不足
 	I18N_GOLD_NOT_ENOUGH    = 2002 // 金币不足

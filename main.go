@@ -14,6 +14,7 @@ import (
 	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/route"
 	"io/github/gforgame/examples/system"
+	protocolValidator "io/github/gforgame/examples/validator"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
@@ -58,6 +59,22 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		logger.ErrorNoStack(fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
 		return false
 	}
+
+	// 验证协议的参数，如果校验失败，直接返回错误码
+	if msgHandler.NeedValidate {
+		validationErrors := protocolValidator.ValidateStruct(frame.Msg)
+		if len(validationErrors) > 0 {
+			errMsg := protocolValidator.FormatValidationErrors(validationErrors)
+			if errMsg != "" {
+				// logger.Info(fmt.Sprintf("validation failed for cmd=%d: %s", frame.Header.Cmd, errMsg))
+				if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_PROTOCOL_VALIDATION_FAILED); ok {
+					session.Send(resp, frame.Header.Index)
+				}
+				return false
+			}
+		}
+	}
+
 	var args []reflect.Value
 	if msgHandler.Indindexed {
 		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Header.Index), reflect.ValueOf(frame.Msg)}
@@ -72,9 +89,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
 			if err := session.Send(resp, frame.Header.Index); err != nil {
 				// logger.Error(fmt.Errorf("session.Send error response failed: %v", err))
-				return false
 			}
-			return true
 		}
 		return false
 	}

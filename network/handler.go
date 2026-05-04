@@ -3,15 +3,17 @@ package network
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type (
 	//Handler represents a message.Message's handler's meta information.
 	Handler struct {
-		Receiver   reflect.Value  // receiver of method
-		Method     reflect.Method // method stub
-		Type       reflect.Type   // arg type of method
-		Indindexed bool
+		Receiver     reflect.Value  // receiver of method
+		Method       reflect.Method // method stub
+		Type         reflect.Type   // arg type of method
+		Indindexed   bool
+		NeedValidate bool // 是否需要参数校验
 	}
 
 	MessageRoute struct {
@@ -44,12 +46,41 @@ func (r *MessageRoute) RegisterMessageHandlers(comp Module) error {
 				return err
 			}
 
-			r.Handlers[cmd] = &Handler{Receiver: reflect.ValueOf(comp), Method: method, Type: mt.In(cmdFieldIndex), Indindexed: containsIndex}
-		} else {
-			
+			needValidate := r.needValidation(method.Name, mt.In(cmdFieldIndex))
+
+			r.Handlers[cmd] = &Handler{
+				Receiver:     reflect.ValueOf(comp),
+				Method:       method,
+				Type:         mt.In(cmdFieldIndex),
+				Indindexed:   containsIndex,
+				NeedValidate: needValidate,
+			}
 		}
 	}
 	return nil
+}
+
+func (r *MessageRoute) needValidation(methodName string, msgType reflect.Type) bool {
+	if strings.HasPrefix(methodName, "Validatable") {
+		return true
+	}
+	return hasValidateTag(msgType)
+}
+
+func hasValidateTag(t reflect.Type) bool {
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Tag.Get("validate") != "" && field.Tag.Get("validate") != "-" {
+			return true
+		}
+	}
+	return false
 }
 
 // isHandlerMethod decide a method is suitable handler method
