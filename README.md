@@ -141,6 +141,14 @@ example/unity同时兼容websocket/socket通信方式
 - grpc 跨服通信接入
 - excel 配置文件读取, jforgame-data 实现
 
+## AI 赋能
+
+项目集成 AI 辅助开发能力，支持通过自然语言命令快速生成代码骨架和路由处理器。(参考.trae目录下的skill文件)
+
+- **服务骨架生成**：输入 `新增一个 XXService` 或 `新增 XX服务`，自动创建 Service + Route + Protos 文件骨架
+- **路由自动补全**：输入 `新增XX路由`，自动扫描 `protos/XX.go` 中的 `Req*` 结构体并生成对应的路由方法
+
+
 ## 业务功能(cocos 交互界面已完成，unity 交互界面逐步完善)
 
 同时按下键盘 alt+g+m 组合键可切换 gm 控制台
