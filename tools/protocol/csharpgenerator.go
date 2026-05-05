@@ -12,12 +12,12 @@ type CSharpGenerator struct {
 }
 
 // NewCSharpGenerator 创建C#生成器实例
-func NewCSharpGenerator(goDir, outputDir, tplPath string) *CSharpGenerator {
+func NewCSharpGenerator(goDir, outputDir,tplPath string) *CSharpGenerator {
 	return &CSharpGenerator{
 		BaseGenerator: BaseGenerator{
-			GoDir:        goDir,
+			GoDir:     goDir,
 			TemplatePath: tplPath,
-			OutputDir:    outputDir,
+			OutputDir: outputDir,
 		},
 		typeMap: map[string]string{
 			"int":     "int",
@@ -81,9 +81,9 @@ type cSharpTemplateData struct {
 }
 
 type cSharpField struct {
-	Name      string
+	Name       string
 	FieldType string
-	Comment   string
+	Comment    string
 }
 
 // BuildTemplateData 构建C#模板数据
@@ -91,9 +91,9 @@ func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int
 	var fields []cSharpField
 	for _, f := range si.Fields {
 		fields = append(fields, cSharpField{
-			Name:      f.Name,
+			Name:       f.Name,
 			FieldType: c.MapType(f.Type),
-			Comment:   f.Comment,
+			Comment:    f.Comment,
 		})
 	}
 

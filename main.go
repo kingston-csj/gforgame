@@ -9,16 +9,11 @@ import (
 	"io/github/gforgame/examples/bootstrap"
 	"io/github/gforgame/examples/constants"
 	"io/github/gforgame/examples/context"
-	playerdomain "io/github/gforgame/examples/domain/player"
 	"io/github/gforgame/examples/http"
-	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"io/github/gforgame/examples/route"
-	"io/github/gforgame/examples/system"
-	protocolValidator "io/github/gforgame/examples/validator"
 	"io/github/gforgame/network"
 	"io/github/gforgame/network/protocol"
 	"io/github/gforgame/network/ws"
-	protocolexporter "io/github/gforgame/tools/protocol"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
@@ -31,9 +26,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:generate go generate ./examples/bootstrap
+
 type GameTaskHandler struct {
 	router *network.MessageRoute
 }
+
+// 使用静态路由，避免反射调用，提高性能。
+// 代码生成内容见 route_dispatch_gen.go
+// 部署前请先执行 go generate .
+type generatedRouteInvoker func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error)
+
+var generatedRouteDispatchers = map[int32]generatedRouteInvoker{}
 
 func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
@@ -60,18 +64,23 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		return false
 	}
 
-	// 验证协议的参数，如果校验失败，直接返回错误码
-	if msgHandler.NeedValidate {
-		validationErrors := protocolValidator.ValidateStruct(frame.Msg)
-		if len(validationErrors) > 0 {
-			errMsg := protocolValidator.FormatValidationErrors(validationErrors)
-			if errMsg != "" {
-				// logger.Info(fmt.Sprintf("validation failed for cmd=%d: %s", frame.Header.Cmd, errMsg))
-				if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_PROTOCOL_VALIDATION_FAILED); ok {
-					session.Send(resp, frame.Header.Index)
-				}
-				return false
+	resp, handled, dispatchErr, panicErr := callGeneratedRouteHandlerSafely(frame.Header.Cmd, msgHandler, session, frame.Header.Index, frame.Msg)
+	if handled {
+		if panicErr != nil {
+			logger.Error(fmt.Sprintf("generated route handler panic: cmd=%d method=%s", frame.Header.Cmd, msgHandler.Method.Name), panicErr)
+			if errorResp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
+				session.Send(errorResp, frame.Header.Index)
 			}
+			return false
+		}
+		if dispatchErr != nil {
+			// 静态分发失败时回退反射调用，保证兼容性。
+			logger.ErrorNoStack(fmt.Errorf("generated dispatch failed, fallback to reflect: cmd=%d err=%v", frame.Header.Cmd, dispatchErr))
+		} else {
+			if resp != nil {
+				session.Send(resp, frame.Header.Index)
+			}
+			return true
 		}
 	}
 
@@ -87,9 +96,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	if panicErr != nil {
 		logger.Error(fmt.Sprintf("route handler panic: cmd=%d method=%s", frame.Header.Cmd, msgHandler.Method.Name), panicErr)
 		if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
-			if err := session.Send(resp, frame.Header.Index); err != nil {
-				// logger.Error(fmt.Errorf("session.Send error response failed: %v", err))
-			}
+			session.Send(resp, frame.Header.Index)
 		}
 		return false
 	}
@@ -102,6 +109,29 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 		}
 	}
 	return true
+}
+
+func callGeneratedRouteHandlerSafely(cmd int32, msgHandler *network.Handler, session *network.Session, index int32, msg any) (resp any, handled bool, dispatchErr error, panicErr error) {
+	invoker, ok := getGeneratedRouteInvoker(cmd)
+	if !ok {
+		return nil, false, nil, nil
+	}
+	handled = true
+	defer func() {
+		if r := recover(); r != nil {
+			panicErr = logger.PanicToError(r)
+		}
+	}()
+	resp, dispatchErr = invoker(msgHandler, session, index, msg)
+	return resp, handled, dispatchErr, nil
+}
+
+func getGeneratedRouteInvoker(cmd int32) (generatedRouteInvoker, bool) {
+	if generatedRouteDispatchers == nil {
+		return nil, false
+	}
+	invoker, ok := generatedRouteDispatchers[cmd]
+	return invoker, ok
 }
 
 func callRouteHandlerSafely(msgHandler *network.Handler, args []reflect.Value) (values []reflect.Value, panicErr error) {
@@ -134,11 +164,11 @@ func buildErrorResponse(msgHandler *network.Handler, code int32) (any, bool) {
 
 func NewHttpServer() *gin.Engine {
 	router := gin.Default()
-	// 关闭游戏服务器进程
+	// 关闭游戏服务器进
 	router.POST("/admin/stop", func(c *gin.Context) {
 		http.StopServer(c)
 	})
-	// 配置 CORS 中间件
+	// 配置 CORS 中间
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"}, // 允许所有源，生产环境应指定具体域名
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -161,12 +191,13 @@ type MyMessageDispatch struct {
 }
 
 func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
-	logger.Info(fmt.Sprintf("session closed: %v", session))
+	logger.Info(fmt.Sprintf("session closed: %s", session.ToString()))
 	// 关闭session
 	network.RemoveSession(session)
 }
 
 func main() {
+	logger.Info(fmt.Sprintf("game server is starting..."))
 	startTime := time.Now()
 
 	router := network.NewMessageRoute()
@@ -208,14 +239,6 @@ func main() {
 		route.NewFriendRoute(),
 	}
 
-	// node := tcp.NewServer(
-	// 	tcp.WithAddress(serverconfig.ServerConfig.ServerUrl),
-	// 	tcp.WithRouter(router),
-	// 	tcp.WithIoDispatch(ioDispatcher),
-	// 	tcp.WithCodec(codec),
-	// 	tcp.WithModules(modules...),
-	// )
-
 	node := ws.NewServer(
 		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
 		ws.WithRouter(router),
@@ -231,14 +254,14 @@ func main() {
 		panic(err)
 	}
 
-	// 启动rpc服务器
+	// 启动rpc服务
 	// if len(serverconfig.ServerConfig.RpcServerUrl) > 0 {
 	// 	go func() {
 	// 		NewRpcServer(serverconfig.ServerConfig.RpcServerUrl)
 	// 	}()
 	// }
 
-	// 启动后台http服务器
+	// 启动后台http服务
 	// go func() {
 	// 	context.HttpServer = NewHttpServer()
 	// }()
@@ -253,8 +276,9 @@ func main() {
 	endTime := time.Now()
 	logger.Info("game server is starting at " + serverconfig.ServerConfig.ServerUrl + ", cost " + endTime.Sub(startTime).String())
 
-	sg := make(chan os.Signal)
+	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sg)
 	select {
 	case sig := <-sg:
 		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
@@ -263,57 +287,5 @@ func main() {
 	}
 	// 执行所有关服逻辑
 	node.Stop()
-}
-
-// 自动建表
-func autoCrreateDatabase() {
-	// 玩家表
-	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
-	if err != nil {
-		panic(err)
-	}
-	// 好友表
-	err = mysqldb.Db.AutoMigrate(&playerdomain.Friend{})
-	if err != nil {
-		panic(err)
-	}
-	// 场景表
-	err = mysqldb.Db.AutoMigrate(&playerdomain.Scene{})
-	if err != nil {
-		panic(err)
-	}
-	// 系统参数表
-	err = mysqldb.Db.AutoMigrate(&system.SystemParameterEnt{})
-	if err != nil {
-		panic(err)
-	}
-}
-
-func TryExportProtocols() {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "dev"
-	}
-	// 开发环境，导出所有客户端协议
-	if env == "dev" {
-		// generator := protocolexporter.NewTypeScriptGenerator(
-		// 	"protos",
-		// 	"tools\\protocol\\output\\typescript\\",
-		// 	"tools\\protocol\\templates\\tstemplate.tpl",
-		// )
-		generator := protocolexporter.NewCSharpGenerator(
-			"examples\\protos",
-			"tools\\protocol\\output\\csharp\\",
-			"tools\\protocol\\templates\\csharptemplate.tpl",
-		)
-
-		error := generator.Generate(network.GetMsgName2IdMapper())
-		if error != nil {
-			panic(error)
-		}
-		err2 := generator.BaseGenerator.GenerateRegisterFromTags("examples\\protos", "examples\\protos\\register_gen.go", nil)
-		if err2 != nil {
-			panic(err2)
-		}
-	}
+	logger.Info(fmt.Sprintf("game server is closed"))
 }

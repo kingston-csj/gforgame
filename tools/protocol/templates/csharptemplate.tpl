@@ -7,7 +7,7 @@ namespace Game.Net.Message
     /// {{.StructComment}}
     /// </summary>
     {{if .Cmd}} [MessageMeta(Cmd = {{.Cmd}})] {{end}}
-    public class {{.StructName}} {{if .Cmd}}: Message {{end}}
+    public class {{.StructName}} {{if .Cmd}}: {{.SuperClass}} {{end}}
     {
         {{range .Fields}}
         /// <summary>
