@@ -1,9 +1,10 @@
 package player
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/contract"
 	"time"
+
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/contract"
 )
 
 type Mailbox struct {

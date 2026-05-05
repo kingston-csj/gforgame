@@ -2,8 +2,9 @@ package data
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
 	"reflect"
+
+	"github.com/forfun/gforgame/common/logger"
 )
 
 type TableMeta struct {

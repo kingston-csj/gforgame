@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "io/github/gforgame/examples/protos"
-	"io/github/gforgame/network"
-	protocolexporter "io/github/gforgame/tools/protocol"
+	_ "github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/network"
+	protocolexporter "github.com/forfun/gforgame/tools/protocol"
 )
 
 func main() {

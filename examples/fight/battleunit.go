@@ -1,9 +1,9 @@
 package fight
 
 import (
-	"io/github/gforgame/examples/fight/actor"
-	"io/github/gforgame/examples/fight/attribute"
-	"io/github/gforgame/examples/fight/skill"
+	"github.com/forfun/gforgame/examples/fight/actor"
+	"github.com/forfun/gforgame/examples/fight/attribute"
+	"github.com/forfun/gforgame/examples/fight/skill"
 )
 
 type BattleUnit struct {

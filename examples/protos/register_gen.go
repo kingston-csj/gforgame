@@ -3,7 +3,7 @@
 package protos
 
 import (
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/network"
 )
 
 func init() {

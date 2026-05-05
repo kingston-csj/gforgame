@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/service/rank/container"
-	"io/github/gforgame/examples/service/rank/model"
 	"math"
+
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/service/rank/container"
+	"github.com/forfun/gforgame/examples/service/rank/model"
 )
 
 type RankHandler interface {

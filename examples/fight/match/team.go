@@ -1,6 +1,6 @@
 package match
 
-import "io/github/gforgame/examples/fight/actor"
+import "github.com/forfun/gforgame/examples/fight/actor"
 
 type Team struct {
 	Camp   int32

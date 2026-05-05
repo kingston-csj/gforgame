@@ -6,15 +6,15 @@ import (
 	"os/signal"
 	"reflect"
 
-	"io/github/gforgame/codec/json"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/examples/cross"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/network"
-	"io/github/gforgame/network/client"
-	"io/github/gforgame/network/protocol"
-	"io/github/gforgame/persist"
+	"github.com/forfun/gforgame/codec/json"
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/examples/cross"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/client"
+	"github.com/forfun/gforgame/network/protocol"
+	"github.com/forfun/gforgame/persist"
 )
 
 // 实现 RequestCallback 接口的匿名对象

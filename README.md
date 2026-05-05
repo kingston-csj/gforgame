@@ -73,7 +73,7 @@ go 客户端入口：client/go/client.go
 
 每个功能以模块的形式组织业务，例如背包，任务，技能等等  
 模块需继承 Module，该模块的所有通信协议只需在protos文件下进行定义即可，框架会自动扫描并进行注册  
-新模块通过 network.RegisterModule(player.NewPlayerRoute())进行注册，目的是为了扫描消息处理器。  
+新模块通过 network.RegisterModule(player.NewPlayerRoute())进行注册，目的是为了扫描消息处理器。
 
 ### websocket/socket
 
@@ -81,7 +81,6 @@ node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket
 example/cocos 为 ws 的客户端程序。
 若游戏发布平台不是小游戏，也可直接使用原生socket，  
 example/unity同时兼容websocket/socket通信方式
-
 
 ### 跨服通信方式一：基于 rpc
 
@@ -98,7 +97,7 @@ example/unity同时兼容websocket/socket通信方式
 
 ```golang
 
-    import "io/github/gforgame/network/client"
+    import "github.com/forfun/gforgame/network/client"
     r, err := client.Request(session, &protos.ReqPlayerLogin{Id: "1001"})
 	if err != nil {
 		fmt.Println(err)
@@ -111,7 +110,7 @@ example/unity同时兼容websocket/socket通信方式
 
 ```golang
 
-    import "io/github/gforgame/network/client"
+    import "github.com/forfun/gforgame/network/client"
 
     // 实现 RequestCallback 接口的匿名对象
     type commonCallback struct{}
@@ -147,7 +146,6 @@ example/unity同时兼容websocket/socket通信方式
 
 - **服务骨架生成**：输入 `新增一个 XXService` 或 `新增 XX服务`，自动创建 Service + Route + Protos 文件骨架
 - **路由自动补全**：输入 `新增XX路由`，自动扫描 `protos/XX.go` 中的 `Req*` 结构体并生成对应的路由方法
-
 
 ## 业务功能(cocos 交互界面已完成，unity 交互界面逐步完善)
 

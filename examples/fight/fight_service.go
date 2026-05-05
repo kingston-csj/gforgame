@@ -1,16 +1,17 @@
 package fight
 
 import (
-	"io/github/gforgame/examples/config"
-	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/fight/actor"
-	"io/github/gforgame/examples/fight/match"
-	"io/github/gforgame/examples/fight/report"
-	skillservice "io/github/gforgame/examples/fight/skill"
-	"io/github/gforgame/examples/service/player"
 	"sort"
 	"sync"
+
+	"github.com/forfun/gforgame/examples/config"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/fight/actor"
+	"github.com/forfun/gforgame/examples/fight/match"
+	"github.com/forfun/gforgame/examples/fight/report"
+	skillservice "github.com/forfun/gforgame/examples/fight/skill"
+	"github.com/forfun/gforgame/examples/service/player"
 )
 
 var (

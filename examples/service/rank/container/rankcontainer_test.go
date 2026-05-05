@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/service/rank/model"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/service/rank/model"
 )
 
 type TestRank struct {

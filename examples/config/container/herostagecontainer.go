@@ -1,8 +1,8 @@
 package container
 
 import (
-	"io/github/gforgame/data"
-	configdomain "io/github/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/data"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 type HeroStageContainer struct {

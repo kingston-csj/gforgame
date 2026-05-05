@@ -2,9 +2,10 @@ package player
 
 import (
 	"errors"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
+
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 type QuestBox struct {

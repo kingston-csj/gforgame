@@ -1,21 +1,22 @@
 package mail
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/common/util/timeutil"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/contract"
 	"time"
 
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/reward"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/timeutil"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/contract"
 
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/reward"
+
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 var (

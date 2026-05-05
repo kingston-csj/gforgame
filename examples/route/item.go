@@ -1,12 +1,12 @@
 package route
 
 import (
-	"io/github/gforgame/examples/context"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/context"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/network"
 )
 
 type ItemRoute struct {

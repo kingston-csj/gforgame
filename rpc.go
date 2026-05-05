@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"io/github/gforgame/codec/json"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/network/rpc"
 	"net"
+
+	"github.com/forfun/gforgame/codec/json"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/network/rpc"
 
 	"google.golang.org/grpc"
 )

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"io/github/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/context"
 
 	"github.com/gin-gonic/gin"
 )

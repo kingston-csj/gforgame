@@ -1,11 +1,12 @@
 package buff
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/examples/config"
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/fight/attribute"
 	"strings"
+
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/examples/config"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/fight/attribute"
 )
 
 type AttrBuff struct {

@@ -2,9 +2,10 @@ package cache_test
 
 import (
 	"fmt"
-	"io/github/gforgame/cache"
-	mysqldb "io/github/gforgame/examples/infra/persistence"
 	"testing"
+
+	"github.com/forfun/gforgame/cache"
+	mysqldb "github.com/forfun/gforgame/examples/infra/persistence"
 )
 
 type Player struct {

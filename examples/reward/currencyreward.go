@@ -1,11 +1,12 @@
 package reward
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
 	"strconv"
+
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 type CurrencyReward struct {

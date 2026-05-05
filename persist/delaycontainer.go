@@ -1,11 +1,12 @@
 package persist
 
 import (
-	"io/github/gforgame/common/logger"
 	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/forfun/gforgame/common/logger"
 )
 
 // DelayContainer 延迟持久化容器

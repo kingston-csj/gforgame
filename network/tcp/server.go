@@ -3,10 +3,11 @@ package tcp
 import (
 	"errors"
 	"fmt"
-	"io/github/gforgame/network"
 	"log/slog"
 	"net"
 	"sync"
+
+	"github.com/forfun/gforgame/network"
 )
 
 type TcpServer struct {

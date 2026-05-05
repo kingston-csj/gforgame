@@ -1,10 +1,11 @@
 package skill
 
 import (
-	"io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/fight/actor"
-	"io/github/gforgame/examples/fight/match"
 	"math/rand/v2"
+
+	"github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/fight/actor"
+	"github.com/forfun/gforgame/examples/fight/match"
 )
 
 var (

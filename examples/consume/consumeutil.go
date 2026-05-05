@@ -1,8 +1,9 @@
 package consume
 
 import (
-	"io/github/gforgame/common/util"
 	"strings"
+
+	"github.com/forfun/gforgame/common/util"
 )
 
 func ParseConsume(config string) *AndConsume{

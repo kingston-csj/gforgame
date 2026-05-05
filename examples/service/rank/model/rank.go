@@ -1,8 +1,9 @@
 package model
 
 import (
-	"io/github/gforgame/examples/protos"
 	"strings"
+
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 type BaseRank interface {

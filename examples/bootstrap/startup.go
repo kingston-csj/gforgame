@@ -1,13 +1,13 @@
 package bootstrap
 
 import (
-	mysqldb "io/github/gforgame/examples/infra/persistence"
+	mysqldb "github.com/forfun/gforgame/examples/infra/persistence"
 
-	dataconfig "io/github/gforgame/examples/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/service/activity"
-	"io/github/gforgame/examples/service/player"
-	"io/github/gforgame/examples/system"
+	dataconfig "github.com/forfun/gforgame/examples/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/service/activity"
+	"github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/system"
 )
 
 // 生成顺序必须固定：

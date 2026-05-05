@@ -3,13 +3,13 @@ package catalog
 import (
 	"sync"
 
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/reward"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/reward"
 )
 
 type CatalogService struct {

@@ -1,10 +1,11 @@
 package container
 
 import (
-	"io/github/gforgame/data"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
 	"sort"
+
+	"github.com/forfun/gforgame/data"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 type QuestContainer struct {

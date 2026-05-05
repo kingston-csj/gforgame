@@ -2,13 +2,14 @@ package reward
 
 import (
 	"errors"
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/consume"
-	"io/github/gforgame/examples/contract"
-	"io/github/gforgame/examples/protos"
 	"math"
 	"strings"
+
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/consume"
+	"github.com/forfun/gforgame/examples/contract"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 func ParseReward(config string) *AndReward {

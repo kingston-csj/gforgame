@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	playerdomain "io/github/gforgame/examples/domain/player"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
 )
 
 type TransferType int

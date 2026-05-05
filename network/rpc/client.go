@@ -2,8 +2,9 @@ package rpc
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
 	"sync"
+
+	"github.com/forfun/gforgame/common/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

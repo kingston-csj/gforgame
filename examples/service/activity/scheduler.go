@@ -2,15 +2,16 @@ package activity
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/common/schedule"
-	"io/github/gforgame/common/util/timeutil"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/common/schedule"
+	"github.com/forfun/gforgame/common/util/timeutil"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 // innerTaskMap 内层任务映射，保证并发安

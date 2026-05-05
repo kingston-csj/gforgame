@@ -1,15 +1,17 @@
 package chat
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
 	"sync"
 
-	"io/github/gforgame/common/util"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	playerservice "io/github/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+
 	"time"
+
+	"github.com/forfun/gforgame/common/util"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
 )
 
 // 聊天模块

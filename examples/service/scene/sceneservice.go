@@ -1,13 +1,14 @@
 package scene
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/player"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	mysqldb "io/github/gforgame/examples/infra/persistence"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
 	"sync"
+
+	"github.com/forfun/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/domain/player"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	mysqldb "github.com/forfun/gforgame/examples/infra/persistence"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
 
 	"gorm.io/gorm"
 )

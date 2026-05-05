@@ -1,11 +1,12 @@
 package route
 
 import (
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/service/mixture"
-	playerservice "io/github/gforgame/examples/service/player"
-	"io/github/gforgame/network"
 	"time"
+
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/service/mixture"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/network"
 )
 
 type MixtureRoute struct {

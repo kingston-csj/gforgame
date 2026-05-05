@@ -1,8 +1,8 @@
 package skill
 
 import (
-	"io/github/gforgame/examples/config"
-	configdomain "io/github/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/config"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 func NewSkill(skillId int32) Skill {

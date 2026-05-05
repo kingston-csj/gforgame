@@ -2,12 +2,13 @@ package system
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/common/util/timeutil"
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/events"
 	"log"
 	"time"
+
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/common/util/timeutil"
+	"github.com/forfun/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/events"
 
 	"github.com/robfig/cron/v3"
 )

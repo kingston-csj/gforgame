@@ -6,10 +6,10 @@ import (
 	"strings"
 	"sync"
 
-	"io/github/gforgame/data"
-	"io/github/gforgame/examples/config/container"
+	"github.com/forfun/gforgame/data"
+	"github.com/forfun/gforgame/examples/config/container"
 
-	domain "io/github/gforgame/examples/domain/config"
+	domain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 // DataManager 配置数据管理器

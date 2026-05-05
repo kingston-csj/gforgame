@@ -1,12 +1,13 @@
 package route
 
 import (
-	"io/github/gforgame/examples/service/gm"
-	playerservice "io/github/gforgame/examples/service/player"
 	"strings"
 
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/service/gm"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
+
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/network"
 )
 
 type GmRoute struct {

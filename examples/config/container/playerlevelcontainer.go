@@ -1,9 +1,9 @@
 package container
 
 import (
-	"io/github/gforgame/data"
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/fight/attribute"
+	"github.com/forfun/gforgame/data"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/fight/attribute"
 )
 
 type PlayerLevelContainer struct {

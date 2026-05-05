@@ -1,9 +1,10 @@
 package container
 
 import (
-	"io/github/gforgame/data"
-	configdomain "io/github/gforgame/examples/domain/config"
 	"math/rand"
+
+	"github.com/forfun/gforgame/data"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 )
 
 type NameContainer struct {

@@ -3,23 +3,23 @@ package item
 import (
 	"sync"
 
-	"io/github/gforgame/common/errors"
-	"io/github/gforgame/examples/protos"
+	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/examples/protos"
 
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/consume"
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/contract"
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/service/catalog"
-	playerservice "io/github/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/consume"
+	"github.com/forfun/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/contract"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/service/catalog"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
 
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/reward"
-	"io/github/gforgame/network"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/reward"
+	"github.com/forfun/gforgame/network"
 )
 
 // 普通道具模块

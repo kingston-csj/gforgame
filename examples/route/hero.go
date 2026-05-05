@@ -1,14 +1,14 @@
 package route
 
 import (
-	"io/github/gforgame/examples/context"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/context"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
 
-	"io/github/gforgame/examples/protos"
-	heroService "io/github/gforgame/examples/service/hero"
-	playerservice "io/github/gforgame/examples/service/player"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/protos"
+	heroService "github.com/forfun/gforgame/examples/service/hero"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/network"
 )
 
 type HeroRoute struct {

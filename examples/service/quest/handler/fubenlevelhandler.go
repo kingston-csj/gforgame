@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"io/github/gforgame/examples/constants"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	events "io/github/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/constants"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	events "github.com/forfun/gforgame/examples/events"
 )
 
 type FubenLevelQuestHandler struct {

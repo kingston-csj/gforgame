@@ -2,9 +2,10 @@ package data_test
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/data"
 	"testing"
+
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/data"
 )
 
 func TestExcelReader(t *testing.T) {

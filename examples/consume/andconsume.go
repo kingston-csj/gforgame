@@ -2,7 +2,8 @@ package consume
 
 import (
 	"fmt"
-	"io/github/gforgame/examples/domain/player"
+
+	"github.com/forfun/gforgame/examples/domain/player"
 )
 
 type AndConsume struct {

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"io/github/gforgame/common/schedule"
+	"github.com/forfun/gforgame/common/schedule"
 )
 
 var (

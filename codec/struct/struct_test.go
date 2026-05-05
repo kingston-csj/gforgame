@@ -1,9 +1,10 @@
 package structcodec_test
 
 import (
-	structcodec "io/github/gforgame/codec/struct"
 	"reflect"
 	"testing"
+
+	structcodec "github.com/forfun/gforgame/codec/struct"
 )
 
 type Address struct {

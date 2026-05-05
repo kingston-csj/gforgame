@@ -1,9 +1,9 @@
 package actor
 
 import (
-	"io/github/gforgame/examples/fight/attribute"
-	"io/github/gforgame/examples/fight/buff"
-	"io/github/gforgame/examples/fight/state"
+	"github.com/forfun/gforgame/examples/fight/attribute"
+	"github.com/forfun/gforgame/examples/fight/buff"
+	"github.com/forfun/gforgame/examples/fight/state"
 )
 
 type Actor interface {

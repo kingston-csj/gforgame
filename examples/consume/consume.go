@@ -1,6 +1,6 @@
 package consume
 
-import "io/github/gforgame/examples/domain/player"
+import "github.com/forfun/gforgame/examples/domain/player"
 
 type Consume interface {
 	Verify(player *player.Player) error

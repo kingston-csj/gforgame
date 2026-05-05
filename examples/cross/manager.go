@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"io/github/gforgame/codec/json"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/network/rpc"
+	"github.com/forfun/gforgame/codec/json"
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/network/rpc"
 )
 
 func PlayerLoginRemote(p *playerdomain.Player, kind TransferType) {

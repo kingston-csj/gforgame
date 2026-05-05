@@ -1,7 +1,7 @@
 package network
 
 import (
-	"io/github/gforgame/network/protocol"
+	"github.com/forfun/gforgame/network/protocol"
 )
 
 type IoDispatch interface {

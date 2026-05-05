@@ -2,7 +2,8 @@ package protocol
 
 import (
 	"errors"
-	"io/github/gforgame/common/buffer"
+
+	"github.com/forfun/gforgame/common/buffer"
 )
 
 // Protocol constants.

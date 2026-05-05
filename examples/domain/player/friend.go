@@ -3,8 +3,8 @@ package player
 import (
 	"encoding/json"
 
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/persist"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/persist"
 
 	"gorm.io/gorm"
 )

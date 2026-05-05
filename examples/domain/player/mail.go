@@ -3,7 +3,7 @@ package player
 import (
 	"time"
 
-	"io/github/gforgame/examples/contract"
+	"github.com/forfun/gforgame/examples/contract"
 )
 
 type Mail struct {

@@ -1,4 +1,4 @@
-module io/github/gforgame
+module github.com/forfun/gforgame
 
 go 1.23.0
 

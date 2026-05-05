@@ -1,10 +1,11 @@
 package util
 
 import (
-	"io/github/gforgame/config"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/forfun/gforgame/config"
 )
 
 // IDGenerator 全局唯一ID生成器

@@ -341,7 +341,7 @@ func (b *BaseGenerator) GenerateRegisterFromTags(goDir string, outputFile string
 	var buf bytes.Buffer
 	buf.WriteString("// 该文件为程序自动生成，请勿手动修改\n\n")
 	buf.WriteString("package protos\n\n")
-	buf.WriteString("import (\n\t\"io/github/gforgame/network\"\n)\n\n")
+	buf.WriteString("import (\n\t\"github.com/forfun/gforgame/network\"\n)\n\n")
 	buf.WriteString("func init() {\n")
 
 	fset := token.NewFileSet()

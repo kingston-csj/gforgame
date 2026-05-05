@@ -1,8 +1,8 @@
 package io
 
 import (
-	"io/github/gforgame/examples/contract"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/contract"
+	"github.com/forfun/gforgame/network"
 )
 
 func NotifyPlayer(player contract.Player, data any) {

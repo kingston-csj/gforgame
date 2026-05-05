@@ -1,12 +1,12 @@
 package handler
 
 import (
-	playerdomain "io/github/gforgame/examples/domain/player"
-	mysqldb "io/github/gforgame/examples/infra/persistence"
-	"io/github/gforgame/examples/protos"
-	playerservice "io/github/gforgame/examples/service/player"
-	"io/github/gforgame/examples/service/rank/container"
-	"io/github/gforgame/examples/service/rank/model"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	mysqldb "github.com/forfun/gforgame/examples/infra/persistence"
+	"github.com/forfun/gforgame/examples/protos"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/service/rank/container"
+	"github.com/forfun/gforgame/examples/service/rank/model"
 )
 
 type PlayerLevelRankHandler struct {

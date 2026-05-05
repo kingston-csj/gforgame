@@ -1,10 +1,11 @@
 package persistence
 
 import (
-	"io/github/gforgame/config"
 	"log"
 	"os"
 	"time"
+
+	"github.com/forfun/gforgame/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

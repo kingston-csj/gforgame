@@ -1,9 +1,10 @@
 package reward
 
 import (
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/player"
 	"strconv"
+
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/domain/player"
 )
 
 type TicketReward struct {

@@ -5,9 +5,9 @@ package main
 import (
 	"fmt"
 
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/route"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/route"
+	"github.com/forfun/gforgame/network"
 )
 
 func init() {

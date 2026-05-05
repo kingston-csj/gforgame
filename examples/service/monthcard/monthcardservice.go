@@ -2,16 +2,17 @@ package monthcard
 
 import (
 	"fmt"
-	"io/github/gforgame/common/errors"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/reward"
 	"sync"
 	"time"
+
+	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/reward"
 )
 
 // 月卡服务

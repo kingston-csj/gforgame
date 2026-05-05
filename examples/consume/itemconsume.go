@@ -1,9 +1,9 @@
 package consume
 
 import (
-	"io/github/gforgame/common/errors"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/domain/player"
 )
 
 type ItemConsume struct {

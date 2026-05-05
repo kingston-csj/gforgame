@@ -1,8 +1,9 @@
 package jsonutil_test
 
 import (
-	"io/github/gforgame/common/util/jsonutil"
 	"testing"
+
+	"github.com/forfun/gforgame/common/util/jsonutil"
 )
 
 type TestUser struct {

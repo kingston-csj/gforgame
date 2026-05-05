@@ -1,8 +1,9 @@
 package player
 
 import (
-	"io/github/gforgame/examples/constants"
 	"time"
+
+	"github.com/forfun/gforgame/examples/constants"
 )
 
 type RechargeBox struct {

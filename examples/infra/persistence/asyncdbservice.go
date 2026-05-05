@@ -1,8 +1,8 @@
 package persistence
 
 import (
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/persist"
+	"github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/persist"
 )
 type AsyncDBService struct {
 	playerWorker persist.PersistContainer

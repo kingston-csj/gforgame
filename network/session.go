@@ -3,16 +3,17 @@ package network
 import (
 	"errors"
 	"fmt"
-	"io/github/gforgame/codec"
-	"io/github/gforgame/common/logger"
-	"io/github/gforgame/common/util/jsonutil"
-	"io/github/gforgame/network/protocol"
 	"log"
 	"log/slog"
 	"net"
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/forfun/gforgame/codec"
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/common/util/jsonutil"
+	"github.com/forfun/gforgame/network/protocol"
 
 	"github.com/gorilla/websocket"
 )

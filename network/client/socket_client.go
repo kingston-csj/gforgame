@@ -1,10 +1,11 @@
 package client
 
 import (
-	"io/github/gforgame/codec"
-	"io/github/gforgame/network"
 	"log"
 	"net"
+
+	"github.com/forfun/gforgame/codec"
+	"github.com/forfun/gforgame/network"
 )
 
 type TcpSocketClient struct {

@@ -1,6 +1,6 @@
 package events
 
-import "io/github/gforgame/examples/contract"
+import "github.com/forfun/gforgame/examples/contract"
 
 type IPlayerEvent interface {
 	GetOwner() contract.Player

@@ -1,9 +1,10 @@
 package json_test
 
 import (
-	"io/github/gforgame/codec/json"
 	"reflect"
 	"testing"
+
+	"github.com/forfun/gforgame/codec/json"
 )
 
 type Message struct {

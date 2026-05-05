@@ -1,6 +1,6 @@
 package reward
 
-import "io/github/gforgame/examples/domain/player"
+import "github.com/forfun/gforgame/examples/domain/player"
 
 type Reward interface {
 

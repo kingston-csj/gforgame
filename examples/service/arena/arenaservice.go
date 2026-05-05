@@ -1,22 +1,23 @@
 package arena
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/config/container"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/context"
-	player "io/github/gforgame/examples/domain/player"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/protos"
-	heroService "io/github/gforgame/examples/service/hero"
-	mailService "io/github/gforgame/examples/service/mail"
-	"io/github/gforgame/examples/service/monthcard"
-	playerService "io/github/gforgame/examples/service/player"
-	"io/github/gforgame/examples/service/rank"
 	"math"
 	"sync"
+
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/config/container"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/context"
+	player "github.com/forfun/gforgame/examples/domain/player"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/protos"
+	heroService "github.com/forfun/gforgame/examples/service/hero"
+	mailService "github.com/forfun/gforgame/examples/service/mail"
+	"github.com/forfun/gforgame/examples/service/monthcard"
+	playerService "github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/service/rank"
 )
 
 type ArenaService struct {

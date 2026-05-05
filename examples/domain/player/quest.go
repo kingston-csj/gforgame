@@ -1,11 +1,11 @@
 package player
 
 import (
-	"io/github/gforgame/common/util/timeutil"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
-	"io/github/gforgame/examples/protos"
+	"github.com/forfun/gforgame/common/util/timeutil"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 type Quest struct {

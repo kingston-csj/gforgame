@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"io/github/gforgame/codec"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/codec"
+	"github.com/forfun/gforgame/network"
 )
 
 type Options struct {

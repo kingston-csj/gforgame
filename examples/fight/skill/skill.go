@@ -1,10 +1,10 @@
 package skill
 
 import (
-	"io/github/gforgame/examples/config"
-	configdomain "io/github/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/examples/config"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
 
-	"io/github/gforgame/examples/fight/actor"
+	"github.com/forfun/gforgame/examples/fight/actor"
 )
 
 type Skill interface {

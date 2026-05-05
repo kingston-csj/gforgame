@@ -1,9 +1,10 @@
 package schedule_test
 
 import (
-	"io/github/gforgame/common/schedule"
 	"testing"
 	"time"
+
+	"github.com/forfun/gforgame/common/schedule"
 )
 
 func TestDefaultTaskScheduler_Schedule(t *testing.T) {

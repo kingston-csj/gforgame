@@ -1,11 +1,11 @@
 package route
 
 import (
-	"io/github/gforgame/examples/context"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	events "io/github/gforgame/examples/events"
-	recharge "io/github/gforgame/examples/service/recharge"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/context"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	events "github.com/forfun/gforgame/examples/events"
+	recharge "github.com/forfun/gforgame/examples/service/recharge"
+	"github.com/forfun/gforgame/network"
 )
 
 type RechargeRoute struct {

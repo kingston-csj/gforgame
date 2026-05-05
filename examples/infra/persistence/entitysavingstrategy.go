@@ -1,6 +1,6 @@
 package persistence
 
-import "io/github/gforgame/persist"
+import "github.com/forfun/gforgame/persist"
 
 type EntitySavingStrategy struct {
 }

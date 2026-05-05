@@ -1,6 +1,6 @@
 package config
 
-import "io/github/gforgame/examples/fight/attribute"
+import "github.com/forfun/gforgame/examples/fight/attribute"
 type PlayerLevelData struct {
 	Id      int32 `json:"id" excel:"id"`
 	Level   int32 `json:"level" excel:"level"`

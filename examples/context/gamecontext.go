@@ -1,13 +1,13 @@
 package context
 
 import (
-	"io/github/gforgame/cache"
-	"io/github/gforgame/common/eventbus"
-	"io/github/gforgame/common/schedule"
-	"io/github/gforgame/network/tcp"
-	"io/github/gforgame/network/ws"
+	"github.com/forfun/gforgame/cache"
+	"github.com/forfun/gforgame/common/eventbus"
+	"github.com/forfun/gforgame/common/schedule"
+	"github.com/forfun/gforgame/network/tcp"
+	"github.com/forfun/gforgame/network/ws"
 
-	"io/github/gforgame/examples/infra/persistence"
+	"github.com/forfun/gforgame/examples/infra/persistence"
 )
 
 var (

@@ -1,10 +1,10 @@
 package chat
 
 import (
-	"io/github/gforgame/examples/constants"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/service/friend"
-	playerservice "io/github/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/constants"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/service/friend"
+	playerservice "github.com/forfun/gforgame/examples/service/player"
 )
 
 type FriendChannelHandler struct {

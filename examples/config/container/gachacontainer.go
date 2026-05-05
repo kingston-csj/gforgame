@@ -1,9 +1,9 @@
 package container
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/data"
-	"io/github/gforgame/examples/domain/config"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/data"
+	"github.com/forfun/gforgame/examples/domain/config"
 )
 type GachaContainer struct {
 	*data.Container[int32, config.GachaData]

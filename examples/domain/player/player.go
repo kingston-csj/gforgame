@@ -3,11 +3,11 @@ package player
 import (
 	"encoding/json"
 
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/examples/fight/attribute"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/persist"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/examples/fight/attribute"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/persist"
 
 	"gorm.io/gorm"
 )

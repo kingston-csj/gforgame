@@ -1,9 +1,10 @@
 package client
 
 import (
-	"io/github/gforgame/network"
 	"sync/atomic"
 	"time"
+
+	"github.com/forfun/gforgame/network"
 )
 
 var (

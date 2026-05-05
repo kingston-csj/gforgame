@@ -1,8 +1,8 @@
 package core
 
 import (
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/protos"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 // QuestHandler 定义任务处理器契约。

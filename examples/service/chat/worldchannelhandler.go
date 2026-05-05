@@ -1,11 +1,12 @@
 package chat
 
 import (
-	"io/github/gforgame/common/container/list"
-	"io/github/gforgame/examples/constants"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	network "io/github/gforgame/network"
 	"time"
+
+	"github.com/forfun/gforgame/common/container/list"
+	"github.com/forfun/gforgame/examples/constants"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	network "github.com/forfun/gforgame/network"
 )
 
 type WorldChannelHandler struct {

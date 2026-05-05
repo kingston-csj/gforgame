@@ -2,9 +2,10 @@ package data_test
 
 import (
 	"fmt"
-	"io/github/gforgame/data"
 	"reflect"
 	"testing"
+
+	"github.com/forfun/gforgame/data"
 )
 
 type RewardDef struct {

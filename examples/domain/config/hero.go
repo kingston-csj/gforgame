@@ -1,7 +1,7 @@
 package config
 
 import (
-	"io/github/gforgame/examples/fight/attribute"
+	"github.com/forfun/gforgame/examples/fight/attribute"
 )
 
 type HeroData struct {

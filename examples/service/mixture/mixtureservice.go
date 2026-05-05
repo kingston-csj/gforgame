@@ -2,10 +2,11 @@
 package mixture
 
 import (
-	"io/github/gforgame/examples/context"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
 	"sync"
+
+	"github.com/forfun/gforgame/examples/context"
+	"github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
 )
 
 // 混合服务

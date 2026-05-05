@@ -1,11 +1,11 @@
 package director
 
 import (
-	"io/github/gforgame/examples/constants"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
-	qcore "io/github/gforgame/examples/service/quest/core"
+	"github.com/forfun/gforgame/examples/constants"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
+	qcore "github.com/forfun/gforgame/examples/service/quest/core"
 )
 
 type baseQuestDirector struct {

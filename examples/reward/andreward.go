@@ -3,7 +3,7 @@ package reward
 import (
 	"fmt"
 
-	"io/github/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/domain/player"
 )
 
 type AndReward struct {

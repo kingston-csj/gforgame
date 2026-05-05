@@ -1,10 +1,11 @@
 package rank
 
 import (
-	"io/github/gforgame/examples/protos"
-	"io/github/gforgame/examples/service/player"
-	"io/github/gforgame/examples/service/rank/handler"
 	"sync"
+
+	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/examples/service/player"
+	"github.com/forfun/gforgame/examples/service/rank/handler"
 )
 
 type RankType int

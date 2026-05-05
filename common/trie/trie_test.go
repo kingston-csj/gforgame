@@ -2,8 +2,9 @@ package trie_test
 
 import (
 	"fmt"
-	"io/github/gforgame/common/trie"
 	"testing"
+
+	"github.com/forfun/gforgame/common/trie"
 )
 
 func TestLog(t *testing.T) {

@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	events "io/github/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	events "github.com/forfun/gforgame/examples/events"
 )
 
 type RecruitQuestHandler struct {

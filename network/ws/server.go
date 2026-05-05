@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/github/gforgame/network"
-	"io/github/gforgame/network/protocol"
 	"log/slog"
 	"net"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/protocol"
 
 	"github.com/gorilla/websocket"
 )

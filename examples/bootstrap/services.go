@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	heroservice "io/github/gforgame/examples/service/hero"
-	itemservice "io/github/gforgame/examples/service/item"
+	heroservice "github.com/forfun/gforgame/examples/service/hero"
+	itemservice "github.com/forfun/gforgame/examples/service/item"
 )
 
 // InitServices 预热服务并完成跨模块注册（reward/consume ops 等）。

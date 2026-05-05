@@ -1,9 +1,9 @@
 package match
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/examples/fight/actor"
-	"io/github/gforgame/examples/fight/report"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/examples/fight/actor"
+	"github.com/forfun/gforgame/examples/fight/report"
 )
 
 type Match struct {

@@ -2,10 +2,11 @@ package activity
 
 import (
 	"errors"
-	"io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/protos"
 	"reflect"
 	"time"
+
+	"github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 var (

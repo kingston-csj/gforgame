@@ -1,7 +1,7 @@
 package reward
 
 import (
-	itemcontract "io/github/gforgame/examples/contract"
+	itemcontract "github.com/forfun/gforgame/examples/contract"
 )
 
 var (

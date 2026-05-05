@@ -1,16 +1,17 @@
 package mall
 
 import (
-	"io/github/gforgame/common/errors"
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/constants"
-	"io/github/gforgame/examples/consume"
-	"io/github/gforgame/examples/context"
-	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/reward"
 	"sync"
+
+	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/constants"
+	"github.com/forfun/gforgame/examples/consume"
+	"github.com/forfun/gforgame/examples/context"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/reward"
 )
 
 // 商城模块

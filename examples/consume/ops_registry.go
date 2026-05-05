@@ -1,8 +1,9 @@
 package consume
 
 import (
-	itemcontract "io/github/gforgame/examples/contract"
 	"sync"
+
+	itemcontract "github.com/forfun/gforgame/examples/contract"
 )
 
 var (

@@ -2,8 +2,9 @@ package logger_test
 
 import (
 	"fmt"
-	"io/github/gforgame/common/logger"
 	"testing"
+
+	"github.com/forfun/gforgame/common/logger"
 )
 
 func ExampleLog() {

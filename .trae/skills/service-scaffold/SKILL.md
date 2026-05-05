@@ -73,8 +73,8 @@ package <packageName>
 
 import (
 	"sync"
-  configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
+  configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
 )
 
 type <ServiceName> struct{}
@@ -98,8 +98,8 @@ func Get<ServiceName>() *<ServiceName> {
 package route
 
 import (
-	"io/github/gforgame/examples/service/<packageName>"
-	"io/github/gforgame/network"
+	"github.com/forfun/gforgame/examples/service/<packageName>"
+	"github.com/forfun/gforgame/network"
 )
 
 type <RouteName> struct {

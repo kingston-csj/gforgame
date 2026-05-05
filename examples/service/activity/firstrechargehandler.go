@@ -1,10 +1,10 @@
 package activity
 
 import (
-	"io/github/gforgame/common/util"
-	"io/github/gforgame/common/util/timeutil"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/protos"
+	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/timeutil"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/protos"
 )
 
 type FirstRechargeActivityHandler struct {

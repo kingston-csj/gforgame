@@ -3,8 +3,8 @@ package cross
 import (
 	"fmt"
 
-	"io/github/gforgame/common/logger"
-	playerdomain "io/github/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/common/logger"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
 )
 
 type IslandTransfer struct{}

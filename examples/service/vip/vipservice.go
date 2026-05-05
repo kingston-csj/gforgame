@@ -1,16 +1,17 @@
 package vip
 
 import (
-	"io/github/gforgame/examples/config"
-	"io/github/gforgame/examples/config/container"
-	"io/github/gforgame/examples/context"
-	configdomain "io/github/gforgame/examples/domain/config"
-	playerdomain "io/github/gforgame/examples/domain/player"
-	"io/github/gforgame/examples/events"
-	"io/github/gforgame/examples/io"
-	"io/github/gforgame/examples/protos"
 	"sync"
 	"time"
+
+	"github.com/forfun/gforgame/examples/config"
+	"github.com/forfun/gforgame/examples/config/container"
+	"github.com/forfun/gforgame/examples/context"
+	configdomain "github.com/forfun/gforgame/examples/domain/config"
+	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+	"github.com/forfun/gforgame/examples/events"
+	"github.com/forfun/gforgame/examples/io"
+	"github.com/forfun/gforgame/examples/protos"
 ) 
 
 

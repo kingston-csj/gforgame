@@ -1,7 +1,7 @@
 package player
 
 import (
-	"io/github/gforgame/persist"
+	"github.com/forfun/gforgame/persist"
 
 	"gorm.io/gorm"
 )

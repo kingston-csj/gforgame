@@ -2,8 +2,9 @@ package set_test
 
 import (
 	"encoding/json"
-	"io/github/gforgame/common/container/set"
 	"testing"
+
+	"github.com/forfun/gforgame/common/container/set"
 )
 
 func TestSet_Json(t *testing.T) {
