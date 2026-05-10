@@ -1,0 +1,97 @@
+package director
+
+import (
+	"github.com/forfun/gforgame/internal/config"
+	"github.com/forfun/gforgame/internal/config/container"
+	"github.com/forfun/gforgame/internal/constants"
+	configdomain "github.com/forfun/gforgame/internal/domain/config"
+	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/io"
+	"github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/internal/reward"
+)
+
+// 每日任务类别
+type AchievementQuestDirector struct {
+	*baseQuestDirector
+}
+
+func NewAchievementQuestDirector() *AchievementQuestDirector {
+	d := &AchievementQuestDirector{}
+	d.baseQuestDirector = NewBaseQuestDirector(d)
+	return d
+}
+
+/// 实现QuestDirector接口
+func (d *AchievementQuestDirector) OnPlayerLogin(player *playerdomain.Player) {
+	questBox := player.QuestBox
+	questContainer := config.GetSpecificContainer[*container.QuestContainer]()
+	for group, quests := range questContainer.AchievementsByGroup {
+		// 初始化每个分组的第一条任务
+		if !questBox.HasAppointedTypeAchievement(d.GetCategoryType(), group) {
+			_, _ = d.resolver.AcceptQuest(player, quests[0].Id)
+		}
+	}
+
+	achievementVos := make([]*protos.QuestVo, 0)
+	for _, achievement := range questBox.SelectUnFinishedQuestsByCategory(d.GetCategoryType()) {
+		achievementData := config.QueryById[configdomain.QuestData](achievement.Id)
+		// 如果是最后一条，或者未完成状态，则添加到列表
+		if achievementData.Next == 0 || achievement.Status != constants.QuestStatusRewarded {
+			achievementVos = append(achievementVos, achievement.ToVo())
+		}
+	}
+
+	notify := &protos.PushAchievementInfo{
+		Score:          player.ExtendBox.AchievementScore,
+		AchievementVos: achievementVos,
+	}
+	io.NotifyPlayer(player, notify)
+}
+
+// 任务完成执行切面
+func (d *AchievementQuestDirector) OnQuestProgressFinished(player *playerdomain.Player, quest *playerdomain.Quest) {
+	d.baseQuestDirector.OnQuestProgressFinished(player, quest)
+	questData := config.QueryById[configdomain.QuestData](quest.Id)
+	// 下一个任务，自动继承当前进度
+	if questData.Next > 0 {
+		nextQuest, _ := d.resolver.AcceptQuest(player, questData.Next)
+		if nextQuest == nil {
+			return
+		}
+		nextQuest.Progress = quest.Progress
+		if nextQuest.Progress >= nextQuest.Target {
+			nextQuest.Status = constants.QuestStatusFinished
+		}
+		refresh := &protos.PushQuestRefreshVo{}
+		refresh.Quest = nextQuest.ToVo()
+		io.NotifyPlayer(player, refresh)
+	}
+}
+
+// 玩家完成任务后触发
+func (d *AchievementQuestDirector) AfterTakeReward(player *playerdomain.Player, quest *playerdomain.Quest) {
+	questData := config.QueryById[configdomain.QuestData](quest.Id)
+	player.ExtendBox.AchievementScore += questData.Score
+}
+
+func (d *AchievementQuestDirector) TakeProgressRewards(player *playerdomain.Player) []*protos.RewardVo {
+	myScore := player.ExtendBox.AchievementScore
+	canRewardTimes := myScore / 100
+	if canRewardTimes < 1 {
+		return make([]*protos.RewardVo, 0)
+	}
+
+	player.ExtendBox.AchievementScore -= canRewardTimes * 100
+	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
+	rewardStr := commonContainer.GetStringValue(constants.CommonValueKeyAchievementQuestProessReward)
+	perReward := reward.ParseReward(rewardStr)
+	andReward := reward.Multiply(perReward, float64(canRewardTimes))
+	andReward.Reward(player, constants.ActionType_AchievementQuestProgressReward)
+	return reward.ToRewardVos(andReward)
+}
+
+// 获取任务类型
+func (d *AchievementQuestDirector) GetCategoryType() int32 {
+	return constants.QuestCategoryAchievement
+}

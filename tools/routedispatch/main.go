@@ -28,19 +28,21 @@ func main() {
 		panic(err)
 	}
 
-	reqCmdMap, err := parseReqCmdMap(filepath.Join(root, "examples", "protos", "register_gen.go"))
+	reqCmdMap, err := parseReqCmdMap(filepath.Join(root, "internal", "protos", "register_gen.go"))
 	if err != nil {
 		panic(err)
 	}
 
-	methods, err := parseRouteMethods(filepath.Join(root, "examples", "route"), reqCmdMap)
+	methods, err := parseRouteMethods(filepath.Join(root, "internal", "route"), reqCmdMap)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := writeGeneratedFile(filepath.Join(root, "route_dispatch_gen.go"), methods); err != nil {
+	outFile := filepath.Join(root, "cmd", "game", "route_dispatch_gen.go")
+	if err := writeGeneratedFile(outFile, methods); err != nil {
 		panic(err)
 	}
+	
 	fmt.Printf("静态路由表生成完成，输出文件：route_dispatch_gen.go\n")
 }
 
@@ -249,8 +251,8 @@ func writeGeneratedFile(filePath string, methods []routeMethod) error {
 	b.WriteString("package main\n\n")
 	b.WriteString("import (\n")
 	b.WriteString("\t\"fmt\"\n\n")
-	b.WriteString("\t\"github.com/forfun/gforgame/examples/protos\"\n")
-	b.WriteString("\t\"github.com/forfun/gforgame/examples/route\"\n")
+	b.WriteString("\t\"github.com/forfun/gforgame/internal/protos\"\n")
+	b.WriteString("\t\"github.com/forfun/gforgame/internal/route\"\n")
 	b.WriteString("\t\"github.com/forfun/gforgame/network\"\n")
 	b.WriteString(")\n\n")
 	b.WriteString("func init() {\n")

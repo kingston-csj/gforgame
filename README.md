@@ -85,7 +85,7 @@ example/unity同时兼容websocket/socket通信方式
 ### 跨服通信方式一：基于 rpc
 
 使用 grpc 进行跨进程通信，需要先安装 protobuf 和 protoc-gen-go-grpc 编译插件  
-根据不同的跨服类型，自行定义业务逻辑，参考 examples/cross 相关代码（流程待完善）
+根据不同的跨服类型，自行定义业务逻辑，参考 internal/cross 相关代码（流程待完善）
 
 ### 跨服通信方式二：基于 socket
 

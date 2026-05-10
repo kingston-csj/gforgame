@@ -5,7 +5,7 @@ description: Generates Go service, route, and protos module skeletons based on v
 
 # Service Scaffold
 
-用于在项目中快速新增符合现有风格的 Go Service + Route + Protos 文件骨架，参考 `examples/service/vip/vipservice.go` 与 `examples/route/vip.go` 的结构与命名。
+用于在项目中快速新增符合现有风格的 Go Service + Route + Protos 文件骨架，参考 `internal/service/vip/vipservice.go` 与 `internal/route/vip.go` 的结构与命名。
 
 ## 何时使用
 
@@ -17,8 +17,8 @@ description: Generates Go service, route, and protos module skeletons based on v
 
 在以下三个位置生成骨架：
 
-1. `examples/service/<servicefolder>/<servicefile>.go`
-2. `examples/route/<routefile>.go`
+1. `internal/service/<servicefolder>/<servicefile>.go`
+2. `internal/route/<routefile>.go`
 3. `protos/<protofile>.go`
 
 ### Service 文件
@@ -54,7 +54,7 @@ description: Generates Go service, route, and protos module skeletons based on v
   - Route 构造函数：`NewXXRoute`
   - 包名：小写业务名（例如 `vip`, `mail`, `arena`）
   - 文件名：`xxservice.go`（全小写）
-  - Route 文件名：`xx.go`（放在 `examples/route`）
+  - Route 文件名：`xx.go`（放在 `internal/route`）
   - Protos 文件名：`xx.go`（放在 `protos`）
 - 如果用户只给业务名（如 `vip`）：
   - 自动推导结构体为 `VipService`
@@ -73,8 +73,8 @@ package <packageName>
 
 import (
 	"sync"
-  configdomain "github.com/forfun/gforgame/examples/domain/config"
-	playerdomain "github.com/forfun/gforgame/examples/domain/player"
+  configdomain "github.com/forfun/gforgame/internal/domain/config"
+	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 )
 
 type <ServiceName> struct{}
@@ -98,7 +98,7 @@ func Get<ServiceName>() *<ServiceName> {
 package route
 
 import (
-	"github.com/forfun/gforgame/examples/service/<packageName>"
+	"github.com/forfun/gforgame/internal/service/<packageName>"
 	"github.com/forfun/gforgame/network"
 )
 

@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -86,8 +87,8 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int32) e
 		// 为每个结构体生成文件
 		for _, si := range structInfos {
 			sourceFile := strings.TrimSuffix(filePath, ".go")
-			// 去掉 examples\protos\ 前缀
-			sourceFile = strings.TrimPrefix(sourceFile, "examples\\protos\\")
+			// 去掉 internal/protos 前缀
+			sourceFile = strings.TrimPrefix(sourceFile, filepath.Join("internal", "protos"))
 
 			si.SourceFile = sourceFile
 			if err := b.generateStructFile(g, si, msgIds); err != nil {

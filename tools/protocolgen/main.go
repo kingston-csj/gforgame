@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/forfun/gforgame/examples/protos"
+	_ "github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	protocolexporter "github.com/forfun/gforgame/tools/protocol"
 )
@@ -18,10 +18,10 @@ func main() {
 		panic(err)
 	}
 
-	protosDir := "examples\\protos"
+	protosDir := filepath.Join("internal", "protos")
 	csharpOutDir := "tools\\protocol\\output\\csharp\\"
 	templatePath := "tools\\protocol\\templates\\csharptemplate.tpl"
-	registerFile := "examples\\protos\\register_gen.go"
+	registerFile := filepath.Join("internal", "protos", "register_gen.go")
 
 	generator := protocolexporter.NewCSharpGenerator(
 		protosDir,

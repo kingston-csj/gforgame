@@ -8,9 +8,9 @@ import (
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/examples/cross"
-	playerdomain "github.com/forfun/gforgame/examples/domain/player"
-	"github.com/forfun/gforgame/examples/protos"
+	"github.com/forfun/gforgame/internal/cross"
+	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/client"
 	"github.com/forfun/gforgame/network/protocol"

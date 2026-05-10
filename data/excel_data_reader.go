@@ -3,10 +3,13 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
 
+	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util"
 
 	"github.com/tealeg/xlsx"
@@ -23,8 +26,8 @@ func NewExcelDataReader(ignoreUnknownFields bool) *ExcelDataReader {
 }
 
 func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
-	// 使用 xlsx.OpenFile 打开 Excel 文件
-	xlFile, err := xlsx.OpenFile("config/excel/" + filePath)
+	excelFilePath := resolveExcelFilePath(filePath)
+	xlFile, err := xlsx.OpenFile(excelFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Excel file: %v", err)
 	}
@@ -38,7 +41,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 遍历每一行
 	for _, row := range rows {
 		rowLine++
-		if rowLine < 3 {
+		if rowLine < 3  {
 			continue
 		}
 		if rowLine == 3 {
@@ -49,6 +52,10 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 			continue
 		}
 		firstCell := getCellValue(row.Cells[0])
+		if util.EqualsIgnoreCase(firstCell, "") {
+			break
+		}
+
 		// if len(headers) == 0 {
 		// 	continue
 		// }
@@ -56,7 +63,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if util.EqualsIgnoreCase(firstCell, "End") {
+		if util.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 	}
@@ -64,10 +71,72 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	return r.readRecords(clazz, records)
 }
 
+func resolveExcelFilePath(filePath string) string {
+	if filepath.IsAbs(filePath) {
+		return filePath
+	}
+	// 优先从 exe 目录向上查找，兼容打包和 IDE 的 __debug_bin。
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		if path, ok := findExcelFileFromBase(exeDir, filePath); ok {
+			return path
+		}
+		if root, ok := findProjectRoot(exeDir); ok {
+			return filepath.Join(root, "config", "excel", filePath)
+		}
+	}
+	// 再从当前工作目录向上查找，兼容 `go test` 等场景。
+	if cwd, err := os.Getwd(); err == nil {
+		if path, ok := findExcelFileFromBase(cwd, filePath); ok {
+			return path
+		}
+		if root, ok := findProjectRoot(cwd); ok {
+			return filepath.Join(root, "config", "excel", filePath)
+		}
+	}
+	// 兜底：保持原有相对路径行为。
+	if abs, err := filepath.Abs(filepath.Join("config", "excel", filePath)); err == nil {
+		return abs
+	}
+	return filepath.Join("config", "excel", filePath)
+}
+
+func findExcelFileFromBase(baseDir, filePath string) (string, bool) {
+	dir := filepath.Clean(baseDir)
+	for {
+		candidate := filepath.Join(dir, "config", "excel", filePath)
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, true
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return "", false
+}
+
+func findProjectRoot(baseDir string) (string, bool) {
+	dir := filepath.Clean(baseDir)
+	for {
+		goModPath := filepath.Join(dir, "go.mod")
+		if _, err := os.Stat(goModPath); err == nil {
+			return dir, true
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	return "", false
+}
+
 func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("panic:", clazz, rows)
+			logger.Error("",fmt.Errorf("readRecords panic recovered: %v", err))
 		}
 	}()
 
@@ -147,39 +216,65 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 	return columns
 }
 
-// 处理分号分隔的切片数据
+// 处理分号分隔的切片数?
 func parseSliceValue(value string, fieldType reflect.Type) (interface{}, error) {
 	strValues := strings.Split(value, ";")
 	sliceVal := reflect.MakeSlice(fieldType, len(strValues), len(strValues))
 
 	// 根据切片的元素类型进行转换
-	elemType := fieldType.Elem()
+		elemType := fieldType.Elem()
 	for i, strVal := range strValues {
-		var elemVal interface{}
-		var err error
+		strVal = strings.TrimSpace(strVal)
 
+		var elemVal reflect.Value
 		switch elemType.Kind() {
-		case reflect.Int32:
-			if num, err := strconv.ParseInt(strVal, 10, 32); err == nil {
-				elemVal = int32(num)
+		case reflect.String:
+			elemVal = reflect.ValueOf(strVal)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			if strVal == "" {
+				elemVal = reflect.Zero(elemType)
+				break
 			}
-		case reflect.Int64:
-			elemVal, err = strconv.ParseInt(strVal, 10, 64)
-		case reflect.Float32:
-			if num, err := strconv.ParseFloat(strVal, 32); err == nil {
-				elemVal = float32(num)
+			num, err := strconv.ParseInt(strVal, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
 			}
-		case reflect.Float64:
-			elemVal, err = strconv.ParseFloat(strVal, 64)
+			elemVal = reflect.ValueOf(num).Convert(elemType)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			if strVal == "" {
+				elemVal = reflect.Zero(elemType)
+				break
+			}
+			num, err := strconv.ParseUint(strVal, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
+			}
+			elemVal = reflect.ValueOf(num).Convert(elemType)
+		case reflect.Float32, reflect.Float64:
+			if strVal == "" {
+				elemVal = reflect.Zero(elemType)
+				break
+			}
+			num, err := strconv.ParseFloat(strVal, 64)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
+			}
+			elemVal = reflect.ValueOf(num).Convert(elemType)
+		case reflect.Bool:
+			if strVal == "" {
+				elemVal = reflect.Zero(elemType)
+				break
+			}
+			b, err := strconv.ParseBool(strVal)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse slice element '%s' as bool: %w", strVal, err)
+			}
+			elemVal = reflect.ValueOf(b)
 		default:
-			elemVal = strVal
+			return nil, fmt.Errorf("unsupported slice element type: %s", elemType.Kind())
 		}
 
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse slice element: %v", err)
-		}
-
-		sliceVal.Index(i).Set(reflect.ValueOf(elemVal))
+		sliceVal.Index(i).Set(elemVal)
 	}
 	return sliceVal.Interface(), nil
 }
@@ -220,7 +315,7 @@ func convertValue(value string, fieldType reflect.Type) (any, error) {
 	case reflect.Array:
 		return strings.Split(value, ";"), nil
 	case reflect.Slice, reflect.Struct:
-		// 处理嵌套的 JSON 对象
+		// 处理嵌套 JSON 对象
 		fieldVal := reflect.New(fieldType).Interface()
 		if err := json.Unmarshal([]byte(value), &fieldVal); err != nil {
 			// 如果解析失败，尝试解析为数组
@@ -252,8 +347,8 @@ func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
 
 	for i := 0; i < objType.NumField(); i++ {
 		field := objType.Field(i)
-		tag := field.Tag.Get("excel")         // 获取 Tag 值
-		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹配
+		tag := field.Tag.Get("excel") // 获取 Tag ?
+		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹?
 			return obj.Field(i), nil
 		}
 
@@ -261,7 +356,7 @@ func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
 		if field.Anonymous {
 			fieldVal := obj.Field(i)
 
-			// 如果是指针且为 nil，需要初始化
+			// 如果是指针且nil，需要初始化
 			if fieldVal.Kind() == reflect.Ptr {
 				if fieldVal.IsNil() {
 					if fieldVal.CanSet() {

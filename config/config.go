@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -61,8 +62,15 @@ func init() {
 		env = "dev"
 	}
 	v.SetConfigName("config-" + env)
-	// ./config路径在开发及部署环境均适用
-	v.AddConfigPath("./config")
+	// 优先读取可执行文件目录下的 config（部署场景）
+	if exePath, err := os.Executable(); err == nil {
+		exeDir := filepath.Dir(exePath)
+		v.AddConfigPath(filepath.Join(exeDir, "config"))
+		// 兼容二级目录启动（如 gate/main.go）
+		v.AddConfigPath(filepath.Join(exeDir, "..", "config"))
+	}
+	// 兼容开发环境：从不同启动目录向上回溯 config 目录。
+	v.AddConfigPath("../../config")
 	// 再次读取配置文件，这次是根据环境变量，使用合并配置的方法确保旧配置被替换
 	if err := v.MergeInConfig(); err != nil {
 		// panic(fmt.Errorf("failed to read config: %w", err))

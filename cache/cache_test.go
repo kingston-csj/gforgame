@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/forfun/gforgame/cache"
-	mysqldb "github.com/forfun/gforgame/examples/infra/persistence"
+	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 )
 
 type Player struct {
