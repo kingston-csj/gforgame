@@ -13,6 +13,7 @@ type Options struct {
 	wsPath       string
 	modules      []network.Module
 	Router       *network.MessageRoute
+	payloadMode  network.PayloadMode
 }
 
 type Option func(*Options)
@@ -56,5 +57,12 @@ func WithModules(ms ...network.Module) Option {
 func WithRouter(r *network.MessageRoute) Option {
 	return func(opt *Options) {
 		opt.Router = r
+	}
+}
+
+// WithPayloadMode 设置消息体处理模式（解析 or 原始转发）
+func WithPayloadMode(mode network.PayloadMode) Option {
+	return func(opt *Options) {
+		opt.payloadMode = mode
 	}
 }

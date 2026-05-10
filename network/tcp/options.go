@@ -10,6 +10,7 @@ type Options struct {
 	ServiceAddr  string // current server service address (RPC)
 	MessageCodec codec.MessageCodec
 	IoDispatch   network.IoDispatch
+	DispatchWorkers int
 	modules      []network.Module
 	Router       *network.MessageRoute
 }
@@ -48,5 +49,13 @@ func WithRouter(r *network.MessageRoute) Option {
 func WithModules(ms ...network.Module) Option {
 	return func(opt *Options) {
 		opt.modules = append(opt.modules, ms...)
+	}
+}
+
+// WithDispatchWorkers 设置每条连接的消息消费 worker 数。
+// 值 <= 0 时按 1 处理。
+func WithDispatchWorkers(n int) Option {
+	return func(opt *Options) {
+		opt.DispatchWorkers = n
 	}
 }

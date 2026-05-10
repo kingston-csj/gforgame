@@ -13,9 +13,10 @@ const (
 )
 
 type MessageHeader struct {
-	Cmd   int32 //消息类型
-	Index int32 //客户端消息索引，由客户端维护自增长
-	Size  int32 //消息长度
+	Cmd      int32  //消息类型
+	Index    int32  //客户端消息索引，由客户端维护自增长
+	Size     int32  //消息长度
+	Payload string  //网关模式透传玩家ID（不参与底层二进制编解码）
 }
 
 // ErrPacketSizeExceed is the error used for encode/decode.

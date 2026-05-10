@@ -32,7 +32,7 @@ func NewServer(opts ...Option) *WsServer {
 	}
 
 	if opt.wsPath == "" {
-		panic("ws path cannot be empty")
+		opt.wsPath = "ws"
 	}
 
 	s := &WsServer{
@@ -140,6 +140,7 @@ func onClientConnected(node *WsServer, conn net.Conn) {
 
 	// 创建Session
 	ioSession := network.NewSessionWithProtocol(conn, node.MessageCodec, protocolType)
+	ioSession.SetPayloadMode(node.payloadMode)
 	network.RegisterSession(conn, ioSession)
 
 	// session created hook

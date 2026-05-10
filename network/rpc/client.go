@@ -2,9 +2,8 @@ package rpc
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
-
-	"github.com/forfun/gforgame/common/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -27,7 +26,7 @@ func GetOrCreateClient(sid uint32) (RpcClient, error) {
 		mu.Lock()
 		defer mu.Unlock()
 		s, found = clients[sid]
-		// 双重检测
+		// 双重检查，确保只创建一次
 		if !found {
 			conn, err := grpc.NewClient(fmt.Sprintf(":%d", sid), grpc.WithTransportCredentials(insecure.NewCredentials()))
 			if err != nil {
@@ -35,7 +34,7 @@ func GetOrCreateClient(sid uint32) (RpcClient, error) {
 			}
 
 			c := NewRpcClient(conn)
-			logger.Info(fmt.Sprintf("connect to rpc server %d)", sid))
+			slog.Info(fmt.Sprintf("connect to rpc server %d)", sid))
 			clients[sid] = c
 			return c, nil
 		}

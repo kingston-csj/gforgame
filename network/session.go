@@ -3,6 +3,7 @@ package network
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"net"
@@ -47,6 +48,8 @@ type Session struct {
 	AsynTasks chan func()
 	// 协议类型
 	protocolType protocol.ProtocolType
+	// 消息体处理模式
+	payloadMode PayloadMode
 	// 关闭只执行一次
 	closeOnce sync.Once
 }
@@ -63,6 +66,7 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 		remoteAddr:    conn.RemoteAddr().String(),
 		AsynTasks:     make(chan func(), 16),
 		protocolType:  protocol.ProtocolTypeBinary,
+		payloadMode:   PayloadModeDecode,
 	}
 }
 
@@ -71,7 +75,8 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 	factory := &protocol.ProtocolFactory{}
 	protocolAdapter := factory.NewProtocolAdapter(protocolType)
 
-	return &Session{conn: conn,
+	return &Session{
+		conn:          conn,
 		ProtocolCodec: protocolAdapter,
 		MessageCodec:  messageCodec,
 		Die:           make(chan bool, 1),
@@ -82,7 +87,12 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 		remoteAddr:    conn.RemoteAddr().String(),
 		AsynTasks:     make(chan func(), 16),
 		protocolType:  protocolType,
+		payloadMode:   PayloadModeDecode,
 	}
+}
+
+func (s *Session) SetPayloadMode(mode PayloadMode) {
+	s.payloadMode = mode
 }
 
 // Send 发送消息
@@ -103,20 +113,8 @@ func (s *Session) Send(msg any, index int32) error {
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
 
-	msgName, e3 := GetMsgName(cmd)
-	if e3 != nil {
-		return fmt.Errorf("get message %s name failed:%v", msg, e3)
-	}
-	jsonStr, err := jsonutil.StructToJSON(msg)
-	id, ok := s.GetAttr("id")
-	if !ok {
-		id = ""
-	}
-	if err == nil {
-		if !strings.Contains(msgName, "Heartbeat") {
-			logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
-		}
-	}
+	// 调试日志
+	logSentMessage(s, msg)
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
 	select {
 	case <-s.Die:
@@ -178,6 +176,72 @@ func (s *Session) SendAndClose(msg any) error {
 		return err
 	}
 	return err
+}
+
+func logSentMessage(s *Session, msg any) {
+	cmd, e2 := GetMessageCmd(msg)
+	if e2 != nil {
+		return
+	}
+	// 转发消息，记录实际发送的内容
+	if cmd == -300 {
+		logTransferSentMessage(s, msg)
+		return
+	}
+	msgName, e3 := GetMsgName(cmd)
+	if e3 != nil {
+		return
+	}
+	jsonStr, err := jsonutil.StructToJSON(msg)
+	id, ok := s.GetAttr("id")
+	if !ok {
+		id = ""
+	}
+
+	if err == nil {
+		if !strings.Contains(msgName, "HeartBeat") {
+			logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
+		}
+	}
+}
+
+type transferLogCarrier interface {
+	GetPlayerID() string
+	GetTransferCmd() int32
+	GetTransferBody() []byte
+}
+
+func logTransferSentMessage(s *Session, msg any) {
+	transfer, ok := msg.(transferLogCarrier)
+	if !ok {
+		return
+	}
+	innerCmd := transfer.GetTransferCmd()
+	innerMsgName, err := GetMsgName(innerCmd)
+	if err != nil || strings.Contains(innerMsgName, "HeartBeat") {
+		return
+	}
+	innerBody := transfer.GetTransferBody()
+	if len(innerBody) == 0 {
+		return
+	}
+	typ, _ := GetMessageType(innerCmd)
+	if typ == nil {
+		return
+	}
+	innerMsg := reflect.New(typ.Elem()).Interface()
+	if err := s.MessageCodec.Decode(innerBody, innerMsg); err != nil {
+		return
+	}
+	jsonStr, err := jsonutil.StructToJSON(innerMsg)
+	if err != nil {
+		return
+	}
+	id, ok := s.GetAttr("id")
+	if !ok {
+		id = transfer.GetPlayerID()
+	}
+	logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, innerCmd, innerMsgName, jsonStr))
 }
 
 func (s *Session) Write() {
@@ -280,6 +344,14 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 			continue
 		}
 
+		if s.payloadMode == PayloadModeRawBody {
+			for _, p := range packets {
+				ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: p.Data}
+				s.DataReceived <- ioFrame
+			}
+			continue
+		}
+
 		// 处理解码后的数据
 		for _, p := range packets {
 			typ, _ := GetMessageType(p.Header.Cmd)
@@ -313,7 +385,11 @@ func (s *Session) readTCPStream() {
 
 		n, err := s.conn.Read(buf)
 		if err != nil {
-			log.Println(err.Error())
+			errMsg := "tcp read failed"
+			if errors.Is(err, io.EOF) {
+				errMsg = "tcp peer closed connection"
+			}
+			slog.Info(errMsg, "remoteAddr", s.remoteAddr, "localAddr", s.localAddr, "error", err)
 			return
 		}
 		if n <= 0 {
@@ -326,6 +402,11 @@ func (s *Session) readTCPStream() {
 		}
 		// process packets decoded
 		for _, p := range packets {
+			if s.payloadMode == PayloadModeRawBody {
+				ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: p.Data}
+				s.DataReceived <- ioFrame
+				continue
+			}
 			typ, _ := GetMessageType(p.Header.Cmd)
 			if typ == nil {
 				slog.Error(fmt.Sprintf("message type not found %v", p.Header.Cmd))

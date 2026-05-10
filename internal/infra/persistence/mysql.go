@@ -17,6 +17,10 @@ var (
 )
 
 func init() {
+	dbURL, ok := config.GetExtraString("db.url")
+	if !ok || dbURL == "" {
+		panic("配置项 db.url 为空，请在 config-logic.yml 中配置")
+	}
 	gormLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -27,7 +31,7 @@ func init() {
 		},
 	)
 
-	var database, err = gorm.Open(mysql.Open(config.ServerConfig.DbUrl), &gorm.Config{
+	var database, err = gorm.Open(mysql.Open(dbURL), &gorm.Config{
 		Logger: gormLogger,
 	})
 	if err != nil {

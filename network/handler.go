@@ -3,17 +3,17 @@ package network
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 type (
 	//Handler represents a message.Message's handler's meta information.
 	Handler struct {
-		Receiver     reflect.Value  // receiver of method
-		Method       reflect.Method // method stub
-		Type         reflect.Type   // arg type of method
-		Indindexed   bool
-		NeedValidate bool // 是否需要参数校验
+		Receiver   reflect.Value  // receiver of method
+		Method     reflect.Method // method stub
+		Type       reflect.Type   // arg type of method
+		Indindexed bool
+		HasPlayer  bool
+		HasSession bool
 	}
 
 	MessageRoute struct {
@@ -27,6 +27,7 @@ func NewMessageRoute() *MessageRoute {
 
 var (
 	typeOfSession = reflect.TypeOf(&Session{})
+	typeOfString  = reflect.TypeOf("")
 )
 
 func (r *MessageRoute) RegisterMessageHandlers(comp Module) error {
@@ -35,52 +36,25 @@ func (r *MessageRoute) RegisterMessageHandlers(comp Module) error {
 		method := clazz.Method(m)
 		mt := method.Type
 		if r.isHandlerMethod(method) {
-			containsIndex := false
-			cmdFieldIndex := 2
-			if method.Type.NumIn() == 4 {
-				containsIndex = true
-				cmdFieldIndex = 3
-			}
+			hasPlayer, hasSession, containsIndex, cmdFieldIndex := parseHandlerSignature(mt)
 			cmd, err := GetMessageCmdFromType(mt.In(cmdFieldIndex))
 			if err != nil {
 				return err
 			}
 
-			needValidate := r.needValidation(method.Name, mt.In(cmdFieldIndex))
-
 			r.Handlers[cmd] = &Handler{
-				Receiver:     reflect.ValueOf(comp),
-				Method:       method,
-				Type:         mt.In(cmdFieldIndex),
-				Indindexed:   containsIndex,
-				NeedValidate: needValidate,
+				Receiver:   reflect.ValueOf(comp),
+				Method:     method,
+				Type:       mt.In(cmdFieldIndex),
+				Indindexed: containsIndex,
+				HasPlayer:  hasPlayer,
+				HasSession: hasSession,
 			}
+		} else {
+			
 		}
 	}
 	return nil
-}
-
-func (r *MessageRoute) needValidation(methodName string, msgType reflect.Type) bool {
-	if strings.HasPrefix(methodName, "Validatable") {
-		return true
-	}
-	return hasValidateTag(msgType)
-}
-
-func hasValidateTag(t reflect.Type) bool {
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	if t.Kind() != reflect.Struct {
-		return false
-	}
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		if field.Tag.Get("validate") != "" && field.Tag.Get("validate") != "-" {
-			return true
-		}
-	}
-	return false
 }
 
 // isHandlerMethod decide a method is suitable handler method
@@ -90,34 +64,78 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 	if method.PkgPath != "" {
 		return false
 	}
-	// Method needs three ins: receiver, *Session, [index], pointer.
-	if mt.NumIn() != 3 && mt.NumIn() != 4 {
+	// 兼容签名（receiver后参数）：
+	// 1) *Session, *Req
+	// 2) *Session, index, *Req
+	// 3) playerId, *Req
+	// 4) playerId, index, *Req
+	// 5) playerId, *Session, *Req
+	// 6) playerId, *Session, index, *Req
+	if mt.NumIn() != 3 && mt.NumIn() != 4 && mt.NumIn() != 5 {
 		return false
 	}
 	// Method needs one outs: error
 	// if mt.NumOut() != 1 {
 	// 	return false
 	// }
-	if t1 := mt.In(1); t1.Kind() != reflect.Ptr || t1 != typeOfSession {
-		return false
-	}
-	if mt.NumIn() == 3 {
-		if mt.In(2).Kind() != reflect.Ptr {
-			return false
-		}
-	}
-	// 4个参数才有index int32字段
-	if mt.NumIn() == 4 {
-		// index must be int32
-		if mt.In(2).Kind() != reflect.Int32 {
-			panic(fmt.Sprintf("method %s is not a handler method, index must be int32", method.Name))
-		}
-		if mt.In(3).Kind() != reflect.Ptr {
-			panic(fmt.Sprintf("method %s is not a handler method, arg must be pointer", method.Name))
-		}
-	}
+	_, _, _, reqIndex := parseHandlerSignature(mt)
+	return reqIndex > 0
+}
 
-	return true
+func BuildHandlerArgs(msgHandler *Handler, session *Session, index int32, msg any, playerID string) []reflect.Value {
+	args := make([]reflect.Value, 0, 5)
+	args = append(args, msgHandler.Receiver)
+	if msgHandler.HasPlayer {
+		args = append(args, reflect.ValueOf(playerID))
+	}
+	if msgHandler.HasSession {
+		args = append(args, reflect.ValueOf(session))
+	}
+	if msgHandler.Indindexed {
+		args = append(args, reflect.ValueOf(index))
+	}
+	args = append(args, reflect.ValueOf(msg))
+	return args
+}
+
+func parseHandlerSignature(mt reflect.Type) (hasPlayer bool, hasSession bool, hasIndex bool, reqIndex int) {
+	if mt.NumIn() < 3 || mt.NumIn() > 5 {
+		return false, false, false, -1
+	}
+	i := 1 // skip receiver
+	last := mt.NumIn() - 1
+
+	if mt.In(i) == typeOfString {
+		hasPlayer = true
+		i++
+		if i > last {
+			return false, false, false, -1
+		}
+	}
+	if mt.In(i) == typeOfSession {
+		hasSession = true
+		i++
+		if i > last {
+			return false, false, false, -1
+		}
+	}
+	if i < last {
+		if mt.In(i).Kind() != reflect.Int32 {
+			return false, false, false, -1
+		}
+		hasIndex = true
+		i++
+	}
+	if i != last {
+		return false, false, false, -1
+	}
+	if mt.In(i).Kind() != reflect.Ptr {
+		panic(fmt.Sprintf("method %s is not a handler method, arg must be pointer", mt.String()))
+	}
+	if !hasPlayer && !hasSession {
+		return false, false, false, -1
+	}
+	return hasPlayer, hasSession, hasIndex, i
 }
 
 func (r *MessageRoute) GetHandler(cmd int32) (*Handler, error) {

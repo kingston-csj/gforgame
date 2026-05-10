@@ -4,6 +4,7 @@ type ReqPlayerLogin struct {
 	_        struct{} `cmd_ref:"CmdPlayerReqLogin"`
 	Pwd      string   `validate:"required" json:"pwd"`
 	PlayerId string   `validate:"required" json:"playerId"`
+	ServerId int32    `json:"serverId"`
 }
 
 type ReqPlayerLoadingFinish struct {

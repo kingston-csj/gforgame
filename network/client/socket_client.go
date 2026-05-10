@@ -1,7 +1,6 @@
 package client
 
 import (
-	"log"
 	"net"
 
 	"github.com/forfun/gforgame/codec"
@@ -21,7 +20,7 @@ type TcpSocketClient struct {
 func (c *TcpSocketClient) OpenSession() (*network.Session, error) {
 	conn, err := net.Dial("tcp", c.RemoteAddress)
 	if err != nil {
-		log.Fatal("连接服务器失败:", err)
+		return nil, err
 	}
 	// defer conn.Close()
 	session := network.NewSession(conn, c.MsgCodec)
