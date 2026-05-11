@@ -5,7 +5,7 @@ import (
 	"time"
 
 	commonerrors "github.com/forfun/gforgame/common/errors"
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/common/util/timeutil"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
@@ -299,7 +299,7 @@ func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, 
 			quest.AddProgress(1)
 			handler.CheckProgress(player, quest)
 		}
-	}, timeutil.MILLIS_PER_SECOND*int64(util.Int32Value(questData.Extra)))
+	}, timeutil.MILLIS_PER_SECOND*int64(conv.Int32Value(questData.Extra)))
 	return 0
 }
 

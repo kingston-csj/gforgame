@@ -4,12 +4,12 @@ import (
 	"sync"
 
 	"github.com/forfun/gforgame/internal/constants"
+	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 
 	"time"
 
-	"github.com/forfun/gforgame/common/util"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
@@ -79,7 +79,7 @@ func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqCh
 		}
 	}
 	message := &playerdomain.ChatMessage{
-		Id:         util.GetNextID(),
+		Id:         idgen.GetNextID(),
 		Channel:    int32(msg.Channel),
 		SenderId:   player.Id,
 		SenderHead: playerProfile.Head,

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 
 	"github.com/tealeg/xlsx"
 )
@@ -52,7 +52,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 			continue
 		}
 		firstCell := getCellValue(row.Cells[0])
-		if util.EqualsIgnoreCase(firstCell, "") {
+		if conv.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 
@@ -63,7 +63,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if util.EqualsIgnoreCase(firstCell, "") {
+		if conv.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 	}

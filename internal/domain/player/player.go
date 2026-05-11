@@ -3,7 +3,7 @@ package player
 import (
 	"encoding/json"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -249,7 +249,7 @@ func saveJSON[T any](component *T, jsonTarget *string) error {
 
 func loadJSON[T any](jsonStr string, target **T, factory func() *T) {
 	val := factory()
-	if !util.IsEmptyString(jsonStr) {
+	if !conv.IsEmptyString(jsonStr) {
 		_ = json.Unmarshal([]byte(jsonStr), val)
 	}
 	// 如果实现了 PostLoader 接口，则调用 AfterLoad 进行后处理

@@ -3,10 +3,11 @@ package buff
 import (
 	"strings"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/config"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/fight/attribute"
+	"github.com/forfun/gforgame/internal/idgen"
 )
 
 type AttrBuff struct {
@@ -24,12 +25,12 @@ func NewAttrBuff(modelId int32) *AttrBuff {
 	for _, attrStr := range attrStrs {
 		attrType := strings.Split(attrStr, "_")[0]
 		attrValue := strings.Split(attrStr, "_")[1]
-		attr_map[attribute.AttrType(attrType)], _ = util.StringToInt32(attrValue)
+		attr_map[attribute.AttrType(attrType)], _ = conv.StringToInt32(attrValue)
 	}
 	return &AttrBuff{
 		Buff: Buff{
 			ModelId:  modelId,
-			Id:       util.GetNextID(),
+			Id:       idgen.GetNextID(),
 			Duration: buffData.Duration,
 		},
 		Attrs: attr_map,

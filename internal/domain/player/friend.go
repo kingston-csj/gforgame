@@ -3,7 +3,7 @@ package player
 import (
 	"encoding/json"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/persist"
 
 	"gorm.io/gorm"
@@ -33,12 +33,12 @@ func (f *Friend) BeforePersist() error {
 }
 
 func (f *Friend) AfterLoad() error {
-	if !util.IsEmptyString(f.FriendJson) {
+	if !conv.IsEmptyString(f.FriendJson) {
 		_ = json.Unmarshal([]byte(f.FriendJson), &f.Friends)
 	} else {
 		f.Friends = make(map[string]bool)
 	}
-	if !util.IsEmptyString(f.ApplyJson) {
+	if !conv.IsEmptyString(f.ApplyJson) {
 		_ = json.Unmarshal([]byte(f.ApplyJson), &f.Applies)
 	} else {
 		f.Applies = make(map[string]*FriendApplyItem)

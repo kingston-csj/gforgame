@@ -4,7 +4,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/forfun/gforgame/common/util"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
@@ -12,6 +11,7 @@ import (
 	player "github.com/forfun/gforgame/internal/domain/player"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
+	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/protos"
 	heroService "github.com/forfun/gforgame/internal/service/hero"
 	mailService "github.com/forfun/gforgame/internal/service/mail"
@@ -147,7 +147,7 @@ func addFightRecord(player *player.Player, target *player.Player, score int32, i
 		winner = target.Id
 	}
 	record := &playerdomain.MatchRecord{
-		Id:         util.GetNextID(),
+		Id:         idgen.GetNextID(),
 		OpponentId: target.Id,
 		Score:      score,
 		IsAttack:   isAttack,

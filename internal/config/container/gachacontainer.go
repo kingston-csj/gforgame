@@ -1,7 +1,7 @@
 package container
 
 import (
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/randx"
 	"github.com/forfun/gforgame/data"
 	"github.com/forfun/gforgame/internal/domain/config"
 )
@@ -25,6 +25,6 @@ func (c *GachaContainer) RandItem(gachaType int32) *config.GachaData {
 			weights = append(weights, int(record.Weight))
 		}
 	}
-	index,_ := util.RandomIndex(weights)
+	index,_ := randx.RandomIndex(weights)
 	return pool[index]
 }

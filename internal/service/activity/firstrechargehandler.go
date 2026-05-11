@@ -1,7 +1,7 @@
 package activity
 
 import (
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/common/util/timeutil"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/protos"
@@ -32,7 +32,7 @@ func (d *FirstRechargeActivityHandler) LoadActivityInfo(p *playerdomain.Player) 
 		if firstReward {
 			dayDiff := timeutil.GetDayDiffFromToday(p.RechargeBox.FirstRechargeTime)
 			for _, rewardData := range activityRewards {
-				if dayDiff >= util.Int32Value(rewardData.Condition) {
+				if dayDiff >= conv.Int32Value(rewardData.Condition) {
 					if activityInfo.Rewards[rewardData.Id] != "2" {
 						activityInfo.Rewards[rewardData.Id] = "1"
 					}

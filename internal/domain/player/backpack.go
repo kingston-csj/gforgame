@@ -2,11 +2,11 @@ package player
 
 import (
 	"github.com/forfun/gforgame/common/errors"
-	"github.com/forfun/gforgame/common/util"
 	"github.com/forfun/gforgame/internal/config"
 	configcontract "github.com/forfun/gforgame/internal/config/contracts"
 	"github.com/forfun/gforgame/internal/constants"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
+	"github.com/forfun/gforgame/internal/idgen"
 	protos "github.com/forfun/gforgame/internal/protos"
 )
 
@@ -149,7 +149,7 @@ func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item))
 		}
 		remaining -= newItemAmount
 		newItem := &Item{
-			Uid:    util.GetNextID(),
+			Uid:    idgen.GetNextID(),
 			ItemId: itemId,
 			Count:  newItemAmount,
 			Level:  0,

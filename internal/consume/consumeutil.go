@@ -3,11 +3,11 @@ package consume
 import (
 	"strings"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 )
 
 func ParseConsume(config string) *AndConsume{
-	if util.IsBlankString(config) {
+	if conv.IsBlankString(config) {
 		return &AndConsume{}
 	}
 	splits := strings.Split(config, ",")
@@ -15,23 +15,23 @@ func ParseConsume(config string) *AndConsume{
 	for _, split := range splits {
 		params := strings.Split(split, "_")
 		consumeType := params[0]
-		if util.EqualsIgnoreCase(consumeType, "item") {
-			itemId, _ := util.StringToInt32(params[1])
-			count, _ := util.StringToInt32(params[2])
+		if conv.EqualsIgnoreCase(consumeType, "item") {
+			itemId, _ := conv.StringToInt32(params[1])
+			count, _ := conv.StringToInt32(params[2])
 			itemConsume := &ItemConsume{
 				ItemId: itemId,
 				Amount:  count,
 			}
 			andConsume.Add(itemConsume)
-		} else if util.EqualsIgnoreCase(consumeType, "Gold") {
-			amount, _ := util.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(consumeType, "Gold") {
+			amount, _ := conv.StringToInt32(params[1])
 			currencyConsume := &CurrencyConsume{
 				Currency: "Gold",	
 				Amount:   amount,
 			}
 			andConsume.Add(currencyConsume)
-		} else if util.EqualsIgnoreCase(consumeType, "Diamond") {
-			amount, _ := util.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(consumeType, "Diamond") {
+			amount, _ := conv.StringToInt32(params[1])
 			currencyConsume := &CurrencyConsume{
 				Currency: "Diamond",	
 				Amount:   amount,

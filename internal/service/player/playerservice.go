@@ -10,7 +10,7 @@ import (
 	commonerrors "github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/trie"
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/camp"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
@@ -21,6 +21,7 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/fight/attribute"
+	"github.com/forfun/gforgame/internal/idgen"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -179,8 +180,8 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 }
 
 func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
-	id := util.GetNextID()
-	if util.IsEmptyString(name) {
+	id := idgen.GetNextID()
+	if conv.IsEmptyString(name) {
 		name = ps.RandomName()
 	}
 	player := &playerdomain.Player{}
@@ -395,7 +396,7 @@ func (ps *PlayerService) RandomName() string {
 			return name
 		}
 	}
-	return util.GetNextID()
+	return idgen.GetNextID()
 }
 
 func (ps *PlayerService) EditPlayer(p *playerdomain.Player, head int32, name string) int32 {

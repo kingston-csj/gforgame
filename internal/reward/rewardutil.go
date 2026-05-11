@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
 	"github.com/forfun/gforgame/internal/contract"
@@ -13,7 +13,7 @@ import (
 )
 
 func ParseReward(config string) *AndReward {
-	if util.IsBlankString(config) {
+	if conv.IsBlankString(config) {
 		return NewAndReward()
 	}
 	rewards := ParseRewardList(config)
@@ -26,52 +26,52 @@ func ParseReward(config string) *AndReward {
 
 func ParseRewardList(config string) []Reward {
 	result := make([]Reward, 0)
-	if util.IsBlankString(config) {
+	if conv.IsBlankString(config) {
 		return result
 	}
 	splits := strings.Split(config, ",")
 	for _, split := range splits {
 		params := strings.Split(split, "_")
 		rewardType := params[0]
-		if util.EqualsIgnoreCase(rewardType, constants.CurrencyTypeGold) {
-			amount, _ := util.StringToInt32(params[1])
+		if conv.EqualsIgnoreCase(rewardType, constants.CurrencyTypeGold) {
+			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &CurrencyReward{
 				Currency:   "Gold",
 				Amount:     amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.CurrencyTypeDiamond) {
-			amount, _ := util.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.CurrencyTypeDiamond) {
+			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &CurrencyReward{
 				Currency:   "Diamond", 
 				Amount:     amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.RewardTypeItem) {
-			itemId, _ := util.StringToInt32(params[1])
-			amount, _ := util.StringToInt32(params[2])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeItem) {
+			itemId, _ := conv.StringToInt32(params[1])
+			amount, _ := conv.StringToInt32(params[2])
 			result = append(result, &ItemReward{
 				ItemId: itemId,
 				Amount: amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.RewardTypeRune) {
-			amount, _ := util.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeRune) {
+			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &RuneReward{
 				ItemId: amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.RewardTypeTicket) {
-			mapId, _ := util.StringToInt32(params[1])
-			amount, _ := util.StringToInt32(params[2])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeTicket) {
+			mapId, _ := conv.StringToInt32(params[1])
+			amount, _ := conv.StringToInt32(params[2])
 			result = append(result, &TicketReward{
 				MapId: mapId,
 				Amount: amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.RewardTypeHero) {
-			amount, _ := util.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeHero) {
+			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &HeroReward{
 				HeroId: amount,
 			})
-		} else if util.EqualsIgnoreCase(rewardType, constants.RewardTypeCard) {
-			cardId, _ := util.StringToInt32(params[1])
-			amount, _ := util.StringToInt32(params[2])
+		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeCard) {
+			cardId, _ := conv.StringToInt32(params[1])
+			amount, _ := conv.StringToInt32(params[2])
 			result = append(result, &CardReward{
 				CardId: cardId,
 				Amount: amount,
@@ -89,15 +89,15 @@ func ParseRewards(rewards []contract.RewardDefLite) *AndReward {
         split := strings.Split(rewardItem.Value, "_")
         switch rewardItem.Type {
 		case "item":
-			itemId, _ := util.StringToInt32(split[0])
-			amount, _ := util.StringToInt32(split[1])
+			itemId, _ := conv.StringToInt32(split[0])
+			amount, _ := conv.StringToInt32(split[1])
 			andReward.AddReward(&ItemReward{
 				ItemId: itemId,
 				Amount: amount,
 			})
 		case "currency":
 			kind := split[0]
-			amount, _ := util.StringToInt32(split[1])
+			amount, _ := conv.StringToInt32(split[1])
             andReward.AddReward(&CurrencyReward{Currency: kind, Amount: amount})
         }
     }

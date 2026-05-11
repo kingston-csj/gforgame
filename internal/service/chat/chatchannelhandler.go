@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -71,7 +71,7 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 		Content:    message.Content,
 	}
 
-	if util.IsEmptyString(message.SenderId) {
+	if conv.IsEmptyString(message.SenderId) {
 		messageVo.SenderName = "系统"
 	} else {
 		playerProfile := playerservice.GetPlayerService().GetPlayerProfileById(message.SenderId)

@@ -4,11 +4,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/domain/player"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
@@ -178,7 +179,7 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 		FromId:   player.Id,
 		TargetId: friendId,
 		Time:     time.Now().Unix(),
-		Id:       util.GetNextID(),
+		Id:       idgen.GetNextID(),
 	}
 	fromFriendEnt.Applies[applyItem.Id] = applyItem
 	s.SaveFriend(fromFriendEnt)
@@ -208,7 +209,7 @@ func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId str
 	friend := s.GetFriendEntOrCreate(player.Id)
 	players := make([]*playerdomain.Player, 0)
 	applyIds := make([]string, 0)
-	if util.IsBlankString(applyId) {
+	if conv.IsBlankString(applyId) {
 		for applyId := range friend.Applies {
 			applyIds = append(applyIds, applyId)
 		}

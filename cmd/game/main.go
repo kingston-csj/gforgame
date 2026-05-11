@@ -289,5 +289,6 @@ func main() {
 	}
 	// 执行所有关服逻辑
 	node.Stop()
+	context.DbService.Shutdown()
 	logger.Info(fmt.Sprintf("game server is closed"))
 }

@@ -8,7 +8,7 @@ import (
 
 	"github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/common/util/jsonutil"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
@@ -141,13 +141,13 @@ func handleReset(player *playerdomain.Player, params string) *errors.BusinessErr
 }
 
 func handleLevel(player *playerdomain.Player, params string) *errors.BusinessError {
-	player.Level = util.Int32Value(params)
+	player.Level = conv.Int32Value(params)
 	playerservice.GetPlayerService().GetPlayerProfileById(player.Id)
 	return nil
 }
 
 func handleAddItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
 	if err != nil {
 		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
@@ -158,7 +158,7 @@ func handleAddItems(player *playerdomain.Player, params string) *errors.Business
 }
 
 func handleRemoveItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
 	if err != nil {
 		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
@@ -177,7 +177,7 @@ func handleRemoveItems(player *playerdomain.Player, params string) *errors.Busin
 }
 
 func handleAddDiamond(player *playerdomain.Player, params string) *errors.BusinessError {
-	count, _ := util.StringToInt32(params)
+	count, _ := conv.StringToInt32(params)
 	reward := &reward.CurrencyReward{
 		Currency: "diamond",
 		Amount:   count,
@@ -187,7 +187,7 @@ func handleAddDiamond(player *playerdomain.Player, params string) *errors.Busine
 }
 
 func handleAddGold(player *playerdomain.Player, params string) *errors.BusinessError {
-	count, _ := util.StringToInt32(params)
+	count, _ := conv.StringToInt32(params)
 	reward := &reward.CurrencyReward{
 		Currency: "gold",
 		Amount:   count,
@@ -197,19 +197,19 @@ func handleAddGold(player *playerdomain.Player, params string) *errors.BusinessE
 }
 
 func handleQuest(player *playerdomain.Player, params string) *errors.BusinessError {
-	questId, _ := util.StringToInt32(params)
+	questId, _ := conv.StringToInt32(params)
 	questservice.GetQuestService().GmFinish(player, questId)
 	return nil
 }
 
 func handleRecharge(player *playerdomain.Player, params string) *errors.BusinessError {
-	rechargeId, _ := util.StringToInt32(params)
+	rechargeId, _ := conv.StringToInt32(params)
 	recharge.GetRechargeService().Recharge(player, rechargeId)
 	return nil
 }
 
 func handleAddSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
 	if err != nil {
 		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
@@ -223,7 +223,7 @@ func handleAddSceneItems(player *playerdomain.Player, params string) *errors.Bus
 }
 
 func handleRemoveSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := util.ToIntIntMap(params, ";", "=")
+	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
 	if err != nil {
 		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
@@ -240,7 +240,7 @@ func handleDailyReset(player *playerdomain.Player, params string) *errors.Busine
 
 
 func handleAddMail(player *playerdomain.Player, params string) *errors.BusinessError {
-	mail.GetMailService().SendSimpleMail(player, util.Int32Value(params))
+	mail.GetMailService().SendSimpleMail(player, conv.Int32Value(params))
 	return nil
 }
 

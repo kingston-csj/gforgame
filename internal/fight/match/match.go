@@ -1,9 +1,9 @@
 package match
 
 import (
-	"github.com/forfun/gforgame/common/util"
 	"github.com/forfun/gforgame/internal/fight/actor"
 	"github.com/forfun/gforgame/internal/fight/report"
+	"github.com/forfun/gforgame/internal/idgen"
 )
 
 type Match struct {
@@ -19,7 +19,7 @@ type Match struct {
 }
 
 func NewMatch(redTeam *Team, blueTeam *Team) *Match {
-	return &Match{Id: util.GetNextID(), RedTeam: redTeam, BlueTeam: blueTeam, Report: report.NewBattleReport()}
+	return &Match{Id: idgen.GetNextID(), RedTeam: redTeam, BlueTeam: blueTeam, Report: report.NewBattleReport()}
 }
 
 func (m *Match) GetMyTeam(actor actor.Actor) *Team {

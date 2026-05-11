@@ -88,12 +88,12 @@ go 客户端入口：client/go/client.go
 
 ### websocket/socket
 
-网关可选择socket/websocket 通信方式,主要是为了兼容不同游戏平台的需求。
-但网关与游戏服务器之间的通信方式，属于内部通信，建议使用socket方式。
-node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket  
-example/cocos 为 ws 的客户端程序。
-若游戏发布平台不是小游戏，也可直接使用原生socket，  
-example/unity同时兼容websocket/socket通信方式
+网关可选择socket/websocket 通信方式,主要是为了兼容不同游戏平台的需求。  
+但网关与游戏服务器之间的通信方式，属于内部通信，建议使用socket方式。  
+node.Startup()方法参数增加 network.WithWebsocket()代表选择 websocket。  
+example/cocos 为 ws 的客户端程序。  
+若游戏发布平台不是小游戏，也可直接使用原生socket。
+example/unity同时兼容websocket/socket通信方式。
 
 ### 跨服通信方式一：基于 rpc
 

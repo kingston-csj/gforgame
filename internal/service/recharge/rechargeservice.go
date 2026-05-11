@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	config "github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/context"
@@ -38,13 +38,13 @@ func (s *RechargeService) OnPlayerLogin(player *playerdomain.Player) {
 
 func (s *RechargeService) Recharge(player *playerdomain.Player, rechargeId int32) {
 	rechargeData := config.QueryById[configdomain.RechargeData](rechargeId)	
-	if util.IsEmptyString(rechargeData.Children) {
+	if conv.IsEmptyString(rechargeData.Children) {
 		s.recharge0(player, rechargeId)
 	} else {
 		// 如果是捆绑销售的商品
 		children := strings .Split(rechargeData.Children, ",")
 		for _, child := range children {
-			s.recharge0(player, util.Int32Value(child))
+			s.recharge0(player, conv.Int32Value(child))
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package route
 
 import (
-	"github.com/forfun/gforgame/common/util"
+	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/context"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
@@ -64,7 +64,7 @@ func (ps *PlayerRoute) Init() {
 }
 
 func (ps *PlayerRoute) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin) {
-	if util.IsBlankString(msg.PlayerId) {
+	if conv.IsBlankString(msg.PlayerId) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return
 	}
@@ -77,7 +77,7 @@ func (ps *PlayerRoute) ReqLoadingFinish(s *network.Session, index int32, msg *pr
 }
 
 func (ps *PlayerRoute) ReqCreate(s *network.Session, msg *protos.ReqPlayerCreate) {
-	if util.IsBlankString(msg.Name) {
+	if conv.IsBlankString(msg.Name) {
 		s.Send(&protos.ResPlayerCreate{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, 0)
 		return
 	}

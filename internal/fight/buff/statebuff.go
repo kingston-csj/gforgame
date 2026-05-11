@@ -1,10 +1,10 @@
 package buff
 
 import (
-	"github.com/forfun/gforgame/common/util"
 	"github.com/forfun/gforgame/internal/config"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/fight/state"
+	"github.com/forfun/gforgame/internal/idgen"
 )
 
 type StateBuff struct {
@@ -17,7 +17,7 @@ func NewStateBuff(modelId int32) *StateBuff {
 	return &StateBuff{
 		Buff: Buff{
 			ModelId:  modelId,
-			Id:       util.GetNextID(),
+			Id:       idgen.GetNextID(),
 			Duration: buffData.Duration,
 		},
 		StateType: state.StateType(buffData.Params),
