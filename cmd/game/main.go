@@ -255,13 +255,6 @@ func main() {
 		panic(err)
 	}
 
-	// 启动rpc服务
-	// if len(serverconfig.ServerConfig.RpcServerUrl) > 0 {
-	// 	go func() {
-	// 		NewRpcServer(serverconfig.ServerConfig.RpcServerUrl)
-	// 	}()
-	// }
-
 	// 启动后台http服务
 	// go func() {
 	// 	context.HttpServer = NewHttpServer()

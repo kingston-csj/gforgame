@@ -1,14 +1,9 @@
 package cross
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/network/rpc"
 )
 
 func PlayerLoginRemote(p *playerdomain.Player, kind TransferType) {
@@ -48,20 +43,20 @@ func transferToRemote(p *playerdomain.Player, t Transfer) error {
 }
 
 func doEnterCrossServer(p *playerdomain.Player, t Transfer) error {
-	codec := json.NewSerializer()
-	data, err := codec.Encode(p)
-	if err != nil {
-		return err
-	}
+	// codec := json.NewSerializer()
+	// data, err := codec.Encode(p)
+	// if err != nil {
+	// 	return err
+	// }
 
-	rpcClient, err := rpc.GetOrCreateClient(1001)
-	if err != nil {
-		panic(err)
-	}
-	resp, err := rpcClient.EnterRemote(context.Background(), &rpc.PlayerCrossRequest{Data: data})
-	if err != nil {
-		return err
-	}
-	fmt.Println("rpc客户端收到消息：", resp.Message)
+	// rpcClient, err := rpc.GetOrCreateClient(1001)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// resp, err := rpcClient.EnterRemote(context.Background(), &rpc.PlayerCrossRequest{Data: data})
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println("rpc客户端收到消息：", resp.Message)
 	return nil
 }

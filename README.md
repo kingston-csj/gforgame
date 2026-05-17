@@ -95,12 +95,7 @@ example/cocos 为 ws 的客户端程序。
 若游戏发布平台不是小游戏，也可直接使用原生socket。
 example/unity同时兼容websocket/socket通信方式。
 
-### 跨服通信方式一：基于 rpc
-
-使用 grpc 进行跨进程通信，需要先安装 protobuf 和 protoc-gen-go-grpc 编译插件  
-根据不同的跨服类型，自行定义业务逻辑，参考 internal/cross 相关代码（流程待完善）
-
-### 跨服通信方式二：基于 socket
+### 跨服通信方式：基于 socket
 
 推荐使用原生的 socket 进行跨进程通信，无论是游戏app作为客户端，还是跨服节点作为客户端  
 都使用统一的调用方式，也无须引入 grpc  
@@ -150,7 +145,6 @@ example/unity同时兼容websocket/socket通信方式。
 - 使用原生 map 实现一套高效 cache 工具，直接存储原生对象引用而非 byte[]，避免频繁序列化与反序列化
 - 数据异步持久化，玩家数据实时更新缓存，定时持久化到数据库
 - http 管理后台
-- grpc 跨服通信接入
 - excel 配置文件读取, jforgame-data 实现
 
 ## AI 赋能
