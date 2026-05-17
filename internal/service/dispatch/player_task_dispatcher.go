@@ -1,10 +1,11 @@
-package network
+package dispatch
 
 import (
 	"hash/fnv"
 	"log/slog"
 
 	serverconfig "github.com/forfun/gforgame/config"
+	"github.com/forfun/gforgame/network"
 )
 
 // playerTaskDispatcher 用于在无玩家会话时，按 playerId 串行执行任务。
@@ -64,7 +65,7 @@ func DispatchPlayerTask(playerID string, task func()) {
 		globalPlayerTaskDispatcher.submit(playerID, task)
 		return
 	}
-	if session := GetSessionByPlayerId(playerID); session != nil {
+	if session := network.GetSessionByPlayerId(playerID); session != nil {
 		select {
 		case <-session.Die:
 		default:
