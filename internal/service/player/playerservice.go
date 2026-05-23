@@ -25,6 +25,7 @@ import (
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
+	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/system"
 	"github.com/forfun/gforgame/network"
 )
@@ -38,22 +39,23 @@ var (
 // 玩家模块
 type PlayerService struct {
 	network.Base
-	playerProfiles map[string]*playerdomain.PlayerProfile
+	playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
 	// 双向map, id -> name
 	idNameMapper *hashmap.SyncDualHashMap[string, string]
 	// 玩家名称字典树
 	nameDict *trie.TrieDictionary
+	
+	quest     *questservice.QuestService
 }
 
-func GetPlayerService() *PlayerService {
-	once.Do(func() {
-		instance = &PlayerService{
-			playerProfiles: make(map[string]*playerdomain.PlayerProfile),
-			idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
-			nameDict:       trie.NewTrieDictionary(),
-		}
-	})
-	return instance
+func NewPlayerService( questService *questservice.QuestService) *PlayerService {
+	service := &PlayerService{
+		playerProfiles: hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
+		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
+		nameDict:       trie.NewTrieDictionary(),
+		quest:          questService,
+	}
+	return service
 }
 
 // LoadPlayerProfile 加载玩家概况数据
@@ -65,13 +67,17 @@ func (ps *PlayerService) LoadPlayerProfile() {
 	}
 
 	for _, profile := range profiles {
-		ps.playerProfiles[profile.Id] = profile
+		ps.playerProfiles.Set(profile.Id, profile)
 		ps.idNameMapper.Put(profile.Id, profile.Name)
 	}
 }
 
 func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.PlayerProfile {
-	return ps.playerProfiles[playerId]
+	v, ok := ps.playerProfiles.Get(playerId)
+	if ok {
+		return v
+	}
+	return nil
 }
 
 func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
@@ -346,7 +352,8 @@ func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 // 模糊搜索玩家(名字包含关键字)
 func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	playerIds := make([]string, 0)
-	for _, profile := range ps.playerProfiles {
+	profiles := ps.playerProfiles.Values()
+	for _, profile := range profiles {
 		if strings.Contains(profile.Name, name) {
 			playerIds = append(playerIds, profile.Id)
 		}
@@ -411,7 +418,11 @@ func (ps *PlayerService) EditPlayer(p *playerdomain.Player, head int32, name str
 		ps.nameDict.AddNode(name)
 	}
 
-	ps.playerProfiles[p.Id].Name = name
+	profile := ps.GetPlayerProfileById(p.Id)
+	if profile != nil {
+		profile.Name = name
+	}
+	ps.playerProfiles.Set(p.Id, profile)
 	p.Head = head
 	ps.SavePlayer(p)
 	return 0

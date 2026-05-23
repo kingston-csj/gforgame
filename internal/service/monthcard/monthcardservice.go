@@ -2,7 +2,6 @@ package monthcard
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/common/errors"
@@ -13,21 +12,18 @@ import (
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/reward"
+	mailservice "github.com/forfun/gforgame/internal/service/mail"
 )
 
 // 月卡服务
-type MonthCardService struct{}
+type MonthCardService struct {
+	mail *mailservice.MailService
+}
 
-var (
-	instance *MonthCardService
-	once     sync.Once
-)
-
-func GetMonthCardService() *MonthCardService {
-	once.Do(func() {
-		instance = &MonthCardService{}
-	})
-	return instance
+func NewMonthCardService(mail *mailservice.MailService) *MonthCardService {
+	return &MonthCardService{
+		mail: mail,
+	}
 }
 
 func (ps *MonthCardService) OnPlayerLogin(player *player.Player) {

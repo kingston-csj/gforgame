@@ -1,7 +1,6 @@
 package vip
 
 import (
-	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/internal/config"
@@ -17,17 +16,8 @@ import (
 
 type VipService struct{}
 
-
-var (
-	instance *VipService
-	once     sync.Once
-)
-
-func GetVipService() *VipService {
-	once.Do(func() {
-		instance = &VipService{}	
-	})
-	return instance
+func NewVipService() *VipService {
+	return &VipService{}
 }
 
 func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32 ) {

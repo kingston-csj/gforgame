@@ -2,7 +2,6 @@ package fight
 
 import (
 	"sort"
-	"sync"
 
 	"github.com/forfun/gforgame/internal/config"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
@@ -14,19 +13,19 @@ import (
 	"github.com/forfun/gforgame/internal/service/player"
 )
 
-var (
-	instance *FightService
-	once     sync.Once
-)
-
-func GetFightService() *FightService {
-	once.Do(func() {
-		instance = &FightService{}
-	})
-	return instance
+type FightService struct {
+	playerService *player.PlayerService
 }
 
-type FightService struct {
+const (
+	NORMAL_MAP = 100002
+	AREAN_MAP  = 100003
+)
+
+func NewFightService(playerService *player.PlayerService) *FightService {
+	return &FightService{
+		playerService: playerService,
+	}
 }
 
 func (s *FightService) StartFight(match *match.Match) {
@@ -111,8 +110,8 @@ func (s *FightService) RoundBegin(match *match.Match, round int32) {
 }
 
 func (s *FightService) Test() {
-	p1 := player.GetPlayerService().GetPlayer("111")
-	p2 := player.GetPlayerService().GetPlayer("aaa")
+	p1 := s.playerService.GetPlayer("111")
+	p2 := s.playerService.GetPlayer("aaa")
 	team1 := match.NewTeam(match.BlueCamp, s.getFightActors(p1))
 	team2 := match.NewTeam(match.RedCamp, s.getFightActors(p2))
 	match := match.NewMatch(team1, team2)

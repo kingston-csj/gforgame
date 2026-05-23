@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"github.com/forfun/gforgame/common/util/conv"
+	util "github.com/forfun/gforgame/common/util/conv"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -26,7 +26,7 @@ type ChatChannelHandler interface {
 	// 广播消息
 	Broadcast(ChatMessage *playerdomain.ChatMessage)
 
-	// 获取消息
+	// 枚举消息接收者
 	Receivers(message *playerdomain.ChatMessage) []string
 
 	// 获取频道类型
@@ -34,13 +34,12 @@ type ChatChannelHandler interface {
 }
 
 type BaseChatChannelHandler struct {
-	self ChatChannelHandler
+	self   ChatChannelHandler // 指向子类
+	player *playerservice.PlayerService
 }
 
-func NewBaseChatChannelHandler(self ChatChannelHandler) *BaseChatChannelHandler {
-	return &BaseChatChannelHandler{
-		self: self,
-	}
+func NewBaseChatChannelHandler(self ChatChannelHandler, player *playerservice.PlayerService) *BaseChatChannelHandler {
+	return &BaseChatChannelHandler{self: self, player: player}
 }
 
 func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
@@ -51,7 +50,7 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 	// 广播消息
 	for _, receiver := range receivers {
 		if network.IsOnline(receiver) {
-			player := playerservice.GetPlayerService().GetPlayerByPlayerId(receiver)
+			player := b.player.GetPlayer(receiver)
 			if player != nil {
 				onlines = append(onlines, player)
 			}
@@ -62,19 +61,22 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 		return
 	}
 
+	sender := b.player.GetPlayerProfileById(message.SenderId)
 	messageVo := &protos.ChatMessageVo{
 		Id:         message.Id,
 		Channel:    message.Channel,
 		SenderId:   message.SenderId,
-		SenderHead: message.SenderHead,
+		SenderHead: sender.Head,
+		SenderName: sender.Name,
+		ReceiverId: message.ReceiverId,
 		Timestamp:  message.Timestamp,
 		Content:    message.Content,
 	}
 
-	if conv.IsEmptyString(message.SenderId) {
+	if util.IsEmptyString(message.SenderId) {
 		messageVo.SenderName = "系统"
 	} else {
-		playerProfile := playerservice.GetPlayerService().GetPlayerProfileById(message.SenderId)
+		playerProfile := b.player.GetPlayerProfileById(message.SenderId)
 		if playerProfile != nil {
 			messageVo.SenderName = playerProfile.Name
 		}

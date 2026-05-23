@@ -2,7 +2,6 @@ package arena
 
 import (
 	"math"
-	"sync"
 
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
@@ -15,29 +14,27 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	heroService "github.com/forfun/gforgame/internal/service/hero"
 	mailService "github.com/forfun/gforgame/internal/service/mail"
-	"github.com/forfun/gforgame/internal/service/monthcard"
 	playerService "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/rank"
 )
 
 type ArenaService struct {
+	player    *playerService.PlayerService
+	rank      *rank.RankService
+	mail      *mailService.MailService
 }
 
-var (
-	instance *ArenaService
-	once     sync.Once
-)
-
-func GetArenaService() *ArenaService {
-	once.Do(func() {
-		instance = &ArenaService{}
-	})
-	return instance
+func NewArenaService(player *playerService.PlayerService, rankService *rank.RankService, mail *mailService.MailService) *ArenaService {
+	return &ArenaService{
+		player:    player,
+		rank:      rankService,
+		mail:      mail,
+	}
 }
 
 // 申请挑战
 func (s *ArenaService) Apply(player *player.Player, targetId string) int32 {
-	target := playerService.GetPlayerService().GetPlayer(targetId)
+	target := s.player.GetPlayer(targetId)
 	if target == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
@@ -57,12 +54,12 @@ func getTodayFreeTimes(player *player.Player) int32 {
 	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 	// 每日竞技场战斗次数
 	arenaDailyTimes := commonContainer.GetInt32Value("arenaDailyTimes")
-	return arenaDailyTimes + monthcard.GetMonthCardService().GetExtraArenaTimes(player)
+	return arenaDailyTimes
 }
 
 func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) *protos.ResArenaFightEnd{
 	res := &protos.ResArenaFightEnd{}
-	targetPlayer := playerService.GetPlayerService().GetPlayer(target)
+	targetPlayer := s.player.GetPlayer(target)
 	if targetPlayer == nil {
 		res.Code = constants.I18N_COMMON_NOT_FOUND
 		return res
@@ -97,13 +94,13 @@ func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) 
 		},
 	})
 
-	rankInfo1 := rank.GetRankService().GetMyRankInfo(rank.PlayerArenaRank, player.Id)
+	rankInfo1 := s.rank.GetMyRankInfo(rank.PlayerArenaRank, player.Id)
 	rankParams1 := string(rankInfo1.Order)
 	if rankInfo1.Order <= 0 {
 		rankParams1 = "未上榜"
 	}
 	mailId := Ternary(win, constants.MailIdArenaFightWin, constants.MailIdArenaFightLose)
-	mailService.GetMailService().SendSimpleMail2(player, mailId, 
+	s.mail.SendSimpleMail2(player, mailId, 
 		targetPlayer.Name, rankParams1, string(newScore1), rankParams1)
 	addFightRecord(player, targetPlayer, score1, true, win)
 	res.TargetInitScore = targetPlayer.ArenaScore
@@ -112,13 +109,13 @@ func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) 
 	// 被挑战者,增加积分
 	score2 := calcSettleScore(targetPlayer, player, !win)
 	newScore2 := targetPlayer.ArenaScore + score2
-	rankInfo2 := rank.GetRankService().GetMyRankInfo(rank.PlayerArenaRank, targetPlayer.Id)
+	rankInfo2 := s.rank.GetMyRankInfo(rank.PlayerArenaRank, targetPlayer.Id)
 	rankParams2 := string(rankInfo2.Order)
 	if rankInfo2.Order <= 0 {
 		rankParams2 = "未上榜"
 	}
 	mailId2 := Ternary(win, constants.MailIdArenaFightLose, constants.MailIdArenaFightWin)
-	mailService.GetMailService().SendSimpleMail2(targetPlayer, mailId2, 
+	s.mail.SendSimpleMail2(targetPlayer, mailId2, 
 		player.Name, rankParams2, string(newScore2), rankParams2)
 	addFightRecord(targetPlayer, player, score2, false, !win)
 	context.EventBus.Publish(events.AreaScoreChanged, &events.AreaScoreChangedEvent{

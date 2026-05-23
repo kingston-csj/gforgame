@@ -1,7 +1,6 @@
 package signin
 
 import (
-	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/common/errors"
@@ -21,17 +20,10 @@ import (
 type SignInService struct {
 }
 
-var (
-	instance *SignInService
-	once     sync.Once
-)
-
-func GetSignInService() *SignInService {
-	once.Do(func() {
-		instance = &SignInService{}
-	})
-	return instance
+func NewSignInService() *SignInService {
+	return &SignInService{}
 }
+
 
 func (s *SignInService) OnPlayerLogin(player *playerdomain.Player) {
     push := &protos.PushSigninInfo{};

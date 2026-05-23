@@ -1,8 +1,6 @@
 package activity
 
 import (
-	"sync"
-
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
@@ -11,28 +9,20 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 )
 
+
 type ActivityService struct {
 	activityScheduler *ActivityScheduler
 }
 
-var (
-	instance          *ActivityService
-	once              sync.Once
-	activityScheduler *ActivityScheduler = NewActivityScheduler(context.TaskScheduler)
-)
+var activityScheduler = NewActivityScheduler(context.TaskScheduler)
 
-func GetActivityService() *ActivityService {
-	once.Do(func() {
-		instance = &ActivityService{
-			activityScheduler: activityScheduler,
-		}
-
-		firstRechargeHandler := NewFirstRechargeActivityHandler(activityScheduler)
-		registerHandler(1001, firstRechargeHandler)
-		registerHandler(1002, firstRechargeHandler)
-
-	})
-	return instance
+func NewActivityService() *ActivityService {
+	s := &ActivityService{
+		activityScheduler: activityScheduler,
+	}
+	firstRechargeHandler := NewFirstRechargeActivityHandler(activityScheduler)
+	registerHandler(1001, firstRechargeHandler)
+	return s
 }
 
 func (s *ActivityService) ScheduleAllActivity() {

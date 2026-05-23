@@ -1,8 +1,6 @@
 package catalog
 
 import (
-	"sync"
-
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
@@ -15,17 +13,10 @@ import (
 type CatalogService struct {
 }
 
-var (
-	instance *CatalogService
-	once     sync.Once
-)
-
-func GetCatalogService() *CatalogService {
-	once.Do(func() {
-		instance = &CatalogService{}
-	})
-	return instance
+func NewCatalogService() *CatalogService {
+	return &CatalogService{}
 }
+
 
 func (s *CatalogService) OnPlayerLogin(player *playerdomain.Player) {
 	push := &protos.PushCatalogInfo{

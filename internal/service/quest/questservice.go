@@ -1,7 +1,6 @@
 package quest
 
 import (
-	"sync"
 	"time"
 
 	commonerrors "github.com/forfun/gforgame/common/errors"
@@ -27,14 +26,8 @@ type QuestService struct {
 	handlers  map[int32]qcore.QuestHandler
 }
 
-var (
-	instance *QuestService
-	once     sync.Once
-)
-
-func GetQuestService() *QuestService {
-	once.Do(func() {
-		instance = &QuestService{}
+func NewQuestService() *QuestService {
+		instance := &QuestService{}
 
 		// 注册所有任务分类
 		instance.directors = make(map[int32]qcore.QuestDirector)
@@ -54,11 +47,10 @@ func GetQuestService() *QuestService {
 		instance.handlers[constants.QuestTypeLogin] = &questhandler.LoginQuestHandler{}
 		instance.handlers[constants.QuestTypePassGuanka] = &questhandler.MainGuanKaQuestHandler{}
 
-		instance.wireResolver()
-		for _, handler := range instance.handlers {
-			handler.SubscribeEvent()
-		}
-	})
+	instance.wireResolver()
+	for _, handler := range instance.handlers {
+		handler.SubscribeEvent()
+	}
 	return instance
 }
 
@@ -83,14 +75,14 @@ func (s *QuestService) OnPlayerLogin(player *playerdomain.Player) {
 			delete(player.QuestBox.Doing, id)
 		}
 	}
-	for catalog := range instance.directors {
-		instance.directors[catalog].OnPlayerLogin(player)
+	for catalog := range s.directors {
+		s.directors[catalog].OnPlayerLogin(player)
 	}
 }
 
 func (s *QuestService) OnPlayerDailyReset(player *playerdomain.Player) {
 	player.QuestBox.ClearQuestsByCategory(constants.QuestCategoryDaily)
-	instance.directors[constants.QuestCategoryDaily].OnPlayerLogin(player)
+	s.directors[constants.QuestCategoryDaily].OnPlayerLogin(player)
 }
 
 func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
@@ -116,7 +108,7 @@ func (s *QuestService) AcceptQuest(player *playerdomain.Player, questId int32) (
 	quest := &playerdomain.Quest{
 		Id: questId,
 	}
-	handler, ok := instance.handlers[questData.Type]
+	handler, ok := s.handlers[questData.Type]
 	// 判空（暂时不处理）
 	if !ok {
 		return nil, commonerrors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
@@ -294,7 +286,7 @@ func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, 
 	context.EventBus.Publish(events.PlayerEntityChange, player)
 
 	context.TaskScheduler.Schedule(func() {
-		handler, ok := instance.handlers[questData.Type]
+		handler, ok := s.handlers[questData.Type]
 		if ok {
 			quest.AddProgress(1)
 			handler.CheckProgress(player, quest)

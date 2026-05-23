@@ -2,7 +2,6 @@ package recharge
 
 import (
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/common/util/conv"
@@ -21,15 +20,9 @@ import (
 type RechargeService struct {
 }
 
-var (
-	instance *RechargeService
-	once     sync.Once
-)
-
-func GetRechargeService() *RechargeService {
+func NewRechargeService() *RechargeService {
 	return &RechargeService{}
 }
-
 
 func (s *RechargeService) OnPlayerLogin(player *playerdomain.Player) {
     push := &protos.PushRechargeInfo{};

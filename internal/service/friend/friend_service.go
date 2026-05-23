@@ -1,7 +1,6 @@
 package friend
 
 import (
-	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/common/util/conv"
@@ -12,24 +11,22 @@ import (
 	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
+	mailservice "github.com/forfun/gforgame/internal/service/mail"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
 )
 
 // 好友模块
 type FriendService struct {
+	player *playerservice.PlayerService
+	mail   *mailservice.MailService
 }
 
-var (
-	instance *FriendService
-	once     sync.Once
-)
-
-func GetFriendService() *FriendService {
-	once.Do(func() {
-		instance = &FriendService{}
-	})
-	return instance
+func NewFriendService(player *playerservice.PlayerService, mail *mailservice.MailService) *FriendService {
+	return &FriendService{
+		player: player,
+		mail:   mail,
+	}
 }
 
 func (s *FriendService) GetFriendEnt(playerId string) *player.Friend {
@@ -92,7 +89,7 @@ func (s *FriendService) QueryMyFriendVos(playerId string) []*protos.FriendVo {
 	}
 	friends := make([]*protos.FriendVo, 0)
 	for friendId := range friend.Friends {
-		friend := playerservice.GetPlayerService().GetPlayerProfileById(friendId)
+		friend := s.player.GetPlayerProfileById(friendId)
 		friends = append(friends, &protos.FriendVo{
 			Id:       friendId,
 			Name:     friend.Name,
@@ -112,10 +109,10 @@ func (s *FriendService) IsFriend(playerId string, friendId string) bool {
 
 // 模糊搜索玩家 (key可能为名字或id)
 func (s *FriendService) SearchByKey(key string) []*protos.FriendVo {
-	playerIds := playerservice.GetPlayerService().FuzzySearchPlayers(key)
+	playerIds := s.player.FuzzySearchPlayers(key)
 	friends := make([]*protos.FriendVo, 0)
 	for _, playerId := range playerIds {
-		profile := playerservice.GetPlayerService().GetPlayerProfileById(playerId)
+		profile := s.player.GetPlayerProfileById(playerId)
 		friends = append(friends, &protos.FriendVo{
 			Id:       playerId,
 			Name:     profile.Name,
@@ -123,7 +120,7 @@ func (s *FriendService) SearchByKey(key string) []*protos.FriendVo {
 		})
 	}
 	// 如果是id,添加到结果中
-	playerByName := playerservice.GetPlayerService().GetPlayerProfileById(key)
+	playerByName := s.player.GetPlayerProfileById(key)
 	if playerByName != nil {
 		friends = append(friends, &protos.FriendVo{
 			Id:       playerByName.Id,
@@ -138,7 +135,7 @@ func (s *FriendService) RefreshClientInfo(player *playerdomain.Player) {
 	applyItems := s.QueryApplyRecords(player.Id)
 	applyVos := make([]*protos.FriendApplyVo, 0, len(applyItems))
 	for _, apply := range applyItems {
-		fromPlayer := playerservice.GetPlayerService().GetPlayerProfileById(apply.FromId)
+		fromPlayer := s.player.GetPlayerProfileById(apply.FromId)
 		applyVos = append(applyVos, &protos.FriendApplyVo{
 			FromId:     fromPlayer.Id,
 			FromName:   fromPlayer.Name,
@@ -162,7 +159,7 @@ func (s *FriendService) RefreshClientInfo(player *playerdomain.Player) {
 
 // 申请好友
 func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string) int {
-	targetPlayer := playerservice.GetPlayerService().GetPlayerProfileById(friendId)
+	targetPlayer := s.player.GetPlayerProfileById(friendId)
 	if targetPlayer == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
@@ -192,7 +189,7 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 				targetFriendEnt := s.GetFriendEntOrCreate(friendId)
 				targetFriendEnt.Applies[applyItem.Id] = applyItem
 				s.SaveFriend(targetFriendEnt)
-				s.RefreshClientInfo(playerservice.GetPlayerService().GetPlayer(friendId))
+				s.RefreshClientInfo(s.player.GetPlayer(friendId))
 			}
 		}
 	} else {
@@ -233,13 +230,13 @@ func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId str
 		if network.IsOnline(apply.FromId) {
 			session := network.GetSessionByPlayerId(apply.FromId)
 			if session != nil {
-				players = append(players, playerservice.GetPlayerService().GetPlayer(apply.FromId))
+				players = append(players, s.player.GetPlayer(apply.FromId))
 				session.AsynTasks <- func() {
-					s.dealApplyRecord0(playerservice.GetPlayerService().GetPlayer(apply.TargetId), applyId, player.Id, status)
+					s.dealApplyRecord0(s.player.GetPlayer(apply.TargetId), applyId, player.Id, status)
 				}
 			}
 		} else {
-			s.dealApplyRecord0(playerservice.GetPlayerService().GetPlayer(apply.TargetId), applyId, player.Id, status)
+			s.dealApplyRecord0(s.player.GetPlayer(apply.TargetId), applyId, player.Id, status)
 		}
 	}
 

@@ -24,26 +24,28 @@ var (
 
 // 排行榜模块
 type RankService struct {
+	player *player.PlayerService
 }
 
-func GetRankService() *RankService {
-	once.Do(func() {
-		instance = &RankService{}
-		instance.init()
-	})
-	return instance
+func NewRankService(playerService *player.PlayerService) *RankService {
+	service := &RankService{
+		player: playerService,
+	}
+	service.init()
+	return service
 }
+
 
 func (rs *RankService) init() {
-	playerLevelRank := handler.NewPlayerLevelRankHandler()
+	playerLevelRank := handler.NewPlayerLevelRankHandler(rs.player)
 	playerLevelRank.Init()
 	handlers[PlayerLevelRank] = playerLevelRank
 
-	playerFightingRank := handler.NewPlayerFightingRankHandler()
+	playerFightingRank := handler.NewPlayerFightingRankHandler(rs.player)
 	playerFightingRank.Init()
 	handlers[PlayerFightingRank] = playerFightingRank
 
-	playerArenaRank := handler.NewPlayerArenaRankHandler()
+	playerArenaRank := handler.NewPlayerArenaRankHandler(rs.player)
 	playerArenaRank.Init()
 	handlers[PlayerArenaRank] = playerArenaRank
 }
@@ -54,7 +56,7 @@ func (rs *RankService) QueryRanks(rankType RankType, start int, end int) []proto
 	order := int32(start)
 	for _, record := range records {
 		vo := record.AsVo()
-		vo.Name = player.GetPlayerService().GetPlayerProfileById(record.GetId()).Name
+		vo.Name = rs.player.GetPlayerProfileById(record.GetId()).Name
 		vo.Order = order
 		rankInfos = append(rankInfos, vo)
 		order++

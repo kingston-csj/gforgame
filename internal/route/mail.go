@@ -6,18 +6,20 @@ import (
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/mail"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
+	player "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
 )
 
 type MailRoute struct {
 	network.Base
 	service *mail.MailService
+	player  *player.PlayerService
 }
 
-func NewMailRoute() *MailRoute {
+func NewMailRoute(service *mail.MailService, playerService *player.PlayerService) *MailRoute {
 	return &MailRoute{
-		service: mail.GetMailService(),
+		service: service,
+		player:  playerService,
 	}
 }
 
@@ -32,7 +34,7 @@ func (c *MailRoute) OnPlayerLogin(player *playerdomain.Player) {
 }
 
 func (c *MailRoute) ReqGetAllRewards(s *network.Session, index int32, msg *protos.ReqMailGetAllRewards) *protos.ResMailGetAllRewards {
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := c.player.GetPlayerBySession(s)
 	rewardVos := c.service.TakeAllRewards(player)
 	return &protos.ResMailGetAllRewards{
 		Code: 0,
@@ -41,7 +43,7 @@ func (c *MailRoute) ReqGetAllRewards(s *network.Session, index int32, msg *proto
 }
 
 func (c *MailRoute) ReqDeleteAll(s *network.Session, index int32, msg *protos.ReqMailDeleteAll) *protos.ResMailDeleteAll {
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := c.player.GetPlayerBySession(s)
 	removed := c.service.DeleteAll(player)
 	return &protos.ResMailDeleteAll{
 		Removed: removed,
@@ -49,7 +51,7 @@ func (c *MailRoute) ReqDeleteAll(s *network.Session, index int32, msg *protos.Re
 }
 
 func (c *MailRoute) ReqGetReward(s *network.Session, index int32, msg *protos.ReqMailGetReward) *protos.ResMailGetReward {
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := c.player.GetPlayerBySession(s)
 	code, rewardVos := c.service.TakeReward(player, msg.Id)
 	if code != 0 {
 		return &protos.ResMailGetReward{
@@ -62,7 +64,7 @@ func (c *MailRoute) ReqGetReward(s *network.Session, index int32, msg *protos.Re
 }
 
 func (c *MailRoute) ReqRead(s *network.Session, index int32, msg *protos.ReqMailRead) *protos.ResMailRead {
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := c.player.GetPlayerBySession(s)
 	code := c.service.Read(player, msg.Id)
 	return &protos.ResMailRead{
 		Code: int32(code),

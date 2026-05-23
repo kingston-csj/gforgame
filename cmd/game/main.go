@@ -209,35 +209,31 @@ func main() {
 
 	// 自动建表
 	bootstrap.InitMysqlDdl()
-	// 开发环境，导出所有客户端协议
-	bootstrap.DevOnlyExportProtocols()
 	// 加载配置数据
 	bootstrap.InitConfig()
 	// 预热服务并完成跨模块注册（避免首次请求时懒初始化副作用）
-	bootstrap.InitServices()
+	s := bootstrap.InitServices()
 	// 各自业务初始化
-	bootstrap.InitBusiness()
+	bootstrap.InitBusiness(s)
 	// 启动系统任务
 	bootstrap.StartSchedulers()
 
 	// 在这里，添加你的模块消息路由
 	modules := []network.Module{
-		route.NewPlayerRoute(),
-		route.NewHeroRoute(),
-		route.NewSceneRoute(),
-		route.NewQuestRoute(),
-		route.NewGmRoute(),
-		route.NewSignInRoute(),
+		route.NewPlayerRoute(s.Player),
+		route.NewHeroRoute(s.Hero, s.Player),
+		route.NewQuestRoute(s.Quest, s.Player),
+		route.NewGmRoute(s.Gm, s.Player),
+		route.NewSignInRoute(s.SignIn, s.Player),
 		route.NewItemRoute(),
-		route.NewMallRoute(),
-		route.NewMonthCardRoute(),
-		route.NewMailRoute(),
-		route.NewRankRoute(),
+		route.NewMallRoute(s.Mall, s.Player),
+		route.NewMonthCardRoute(s.MonthCard, s.Player),
+		route.NewMailRoute(s.Mail, s.Player),
+		route.NewRankRoute(s.Rank),
 		route.NewRechargeRoute(),
-		route.NewMixtureRoute(),
-		route.NewCatalogRoute(),
-		route.NewChatRoute(),
-		route.NewFriendRoute(),
+		route.NewMixtureRoute(s.Mixture, s.Player),
+		route.NewChatRoute(s.Chat, s.Player),
+		route.NewFriendRoute(s.Friend, s.Player),
 	}
 
 	node := ws.NewServer(

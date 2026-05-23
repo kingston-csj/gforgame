@@ -3,7 +3,6 @@ package hero
 import (
 	"fmt"
 	"strconv"
-	"sync"
 
 	"github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/internal/config"
@@ -19,21 +18,21 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/reward"
 	"github.com/forfun/gforgame/internal/service/item"
+	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
 // 英雄模块
-type HeroService struct{}
+type HeroService struct {
+	item   *item.ItemService
+	player *playerservice.PlayerService
+}
 
-var (
-	instance *HeroService
-	once     sync.Once
-)
-
-func GetHeroService() *HeroService {
-	once.Do(func() {
-		instance = &HeroService{}
-	})
-	return instance
+func NewHeroService(player *playerservice.PlayerService, itemService *item.ItemService) *HeroService {
+	service := &HeroService{
+		item:   itemService,
+		player: player,
+	}
+	return service
 }
 
 func (ps *HeroService) OnPlayerLogin(player *player.Player) {
@@ -141,7 +140,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*err
 				itemConsume.Consume(p, constants.ActionType_HeroRecruit)
 			}
 			if itemCount > 0 {
-				item.GetItemService().UseByModelId(p.Id, itemId, itemCount)
+				ps.item.UseByModelId(p.Id, itemId, itemCount)
 			}
 		}
 
@@ -168,7 +167,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*err
 					Type:  "item",
 					Value: fmt.Sprintf("%d_%d", heroData.ShardItem, heroData.ShardAmount),
 				})
-				item.GetItemService().AddByModelId(p.Id, heroData.ShardItem, heroData.ShardAmount)
+				ps.item.AddByModelId(p.Id, heroData.ShardItem, heroData.ShardAmount)
 			} else {
 				rewardVos = append(rewardVos, &protos.RewardVo{
 					Type:  "hero",

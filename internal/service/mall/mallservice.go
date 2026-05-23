@@ -1,8 +1,6 @@
 package mall
 
 import (
-	"sync"
-
 	"github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
@@ -18,16 +16,8 @@ import (
 type MallService struct {
 }
 
-var (
-	instance *MallService
-	once     sync.Once
-)
-
-func GetMallService() *MallService {
-	once.Do(func() {
-		instance = &MallService{}
-	})
-	return instance
+func NewMallService() *MallService {
+	return &MallService{}
 }
 
 func (s *MallService) OnPlayerLogin(player *playerdomain.Player) {

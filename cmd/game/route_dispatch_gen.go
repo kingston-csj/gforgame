@@ -57,17 +57,6 @@ func init() {
 		r.ReqLogin(session, index, req)
 		return nil, nil
 		},
-		105: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=105 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerUpLevel)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=105 expect=*protos.ReqPlayerUpLevel")
-		}
-		return r.ReqPlayerUpLevel(session, index, req), nil
-		},
 		106: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
 		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
 		if !ok {
@@ -366,28 +355,6 @@ func init() {
 			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2102 expect=*protos.ReqMonthCardGetReward")
 		}
 		return r.ReqGetReward(session, index, req), nil
-		},
-		2802: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.SceneRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2802 expect=*route.SceneRoute")
-		}
-		req, ok := msg.(*protos.ReqSceneSetData)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2802 expect=*protos.ReqSceneSetData")
-		}
-		return r.ReqUpdate(session, index, req), nil
-		},
-		2851: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.SceneRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2851 expect=*route.SceneRoute")
-		}
-		req, ok := msg.(*protos.ReqSceneGetData)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2851 expect=*protos.ReqSceneGetData")
-		}
-		return r.ReqQuery(session, index, req), nil
 		},
 		3001: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
 		r, ok := msgHandler.Receiver.Interface().(*route.SignInRoute)

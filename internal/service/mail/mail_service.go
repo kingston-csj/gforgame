@@ -27,8 +27,8 @@ var (
 // 邮件模块
 type MailService struct{}
 
-func GetMailService() *MailService {
-	return instance
+func NewMailService() *MailService {
+	return &MailService{}
 }
 
 func (s *MailService) AddServerMail(serverMail *playerdomain.ServerMail) {

@@ -94,7 +94,6 @@ func init() {
 
 	// ----from player.go----
 	network.RegisterMessage(103, &ReqPlayerLogin{})
-	network.RegisterMessage(105, &ReqPlayerUpLevel{})
 	network.RegisterMessage(106, &ReqPlayerUpStage{})
 	network.RegisterMessage(109, &ReqEditClientData{})
 	network.RegisterMessage(110, &ReqPlayerRefreshScore{})
@@ -153,5 +152,10 @@ func init() {
 	network.RegisterMessage(-151, &ResHeartBeat{})
 	network.RegisterMessage(-102, &ReqGetServerTime{})
 	network.RegisterMessage(-101, &ReqHeartBeat{})
+
+	// ----from transfer.go----
+	network.RegisterMessage(-352, &ResServerLogin{})
+	network.RegisterMessage(-302, &ReqServerLogin{})
+	network.RegisterMessage(-300, &TransferGateToLogic{})
 
 }

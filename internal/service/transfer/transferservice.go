@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
@@ -18,18 +17,12 @@ import (
 type TransferService struct{}
 
 var (
-	instance *TransferService
-	once     sync.Once
 	msgCodec = json.NewSerializer()
 )
 
-func GetTransferService() *TransferService {
-	once.Do(func() {
-		instance = &TransferService{}
-	})
-	return instance
+func NewTransferService() *TransferService {
+	return &TransferService{}
 }
-
 func (s *TransferService) TransferGateToLogic(session *network.Session, transfer *protos.TransferGateToLogic) {
 	typ, _ := network.GetMessageType(transfer.Cmd)
 	if typ == nil {

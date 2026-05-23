@@ -1,57 +1,57 @@
 package chat
 
 import (
-	"sync"
+	"time"
 
 	"github.com/forfun/gforgame/internal/constants"
+	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
-
-	"time"
-
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	friendservice "github.com/forfun/gforgame/internal/service/friend"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
 // 聊天模块
 type ChatService struct {
+	player   *playerservice.PlayerService
+	handlers map[int32]ChatChannelHandler
 }
 
-var (
-	instance            *ChatService
-	once                sync.Once
-	ChatChannelHandlers map[int32]ChatChannelHandler = make(map[int32]ChatChannelHandler)
-)
-
-func GetChatService() *ChatService {
-	once.Do(func() {
-		instance = &ChatService{}
-		ChatChannelHandlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler()
-		ChatChannelHandlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler()
-		for _, handler := range ChatChannelHandlers {
-			handler.Init()
-		}
-	})
-	return instance
-
+func NewChatService(player *playerservice.PlayerService, friend *friendservice.FriendService) *ChatService {
+	service := &ChatService{
+		player:   player,
+		handlers: make(map[int32]ChatChannelHandler),
+	}
+	service.handlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler(player, friend)
+	service.handlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler(player)
+	for _, chatHandler := range service.handlers {
+		chatHandler.Init()
+	}
+	return service
 }
 
 func (s *ChatService) LoadOfflineMessages(player *playerdomain.Player) {
 	offlineMessages := make([]*playerdomain.ChatMessage, 0)
-	for _, handler := range ChatChannelHandlers {
+	for _, handler := range s.handlers {
 		offlineMessages = append(offlineMessages, handler.LoadOfflineMessages(player)...)
 	}
 	messages := make([]*protos.ChatMessageVo, 0)
 	for _, message := range offlineMessages {
-		messages = append(messages, &protos.ChatMessageVo{
+		sender := s.player.GetPlayerProfileById(message.SenderId)
+		messageVo := &protos.ChatMessageVo{
 			Id:         message.Id,
 			Channel:    message.Channel,
 			SenderId:   message.SenderId,
-			SenderHead: message.SenderHead,
+			ReceiverId: message.ReceiverId,
 			Timestamp:  message.Timestamp,
 			Content:    message.Content,
-		})
+		}
+		if sender != nil {
+			messageVo.SenderName = sender.Name
+			messageVo.SenderHead = sender.Head
+		}
+		messages = append(messages, messageVo)
 	}
 	push := &protos.PushChatNewMessage{
 		Messages: messages,
@@ -60,7 +60,7 @@ func (s *ChatService) LoadOfflineMessages(player *playerdomain.Player) {
 }
 
 func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqChat) *protos.ResChat {
-	handler := ChatChannelHandlers[int32(msg.Channel)]
+	handler := s.handlers[int32(msg.Channel)]
 	if handler == nil {
 		return &protos.ResChat{
 			Code: -1,
@@ -72,7 +72,7 @@ func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqCh
 			Code: code,
 		}
 	}
-	playerProfile := playerservice.GetPlayerService().GetPlayerProfileById(player.Id)
+	playerProfile := s.player.GetPlayerProfileById(player.Id)
 	if playerProfile == nil {
 		return &protos.ResChat{
 			Code: -1,
@@ -82,6 +82,7 @@ func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqCh
 		Id:         idgen.GetNextID(),
 		Channel:    int32(msg.Channel),
 		SenderId:   player.Id,
+		ReceiverId: msg.Target,
 		SenderHead: playerProfile.Head,
 		Timestamp:  time.Now().Unix(),
 		Content:    msg.Content,

@@ -11,12 +11,13 @@ type TransferRoute struct {
 	service *transfer.TransferService
 }
 
-func NewTransferRoute() *TransferRoute {
-	return &TransferRoute{}
+func NewTransferRoute(service *transfer.TransferService) *TransferRoute {
+	return &TransferRoute{
+		service: service,
+	}
 }
 
 func (r *TransferRoute) Init() {
-	r.service = transfer.GetTransferService()
 }
 
 func (r *TransferRoute) ReqTransferGateToLogic(playerId string, s *network.Session, index int32, msg *protos.TransferGateToLogic) interface{} {

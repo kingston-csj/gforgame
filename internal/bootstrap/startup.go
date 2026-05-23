@@ -5,8 +5,6 @@ import (
 
 	dataconfig "github.com/forfun/gforgame/internal/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/service/activity"
-	"github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/system"
 )
 
@@ -36,20 +34,16 @@ func InitMysqlDdl() {
 	}
 }
 
-// DevOnlyExportProtocols 开发环境导出客户端协议与注册代码。
-func DevOnlyExportProtocols() {
-	// 已迁移到 go:generate，运行时不再生成文件，避免启动抖动和二次启动副作用。
-}
-
 // InitConfig 初始化配置数据。
 func InitConfig() {
 	dataconfig.GetDataManager()
 }
 
+
 // InitBusiness 预热业务数据和计划任务。
-func InitBusiness() {
-	player.GetPlayerService().LoadPlayerProfile()
-	activity.GetActivityService().ScheduleAllActivity()
+func InitBusiness(s *Services) {
+	s.Player.LoadPlayerProfile()
+	s.Activity.ScheduleAllActivity()
 }
 
 // StartSchedulers 启动系统级定时任务。

@@ -11,9 +11,9 @@ type RankRoute struct {
 	service *rank.RankService
 }
 
-func NewRankRoute() *RankRoute {
+func NewRankRoute(service *rank.RankService) *RankRoute {
 	return &RankRoute{
-		service: rank.GetRankService(),
+		service: service,
 	}
 }
 

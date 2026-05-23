@@ -2,8 +2,6 @@
 package mixture
 
 import (
-	"sync"
-
 	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -12,16 +10,8 @@ import (
 // 混合服务
 type MixtureService struct{}
 
-var (
-	instance *MixtureService
-	once     sync.Once
-)
-
-func GetMixtureService() *MixtureService {
-	once.Do(func() {
-		instance = &MixtureService{}
-	})
-	return instance
+func NewMixtureService() *MixtureService {
+	return &MixtureService{}
 }
 
 func (s *MixtureService) OnClientUploadEvent(player *player.Player, event int32)  {

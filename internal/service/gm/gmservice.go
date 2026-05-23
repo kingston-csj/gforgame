@@ -4,29 +4,14 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 
-	"github.com/forfun/gforgame/common/errors"
+	commonerrors "github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util/conv"
-	"github.com/forfun/gforgame/common/util/jsonutil"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/consume"
-	"github.com/forfun/gforgame/internal/context"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/events"
-	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
-	"github.com/forfun/gforgame/internal/reward"
-	"github.com/forfun/gforgame/internal/service/item"
-	"github.com/forfun/gforgame/internal/service/mail"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
-	questservice "github.com/forfun/gforgame/internal/service/quest"
-	"github.com/forfun/gforgame/internal/service/recharge"
-	"github.com/forfun/gforgame/internal/service/scene"
-	"github.com/forfun/gforgame/internal/system"
 )
 
-type GmHandler func(player *playerdomain.Player, params string) *errors.BusinessError
+type GmHandler func(player *playerdomain.Player, params string) *commonerrors.BusinessError
 
 type GmCommand struct {
 	Topic       string
@@ -40,36 +25,34 @@ type GmService struct {
 	commands map[string]*GmCommand
 }
 
-var (
-	instance *GmService
-	once     sync.Once
-)
-
-func GetGmService() *GmService {
-	once.Do(func() {
-		instance = &GmService{
-			commands: make(map[string]*GmCommand),
-		}
-		instance.init()
-	})
-	return instance
+type GmRegistrar interface {
+	RegisterTo(gm *GmService)
 }
 
-func (s *GmService) init() {
-	s.Register("help", "查看所有GM命令", "help", s.handleHelp)
-	s.Register("reset", "重置玩家数据", "reset", handleReset)
-	s.Register("level", "修改等级", "level 100", handleLevel)
-	s.Register("add_items", "添加物品", "add_items 1001=1;1002=2", handleAddItems)
-	s.Register("remove_items", "移除物品", "remove_items 1001=1", handleRemoveItems)
-	s.Register("add_diamond", "添加钻石", "add_diamond 1000", handleAddDiamond)
-	s.Register("add_gold", "添加金币", "add_gold 1000", handleAddGold)
-	s.Register("quest", "完成任务", "quest 1001", handleQuest)
-	s.Register("recharge", "模拟充值", "recharge 1", handleRecharge)
-	s.Register("add_scene_items", "添加场景物品", "add_scene_items 1001=1", handleAddSceneItems)
-	s.Register("remove_scene_items", "移除场景物品", "remove_scene_items 1001=1", handleRemoveSceneItems)
-	s.Register("daily_reset", "触发每日重置", "daily_reset", handleDailyReset)
-	s.Register("add_mail", "添加邮件", "add_mail 1001", handleAddMail)
-	s.Register("clone", "克隆玩家", "clone 1001", handleClone)
+func NewGmService(deps *GmDependencies) *GmService {
+	resolved := buildGmDependencies(deps)
+	service := &GmService{
+		commands: make(map[string]*GmCommand),
+	}
+	service.init(resolved)
+	return service
+}
+
+func (s *GmService) init(deps *GmDependencies) {
+	s.registerHandlers(
+		NewSystemGmHandler(),
+		NewPlayerGmHandler(deps.Player),
+		NewItemGmHandler(deps.Item),
+		NewQuestGmHandler(deps.Quest),
+		NewRechargeGmHandler(deps.Recharge),
+		NewMailGmHandler(deps.Mail),
+	)
+}
+
+func (s *GmService) registerHandlers(handlers ...GmRegistrar) {
+	for _, handler := range handlers {
+		handler.RegisterTo(s)
+	}
 }
 
 func (s *GmService) Register(topic, desc, example string, handler GmHandler) {
@@ -81,7 +64,7 @@ func (s *GmService) Register(topic, desc, example string, handler GmHandler) {
 	}
 }
 
-func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params string) *errors.BusinessError {
+func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params string) *commonerrors.BusinessError {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Error("gm dispatch fail", err.(error))
@@ -91,23 +74,20 @@ func (s *GmService) Dispatch(player *playerdomain.Player, topic string, params s
 	cmd, ok := s.commands[topic]
 	if !ok {
 		logger.ErrorNoStack(fmt.Sprintf("gm command not found: %s", topic))
-		return errors.NewBusinessError(constants.I18N_GM_UNKNOWN_COMMAND)
+		return commonerrors.NewBusinessError(constants.I18N_GM_UNKNOWN_COMMAND)
 	}
-
+	// 去掉各各尾的换行符
+	params = strings.TrimSuffix(params, "\r\n")
+	params = strings.TrimSuffix(params, "\n")
 	err := cmd.Handler(player, params)
-
-	// 触发玩家变更事件
-	context.EventBus.Publish(events.PlayerEntityChange, player)
 
 	return err
 }
 
-// ================= GM Handlers =================
-
-func (s *GmService) handleHelp(player *playerdomain.Player, params string) *errors.BusinessError {
+func (s *GmService) handleHelp(player *playerdomain.Player, params string) *commonerrors.BusinessError {
 	var sb strings.Builder
 	sb.WriteString("\n=== GM Commands ===\n")
-	
+
 	// 按Topic排序输出
 	var topics []string
 	for topic := range s.commands {
@@ -120,164 +100,5 @@ func (s *GmService) handleHelp(player *playerdomain.Player, params string) *erro
 		sb.WriteString(fmt.Sprintf("%-20s : %s \n\tExample: %s\n", cmd.Topic, cmd.Description, cmd.Example))
 	}
 	logger.Info(sb.String())
-	return nil
-}
-
-func handleReset(player *playerdomain.Player, params string) *errors.BusinessError {
-	player.Reset()
-	var scenes []playerdomain.Scene
-	err := mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
-	if err != nil {
-		logger.Error("gm reset scene fail", err)
-		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
-	}
-	for _, item := range scenes {
-		sceneId := item.Id[len(player.Id)+1:]
-		cacheScene := scene.GetSceneService().GetSceneRecord(player.Id, sceneId)
-		cacheScene.Data = ""
-		scene.GetSceneService().SaveScene(cacheScene)
-	}
-	return nil
-}
-
-func handleLevel(player *playerdomain.Player, params string) *errors.BusinessError {
-	player.Level = conv.Int32Value(params)
-	playerservice.GetPlayerService().GetPlayerProfileById(player.Id)
-	return nil
-}
-
-func handleAddItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	for itemId, itemNum := range itemIdMap {
-		item.GetItemService().AddByModelId(player.Id, itemId, itemNum)
-	}
-	return nil
-}
-
-func handleRemoveItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	consums := &consume.AndConsume{}
-	for itemId, itemNum := range itemIdMap {
-		consums.Add(&consume.ItemConsume{
-			ItemId: itemId,
-			Amount: itemNum,
-		})
-	}
-	if err := consums.Verify(player); err != nil {
-		return err.(*errors.BusinessError)
-	}
-	consums.Consume(player, constants.ActionType_Gm)
-	return nil
-}
-
-func handleAddDiamond(player *playerdomain.Player, params string) *errors.BusinessError {
-	count, _ := conv.StringToInt32(params)
-	reward := &reward.CurrencyReward{
-		Currency: "diamond",
-		Amount:   count,
-	}
-	reward.Reward(player, constants.ActionType_Gm)
-	return nil
-}
-
-func handleAddGold(player *playerdomain.Player, params string) *errors.BusinessError {
-	count, _ := conv.StringToInt32(params)
-	reward := &reward.CurrencyReward{
-		Currency: "gold",
-		Amount:   count,
-	}
-	reward.Reward(player, constants.ActionType_Gm)
-	return nil
-}
-
-func handleQuest(player *playerdomain.Player, params string) *errors.BusinessError {
-	questId, _ := conv.StringToInt32(params)
-	questservice.GetQuestService().GmFinish(player, questId)
-	return nil
-}
-
-func handleRecharge(player *playerdomain.Player, params string) *errors.BusinessError {
-	rechargeId, _ := conv.StringToInt32(params)
-	recharge.GetRechargeService().Recharge(player, rechargeId)
-	return nil
-}
-
-func handleAddSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	for itemId, itemNum := range itemIdMap {
-		err := item.GetSceneItemService().AddByModelId(player.Id, itemId, itemNum)
-		if err != nil {
-			return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-		}
-	}
-	return nil
-}
-
-func handleRemoveSceneItems(player *playerdomain.Player, params string) *errors.BusinessError {
-	itemIdMap, err := conv.ToIntIntMap(params, ";", "=")
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	for itemId, itemNum := range itemIdMap {
-		item.GetSceneItemService().UseByModelId(player.Id, itemId, itemNum)
-	}
-	return nil
-}
-
-func handleDailyReset(player *playerdomain.Player, params string) *errors.BusinessError {
-	system.PerformDailyUpdate()
-	return nil
-}
-
-
-func handleAddMail(player *playerdomain.Player, params string) *errors.BusinessError {
-	mail.GetMailService().SendSimpleMail(player, conv.Int32Value(params))
-	return nil
-}
-
-func handleClone(player *playerdomain.Player, params string) *errors.BusinessError {
-	targetId := params
-	if player.Id == targetId {
-		return errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	// 复制玩家数据
-	var to playerdomain.Player
-	json, err := jsonutil.StructToJSON(player)
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
-	}
-	err = jsonutil.JsonToStruct(json, &to)
-	if err != nil {
-		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
-	}
-	to.Id = targetId
-	to.Name = playerservice.GetPlayerService().RandomName()
-	playerservice.GetPlayerService().SavePlayer(&to)
-
-	// 复制场景数据
-	var scenes []playerdomain.Scene
-	err = mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
-	if err != nil {
-		logger.Error("gm reset scene fail", err)
-		return errors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
-	}
-	for _, item := range scenes {
-		sceneId := item.Id[len(player.Id)+1:]
-		fromScene := scene.GetSceneService().GetSceneRecord(player.Id, sceneId)
-		toScene := scene.GetSceneService().GetOrCreateScene(targetId, sceneId)
-		toScene.Data = fromScene.Data
-		scene.GetSceneService().SaveScene(toScene)
-	}
-
-
 	return nil
 }

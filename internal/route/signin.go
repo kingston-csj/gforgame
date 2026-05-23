@@ -5,20 +5,22 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/protos"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
+	player "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/signin"
 	"github.com/forfun/gforgame/network"
 )
 
-// SignInRoute 签到路由
+// SignInRoute 绛惧埌璺敱
 type SignInRoute struct {
 	network.Base
 	service *signin.SignInService
+	player  *player.PlayerService
 }
 
-func NewSignInRoute() *SignInRoute {
+func NewSignInRoute(service *signin.SignInService, playerService *player.PlayerService) *SignInRoute {
 	return &SignInRoute{
-		service: signin.GetSignInService(),
+		service: service,
+		player:  playerService,
 	}
 }
 
@@ -29,7 +31,7 @@ func (ps *SignInRoute) Init() {
 }
 
 func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.ReqSignIn) *protos.ResSignIn{
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := ps.player.GetPlayerBySession(s)
 	err := ps.service.SignIn(player)
 	if err != nil {
 		return &protos.ResSignIn{
@@ -40,7 +42,7 @@ func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.Re
 }
 
 func (ps *SignInRoute) ReqSignInMakeup(s *network.Session, index int32, msg *protos.ReqSignInMakeup) *protos.ResSignInMakeup{
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := ps.player.GetPlayerBySession(s)
 	err := ps.service.SignInMakeUp(player, msg.Day)
 	if err != nil {
 		return &protos.ResSignInMakeup{

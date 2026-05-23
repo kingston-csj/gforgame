@@ -9,36 +9,41 @@ import (
 
 type FriendChannelHandler struct {
 	*BaseChatChannelHandler
+	friend *friend.FriendService
+	player *playerservice.PlayerService
 }
 
 func (h *FriendChannelHandler) Init() {
 
 }
 
-func NewFriendChatChannelHandler() *FriendChannelHandler {
-	h := &FriendChannelHandler{}
-	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h)
+func NewFriendChatChannelHandler(player *playerservice.PlayerService, friendService *friend.FriendService) *FriendChannelHandler {
+	h := &FriendChannelHandler{
+		friend: friendService,
+		player: player,
+	}
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, player)
 	return h
 }
 
 func (h *FriendChannelHandler) CheckCanSend(player *playerdomain.Player, target string, content string) int {
-	if playerservice.GetPlayerService().GetPlayerProfileById(target) == nil {
+	if h.player.GetPlayerProfileById(target) == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
-	if friend.GetFriendService().IsFriend(player.Id, target) {
+	if !h.friend.IsFriend(player.Id, target) {
 		return constants.I18N_FRIEND_TIPS1
 	}
 	return 0
 }
 
 func (h *FriendChannelHandler) SaveToDb(message *playerdomain.ChatMessage) {
-	from := playerservice.GetPlayerService().GetPlayer(message.SenderId)
+	from := h.player.GetPlayer(message.SenderId)
 	from.ExtendBox.AddNewMessage(message)
-	playerservice.GetPlayerService().SavePlayer(from)
+	h.player.SavePlayer(from)
 
-	to := playerservice.GetPlayerService().GetPlayer(message.ReceiverId)
+	to := h.player.GetPlayer(message.ReceiverId)
 	to.ExtendBox.AddNewMessage(message)
-	playerservice.GetPlayerService().SavePlayer(to)
+	h.player.SavePlayer(to)
 }
 
 func (h *FriendChannelHandler) LoadOfflineMessages(player *playerdomain.Player) []*playerdomain.ChatMessage {
@@ -49,6 +54,7 @@ func (h *FriendChannelHandler) LoadOfflineMessages(player *playerdomain.Player) 
 				Id:         v2.Id,
 				Channel:    v2.Channel,
 				SenderId:   v2.SenderId,
+				ReceiverId: v2.ReceiverId,
 				SenderHead: v2.SenderHead,
 				Timestamp:  v2.Timestamp,
 				Content:    v2.Content,

@@ -5,18 +5,21 @@ import (
 
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/mixture"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
+
+	player "github.com/forfun/gforgame/internal/service/player"
 )
 
 type MixtureRoute struct {
 	network.Base
 	service *mixture.MixtureService
+	player  *player.PlayerService
 }
 
-func NewMixtureRoute() *MixtureRoute {
+func NewMixtureRoute(service *mixture.MixtureService, playerService *player.PlayerService) *MixtureRoute {
 	return &MixtureRoute{
-		service: mixture.GetMixtureService(),
+		service: service,
+		player:  playerService,
 	}
 }
 
@@ -30,7 +33,7 @@ func (ps *MixtureRoute) ReqIdleViewReward(s *network.Session, index int32, msg *
 }
 
 func (ps *MixtureRoute) ReqClientUploadEvent(s *network.Session, index int32, msg *protos.ReqClientUploadEvent) *protos.ResClientUploadEvent {
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := ps.player.GetPlayerBySession(s)
 	ps.service.OnClientUploadEvent(player, msg.Type)
 	return &protos.ResClientUploadEvent{
 		Code: 0,

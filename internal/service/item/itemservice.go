@@ -1,8 +1,6 @@
 package item
 
 import (
-	"sync"
-
 	"github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/internal/protos"
 
@@ -25,23 +23,25 @@ import (
 // 普通道具模块
 type ItemService struct {
 	network.Base
+	player  *playerservice.PlayerService
+	catalog *catalog.CatalogService
 }
 
 var (
 	itemservice           *ItemService
-	once               sync.Once
 	errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	notEnoughError = errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
 )
 
 var RecruitItemId int32 = 2002
 
-func GetItemService() *ItemService {
-	once.Do(func() {
-		itemservice = &ItemService{}
-		itemservice.init()
-	})
-	return itemservice
+func NewItemService(player *playerservice.PlayerService, catalogService *catalog.CatalogService) *ItemService {
+	service := &ItemService{
+		player:  player,
+		catalog: catalogService,
+	}
+	service.init()
+	return service
 }
 
 func (s *ItemService) init() {
@@ -50,7 +50,7 @@ func (s *ItemService) init() {
 }
 
 func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) error {
-	p := playerservice.GetPlayerService().GetPlayer(playerId)
+	p := s.player.GetPlayer(playerId)
 	backpack := p.Backpack
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
@@ -86,7 +86,7 @@ func (s *ItemService) UseByUid(p *playerdomain.Player, itemUid string, count int
 }
 
 func (s *ItemService) AddByModelId(playerId string, itemId int32, count int32) error {
-	p := playerservice.GetPlayerService().GetPlayer(playerId)
+	p := s.player.GetPlayer(playerId)
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
 	}
@@ -103,7 +103,7 @@ func (s *ItemService) AddByModelId(playerId string, itemId int32, count int32) e
 		return err
 	}
 	// 激活图鉴
-	catalog.GetCatalogService().TryUnlock(p, 1, itemId)
+	s.catalog.TryUnlock(p, 1, itemId)
 
 	// 发布事件，供任务系统使用
 	context.EventBus.Publish(events.PlayerEntityChange, p)

@@ -11,10 +11,14 @@ import (
 
 type PlayerLevelRankHandler struct {
 	BaseRankHandler
+	player *playerservice.PlayerService
 }
 
-func NewPlayerLevelRankHandler() *PlayerLevelRankHandler {
-	return &PlayerLevelRankHandler{BaseRankHandler: BaseRankHandler{rankContainer: container.NewConcurrentRankContainer(100)}}
+func NewPlayerLevelRankHandler(player *playerservice.PlayerService) *PlayerLevelRankHandler {
+	return &PlayerLevelRankHandler{
+		BaseRankHandler: BaseRankHandler{rankContainer: container.NewConcurrentRankContainer(100)},
+		player:          player,
+	}
 }
 
 func (p *PlayerLevelRankHandler) Init() {
@@ -29,11 +33,11 @@ func (p *PlayerLevelRankHandler) Init() {
 }
 
 func (p *PlayerLevelRankHandler) GetMyRankInfo(playerId string) *protos.RankInfo {
-	player := playerservice.GetPlayerService().GetPlayer(playerId)
+	player := p.player.GetPlayer(playerId)
 	rankInfo := &protos.RankInfo{
-		Id: player.Id,
-		Order: int32(p.QueryRankOrder(player.Id)),
-		Value: int64(player.Level),
+		Id:          player.Id,
+		Order:       int32(p.QueryRankOrder(player.Id)),
+		Value:       int64(player.Level),
 		SecondValue: 0,
 		ExtraInfo:   "",
 	}

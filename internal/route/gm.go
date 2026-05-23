@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/forfun/gforgame/internal/service/gm"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
+	player "github.com/forfun/gforgame/internal/service/player"
 
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
@@ -13,11 +13,13 @@ import (
 type GmRoute struct {
 	network.Base
 	service *gm.GmService
+	player  *player.PlayerService
 }
 
-func NewGmRoute() *GmRoute {
+func NewGmRoute(service *gm.GmService, playerService *player.PlayerService) *GmRoute {
 	return &GmRoute{
-		service: gm.GetGmService(),
+		service: service,
+		player:  playerService,
 	}
 }
 
@@ -30,7 +32,7 @@ func (ps *GmRoute) ReqAction(s *network.Session, index int32, msg *protos.ReqGmC
 	if len(strings.Split(msg.Args, " "))>=2 {
 		params = strings.Split(msg.Args, " ")[1]
 	} 
-	player := playerservice.GetPlayerService().GetPlayerBySession(s)
+	player := ps.player.GetPlayerBySession(s)
 	err := ps.service.Dispatch(player, topic, params)
 	if err != nil {
 		return &protos.ResGmCommand{Code: int32(err.Code())}
