@@ -16,19 +16,25 @@ const (
 	CmdReqServerLogin         = -302
 	CmdResServerLogin         = -352
 
-	CmdPlayerReqLogin          = 103
-	CmdReqPlayerLogin        = 105
-	CmdPlayerReqUpStage        = 106
-	CmdPlayerReqRefreshScore   = 110
-	CmdPlayerReqEditClientData = 109
+	CmdReqPlayerLogin        = 103
+	CmdReqPlayerUpLevel      = 105
+	CmdReqPlayerUpStage      = 106
+	CmdReqEditPlayer         = 107
+	CmdReqPlayerRefreshScore = 110
+	CmdReqEditClientData     = 109
 
-	CmdPlayerResLogin           = 154
-	CmdPlayerPushLoadComplete   = 155
-	CmdPlayerResUpLevel         = 152
-	CmdPlayerResUpStage         = 153
-	CmdPlayerPushDailyResetInfo = 156
-	CmdPlayerResEditClientData  = 171
-	CmdPlayerResRefreshScore    = 172
+	CmdResPlayerLogin        = 154
+	CmdPushLoadComplete      = 155
+	CmdResPlayerUpLevel      = 152
+	CmdResPlayerUpStage      = 153
+	CmdResUpdateGuide        = 159
+	CmdPushDailyResetInfo    = 156
+	CmdResEditPlayer         = 160
+	CmdPushUpdateFighting    = 170
+	CmdResEditClientData     = 171
+	CmdResPlayerRefreshScore = 172
+	CmdPushEditClientData    = 195
+	CmdPushPlayerRename      = 196
 
 	CmdPlayerReqCreate        = 2003
 	CmdPlayerResCreate        = 2004

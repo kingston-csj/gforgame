@@ -4,7 +4,9 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/internal/constants"
+	"github.com/forfun/gforgame/internal/context"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -29,6 +31,12 @@ func NewChatService(player *playerservice.PlayerService, friend *friendservice.F
 		chatHandler.Init()
 	}
 	return service
+}
+
+func (s *ChatService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.LoadOfflineMessages(data.(*playerdomain.Player))
+	})
 }
 
 func (s *ChatService) LoadOfflineMessages(player *playerdomain.Player) {

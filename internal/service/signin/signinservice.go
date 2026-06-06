@@ -25,6 +25,14 @@ func NewSignInService() *SignInService {
 }
 
 
+func (s *SignInService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.OnPlayerLogin(data.(*playerdomain.Player))
+	})
+}
+
+
+
 func (s *SignInService) OnPlayerLogin(player *playerdomain.Player) {
     push := &protos.PushSigninInfo{};
     push.SigninDays = player.MonthlyReset.SignInDays

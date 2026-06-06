@@ -31,6 +31,12 @@ func NewMailService() *MailService {
 	return &MailService{}
 }
 
+func (s *MailService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.CheckMailsOnLogin(data.(*playerdomain.Player))
+	})
+}
+
 func (s *MailService) AddServerMail(serverMail *playerdomain.ServerMail) {
 	serverMails[serverMail.Id] = serverMail
 }

@@ -11,7 +11,6 @@ type Options struct {
 	MessageCodec codec.MessageCodec
 	IoDispatch   network.IoDispatch
 	DispatchWorkers int
-	modules      []network.Module
 	Router       *network.MessageRoute
 }
 
@@ -42,13 +41,6 @@ func WithCodec(codec codec.MessageCodec) Option {
 func WithRouter(r *network.MessageRoute) Option {
 	return func(opt *Options) {
 		opt.Router = r
-	}
-}
-
-// WithModules 注册消息路由
-func WithModules(ms ...network.Module) Option {
-	return func(opt *Options) {
-		opt.modules = append(opt.modules, ms...)
 	}
 }
 

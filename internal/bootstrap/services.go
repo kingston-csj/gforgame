@@ -1,6 +1,8 @@
 package bootstrap
 
 import (
+	"reflect"
+
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/internal/service/activity"
 	"github.com/forfun/gforgame/internal/service/arena"
@@ -50,6 +52,12 @@ type Services struct {
 	Vip       *vip.VipService
 }
 
+
+// ServiceModule 定义 service 启动期初始化能力。
+type ServiceModule interface {
+	Init()
+}
+
 // InitServices 预热服务并完成跨模块注册（reward/consume ops 等）。
 func InitServices() *Services {
 	logger.Info("InitServices")
@@ -81,5 +89,25 @@ func InitServices() *Services {
 		Recharge:  s.Recharge,
 		Mail:      s.Mail,
 	})
+
+	s.InitServiceModules()
 	return s
+}
+
+// InitServiceModules 统一执行 service 启动初始化。
+func (s *Services) InitServiceModules() {
+	v := reflect.ValueOf(s).Elem()
+	for i := 0; i < v.Type().NumField(); i++ {
+		field := v.Field(i)
+		if field.Kind() != reflect.Ptr {
+			continue
+		}
+		if field.IsNil() {
+			continue
+		}
+		// 判断是否实现了 ServiceModule 接口
+		if module, ok := field.Interface().(ServiceModule); ok {
+			module.Init()
+		}
+	}
 }

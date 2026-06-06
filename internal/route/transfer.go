@@ -7,7 +7,6 @@ import (
 )
 
 type TransferRoute struct {
-	network.Base
 	service *transfer.TransferService
 }
 
@@ -15,9 +14,6 @@ func NewTransferRoute(service *transfer.TransferService) *TransferRoute {
 	return &TransferRoute{
 		service: service,
 	}
-}
-
-func (r *TransferRoute) Init() {
 }
 
 func (r *TransferRoute) ReqTransferGateToLogic(playerId string, s *network.Session, index int32, msg *protos.TransferGateToLogic) interface{} {

@@ -1,9 +1,6 @@
 package route
 
 import (
-	"github.com/forfun/gforgame/internal/context"
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/protos"
 	player "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/signin"
@@ -12,7 +9,6 @@ import (
 
 // SignInRoute 绛惧埌璺敱
 type SignInRoute struct {
-	network.Base
 	service *signin.SignInService
 	player  *player.PlayerService
 }
@@ -22,12 +18,6 @@ func NewSignInRoute(service *signin.SignInService, playerService *player.PlayerS
 		service: service,
 		player:  playerService,
 	}
-}
-
-func (ps *SignInRoute) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
-		ps.service.OnPlayerLogin(data.(*playerdomain.Player))
-	})
 }
 
 func (ps *SignInRoute) ReqSignIn(s *network.Session, index int32, msg *protos.ReqSignIn) *protos.ResSignIn{

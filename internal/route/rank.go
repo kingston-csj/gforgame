@@ -7,7 +7,6 @@ import (
 )
 
 type RankRoute struct {
-	network.Base
 	service *rank.RankService
 }
 
@@ -15,9 +14,6 @@ func NewRankRoute(service *rank.RankService) *RankRoute {
 	return &RankRoute{
 		service: service,
 	}
-}
-
-func (c *RankRoute) Init() {
 }
 
 func (c *RankRoute) ReqRankQuery(s *network.Session, index int32, msg *protos.ReqRankQuery) *protos.ResRankQuery {

@@ -3,8 +3,10 @@ package catalog
 import (
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
+	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/reward"
@@ -16,6 +18,13 @@ type CatalogService struct {
 func NewCatalogService() *CatalogService {
 	return &CatalogService{}
 }
+
+func (s *CatalogService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.OnPlayerLogin(data.(*playerdomain.Player))
+	})
+}
+
 
 
 func (s *CatalogService) OnPlayerLogin(player *playerdomain.Player) {

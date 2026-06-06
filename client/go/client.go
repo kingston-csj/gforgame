@@ -73,12 +73,8 @@ func main() {
 		Level:      999,
 	}
 	cross.PlayerLoginRemote(p, cross.Island)
-	network.RegisterMessage(protos.CmdChaJoinRoom, &protos.ReqJoinRoom{})
 	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
-	network.RegisterMessage(protos.CmdPlayerReqLogin, &protos.ReqPlayerLogin{})
-	network.RegisterMessage(protos.CmdPlayerResLogin, &protos.ResPlayerLogin{})
-	network.RegisterMessage(protos.CmdPlayerReqCreate, &protos.ReqPlayerCreate{})
-	network.RegisterMessage(protos.CmdPlayerResCreate, &protos.ResPlayerCreate{})
+	network.RegisterMessage(protos.CmdResPlayerLogin, &protos.ResPlayerLogin{})
 
 	// 服务器地址和端口
 	address := "127.0.0.1:9090"

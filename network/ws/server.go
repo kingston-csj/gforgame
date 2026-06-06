@@ -48,15 +48,6 @@ func (n *WsServer) Start() error {
 		return errors.New("service address cannot be empty")
 	}
 
-	modules := n.modules
-	for _, c := range modules {
-		c.Init()
-		err := n.Router.RegisterMessageHandlers(c)
-		if err != nil {
-			return err
-		}
-	}
-
 	if err := n.startListen(); err != nil {
 		return err
 	}
@@ -177,8 +168,5 @@ func (n *WsServer) Stop() {
 		}
 
 		network.CloseAllSessions()
-		for _, c := range n.modules {
-			c.Shutdown()
-		}
 	})
 }

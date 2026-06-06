@@ -11,7 +11,7 @@ type Options struct {
 	MessageCodec codec.MessageCodec
 	IoDispatch   network.IoDispatch
 	wsPath       string
-	modules      []network.Module
+	modules      []any
 	Router       *network.MessageRoute
 	payloadMode  network.PayloadMode
 }
@@ -47,7 +47,7 @@ func WithWsPath(path string) Option {
 }
 
 // WithModules 注册消息路由
-func WithModules(ms ...network.Module) Option {
+func WithModules(ms ...any) Option {
 	return func(opt *Options) {
 		opt.modules = append(opt.modules, ms...)
 	}

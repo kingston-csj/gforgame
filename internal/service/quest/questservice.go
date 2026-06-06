@@ -67,6 +67,11 @@ func (s *QuestService) wireResolver() {
 	}
 }
 
+func (s *QuestService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.OnPlayerLogin(data.(*playerdomain.Player))
+	})
+}
 func (s *QuestService) OnPlayerLogin(player *playerdomain.Player) {
 	for id, quest := range player.QuestBox.Doing {
 		questData := config.QueryById[configdomain.QuestData](quest.Id)

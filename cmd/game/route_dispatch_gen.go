@@ -57,6 +57,17 @@ func init() {
 		r.ReqLogin(session, index, req)
 		return nil, nil
 		},
+		105: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
+		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+		if !ok {
+			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=105 expect=*route.PlayerRoute")
+		}
+		req, ok := msg.(*protos.ReqPlayerUpLevel)
+		if !ok {
+			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=105 expect=*protos.ReqPlayerUpLevel")
+		}
+		return r.ReqPlayerUpLevel(session, index, req), nil
+		},
 		106: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
 		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
 		if !ok {
@@ -320,18 +331,6 @@ func init() {
 			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1906 expect=*protos.ReqFriendDelete")
 		}
 		return r.ReqDelete(session, index, req), nil
-		},
-		2003: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2003 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerCreate)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2003 expect=*protos.ReqPlayerCreate")
-		}
-		r.ReqCreate(session, req)
-		return nil, nil
 		},
 		2005: func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error) {
 		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)

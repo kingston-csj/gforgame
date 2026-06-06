@@ -28,6 +28,7 @@ import (
 	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/system"
 	"github.com/forfun/gforgame/network"
+	"gorm.io/gorm"
 )
 
 var (
@@ -38,7 +39,6 @@ var (
 
 // 玩家模块
 type PlayerService struct {
-	network.Base
 	playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
 	// 双向map, id -> name
 	idNameMapper *hashmap.SyncDualHashMap[string, string]
@@ -58,6 +58,42 @@ func NewPlayerService( questService *questservice.QuestService) *PlayerService {
 	return service
 }
 
+func (ps *PlayerService) Init() {
+	// 缓存数据读取
+	dbLoader := func(key string) (interface{}, error) {
+		var p playerdomain.Player
+		result := mysqldb.Db.First(&p, "id=?", key)
+		if result.Error != nil {
+			if result.Error == gorm.ErrRecordNotFound {
+				// 未找到记录
+				return nil, nil
+			}
+		}
+		p.AfterLoad()
+		context.EventBus.Publish(events.PlayerAfterLoad, &p)
+		return &p, nil
+	}
+	context.CacheManager.Register("player", dbLoader)
+
+	context.EventBus.Subscribe(events.PlayerEntityChange, func(data interface{}) {
+		ps.SavePlayer(data.(*playerdomain.Player))
+	})
+
+	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
+		ps.RefreshFighting(data.(*playerdomain.Player))
+	})
+
+	// 在线玩家每日重置
+	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
+		allSessions := network.GetAllOnlinePlayerSessions()
+		for _, s := range allSessions {
+			s.AsynTasks <- func() {
+				player := ps.GetPlayerBySession(s)
+				ps.DailyReset(player, data.(int64))
+			}
+		}
+	})
+}
 // LoadPlayerProfile 加载玩家概况数据
 func (ps *PlayerService) LoadPlayerProfile() {
 	var profiles []*playerdomain.PlayerProfile

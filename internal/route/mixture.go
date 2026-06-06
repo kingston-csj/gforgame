@@ -11,7 +11,6 @@ import (
 )
 
 type MixtureRoute struct {
-	network.Base
 	service *mixture.MixtureService
 	player  *player.PlayerService
 }
@@ -21,9 +20,6 @@ func NewMixtureRoute(service *mixture.MixtureService, playerService *player.Play
 		service: service,
 		player:  playerService,
 	}
-}
-
-func (ps *MixtureRoute) Init() {
 }
 
 func (ps *MixtureRoute) ReqIdleViewReward(s *network.Session, index int32, msg *protos.ReqIdleViewReward) *protos.ResIdleViewReward {

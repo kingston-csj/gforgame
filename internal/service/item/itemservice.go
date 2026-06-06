@@ -10,6 +10,7 @@ import (
 	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/contract"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
+	"github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/service/catalog"
@@ -17,12 +18,10 @@ import (
 
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/reward"
-	"github.com/forfun/gforgame/network"
 )
 
 // 普通道具模块
 type ItemService struct {
-	network.Base
 	player  *playerservice.PlayerService
 	catalog *catalog.CatalogService
 }
@@ -40,14 +39,33 @@ func NewItemService(player *playerservice.PlayerService, catalogService *catalog
 		player:  player,
 		catalog: catalogService,
 	}
-	service.init()
 	return service
 }
 
-func (s *ItemService) init() {
+func (s *ItemService) Init() {
 	reward.SetItemOps( s)
 	consume.SetItemOps(s)
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.OnPlayerLogin(data.(*player.Player))
+	})
 }
+
+func (s *ItemService) OnPlayerLogin(player *player.Player) {
+	// 发送背包信息
+	resBackpack := &protos.PushBackpackInfo{
+		Items: []protos.ItemInfo{},
+	}
+	if player.Backpack != nil {
+		for _, item := range player.Backpack.Items {
+			resBackpack.Items = append(resBackpack.Items, item.ToVo())
+		}
+	}
+	io.NotifyPlayer(player, resBackpack)
+
+	// 发送货币信息
+	player.NotifyPurseChange()
+}
+
 
 func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) error {
 	p := s.player.GetPlayer(playerId)

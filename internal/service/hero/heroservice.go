@@ -35,6 +35,19 @@ func NewHeroService(player *playerservice.PlayerService, itemService *item.ItemS
 	return service
 }
 
+func (ps *HeroService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		ps.OnPlayerLogin(data.(*player.Player))
+	})
+
+	context.EventBus.Subscribe(events.PlayerAfterLoad, func(data interface{}) {
+		p := data.(*player.Player)
+		for _, h := range p.HeroBox.Heros {
+			ps.ReCalculateHeroAttr(p, h, false)
+		}
+	})
+}
+
 func (ps *HeroService) OnPlayerLogin(player *player.Player) {
 	resAllHeroInfo := &protos.PushAllHeroInfo{}
 	heroVos := make([]*protos.HeroInfo, 0)

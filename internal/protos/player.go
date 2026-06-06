@@ -1,7 +1,7 @@
 package protos
 
 type ReqPlayerLogin struct {
-	_        struct{} `cmd_ref:"CmdPlayerReqLogin"`
+	_        struct{} `cmd_ref:"CmdReqPlayerLogin"`
 	Pwd      string   `validate:"required" json:"pwd"`
 	PlayerId string   `validate:"required" json:"playerId"`
 	ServerId int32    `json:"serverId"`
@@ -12,7 +12,7 @@ type ReqPlayerLoadingFinish struct {
 }
 
 type ResPlayerLogin struct { // 玩家登录响应
-	_          struct{} `cmd_ref:"CmdPlayerResLogin"`
+	_          struct{} `cmd_ref:"CmdResPlayerLogin"`
 	Code       int32    `json:"code"`
 	PlayerId   string   `json:"playerId"`
 	NewCreate  bool     `json:"newCreate"`
@@ -25,14 +25,8 @@ type ResPlayerLogin struct { // 玩家登录响应
 	Camp       int32    `json:"camp"`
 }
 
-type ReqPlayerCreate struct {
-	_    struct{} `cmd_ref:"CmdPlayerReqCreate" type:"req"`
-	Name string   `json:"name"`
-	Camp int32    `json:"camp"`
-}
-
 type ResPlayerCreate struct {
-	_        struct{} `cmd_ref:"CmdPlayerResCreate" type:"res"`
+	_        struct{} `cmd_ref:"CmdResPlayerCreate" type:"res"`
 	Code     int32    `json:"code"`
 	PlayerId string   `json:"playerId"`
 }
@@ -40,42 +34,36 @@ type ResPlayerCreate struct {
 type PushReplacingLogin struct {
 }
 
-type ReqJoinRoom struct {
-	_        struct{} `cmd_ref:"CmdChaJoinRoom" type:"req"`
-	RoomId   int64    `json:"roomId"`
-	PlayerId int64    `json:"playerId"`
-}
-
 type ReqPlayerUpLevel struct {
-	_       struct{} `cmd_ref:"CmdPlayerReqUpLevel" type:"req"`
+	_       struct{} `cmd_ref:"CmdReqPlayerUpLevel" type:"req"`
 	ToLevel int32    `json:"toLevel"`
 }
 
 type ResPlayerUpLevel struct {
-	_    struct{} `cmd_ref:"CmdPlayerResUpLevel" type:"res"`
+	_    struct{} `cmd_ref:"CmdResPlayerUpLevel" type:"res"`
 	Code int32    `json:"code"`
 }
 
 type PushPlayerFightChange struct {
-	_     struct{} `cmd_ref:"CmdPlayerPushFightChange" type:"push"`
+	_     struct{} `cmd_ref:"CmdPushPlayerFightChange" type:"push"`
 	Fight int32    `json:"fight"`
 }
 
 type ReqPlayerUpStage struct {
-	_ struct{} `cmd_ref:"CmdPlayerReqUpStage" type:"req"`
+	_ struct{} `cmd_ref:"CmdReqPlayerUpStage" type:"req"`
 }
 
 type ResPlayerUpStage struct {
-	_    struct{} `cmd_ref:"CmdPlayerResUpStage" type:"res"`
+	_    struct{} `cmd_ref:"CmdResPlayerUpStage" type:"res"`
 	Code int32    `json:"code"`
 }
 
 type PushLoadComplete struct {
-	_ struct{} `cmd_ref:"CmdPlayerPushLoadComplete"`
+	_ struct{} `cmd_ref:"CmdPushLoadComplete"`
 }
 
 type PushDailyResetInfo struct { // 玩家每日重置信息推送
-	_                  struct{} `cmd_ref:"CmdPlayerPushDailyResetInfo"`
+	_                  struct{} `cmd_ref:"CmdPushDailyResetInfo"`
 	NormalRecruitTimes int32    `json:"normalRecruitTimes"` // 普通招募次数
 	HighRecruitTimes   int32    `json:"highRecruitTimes"`   // 高级招募次数
 	MallDailyBuyTimes  int32    `json:"mallDailyBuyTimes"`  // 商城每日购买次数
@@ -91,21 +79,21 @@ type PushWeeklyResetInfo struct { // 玩家每周重置信息推送
 }
 
 type ReqPlayerRefreshScore struct { // 上报经营评分
-	_     struct{} `cmd_ref:"CmdPlayerReqRefreshScore"`
+	_     struct{} `cmd_ref:"CmdReqPlayerRefreshScore"`
 	Score int32    `json:"score"`
 }
 
 type ResPlayerRefreshScore struct { // 玩家经营评分刷新响应
-	_    struct{} `cmd_ref:"CmdPlayerResRefreshScore"`
+	_    struct{} `cmd_ref:"CmdResPlayerRefreshScore"`
 	Code int32    `json:"code"`
 }
 
 type ReqEditClientData struct { // 玩家编辑客户端数据请求
-	_    struct{} `cmd_ref:"CmdPlayerReqEditClientData"`
+	_    struct{} `cmd_ref:"CmdReqEditClientData"`
 	Data string   `json:"data"`
 }
 
 type ResEditClientData struct { // 玩家编辑客户端数据响应
-	_    struct{} `cmd_ref:"CmdPlayerResEditClientData"`
+	_    struct{} `cmd_ref:"CmdResEditClientData"`
 	Code int32    `json:"code"`
 }

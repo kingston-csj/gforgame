@@ -18,13 +18,11 @@ func main() {
 	ioDispatcher := &MyMessageDispatch{}
 	ioDispatcher.AddHandler(&ClientRouter{router: router})
 	codec := gateMsgCodec
-	modules := []network.Module{}
 	node := ws.NewServer(
 		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
 		ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher),
 		ws.WithCodec(codec),
-		ws.WithModules(modules...),
 		ws.WithPayloadMode(network.PayloadModeRawBody),
 	)
 	startLogicConnectScheduler()

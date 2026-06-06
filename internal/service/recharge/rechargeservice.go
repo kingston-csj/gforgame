@@ -24,6 +24,12 @@ func NewRechargeService() *RechargeService {
 	return &RechargeService{}
 }
 
+func (c *RechargeService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		c.OnPlayerLogin(data.(*playerdomain.Player))
+	})
+}
+
 func (s *RechargeService) OnPlayerLogin(player *playerdomain.Player) {
     push := &protos.PushRechargeInfo{};
 	io.NotifyPlayer(player, push)

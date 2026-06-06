@@ -11,7 +11,6 @@ import (
 )
 
 type MallRoute struct {
-	network.Base
 	service *mall.MallService
 	player  *player.PlayerService
 }

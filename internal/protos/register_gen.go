@@ -94,6 +94,7 @@ func init() {
 
 	// ----from player.go----
 	network.RegisterMessage(103, &ReqPlayerLogin{})
+	network.RegisterMessage(105, &ReqPlayerUpLevel{})
 	network.RegisterMessage(106, &ReqPlayerUpStage{})
 	network.RegisterMessage(109, &ReqEditClientData{})
 	network.RegisterMessage(110, &ReqPlayerRefreshScore{})
@@ -104,11 +105,7 @@ func init() {
 	network.RegisterMessage(156, &PushDailyResetInfo{})
 	network.RegisterMessage(171, &ResEditClientData{})
 	network.RegisterMessage(172, &ResPlayerRefreshScore{})
-	network.RegisterMessage(1800, &ReqJoinRoom{})
-	network.RegisterMessage(2003, &ReqPlayerCreate{})
-	network.RegisterMessage(2004, &ResPlayerCreate{})
 	network.RegisterMessage(2005, &ReqPlayerLoadingFinish{})
-	network.RegisterMessage(2008, &PushPlayerFightChange{})
 
 	// ----from quest.go----
 	network.RegisterMessage(701, &ReqQuestTakeReward{})

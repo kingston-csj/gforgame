@@ -8,12 +8,15 @@ import (
 	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/domain/player"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
+	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	mailservice "github.com/forfun/gforgame/internal/service/mail"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
+	"gorm.io/gorm"
 )
 
 // 好友模块
@@ -28,6 +31,29 @@ func NewFriendService(player *playerservice.PlayerService, mail *mailservice.Mai
 		mail:   mail,
 	}
 }
+
+func (s *FriendService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		s.RefreshClientInfo(data.(*playerdomain.Player))
+	})
+
+	// 缓存数据读取
+	dbLoader := func(key string) (interface{}, error) {
+		var p player.Friend
+		result := mysqldb.Db.First(&p, "id=?", key)
+		if result.Error != nil {
+			if result.Error == gorm.ErrRecordNotFound {
+				// 未找到记录
+				return nil, nil
+			}
+		}
+		p.AfterFind(nil)
+		return &p, nil
+	}
+	context.CacheManager.Register("friend", dbLoader)
+}
+
+
 
 func (s *FriendService) GetFriendEnt(playerId string) *player.Friend {
 	cache, _ := context.CacheManager.GetCache("friend")

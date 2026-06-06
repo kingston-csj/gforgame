@@ -44,15 +44,6 @@ func (s *TcpServer) Start() error {
 		return errors.New("service address cannot be empty")
 	}
 
-	modules := s.modules
-	for _, c := range modules {
-		c.Init()
-		err := s.Router.RegisterMessageHandlers(c)
-		if err != nil {
-			return err
-		}
-	}
-
 	listener, err := net.Listen("tcp", s.ServiceAddr)
 	if err != nil {
 		return err
@@ -256,8 +247,5 @@ func (n *TcpServer) Stop() {
 			_ = n.listener.Close()
 		}
 		network.CloseAllSessions()
-		for _, c := range n.modules {
-			c.Shutdown()
-		}
 	})
 }

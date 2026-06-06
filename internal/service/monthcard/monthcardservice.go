@@ -7,8 +7,10 @@ import (
 	"github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
+	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/reward"
@@ -24,6 +26,17 @@ func NewMonthCardService(mail *mailservice.MailService) *MonthCardService {
 	return &MonthCardService{
 		mail: mail,
 	}
+}
+
+func (ps *MonthCardService) Init() {
+	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+		ps.OnPlayerLogin(data.(*player.Player))
+	})
+	context.EventBus.Subscribe(events.Recharge, func(data interface{}) {
+		evt := data.(*events.RechargeEvent)
+		player := evt.Player.(*player.Player)
+		ps.OnRecharge(player, evt.RechargeId)
+	})
 }
 
 func (ps *MonthCardService) OnPlayerLogin(player *player.Player) {

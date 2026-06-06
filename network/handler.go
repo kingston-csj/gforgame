@@ -30,7 +30,7 @@ var (
 	typeOfString  = reflect.TypeOf("")
 )
 
-func (r *MessageRoute) RegisterMessageHandlers(comp Module) error {
+func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 	clazz := reflect.TypeOf(comp)
 	for m := 0; m < clazz.NumMethod(); m++ {
 		method := clazz.Method(m)

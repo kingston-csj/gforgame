@@ -1,9 +1,6 @@
 package route
 
 import (
-	"github.com/forfun/gforgame/internal/context"
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/mail"
 	player "github.com/forfun/gforgame/internal/service/player"
@@ -11,7 +8,6 @@ import (
 )
 
 type MailRoute struct {
-	network.Base
 	service *mail.MailService
 	player  *player.PlayerService
 }
@@ -21,16 +17,6 @@ func NewMailRoute(service *mail.MailService, playerService *player.PlayerService
 		service: service,
 		player:  playerService,
 	}
-}
-
-func (c *MailRoute) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
-		c.OnPlayerLogin(data.(*playerdomain.Player))
-	})
-}
-
-func (c *MailRoute) OnPlayerLogin(player *playerdomain.Player) {
-	c.service.CheckMailsOnLogin(player)
 }
 
 func (c *MailRoute) ReqGetAllRewards(s *network.Session, index int32, msg *protos.ReqMailGetAllRewards) *protos.ResMailGetAllRewards {

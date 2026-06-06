@@ -11,7 +11,6 @@ import (
 )
 
 type GmRoute struct {
-	network.Base
 	service *gm.GmService
 	player  *player.PlayerService
 }
@@ -21,9 +20,6 @@ func NewGmRoute(service *gm.GmService, playerService *player.PlayerService) *GmR
 		service: service,
 		player:  playerService,
 	}
-}
-
-func (ps *GmRoute) Init() {
 }
 
 func (ps *GmRoute) ReqAction(s *network.Session, index int32, msg *protos.ReqGmCommand) interface{} {

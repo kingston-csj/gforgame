@@ -1,9 +1,7 @@
 package route
 
 import (
-	"github.com/forfun/gforgame/internal/context"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/events"
 
 	"github.com/forfun/gforgame/internal/protos"
 	heroService "github.com/forfun/gforgame/internal/service/hero"
@@ -12,7 +10,6 @@ import (
 )
 
 type HeroRoute struct {
-	network.Base
 	service *heroService.HeroService
 	player  *player.PlayerService
 }
@@ -24,18 +21,6 @@ func NewHeroRoute(service *heroService.HeroService, playerService *player.Player
 	}
 }
 
-func (ps *HeroRoute) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
-		ps.service.OnPlayerLogin(data.(*playerdomain.Player))
-	})
-
-	context.EventBus.Subscribe(events.PlayerAfterLoad, func(data interface{}) {
-		p := data.(*playerdomain.Player)
-		for _, h := range p.HeroBox.Heros {
-			ps.service.ReCalculateHeroAttr(p, h, false)
-		}
-	})
-}
 
 func (ps *HeroRoute) OnPlayerLogin(player *playerdomain.Player) {
 	ps.service.OnPlayerLogin(player)

@@ -219,13 +219,13 @@ func main() {
 	bootstrap.StartSchedulers()
 
 	// 在这里，添加你的模块消息路由
-	modules := []network.Module{
+	modules := []any{
 		route.NewPlayerRoute(s.Player),
 		route.NewHeroRoute(s.Hero, s.Player),
 		route.NewQuestRoute(s.Quest, s.Player),
 		route.NewGmRoute(s.Gm, s.Player),
 		route.NewSignInRoute(s.SignIn, s.Player),
-		route.NewItemRoute(),
+		route.NewItemRoute(s.Item, s.Player),
 		route.NewMallRoute(s.Mall, s.Player),
 		route.NewMonthCardRoute(s.MonthCard, s.Player),
 		route.NewMailRoute(s.Mail, s.Player),
@@ -234,6 +234,11 @@ func main() {
 		route.NewMixtureRoute(s.Mixture, s.Player),
 		route.NewChatRoute(s.Chat, s.Player),
 		route.NewFriendRoute(s.Friend, s.Player),
+	}
+
+	if err := bootstrap.InitRouteModules(router, modules); err != nil {
+		logger.Error("init route modules fail", err)
+		panic(err)
 	}
 
 	node := ws.NewServer(
