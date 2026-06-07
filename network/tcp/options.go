@@ -3,15 +3,11 @@ package tcp
 import (
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	serverpkg "github.com/forfun/gforgame/network/server"
 )
 
 type Options struct {
-	Name         string // 服务器名称
-	ServiceAddr  string // current server service address (RPC)
-	MessageCodec codec.MessageCodec
-	IoDispatch   network.IoDispatch
-	DispatchWorkers int
-	Router       *network.MessageRoute
+	serverpkg.BaseServerOptions
 }
 
 type Option func(*Options)
@@ -46,8 +42,23 @@ func WithRouter(r *network.MessageRoute) Option {
 
 // WithDispatchWorkers 设置每条连接的消息消费 worker 数。
 // 值 <= 0 时按 1 处理。
-func WithDispatchWorkers(n int) Option {
+func WithDispatchWorkers(n int32) Option {
 	return func(opt *Options) {
 		opt.DispatchWorkers = n
+	}
+}
+
+// WithPayloadMode 设置消息体处理模式（解析 or 原始转发）。
+func WithPayloadMode(mode network.PayloadMode) Option {
+	return func(opt *Options) {
+		opt.PayloadMode = mode
+	}
+}
+
+
+// WithUseGateway 设置是否使用网关模式
+func WithUseGateway(useGateway bool) Option {
+	return func(opt *Options) {
+		opt.UseGateway = useGateway
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/monthcard"
 	player "github.com/forfun/gforgame/internal/service/player"
-	"github.com/forfun/gforgame/network"
 )
 
 type MonthCardRoute struct {
@@ -19,8 +18,8 @@ func NewMonthCardRoute(service *monthcard.MonthCardService, playerService *playe
 	}
 }
 
-func (ps *MonthCardRoute) ReqGetReward(s *network.Session, index int32, msg *protos.ReqMonthCardGetReward) *protos.ResMonthCardGetReward{
-	player := ps.player.GetPlayerBySession(s)
+func (ps *MonthCardRoute) ReqGetReward(playerId string, index int32, msg *protos.ReqMonthCardGetReward) *protos.ResMonthCardGetReward{
+	player := ps.player.GetPlayer(playerId)
 	err := ps.service.TakeReward(player, msg.Type)
 	if err != nil {
 		return &protos.ResMonthCardGetReward{

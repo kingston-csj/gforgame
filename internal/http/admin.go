@@ -8,5 +8,7 @@ import (
 
 // 关闭服务器
 func StopServer(c *gin.Context) {
-	context.TcpServer.Running <- true
+	if context.GameServer != nil {
+		context.GameServer.NotifyStop()
+	}
 }

@@ -3,12 +3,15 @@ package config
 import (
 	"embed"
 	"fmt"
-	"log/slog"
+
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
+	"sync"
 
+	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/common/util/conv"
+	"github.com/forfun/gforgame/common/util/pathutil"
 	"github.com/spf13/viper"
 )
 
@@ -27,12 +30,13 @@ type Config struct {
 	Extra map[string]any
 }
 
-//go:embed default.yml
 var configFS embed.FS
 
 var (
 	ServerConfig Config
 	allServers   []serverNode
+	allServersMu sync.RWMutex
+	dynamicIDs   = make(map[uint32]struct{})
 )
 
 type serverNode struct {
@@ -50,7 +54,17 @@ type ServerNodeInfo struct {
 	Addr     string
 }
 
-// roleConfig 用于承接角色级配置（config-gate/config-logic）。
+// DynamicServerNode 用于运行时注册动态发现到的服务器节点。
+type DynamicServerNode struct {
+	Id          uint32
+	Type        uint32
+	UseGateMode bool
+	Addr        string
+	HttpAddr    string
+	PprofAddr   string
+}
+
+// roleConfig 用于承接角色级配置（config-gate/config-game）。
 // 已定义字段自动注入，未定义字段进入 Extra。
 type roleConfig struct {
 	Server struct {
@@ -62,21 +76,31 @@ type roleConfig struct {
 // 配置读取规则：
 // 加载顺序: default -> 角色配置(config-gate/config-logic)
 // 先加载的配置会被后加载的同名配置所替换！！！！
-// 1.优先读default.yml文件，应用程序内部配置，项目打包成二进制可执行文件也会嵌入该配置
+// 1.优先读default.yml文件，应用程序内部配置，项目打包成二进制后不嵌入该配置
 // 2.根据ENV读取 config-{ENV}.yml（如 gate/logic）
 func init() {
 	// 创建 Viper 实例
 	v := viper.New()
 	v.SetConfigType("yml")
-	// 打包后的二进制文件也要
-	f, err := configFS.Open("default.yml")
-	if err != nil {
-		panic(fmt.Errorf("failed to open config file: %w", err))
-	}
-	defer f.Close()
-	// 从 io.Reader 读取配置
-	if err := v.ReadConfig(f); err != nil {
-		panic(fmt.Errorf("failed to read config: %w", err))
+
+	// 默认配置优先读取外部文件，便于打包后与二进制一起部署。
+	if defaultConfigFile := resolveDefaultConfigPath(); defaultConfigFile != "" {
+		v.SetConfigFile(defaultConfigFile)
+		if err := v.ReadInConfig(); err != nil {
+			panic(fmt.Errorf("failed to read config file %s: %w", defaultConfigFile, err))
+		}
+		logger.Info(fmt.Sprintf("已加载默认配置: %s", defaultConfigFile))
+	} else {
+		// 外部 default.yml 不存在时，回退到二进制内嵌默认配置。
+		f, err := configFS.Open("default.yml")
+		if err != nil {
+			panic(fmt.Errorf("failed to open embedded config file: %w", err))
+		}
+		defer f.Close()
+		if err := v.ReadConfig(f); err != nil {
+			panic(fmt.Errorf("failed to read embedded config: %w", err))
+		}
+		logger.Info("已加载内嵌默认配置")
 	}
 
 	// 允许 Viper 读取环境变量
@@ -87,7 +111,7 @@ func init() {
 	// 获取环境变量，确定要加载的配置文件
 	env := os.Getenv("ENV")
 	if env == "" {
-		env = "logic"
+		env = "game"
 	}
 	v.SetConfigName("config-" + env)
 	if configFile := resolveEnvConfigPath(env); configFile != "" {
@@ -95,16 +119,16 @@ func init() {
 	}
 	// 再次读取配置文件，这次是根据环境变量，使用合并配置的方法确保旧配置被替换
 	if err := v.MergeInConfig(); err != nil {
-		slog.Error("加载环境配置失败，继续使用默认配置", "env", env, "err", err)
+		logger.ErrorNoStack(fmt.Sprintf("加载环境配置失败，继续使用默认配置: %v", err))
 	} else {
-		slog.Info("已加载环境配置", "env", env, "configFile", v.ConfigFileUsed())
+		logger.Info(fmt.Sprintf("已加载环境配置: %s", v.ConfigFileUsed()))
 	}
 	if err := v.UnmarshalKey("servers", &allServers); err != nil {
 		panic(fmt.Errorf("解析 servers 节点失败: %w", err))
 	}
 	var rc roleConfig
 	if err := v.Unmarshal(&rc); err != nil {
-		slog.Error("解析角色配置失败，继续使用兜底逻辑", "err", err)
+		logger.ErrorNoStack(fmt.Sprintf("解析角色配置失败，继续使用兜底逻辑: %v", err))
 	}
 
 	serverID := rc.Server.Id
@@ -128,19 +152,23 @@ func init() {
 		Extra:       rc.Extra,
 	}
 
-	slog.Info("服务配置加载完成",
-		"env", env,
-		"type", currentNode.Type,
-		"serverId", ServerConfig.ServerId,
-		"serverAddr", ServerConfig.ServerUrl,
-		"httpAddr", ServerConfig.HttpUrl,
-	)
+	logger.Info(fmt.Sprintf(
+		"服务配置加载完成 env=%s type=%d serverId=%d serverAddr=%s httpAddr=%s",
+		env,
+		currentNode.Type,
+		ServerConfig.ServerId,
+		ServerConfig.ServerUrl,
+		ServerConfig.HttpUrl,
+	))
 }
 
 func resolveCurrentServerNode(serverID uint32) *serverNode {
+	allServersMu.RLock()
+	defer allServersMu.RUnlock()
 	for i := range allServers {
 		if allServers[i].Id == serverID {
-			return &allServers[i]
+			node := allServers[i]
+			return &node
 		}
 	}
 	return nil
@@ -159,36 +187,23 @@ func resolveServerID() uint32 {
 
 func resolveEnvConfigPath(env string) string {
 	fileName := fmt.Sprintf("config-%s.yml", env)
-	if exePath, err := os.Executable(); err == nil {
-		if path, ok := findConfigFileFromBase(filepath.Dir(exePath), fileName); ok {
-			return path
-		}
-	}
-	if cwd, err := os.Getwd(); err == nil {
-		if path, ok := findConfigFileFromBase(cwd, fileName); ok {
-			return path
-		}
+	if path, ok := pathutil.ResolveExistingRelativeFile(filepath.Join("config", fileName)); ok {
+		return path
 	}
 	return ""
 }
 
-func findConfigFileFromBase(baseDir, fileName string) (string, bool) {
-	dir := filepath.Clean(baseDir)
-	for {
-		candidate := filepath.Join(dir, "config", fileName)
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate, true
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
+func resolveDefaultConfigPath() string {
+	const fileName = "default.yml"
+	if path, ok := pathutil.ResolveExistingRelativeFile(filepath.Join("config", fileName)); ok {
+		return path
 	}
-	return "", false
+	return ""
 }
 
 func GetServerAddrByType(serverType uint32) string {
+	allServersMu.RLock()
+	defer allServersMu.RUnlock()
 	for i := range allServers {
 		if allServers[i].Type == serverType {
 			return allServers[i].Addr
@@ -198,6 +213,8 @@ func GetServerAddrByType(serverType uint32) string {
 }
 
 func GetServerTypeByID(serverID uint32) (uint32, bool) {
+	allServersMu.RLock()
+	defer allServersMu.RUnlock()
 	for i := range allServers {
 		if allServers[i].Id == serverID {
 			return allServers[i].Type, true
@@ -207,6 +224,8 @@ func GetServerTypeByID(serverID uint32) (uint32, bool) {
 }
 
 func GetServersByType(serverType uint32) []ServerNodeInfo {
+	allServersMu.RLock()
+	defer allServersMu.RUnlock()
 	result := make([]ServerNodeInfo, 0)
 	for i := range allServers {
 		if allServers[i].Type != serverType {
@@ -221,45 +240,85 @@ func GetServersByType(serverType uint32) []ServerNodeInfo {
 	return result
 }
 
+// RegisterDynamicServers 运行时注册或更新服务器节点。
+// 同 id 节点会被覆盖，不存在的节点会被追加。
+func RegisterDynamicServers(nodes []DynamicServerNode) {
+	if len(nodes) == 0 {
+		return
+	}
+
+	allServersMu.Lock()
+	defer allServersMu.Unlock()
+
+	indexByID := make(map[uint32]int, len(allServers))
+	for i := range allServers {
+		indexByID[allServers[i].Id] = i
+	}
+
+	for _, node := range nodes {
+		server := serverNode{
+			Id:          node.Id,
+			Type:        node.Type,
+			UseGateMode: node.UseGateMode,
+			Addr:        node.Addr,
+			HttpAddr:    node.HttpAddr,
+			PprofAddr:   node.PprofAddr,
+		}
+		if idx, ok := indexByID[node.Id]; ok {
+			allServers[idx] = server
+			continue
+		}
+		allServers = append(allServers, server)
+		indexByID[node.Id] = len(allServers) - 1
+	}
+}
+
+// SyncDynamicServers 使用最新列表全量同步动态节点。
+// 旧的动态节点会被移除，静态配置节点保持不变。
+func SyncDynamicServers(nodes []DynamicServerNode) {
+	allServersMu.Lock()
+	defer allServersMu.Unlock()
+
+	filtered := make([]serverNode, 0, len(allServers))
+	for _, server := range allServers {
+		if _, ok := dynamicIDs[server.Id]; ok {
+			continue
+		}
+		filtered = append(filtered, server)
+	}
+	allServers = filtered
+	dynamicIDs = make(map[uint32]struct{}, len(nodes))
+
+	indexByID := make(map[uint32]int, len(allServers))
+	for i := range allServers {
+		indexByID[allServers[i].Id] = i
+	}
+
+	for _, node := range nodes {
+		server := serverNode{
+			Id:          node.Id,
+			Type:        node.Type,
+			UseGateMode: node.UseGateMode,
+			Addr:        node.Addr,
+			HttpAddr:    node.HttpAddr,
+			PprofAddr:   node.PprofAddr,
+		}
+		if idx, ok := indexByID[node.Id]; ok {
+			allServers[idx] = server
+		} else {
+			allServers = append(allServers, server)
+			indexByID[node.Id] = len(allServers) - 1
+		}
+		dynamicIDs[node.Id] = struct{}{}
+	}
+}
+
 func GetExtraString(key string) (string, bool) {
 	val, ok := getExtraValueByPath(ServerConfig.Extra, key)
 	if !ok || val == nil {
 		return "", false
 	}
-	switch v := val.(type) {
-	case string:
-		return v, true
-	case fmt.Stringer:
-		return v.String(), true
-	case int:
-		return strconv.Itoa(v), true
-	case int8:
-		return strconv.FormatInt(int64(v), 10), true
-	case int16:
-		return strconv.FormatInt(int64(v), 10), true
-	case int32:
-		return strconv.FormatInt(int64(v), 10), true
-	case int64:
-		return strconv.FormatInt(v, 10), true
-	case uint:
-		return strconv.FormatUint(uint64(v), 10), true
-	case uint8:
-		return strconv.FormatUint(uint64(v), 10), true
-	case uint16:
-		return strconv.FormatUint(uint64(v), 10), true
-	case uint32:
-		return strconv.FormatUint(uint64(v), 10), true
-	case uint64:
-		return strconv.FormatUint(v, 10), true
-	case float32:
-		return strconv.FormatFloat(float64(v), 'f', -1, 32), true
-	case float64:
-		return strconv.FormatFloat(v, 'f', -1, 64), true
-	case bool:
-		return strconv.FormatBool(v), true
-	default:
-		return "", false
-	}
+	return conv.StringValue(val), true
 }
 
 func GetExtraInt(key string) (int, bool) {
@@ -267,40 +326,7 @@ func GetExtraInt(key string) (int, bool) {
 	if !ok || val == nil {
 		return 0, false
 	}
-	switch v := val.(type) {
-	case int:
-		return v, true
-	case int8:
-		return int(v), true
-	case int16:
-		return int(v), true
-	case int32:
-		return int(v), true
-	case int64:
-		return int(v), true
-	case uint:
-		return int(v), true
-	case uint8:
-		return int(v), true
-	case uint16:
-		return int(v), true
-	case uint32:
-		return int(v), true
-	case uint64:
-		return int(v), true
-	case float32:
-		return int(v), true
-	case float64:
-		return int(v), true
-	case string:
-		n, err := strconv.Atoi(strings.TrimSpace(v))
-		if err != nil {
-			return 0, false
-		}
-		return n, true
-	default:
-		return 0, false
-	}
+	return conv.IntValue(val), true
 }
 
 func GetExtraBool(key string) (bool, bool) {
@@ -308,42 +334,7 @@ func GetExtraBool(key string) (bool, bool) {
 	if !ok || val == nil {
 		return false, false
 	}
-	switch v := val.(type) {
-	case bool:
-		return v, true
-	case string:
-		b, err := strconv.ParseBool(strings.TrimSpace(v))
-		if err != nil {
-			return false, false
-		}
-		return b, true
-	case int:
-		return v != 0, true
-	case int8:
-		return v != 0, true
-	case int16:
-		return v != 0, true
-	case int32:
-		return v != 0, true
-	case int64:
-		return v != 0, true
-	case uint:
-		return v != 0, true
-	case uint8:
-		return v != 0, true
-	case uint16:
-		return v != 0, true
-	case uint32:
-		return v != 0, true
-	case uint64:
-		return v != 0, true
-	case float32:
-		return v != 0, true
-	case float64:
-		return v != 0, true
-	default:
-		return false, false
-	}
+	return conv.BooleanValue(val), true
 }
 
 func getExtraStringFromMap(extra map[string]any, key string) string {

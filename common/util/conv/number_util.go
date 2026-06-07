@@ -7,6 +7,11 @@ import (
 )
 
 // -------------------------- Boolean 转换 --------------------------
+// StringValue 将 any 类型转换为 string（默认值：空字符串）
+func StringValue(object any) string {
+	return toString(object)
+}
+
 // BooleanValue 将 any 类型转换为 bool（默认值：false）
 func BooleanValue(object any) bool {
 	return BooleanValueWithDefault(object, false)

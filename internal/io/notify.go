@@ -6,6 +6,7 @@ import (
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/common/util/jsonutil"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/contract"
 	"github.com/forfun/gforgame/internal/protos"
@@ -27,16 +28,11 @@ func SetGateSession(session *network.Session) {
 	gateSession = session
 }
 
-func NotifyPlayer(player contract.Player, data any) {
-	if player == nil || data == nil {
-		return
-	}
-	playerID := player.GetId()
-
+func NotifyByPlayerId(playerID string, index int32, data any) {
 	if !serverconfig.ServerConfig.UseGateMode {
 		// 直连模式：playerId 映射的是客户端会话，直接发送即可
 		if s := network.GetSessionByPlayerId(playerID); s != nil {
-			_ = s.SendWithoutIndex(data)
+			_ = s.Send(data, index)
 		}
 		return
 	}
@@ -55,13 +51,26 @@ func NotifyPlayer(player contract.Player, data any) {
 	if err != nil {
 		return
 	}
-	if err := gs.SendWithoutIndex(&protos.TransferGateToLogic{
+	transferBody := &protos.TransferGateToLogic{
 		PlayerId: playerID,
 		Cmd:      cmd,
 		Body:     body,
-	}); err != nil {
+		Index:    index,
+	}
+
+
+	msgName, _ := network.GetMsgName(cmd)
+	jsonStr, err := jsonutil.StructToJSON(data)
+	logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
+	_ = gs.Send(transferBody, index)
+}
+
+func NotifyPlayer(player contract.Player, data any) {
+	if player == nil || data == nil {
 		return
 	}
+	playerID := player.GetId()
+	NotifyByPlayerId(playerID, 0, data)
 }
 
 func getGateSession() (*network.Session, bool) {

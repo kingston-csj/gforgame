@@ -2,193 +2,43 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"reflect"
-	"strings"
 	"syscall"
 	"time"
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util/jsonutil"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
-	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/context"
-	"github.com/forfun/gforgame/internal/http"
+	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
 	"github.com/forfun/gforgame/network"
-	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 )
 
-//go:generate go generate ../../internal/bootstrap
-
-type GameTaskHandler struct {
-	router *network.MessageRoute
-}
+//go:generate go run ../../internal/tools/gen all
 
 // 使用静态路由，避免反射调用，提高性能。
 // 代码生成内容见 route_dispatch_gen.go
 // 部署前请先执行 go generate .
-type generatedRouteInvoker func(msgHandler *network.Handler, session *network.Session, index int32, msg any) (any, error)
+type generatedRouteInvoker func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error)
 
+// 注册所有模块的路由
 var generatedRouteDispatchers = map[int32]generatedRouteInvoker{}
-
-func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
-	defer func() {
-		if r := recover(); r != nil {
-			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
-		}
-	}()
-	msgName, _ := network.GetMsgName(frame.Header.Cmd)
-	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
-	if err == nil {
-		if strings.Index(msgName, "HeartBeat") == -1 {
-			id, ok := session.GetAttr("id")
-			if !ok {
-				id = "anonymous"
-			}
-			// fmt.Println("接收消息: cmd:", frame.Header.Cmd, " name:", msgName, " 内容:", jsonStr)
-			logger.Info(fmt.Sprintf("[%s] 接收消息: cmd:%d, name:%s, 内容:%s", id, frame.Header.Cmd, msgName, jsonStr))
-		}
-	}
-
-	msgHandler, _ := g.router.GetHandler(frame.Header.Cmd)
-	if msgHandler == nil {
-		logger.ErrorNoStack(fmt.Errorf("msgHandler is nil: %v", frame.Header.Cmd))
-		return false
-	}
-
-	resp, handled, dispatchErr, panicErr := callGeneratedRouteHandlerSafely(frame.Header.Cmd, msgHandler, session, frame.Header.Index, frame.Msg)
-	if handled {
-		if panicErr != nil {
-			logger.Error(fmt.Sprintf("generated route handler panic: cmd=%d method=%s", frame.Header.Cmd, msgHandler.Method.Name), panicErr)
-			if errorResp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
-				session.Send(errorResp, frame.Header.Index)
-			}
-			return false
-		}
-		if dispatchErr != nil {
-			// 静态分发失败时回退反射调用，保证兼容性。
-			logger.ErrorNoStack(fmt.Errorf("generated dispatch failed, fallback to reflect: cmd=%d err=%v", frame.Header.Cmd, dispatchErr))
-		} else {
-			if resp != nil {
-				session.Send(resp, frame.Header.Index)
-			}
-			return true
-		}
-	}
-
-	var args []reflect.Value
-	if msgHandler.Indindexed {
-		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Header.Index), reflect.ValueOf(frame.Msg)}
-	} else {
-		args = []reflect.Value{msgHandler.Receiver, reflect.ValueOf(session), reflect.ValueOf(frame.Msg)}
-	}
-
-	// 反射调用路由处理器，并捕获处理器内部 panic
-	values, panicErr := callRouteHandlerSafely(msgHandler, args)
-	if panicErr != nil {
-		logger.Error(fmt.Sprintf("route handler panic: cmd=%d method=%s", frame.Header.Cmd, msgHandler.Method.Name), panicErr)
-		if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
-			session.Send(resp, frame.Header.Index)
-		}
-		return false
-	}
-
-	if len(values) > 0 {
-		err := session.Send(values[0].Interface(), frame.Header.Index)
-		if err != nil {
-			logger.Error("session.Send: %v", fmt.Errorf("session.Send: %v", err))
-			return false
-		}
-	}
-	return true
-}
-
-func callGeneratedRouteHandlerSafely(cmd int32, msgHandler *network.Handler, session *network.Session, index int32, msg any) (resp any, handled bool, dispatchErr error, panicErr error) {
-	invoker, ok := getGeneratedRouteInvoker(cmd)
-	if !ok {
-		return nil, false, nil, nil
-	}
-	handled = true
-	defer func() {
-		if r := recover(); r != nil {
-			panicErr = logger.PanicToError(r)
-		}
-	}()
-	resp, dispatchErr = invoker(msgHandler, session, index, msg)
-	return resp, handled, dispatchErr, nil
-}
-
-func getGeneratedRouteInvoker(cmd int32) (generatedRouteInvoker, bool) {
-	if generatedRouteDispatchers == nil {
-		return nil, false
-	}
-	invoker, ok := generatedRouteDispatchers[cmd]
-	return invoker, ok
-}
-
-func callRouteHandlerSafely(msgHandler *network.Handler, args []reflect.Value) (values []reflect.Value, panicErr error) {
-	defer func() {
-		if r := recover(); r != nil {
-			panicErr = logger.PanicToError(r)
-		}
-	}()
-	values = msgHandler.Method.Func.Call(args)
-	return values, nil
-}
-
-func buildErrorResponse(msgHandler *network.Handler, code int32) (any, bool) {
-	mt := msgHandler.Method.Type
-	if mt.NumOut() == 0 {
-		return nil, false
-	}
-	outType := mt.Out(0)
-	if outType.Kind() != reflect.Ptr || outType.Elem().Kind() != reflect.Struct {
-		return nil, false
-	}
-	resp := reflect.New(outType.Elem())
-	codeField := resp.Elem().FieldByName("Code")
-	if !codeField.IsValid() || !codeField.CanSet() || codeField.Kind() != reflect.Int32 {
-		return nil, false
-	}
-	codeField.SetInt(int64(code))
-	return resp.Interface(), true
-}
-
-func NewHttpServer() *gin.Engine {
-	router := gin.Default()
-	// 关闭游戏服务器进
-	router.POST("/admin/stop", func(c *gin.Context) {
-		http.StopServer(c)
-	})
-	// 配置 CORS 中间
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // 允许所有源，生产环境应指定具体域名
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
-	err := router.Run(serverconfig.ServerConfig.HttpUrl)
-	if err != nil {
-		panic(err)
-	}
-
-	return router
-}
 
 type MyMessageDispatch struct {
 	network.BaseIoDispatch
+}
+
+func (m *MyMessageDispatch) OnSessionCreated(session *network.Session) {
+	if serverconfig.ServerConfig.UseGateMode {
+		io.SetGateSession(session)
+	}
+	logger.Info(fmt.Sprintf("logic session created: %s", session.ToString()))
 }
 
 func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
@@ -203,6 +53,10 @@ func main() {
 
 	router := network.NewMessageRoute()
 	ioDispatcher := &MyMessageDispatch{}
+	// 如果是网关模式，需要添加网关消息转换处理程序
+	if serverconfig.ServerConfig.UseGateMode {
+		ioDispatcher.AddHandler(NewGateTransformHandler())
+	}
 	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
@@ -211,66 +65,77 @@ func main() {
 	bootstrap.InitMysqlDdl()
 	// 加载配置数据
 	bootstrap.InitConfig()
-	// 预热服务并完成跨模块注册（避免首次请求时懒初始化副作用）
+	// 注册所有服务
 	s := bootstrap.InitServices()
 	// 各自业务初始化
 	bootstrap.InitBusiness(s)
 	// 启动系统任务
 	bootstrap.StartSchedulers()
 
-	// 在这里，添加你的模块消息路由
-	modules := []any{
-		route.NewPlayerRoute(s.Player),
-		route.NewHeroRoute(s.Hero, s.Player),
-		route.NewQuestRoute(s.Quest, s.Player),
-		route.NewGmRoute(s.Gm, s.Player),
-		route.NewSignInRoute(s.SignIn, s.Player),
-		route.NewItemRoute(s.Item, s.Player),
-		route.NewMallRoute(s.Mall, s.Player),
-		route.NewMonthCardRoute(s.MonthCard, s.Player),
-		route.NewMailRoute(s.Mail, s.Player),
-		route.NewRankRoute(s.Rank),
-		route.NewRechargeRoute(),
-		route.NewMixtureRoute(s.Mixture, s.Player),
+	var modules = []any{
+		route.NewCatalogRoute(s.Catalog, s.Player),
 		route.NewChatRoute(s.Chat, s.Player),
 		route.NewFriendRoute(s.Friend, s.Player),
+		route.NewGmRoute(s.Gm, s.Player),
+		route.NewHeroRoute(s.Hero, s.Player),
+		route.NewItemRoute(s.Item, s.Player),
+		route.NewMailRoute(s.Mail, s.Player),
+		route.NewMallRoute(s.Mall, s.Player),
+		route.NewMixtureRoute(s.Mixture, s.Player),
+		route.NewMonthCardRoute(s.MonthCard, s.Player),
+		route.NewPlayerRoute(s.Player),
+		route.NewQuestRoute(s.Quest, s.Player),
+		route.NewRankRoute(s.Rank),
+		route.NewRechargeRoute(),
+		route.NewSignInRoute(s.SignIn, s.Player),
 	}
-
 	if err := bootstrap.InitRouteModules(router, modules); err != nil {
 		logger.Error("init route modules fail", err)
 		panic(err)
 	}
 
+	// node := tcp.NewServer(
+	// 	tcp.WithAddress(serverconfig.ServerConfig.ServerUrl),
+	// 	tcp.WithRouter(router),
+	// 	tcp.WithIoDispatch(ioDispatcher),
+	// 	tcp.WithCodec(codec),
+	// 	tcp.WithDispatchWorkers(8),
+	// )
+	// context.GameServer = node
 	node := ws.NewServer(
 		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
 		ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher),
 		ws.WithCodec(codec),
-		ws.WithModules(modules...),
+		ws.WithUseGateway(serverconfig.ServerConfig.UseGateMode),
 		ws.WithWsPath("ws"),
 	)
-	context.WsServer = node
+	context.GameServer = node
 
 	err := node.Start()
 	if err != nil {
+		logger.Error("game server start fail", err)
 		panic(err)
 	}
 
 	// 启动后台http服务
-	// go func() {
-	// 	context.HttpServer = NewHttpServer()
-	// }()
+	go func() {
+		context.HttpServer = NewHttpServer()
+	}()
 
-	// pprof性能监控
-	// go func() {
-	// 	mux := NewHttpServeMux()
-	// 	// 监听并在 0.0.0.0:6060 上启动服务器
-	// 	http.ListenAndServe(serverconfig.ServerConfig.PprofAddr, mux)
-	// }()
+	// 自启动，不会有额外消耗
+	if len(serverconfig.ServerConfig.PprofAddr) > 0 {
+		// pprof性能监控
+		go func() {
+			mux := NewHttpServeMux()
+			// 监听并在 0.0.0.0:6060 上启动服务器
+			http.ListenAndServe(serverconfig.ServerConfig.PprofAddr, mux)
+		}()
+	}
 
 	endTime := time.Now()
-	cost := endTime.Sub(startTime)
-	logger.Info(fmt.Sprintf("game server is starting at " + serverconfig.ServerConfig.ServerUrl + ", cost %.2f seconds", cost.Seconds()))
+	costSeconds := endTime.Sub(startTime).Seconds()
+	logger.Info(fmt.Sprintf("game server is starting at %s, cost %.2fs", serverconfig.ServerConfig.ServerUrl, costSeconds))
 
 	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)
@@ -278,11 +143,13 @@ func main() {
 	select {
 	case sig := <-sg:
 		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
-	case <-node.Running:
+	case <-node.RunningChan():
 		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
 	}
 	// 执行所有关服逻辑
 	node.Stop()
+	// 框架模块
 	context.DbService.Shutdown()
+
 	logger.Info(fmt.Sprintf("game server is closed"))
 }

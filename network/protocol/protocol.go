@@ -21,6 +21,7 @@ type MessageHeader struct {
 
 // ErrPacketSizeExceed is the error used for encode/decode.
 var ErrPacketSizeExceed = errors.New("protocol: packet size exceed")
+var ErrInvalidPacketSize = errors.New("protocol: invalid packet size")
 
 type Protocol struct {
 	buf *buffer.ByteBuffer
@@ -50,19 +51,26 @@ func (c *Protocol) readHeader() (*MessageHeader, error) {
 }
 
 func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
-	c.buf.Write(data)
-	// check length
-	if c.buf.Len() < HeadLength {
-		return nil, errors.New("length too small")
-	}
 	var packets []*Packet
+	if err := c.buf.Write(data); err != nil {
+		return nil, err
+	}
 
-	for c.buf.Len() > HeadLength {
+	for c.buf.Len() >= HeadLength {
 		// 保存读取索引
 		c.buf.MarkReadIndex()
 		header, err := c.readHeader()
 		if err != nil {
+			if errors.Is(err, buffer.ErrReadOutOfRange) {
+				_ = c.buf.ResetReadIndex()
+				break
+			}
 			return packets, err
+		}
+		if header.Size < HeadLength {
+			// 头部长度字段非法（小于固定头长度），说明对端发送了脏数据或协议不匹配。
+			// 这种情况无法自愈，直接返回错误，由上层关闭连接即可。
+			return packets, ErrInvalidPacketSize
 		}
 		// 消息体长度
 		bodySize := int(header.Size) - HeadLength
@@ -74,9 +82,12 @@ func (c *Protocol) Decode(data []byte) ([]*Packet, error) {
 			p := &Packet{Header: *header, Data: body}
 			packets = append(packets, p)
 		} else {
-			c.buf.ResetReadIndex()
+			_ = c.buf.ResetReadIndex()
 			break
 		}
+	}
+	if c.buf.RemainingWrite() < HeadLength {
+		c.buf.Compact()
 	}
 
 	return packets, nil

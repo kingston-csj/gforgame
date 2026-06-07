@@ -4,18 +4,16 @@ import (
 	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/schedule"
-	"github.com/forfun/gforgame/network/tcp"
-	"github.com/forfun/gforgame/network/ws"
-
 	"github.com/forfun/gforgame/internal/infra/persistence"
+	serverpkg "github.com/forfun/gforgame/network/server"
+	"github.com/gin-gonic/gin"
 )
 
 var (
 	CacheManager *cache.Manager
 	DbService    *persistence.AsyncDBService
-	TcpServer    *tcp.TcpServer
-	WsServer     *ws.WsServer
-	// HttpServer   *gin.Engine
+	GameServer   serverpkg.Server
+	HttpServer   *gin.Engine
 	EventBus      *eventbus.EventBus
 	TaskScheduler schedule.TaskScheduler
 )

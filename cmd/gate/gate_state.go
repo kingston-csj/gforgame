@@ -19,6 +19,8 @@ var (
 	logicIoDispatcher   network.IoDispatch
 	backendPools        = make(map[int32]*backendPool)
 	backendPoolsMu      sync.RWMutex
+	serverDiscoveryStop = make(chan struct{})
+	backendMonitorStop  = make(chan struct{})
 	playerServerIDMap   = make(map[string]int32)
 	playerServerIDMapMu sync.RWMutex
 	outboundQueue       chan *backendOutboundMsg
@@ -30,4 +32,5 @@ var (
 const (
 	logicServerType       uint32 = 1
 	backendReconnectDelay        = 1500
+	backendMonitorInterval       = 3 * 1000
 )

@@ -1,11 +1,11 @@
-package network
+package session
 
 import (
 	"net"
 	"sync"
 )
 
-// sessionRegistry 统一维护连接、会话、玩家三者关系（包内私有）
+// sessionRegistry 统一维护连接、会话、玩家三者关系（包内私有）。
 type sessionRegistry struct {
 	mu sync.RWMutex
 

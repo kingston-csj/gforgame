@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net"
 	"net/http"
+	"runtime"
 	"sync"
 	"time"
 
+	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/network"
-	"github.com/forfun/gforgame/network/protocol"
+	serverpkg "github.com/forfun/gforgame/network/server"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,10 +26,15 @@ type WsServer struct {
 	stopOnce sync.Once
 }
 
+var _ serverpkg.Server = (*WsServer)(nil)
+
 func NewServer(opts ...Option) *WsServer {
-	opt := Options{}
+	opt := Options{BaseServerOptions: serverpkg.BaseServerOptions{DispatchWorkers: 1}}
 	for _, option := range opts {
 		option(&opt)
+	}
+	if opt.UseGateway && opt.DispatchWorkers <= 0 {
+		opt.DispatchWorkers = int32(runtime.NumCPU())
 	}
 
 	if opt.wsPath == "" {
@@ -59,6 +65,14 @@ func (n *WsServer) Addr() string {
 	return n.ServiceAddr
 }
 
+func (n *WsServer) RunningChan() <-chan bool {
+	return n.Running
+}
+
+func (n *WsServer) NotifyStop() {
+	n.Running <- true
+}
+
 // Enable current server accept connection
 func (n *WsServer) startListen() error {
 	var upgrader = websocket.Upgrader{
@@ -77,16 +91,18 @@ func (n *WsServer) startListen() error {
 	mux.HandleFunc("/"+path, func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			slog.Error(fmt.Sprintf("websocket conn failed %v", err))
+			logger.ErrorNoStack(fmt.Sprintf("websocket conn failed %v", err))
 			return
 		}
 
 		c, err := newWSConn(conn)
 		if err != nil {
-			slog.Error(fmt.Sprintf("new websocket conn failed %v", err))
+			logger.ErrorNoStack(fmt.Sprintf("new websocket conn failed %v", err))
 			return
 		}
-		go onClientConnected(n, c)
+		go func(conn net.Conn) {
+			network.ServeSessionConn(conn, n.MessageCodec, n.IoDispatch, n.DispatchWorkers, n.PayloadMode)
+		}(c)
 	})
 
 	listener, err := net.Listen("tcp", n.ServiceAddr)
@@ -100,59 +116,10 @@ func (n *WsServer) startListen() error {
 	}
 	go func() {
 		if err := n.server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.Error(fmt.Sprintf("websocket server failed %v", err))
+			logger.ErrorNoStack(fmt.Sprintf("websocket server failed %v", err))
 		}
 	}()
 	return nil
-}
-
-// 处理客户端连接，包括socket,websocket
-func onClientConnected(node *WsServer, conn net.Conn) {
-	defer func() {
-		slog.Debug(fmt.Sprintf("客户端连接关闭: %s", conn.RemoteAddr().String()))
-		// 处理客户端网络断开
-		s := network.GetSession(conn)
-		node.IoDispatch.OnSessionClosed(s)
-		network.UnregisterSession(conn)
-		_ = conn.Close()
-	}()
-
-	// 先创建默认的Session，协议类型会在第一次收到消息时确定
-	var protocolType protocol.ProtocolType
-	if _, ok := conn.(*wsConn); ok {
-		// WebSocket连接，先使用二进制协议，后续会根据消息类型调整
-		protocolType = protocol.ProtocolTypeBinary
-		slog.Debug("WebSocket客户端连接，等待确定协议类型")
-	} else {
-		// TCP连接，默认使用二进制协议
-		protocolType = protocol.ProtocolTypeBinary
-		slog.Debug("TCP客户端使用二进制协议")
-	}
-
-	// 创建Session
-	ioSession := network.NewSessionWithProtocol(conn, node.MessageCodec, protocolType)
-	ioSession.SetPayloadMode(node.payloadMode)
-	network.RegisterSession(conn, ioSession)
-
-	// session created hook
-	node.IoDispatch.OnSessionCreated(ioSession)
-
-	// 异步读写数据
-	go ioSession.Read()
-	go ioSession.Write()
-
-	//  轮询，保证异步任务和客户端消息的执行是线程安全的
-	for {
-		select {
-		case task := <-ioSession.AsynTasks:
-			task()
-		case ioFrame := <-ioSession.DataReceived:
-			node.IoDispatch.OnMessageReceived(ioSession, ioFrame)
-		case <-ioSession.Die:
-			// 关闭session，执行defer函数
-			return
-		}
-	}
 }
 
 func (n *WsServer) Stop() {

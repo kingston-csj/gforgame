@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util/jsonutil"
 	serverconfig "github.com/forfun/gforgame/config"
-	"github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/gateway/contract"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 )
@@ -21,10 +20,10 @@ type MyMessageDispatch struct {
 }
 
 func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
-	if v, ok := session.GetAttr("id"); ok {
-		if playerID, ok := v.(string); ok && playerID != "" {
-			if current := network.GetSessionByPlayerId(playerID); current == session {
-				unbindPlayerServer(playerID)
+	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
+		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
+			if current := network.GetSessionByPlayerId(sessionPlayerKey); current == session {
+				unbindPlayerServer(sessionPlayerKey)
 			}
 		}
 	}
@@ -39,12 +38,13 @@ func (g *ClientRouter) MessageReceived(session *network.Session, frame *protocol
 	}()
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
 	logger.Info(fmt.Sprintf("接收消息: cmd:%d, name:%s, 内容:%s", frame.Header.Cmd, msgName, frame.Msg))
-	if frame.Header.Cmd == protos.CmdReqPlayerLogin {
-		var err error
-		loginReq := &protos.ReqPlayerLogin{}
-		if body, ok := frame.Msg.([]byte); ok {
-			err = jsonutil.JsonBytesToStruct(body, loginReq)
+	if frame.Header.Cmd == gateLoginAdapter.LoginCmd() {
+		body, ok := frame.Msg.([]byte)
+		if !ok {
+			logger.ErrorNoStack(fmt.Errorf("login payload type invalid: %T", frame.Msg))
+			return false
 		}
+		loginReq, err := gateLoginAdapter.DecodeLoginRequest(body)
 		if err != nil {
 			logger.ErrorNoStack(fmt.Errorf("unmarshal login req failed: %v", err))
 			return false
@@ -61,32 +61,35 @@ func (g *ClientRouter) MessageReceived(session *network.Session, frame *protocol
 	return true
 }
 
-func HandleLoginReq(session *network.Session, loginReq *protos.ReqPlayerLogin, frame *protocol.RequestDataFrame) error {
+func HandleLoginReq(session *network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
 	logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
-	if loginReq.PlayerId == "" {
+	playerID := loginReq.GetPlayerID()
+	serverID := loginReq.GetServerID()
+	if playerID == "" {
 		return fmt.Errorf("invalid login request: playerId is empty")
 	}
-	loginReq.ServerId = 1001
-	if loginReq.ServerId <= 0 {
+	if serverID <= 0 {
 		return fmt.Errorf("invalid login request: serverId is empty")
 	}
-	if !isBackendServerConfigured(loginReq.ServerId) {
-		return fmt.Errorf("target server not configured or not connected: serverId=%d", loginReq.ServerId)
+	if !isBackendServerConfigured(serverID) {
+		return fmt.Errorf("target server not configured or not connected: serverId=%d", serverID)
 	}
 
-	oldSession := network.GetSessionByPlayerId(loginReq.PlayerId)
+	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
+	oldSession := network.GetSessionByPlayerId(sessionPlayerKey)
 	if oldSession != nil && oldSession != session {
-		logger.Info("玩家顶号登录[" + loginReq.PlayerId + "]")
-		oldSession.SendAndClose(&protos.PushReplacingLogin{})
+		logger.Info("玩家顶号登录[" + sessionPlayerKey + "]")
+		oldSession.SendAndClose(gateLoginAdapter.NewReplacingLoginPush())
 	}
 	if oldSession == session {
-		logger.Info("玩家重复登录[" + loginReq.PlayerId + "]")
+		logger.Info("玩家重复登录[" + sessionPlayerKey + "]")
 	}
-	session.SetAttr("id", loginReq.PlayerId)
-	session.SetAttr("serverId", loginReq.ServerId)
-	network.AddSession(session, loginReq.PlayerId)
-	bindPlayerServer(loginReq.PlayerId, loginReq.ServerId)
-	return transferMsgToLogic(session, frame, loginReq.ServerId)
+	session.SetAttr("id", playerID)
+	session.SetAttr("serverId", serverID)
+	session.SetAttr("sessionPlayerKey", sessionPlayerKey)
+	network.AddSession(session, sessionPlayerKey)
+	bindPlayerServer(sessionPlayerKey, serverID)
+	return transferMsgToLogic(session, frame, serverID)
 }
 
 // 转发消息到logic层
@@ -111,12 +114,7 @@ func transferMsgToLogic(session *network.Session, frame *protocol.RequestDataFra
 		return fmt.Errorf("target server is empty, playerId=%s cmd=%d", playerID, frame.Header.Cmd)
 	}
 
-	transfer := &protos.TransferGateToLogic{
-		PlayerId: playerID,
-		Cmd:      frame.Header.Cmd,
-		Index:    frame.Header.Index,
-		Body:     body,
-	}
+	transfer := gateTransferCodec.NewTransferMessage(playerID, frame.Header.Cmd, frame.Header.Index, body)
 	if err := enqueueTransfer(serverID, transfer, frame.Header.Index); err != nil {
 		return fmt.Errorf("forward message to backend failed, serverId=%d cmd=%d err=%v", serverID, frame.Header.Cmd, err)
 	}
@@ -143,6 +141,13 @@ func getPlayerServer(playerID string) (int32, bool) {
 }
 
 func resolvePlayerServerID(session *network.Session, playerID string) int32 {
+	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
+		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
+			if serverID, ok := getPlayerServer(sessionPlayerKey); ok {
+				return serverID
+			}
+		}
+	}
 	if playerID != "" {
 		if serverID, ok := getPlayerServer(playerID); ok {
 			return serverID
@@ -157,6 +162,10 @@ func resolvePlayerServerID(session *network.Session, playerID string) int32 {
 		}
 	}
 	return 0
+}
+
+func buildSessionPlayerKey(serverID int32, playerID string) string {
+	return fmt.Sprintf("%d_%s", serverID, playerID)
 }
 
 func isBackendServerConfigured(serverID int32) bool {

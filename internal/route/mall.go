@@ -7,7 +7,6 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/mall"
 	player "github.com/forfun/gforgame/internal/service/player"
-	"github.com/forfun/gforgame/network"
 )
 
 type MallRoute struct {
@@ -29,8 +28,8 @@ func (ps *MallRoute) Init() {
 	})
 }
 
-func (ps *MallRoute) ReqMallBuy(s *network.Session, index int32, msg *protos.ReqMallBuy) *protos.ResMallBuy{
-	player := ps.player.GetPlayerBySession(s)
+func (ps *MallRoute) ReqMallBuy(playerId string, index int32, msg *protos.ReqMallBuy) *protos.ResMallBuy{
+	player := ps.player.GetPlayer(playerId)
 	err := ps.service.Buy(player, msg.ProductId, msg.Count)
 	if err != nil {
 		return &protos.ResMallBuy{

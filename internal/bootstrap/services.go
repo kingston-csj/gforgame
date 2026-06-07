@@ -26,7 +26,6 @@ import (
 
 	"github.com/forfun/gforgame/internal/service/signin"
 
-	"github.com/forfun/gforgame/internal/service/transfer"
 	"github.com/forfun/gforgame/internal/service/vip"
 )
 
@@ -48,7 +47,6 @@ type Services struct {
 	Rank      *rank.RankService
 	Recharge  *recharge.RechargeService
 	SignIn    *signin.SignInService
-	Transfer  *transfer.TransferService
 	Vip       *vip.VipService
 }
 
@@ -79,7 +77,6 @@ func InitServices() *Services {
 	s.Mail = mail.NewMailService()
 	s.Mixture = mixture.NewMixtureService()
 	s.SignIn = signin.NewSignInService()
-	s.Transfer = transfer.NewTransferService()
 	s.Activity = activity.NewActivityService()
 	s.Arena = arena.NewArenaService(s.Player, s.Rank, s.Mail)
 	s.Gm = gm.NewGmService(&gm.GmDependencies{

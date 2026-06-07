@@ -41,6 +41,16 @@ func (l *LimitedList[T]) Front() (T, bool) {
 	return zero, false
 }
 
+// PopFront 弹出头部元素（最早添加的），若链表为空则返回零值和false
+func (l *LimitedList[T]) PopFront() (T, bool) {
+	if elem := l.list.Front(); elem != nil {
+		l.list.Remove(elem)
+		return elem.Value.(T), true
+	}
+	var zero T
+	return zero, false
+}
+
 // Back 返回尾部元素（最新添加的），若链表为空则返回零值和false
 func (l *LimitedList[T]) Back() (T, bool) {
 	if elem := l.list.Back(); elem != nil {

@@ -4,7 +4,6 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/catalog"
 	player "github.com/forfun/gforgame/internal/service/player"
-	"github.com/forfun/gforgame/network"
 )
 
 type CatalogRoute struct {
@@ -20,8 +19,8 @@ func NewCatalogRoute(service *catalog.CatalogService, playerService *player.Play
 }
 
 
-func (ps *CatalogRoute) ReqCatalogReward(s *network.Session, index int32, msg *protos.ReqCatalogReward) *protos.ResCatalogReward {
-	p := ps.player.GetPlayerBySession(s)
+func (ps *CatalogRoute) ReqCatalogReward(playerId string, index int32, msg *protos.ReqCatalogReward) *protos.ResCatalogReward {
+	p := ps.player.GetPlayer(playerId)
 	code, rewards := ps.service.TakeReward(p, msg.Type, msg.Id)
 	return &protos.ResCatalogReward{
 		Code:  int32(code),

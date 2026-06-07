@@ -19,7 +19,7 @@ var (
 func init() {
 	dbURL, ok := config.GetExtraString("db.url")
 	if !ok || dbURL == "" {
-		panic("配置项 db.url 为空，请在 config-logic.yml 中配置")
+		panic("配置项 db.url 为空，请在 config-game.yml 中配置")
 	}
 	gormLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),

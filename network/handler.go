@@ -3,6 +3,7 @@ package network
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type (
@@ -14,6 +15,7 @@ type (
 		Indindexed bool
 		HasPlayer  bool
 		HasSession bool
+		NeedValidate bool // 是否需要参数校验
 	}
 
 	MessageRoute struct {
@@ -41,7 +43,7 @@ func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 			if err != nil {
 				return err
 			}
-
+			needValidate := r.needValidation(method.Name, mt.In(cmdFieldIndex))
 			r.Handlers[cmd] = &Handler{
 				Receiver:   reflect.ValueOf(comp),
 				Method:     method,
@@ -49,10 +51,9 @@ func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 				Indindexed: containsIndex,
 				HasPlayer:  hasPlayer,
 				HasSession: hasSession,
+				NeedValidate: needValidate,
 			}
-		} else {
-			
-		}
+		}  
 	}
 	return nil
 }
@@ -80,22 +81,6 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 	// }
 	_, _, _, reqIndex := parseHandlerSignature(mt)
 	return reqIndex > 0
-}
-
-func BuildHandlerArgs(msgHandler *Handler, session *Session, index int32, msg any, playerID string) []reflect.Value {
-	args := make([]reflect.Value, 0, 5)
-	args = append(args, msgHandler.Receiver)
-	if msgHandler.HasPlayer {
-		args = append(args, reflect.ValueOf(playerID))
-	}
-	if msgHandler.HasSession {
-		args = append(args, reflect.ValueOf(session))
-	}
-	if msgHandler.Indindexed {
-		args = append(args, reflect.ValueOf(index))
-	}
-	args = append(args, reflect.ValueOf(msg))
-	return args
 }
 
 func parseHandlerSignature(mt reflect.Type) (hasPlayer bool, hasSession bool, hasIndex bool, reqIndex int) {
@@ -145,4 +130,27 @@ func (r *MessageRoute) GetHandler(cmd int32) (*Handler, error) {
 	} else {
 		return nil, fmt.Errorf("cmd [%d] handler not found", cmd)
 	}
+}
+
+func (r *MessageRoute) needValidation(methodName string, msgType reflect.Type) bool {
+	if strings.HasPrefix(methodName, "Validatable") {
+		return true
+	}
+	return hasValidateTag(msgType)
+}
+
+func hasValidateTag(t reflect.Type) bool {
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Tag.Get("validate") != "" && field.Tag.Get("validate") != "-" {
+			return true
+		}
+	}
+	return false
 }

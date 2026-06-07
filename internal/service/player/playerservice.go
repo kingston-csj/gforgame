@@ -166,7 +166,7 @@ func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	context.DbService.SaveToDb(player)
 }
 
-func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int32) {
+func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int32) *protos.ResPlayerLogin {
 	// 是否是新角色
 	newCreated := ps.GetPlayerProfileById(playerId) == nil
 	player := ps.GetOrCreatePlayer(playerId)
@@ -209,7 +209,7 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		s.SendWithoutIndex(&protos.PushLoadComplete{})
 	}()
 
-	s.Send(&protos.ResPlayerLogin{
+	return &protos.ResPlayerLogin{
 		Code:       0,
 		PlayerId:   player.Id,
 		NewCreate:  newCreated,
@@ -218,7 +218,7 @@ func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int3
 		Level:      player.Level,
 		Name:       player.Name,
 		Stage:      player.Stage,
-	}, index)
+	}
 }
 
 func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {

@@ -40,7 +40,7 @@ coverage.*
 
 **/logs/
 
-tools/protocol/output
+internal/tools/protocol/output
 #go执行文件
 *.exe*  
 

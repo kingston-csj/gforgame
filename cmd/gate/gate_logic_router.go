@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util/jsonutil"
-	"github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/common/util/conv"
+	"github.com/forfun/gforgame/gateway/contract"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 )
@@ -22,21 +21,13 @@ func (g *LogicRouter) MessageReceived(session *network.Session, frame *protocol.
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-	if frame.Header.Cmd == protos.CmdTransferMsgGateToLogic {
-		transferResp := &protos.TransferGateToLogic{}
-		switch body := frame.Msg.(type) {
-		case *protos.TransferGateToLogic:
-			transferResp = body
-		case []byte:
-			if err := jsonutil.JsonBytesToStruct(body, transferResp); err != nil {
-				logger.ErrorNoStack(fmt.Errorf("decode transfer response failed: %v", err))
-				return false
-			}
-		default:
-			logger.ErrorNoStack(fmt.Errorf("transfer response payload type invalid: %T", frame.Msg))
+	if frame.Header.Cmd == gateTransferCodec.TransferCmd() {
+		transferResp, err := gateTransferCodec.ParseTransferMessage(frame.Msg)
+		if err != nil {
+			logger.ErrorNoStack(fmt.Errorf("decode transfer response failed: %v", err))
 			return false
 		}
-		if err := forwardTransferToClient(transferResp); err != nil {
+		if err := forwardTransferToClient(session, transferResp); err != nil {
 			logger.ErrorNoStack(err)
 			return false
 		}
@@ -45,31 +36,42 @@ func (g *LogicRouter) MessageReceived(session *network.Session, frame *protocol.
 	return true
 }
 
-func forwardTransferToClient(transfer *protos.TransferGateToLogic) error {
-	if transfer.PlayerId == "" {
-		return fmt.Errorf("transfer response playerId is empty, cmd=%d", transfer.Cmd)
+func forwardTransferToClient(logicSession *network.Session, transfer contract.GateTransferMessage) error {
+	playerID := transfer.GetPlayerID()
+	cmd := transfer.GetTransferCmd()
+	index := transfer.GetTransferIndex()
+	body := transfer.GetTransferBody()
+	if playerID == "" {
+		return fmt.Errorf("transfer response playerId is empty, cmd=%d", cmd)
 	}
-	clientSession := network.GetSessionByPlayerId(transfer.PlayerId)
+	serverID := resolveBackendServerID(logicSession)
+	if serverID <= 0 {
+		return fmt.Errorf("logic session serverId is empty, playerId=%s cmd=%d", playerID, cmd)
+	}
+	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
+	clientSession := network.GetSessionByPlayerId(sessionPlayerKey)
 	if clientSession == nil {
-		return fmt.Errorf("client session not found, playerId=%s cmd=%d", transfer.PlayerId, transfer.Cmd)
+		return fmt.Errorf("client session not found, sessionPlayerKey=%s cmd=%d", sessionPlayerKey, cmd)
 	}
-	typ, _ := network.GetMessageType(transfer.Cmd)
-	if typ == nil {
-		return fmt.Errorf("transfer response message type not found, cmd=%d", transfer.Cmd)
-	}
-	resp := reflect.New(typ.Elem()).Interface()
-	if err := gateMsgCodec.Decode(transfer.Body, resp); err != nil {
-		return fmt.Errorf("decode transfer response body failed, cmd=%d err=%v", transfer.Cmd, err)
-	}
-	if err := clientSession.Send(resp, transfer.Index); err != nil {
-		return fmt.Errorf("send transfer response to client failed, playerId=%s cmd=%d err=%v", transfer.PlayerId, transfer.Cmd, err)
-	}
-	jsonStr, err := jsonutil.StructToJSON(resp)
+	frame, err := clientSession.ProtocolCodec.Encode(cmd, index, body)
 	if err != nil {
-		return fmt.Errorf("encode transfer response body failed, cmd=%d err=%v", transfer.Cmd, err)
+		return fmt.Errorf("encode transfer raw frame failed, sessionPlayerKey=%s cmd=%d err=%v", sessionPlayerKey, cmd, err)
 	}
-	logger.Info(fmt.Sprintf("send transfer response to client: cmd %d, 内容: %s", transfer.Cmd, jsonStr))
+	if err := clientSession.SendRaw(frame); err != nil {
+		return fmt.Errorf("send transfer raw response to client failed, sessionPlayerKey=%s cmd=%d err=%v", sessionPlayerKey, cmd, err)
+	}
+	logger.Info(fmt.Sprintf("send transfer raw response to client: cmd %d, bodyLen: %d", cmd, len(body)))
 	return nil
+}
+
+func resolveBackendServerID(session *network.Session) int32 {
+	if session == nil {
+		return 0
+	}
+	if v, ok := session.GetAttr("serverId"); ok {
+		return conv.Int32Value(v)
+	}
+	return 0
 }
 
 func newLogicIoDispatcher() network.IoDispatch {

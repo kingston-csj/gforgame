@@ -4,7 +4,6 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/chat"
 	"github.com/forfun/gforgame/internal/service/player"
-	"github.com/forfun/gforgame/network"
 )
 
 
@@ -20,8 +19,8 @@ func NewChatRoute(service *chat.ChatService, playerService *player.PlayerService
 	}
 }
 
-func (rs *ChatRouter) ReqChat(s *network.Session, index int32, msg *protos.ReqChat) *protos.ResChat {
-	p := rs.player.GetPlayerBySession(s)
+func (rs *ChatRouter) ReqChat(playerId string, index int32, msg *protos.ReqChat) *protos.ResChat {
+	p := rs.player.GetPlayer(playerId)
 	response := rs.service.SendMessage(p, msg)
 	return response
 }
