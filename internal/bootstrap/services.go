@@ -27,9 +27,12 @@ import (
 	"github.com/forfun/gforgame/internal/service/signin"
 
 	"github.com/forfun/gforgame/internal/service/vip"
+
+	"go.uber.org/dig"
 )
 
 type Services struct {
+	dig.In // 显式声明：这是一个「依赖输入组」
 	Activity  *activity.ActivityService
 	Arena     *arena.ArenaService
 	Catalog   *catalog.CatalogService
@@ -59,36 +62,64 @@ type ServiceModule interface {
 // InitServices 预热服务并完成跨模块注册（reward/consume ops 等）。
 func InitServices() *Services {
 	logger.Info("InitServices")
-	s := &Services{}
-	s.Mail = mail.NewMailService()
-	s.Catalog = catalog.NewCatalogService()
-	
-	s.Quest = quest.NewQuestService()
-	s.Player = player.NewPlayerService(s.Quest)
-	s.Item = item.NewItemService(s.Player, s.Catalog)
-	s.Hero = hero.NewHeroService(s.Player, s.Item)
-	s.Friend = friend.NewFriendService(s.Player, s.Mail)
-	s.Chat = chat.NewChatService(s.Player, s.Friend)
-	s.MonthCard = monthcard.NewMonthCardService(s.Mail)
-	s.Rank = rank.NewRankService(s.Player)
-	s.Recharge = recharge.NewRechargeService()
-	s.Vip = vip.NewVipService()
-	s.Mall = mall.NewMallService()
-	s.Mail = mail.NewMailService()
-	s.Mixture = mixture.NewMixtureService()
-	s.SignIn = signin.NewSignInService()
-	s.Activity = activity.NewActivityService()
-	s.Arena = arena.NewArenaService(s.Player, s.Rank, s.Mail)
-	s.Gm = gm.NewGmService(&gm.GmDependencies{
-		Player:    s.Player,
-		Item:      s.Item,
-		Quest:     s.Quest,
-		Recharge:  s.Recharge,
-		Mail:      s.Mail,
-	})
 
-	s.InitServiceModules()
-	return s
+	// 创建 dig 容器
+	c := dig.New()
+	// 注册所有服务（只需要写构造函数！）
+	registerServices(c)
+	// 直接取出完整 Services（dig.In 参数对象只能用值类型依赖，不能用指针）
+	var services Services
+	if err := c.Invoke(func(built Services) {
+		services = built
+	}); err != nil {
+		logger.Error("Failed to initialize services: %v", err)
+		panic(err)
+	}
+
+	services.InitServiceModules()
+	return &services
+}
+
+func registerServices(c *dig.Container) {
+	// 基础服务
+	_ = c.Provide(item.NewItemService)
+	_ = c.Provide(mail.NewMailService)
+	_ = c.Provide(catalog.NewCatalogService)
+	
+	_ = c.Provide(quest.NewQuestService)
+	_ = c.Provide(player.NewPlayerService)
+	_ = c.Provide(item.NewItemService)
+	_ = c.Provide(hero.NewHeroService)
+	_ = c.Provide(friend.NewFriendService)
+	_ = c.Provide(chat.NewChatService)
+	_ = c.Provide(monthcard.NewMonthCardService)
+	_ = c.Provide(rank.NewRankService)	
+	_ = c.Provide(recharge.NewRechargeService)
+	_ = c.Provide(vip.NewVipService)
+	_ = c.Provide(mall.NewMallService)
+	_ = c.Provide(mixture.NewMixtureService)
+	_ = c.Provide(signin.NewSignInService)
+	_ = c.Provide(activity.NewActivityService)
+	_ = c.Provide(arena.NewArenaService)
+	
+	// GM 特殊处理
+	_ = c.Provide(newGmService)
+}
+
+func newGmService(
+	player *player.PlayerService,
+	item *item.ItemService,
+	quest *quest.QuestService,
+	recharge *recharge.RechargeService,
+	mail *mail.MailService,
+) *gm.GmService {
+	return gm.NewGmService(&gm.GmDependencies{
+		Player:    player,
+		Item:      item,
+		Quest:     quest,
+		Recharge:  recharge,
+		Mail:      mail,
+	})
 }
 
 // InitServiceModules 统一执行 service 启动初始化。
