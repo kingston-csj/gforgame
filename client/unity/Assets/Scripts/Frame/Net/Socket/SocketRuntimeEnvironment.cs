@@ -1,5 +1,6 @@
 ﻿using Nova.Codec;
 using System;
+using Frame.Commons.Utils;
 
 namespace Nova.Net.Socket
 {
@@ -12,7 +13,7 @@ namespace Nova.Net.Socket
 
         private readonly MessageCodec _messageCodec;
 
-        private readonly MessageFactory _messageFactory;
+        private readonly IMessageFactory _messageFactory;
 
         /// <summary>
         /// 是否使用二进制帧
@@ -23,7 +24,7 @@ namespace Nova.Net.Socket
         private bool _usedWebSocketBinaryFrame = false;
 
         public SocketRuntimeEnvironment(Type messageRouterType, MessageCodec messageCodec,
-            MessageFactory messageFactory)
+            IMessageFactory messageFactory)
         {
             this._messageRouterType = messageRouterType;
             this._messageCodec = messageCodec;
@@ -44,7 +45,7 @@ namespace Nova.Net.Socket
         /// <summary>
         ///     消息工厂
         /// </summary>
-        public MessageFactory MessageFactory => _messageFactory;
+        public IMessageFactory MessageFactory => _messageFactory;
 
         /// <summary>
         /// 是否使用二进制帧
@@ -54,6 +55,5 @@ namespace Nova.Net.Socket
             get => _usedWebSocketBinaryFrame;
             set => _usedWebSocketBinaryFrame = value;
         }
-        
     }
 }

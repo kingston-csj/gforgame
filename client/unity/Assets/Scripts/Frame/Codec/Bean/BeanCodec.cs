@@ -37,7 +37,7 @@ namespace Nova.Codec.bean
                 throw new InvalidOperationException($"无法创建类型 {type.FullName} 的实例，请确保存在无参构造函数", ex);
             }
 
-            // 递归解码每个字段并赋值（严格按字段顺序，与Java保持一致）
+            // 递归解码每个字段并赋值（严格按字段顺序）
             foreach (FieldCodecMeta meta in _fieldMetas)
             {
                 try

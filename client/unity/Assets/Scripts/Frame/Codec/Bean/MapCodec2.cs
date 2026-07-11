@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Frame.Codec.Bean;
+using Frame.Commons.Utils;
 using Nova.Commons.Util;
+using Nova.Net.Socket;
 
 namespace Nova.Codec.bean
 {
     /// <summary>
     /// key 强制为 string 类型
-    /// 元素Value不可以是父类或抽象类
+    /// 元素Value可以是父类或抽象类
     /// </summary>
-    public class MapCodec : Codec
+    public class MapCodec2 : Codec
     {
         public override object Decode(ByteBuff buff, Type type)
         {
@@ -43,6 +46,8 @@ namespace Nova.Codec.bean
 
             // 非空字典：初始化目标字典 
             IDictionary targetDict = (IDictionary)Activator.CreateInstance(type);
+            // 读取状态位
+            byte status = buff.ReadByte();
 
             // 循环解码键值对
             for (int i = 0; i < size; i++)
@@ -51,6 +56,18 @@ namespace Nova.Codec.bean
                 string key = (string)GetCodec(typeof(string)).Decode(buff, typeof(string));
                 // 确定 Value 的实际解码类型
                 Type eleType = valueType; // 默认用泛型指定的 Value 类型（如 BaseVo）
+                if (status == 1)
+                {
+                    int messageId = buff.ReadInt();
+                    eleType = BeanCodecContext.MessageFactory.GetMessageType(messageId);
+                    // 校验动态类型是否兼容目标 Value 类型（如 BaseVo 子类）
+                    if (!valueType.IsAssignableFrom(eleType))
+                    {
+                        throw new InvalidCastException(
+                            $"动态解析的类型 {eleType.FullName} 无法赋值给目标类型 {valueType.FullName}");
+                    }
+                }
+
                 // 解码 Value（使用实际类型编解码器）
                 Codec valueCodec = GetCodec(eleType);
                 object value = valueCodec.Decode(buff, eleType);
@@ -96,8 +113,23 @@ namespace Nova.Codec.bean
                 return;
             }
 
+//        key统一为string，根据value类型判断状态
+//        1:基本类型，写入状态0;
+//        2:不是基本类型，且元素类型是一样的，且不是抽象类(接口)写入状态0
+//        3:否则，写入状态1，然后在迭代的时候，同时写入每个元素的类型id
+            byte status = 0;
             Type dictType = value.GetType();
             Type[] genericArgs = dictType.GetGenericArguments();
+            // 0是key类型，1是value类型
+            if (!TypeUtil.IsPrimitiveOrString(genericArgs[1]))
+            {
+                if (set.Count > 1 || genericArgs[1].IsAbstract || genericArgs[1].IsInterface)
+                {
+                    status = 1;
+                }
+            }
+
+            buff.WriteByte(status);
             // 循环编码键值对
             foreach (var entry in map)
             {
@@ -106,6 +138,14 @@ namespace Nova.Codec.bean
 
                 // 编码 Key（强制用 StringCodec）
                 GetCodec(typeof(string)).Encode(buff, key);
+
+                if (status == 1)
+                {
+                    // 状态为1，写入value的类型id
+                    int messageId = BeanCodecContext.MessageFactory.GetMessageCmd(valueObj.GetType());
+                    buff.WriteInt(messageId);
+                }
+
                 Codec valueCodec = GetCodec(valueObj.GetType());
                 valueCodec.Encode(buff, valueObj);
             }

@@ -21,7 +21,7 @@ namespace Nova.Codec.bean
 
         static Codec()
         {
-            // 注册基础类型编解码器（与 Java 保持一致）
+            // 注册基础类型编解码器
             Register(typeof(bool), new BoolCodec());
             Register(typeof(bool?), new BoolCodec());
             Register(typeof(byte), new ByteCodec());

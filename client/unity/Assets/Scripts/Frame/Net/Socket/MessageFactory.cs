@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Frame.Commons.Utils;
 
 namespace Nova.Net.Socket
 {
-    public class MessageFactory
+    public class MessageFactory : IMessageFactory
     {
         private Dictionary<int, Type> _id2Clazz = new();
 
@@ -40,5 +41,4 @@ namespace Nova.Net.Socket
             return _id2Clazz.ContainsKey(cmd);
         }
     }
-    
 }

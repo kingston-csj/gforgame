@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Nova.Commons.Util;
 
 namespace Nova.Codec.bean
 {
-    
     /// <summary>
     /// 基于结构体的消息体编码解码（自动适配基础类型、数组、集合、自定义类型）
     /// </summary>
@@ -25,7 +25,8 @@ namespace Nova.Codec.bean
         /// 构造函数（指定缓冲区大小）
         /// </summary>
         /// <param name="writeBuffSize">编码单个消息的最大缓冲区大小，超出会抛出 BufferOverflowException</param>
-        public BeanAutoCodec(int readBuffSize, int writeBuffSize)
+        /// <param name="useUpgradeVersion">是否启用升级版本，若为true,代表集合元素可以使用继承模式</param>
+        public BeanAutoCodec(int readBuffSize, int writeBuffSize, bool useUpgradeVersion)
         {
             if (readBuffSize <= 0 || writeBuffSize <= 0)
             {
@@ -34,13 +35,27 @@ namespace Nova.Codec.bean
 
             _receiveBuff = new ByteBuff(readBuffSize);
             _sendBuff = new ByteBuff(writeBuffSize);
+
+            if (useUpgradeVersion)
+            {
+                // 切换集合相关编解码
+                this.UpgradeCodec();
+            }
+        }
+
+        private void UpgradeCodec()
+        {
+            Codec.Replace(typeof(List<>), new CollectionCodec2());
+            Codec.Replace(typeof(HashSet<>), new CollectionCodec2());
+            Codec.Replace(typeof(object[]), new ArrayCodec2());
+            Codec.Replace(typeof(Dictionary<,>), new MapCodec2());
         }
 
 
         /// <summary>
         /// 构造函数（使用默认缓冲区大小1M）
         /// </summary>
-        public BeanAutoCodec() : this(DefaultWriteBuffSize, DefaultWriteBuffSize)
+        public BeanAutoCodec() : this(DefaultWriteBuffSize, DefaultWriteBuffSize, false)
         {
         }
 
@@ -61,7 +76,7 @@ namespace Nova.Codec.bean
                 // 字节数组包装为ByteBuff（读模式）
                 _receiveBuff.Reset();
                 _receiveBuff.WriteBytes(body, body.Length);
-                _receiveBuff.ResetRead(); // 重置读取位置到开头
+                _receiveBuff.ResetReadIndex(); // 重置读取位置到开头
 
                 // 获取对应类型的编解码器并解码
                 Codec codec = Codec.GetCodec(msgType);

@@ -13,12 +13,6 @@ namespace Nova.Commons.Util
     public static class ClassScanner
     {
         /// <summary>
-        /// 默认过滤器（匹配所有类）
-        /// </summary>
-        private static readonly Func<Type, bool> EmptyFilter = _ => true;
-
-
-        /// <summary>
         /// 查找指定类的所有子类（不包括抽象类）
         /// </summary>
         /// <param name="parentType">父类/接口类型</param>

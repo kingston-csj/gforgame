@@ -277,9 +277,9 @@ namespace Nova.Net.UnitySocket
             {
                 for (;;)
                 {
-                    if (_receiveBuff.ReadableBytes < 12)
+                    if (_receiveBuff.ReadableBytes < MESSAGE_SIZE)
                     {
-                        // 如果不够一个字节，则跳出
+                        // 如果不够一个包头，则跳出
                         break;
                     }
 
@@ -303,9 +303,12 @@ namespace Nova.Net.UnitySocket
                     else
                     {
                         // 半包，恢复读取位置，等待下一次数据
-                        _receiveBuff.ResetRead();
+                        _receiveBuff.ResetReadIndex();
                         break;
                     }
+
+                    // 整理下缓冲区（相当于移动数据）
+                    _receiveBuff.Compress();
                 }
             }
         }
