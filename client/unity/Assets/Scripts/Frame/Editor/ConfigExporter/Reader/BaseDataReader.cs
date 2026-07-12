@@ -1,12 +1,10 @@
-﻿using Nova.Commons.Convert;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Nova.Commons.Convert;
 
 namespace Nova.Editor.ConfigExporter
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using System.Text;
-
     /// <summary>
     /// 配置数据读取基类
     /// </summary>
@@ -77,7 +75,7 @@ namespace Nova.Editor.ConfigExporter
         #region 核心方法
 
         /// <summary>
-        /// 递归查找类及其父类的字段（对应Java的findFieldInClassHierarchy）
+        /// 递归查找类及其父类的字段
         /// </summary>
         /// <param name="type">目标类型</param>
         /// <param name="fieldName">字段名</param>
@@ -119,7 +117,7 @@ namespace Nova.Editor.ConfigExporter
         }
 
         /// <summary>
-        /// 将Excel行数据转换为实体列表（对应Java的readRecords）
+        /// 将Excel行数据转换为实体列表
         /// </summary>
         /// <typeparam name="T">实体类型</typeparam>
         /// <param name="type">实体Type</param>

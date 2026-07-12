@@ -10,7 +10,7 @@ namespace Nova.Editor.ConfigExporter
     using UnityEngine;
 
     /// <summary>
-    /// 基于ExcelDataReader的实现类
+    /// 使用Excel文件解析配置文件
     /// </summary>
     public class ExcelReader : BaseDataReader, IDataReader
     {

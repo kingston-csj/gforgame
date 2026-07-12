@@ -4,6 +4,11 @@ using System.IO;
 
 namespace Nova.Editor.ConfigExporter
 {
+    /// <summary>
+    /// 配置文件读取接口
+    /// 解析文件流为指定类型的配置记录集合
+    /// 文件流可以为Excel/Csv/Json等格式
+    /// </summary>
     public interface IDataReader
     {
         /// <summary>

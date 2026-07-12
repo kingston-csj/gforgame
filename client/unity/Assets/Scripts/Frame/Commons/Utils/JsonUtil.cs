@@ -5,7 +5,7 @@
     using UnityEngine;
 
     /// <summary>
-    /// 模仿 Unity JsonUtility API 的 Newtonsoft.Json 工具类
+    /// 使用 Newtonsoft.Json 工具类
     /// 优势：支持根数组、大小写不敏感、忽略多余字段、兼容复杂类型
     /// </summary>
     public static class JsonUtil

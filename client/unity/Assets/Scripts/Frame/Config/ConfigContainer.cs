@@ -35,7 +35,7 @@ namespace Nova.Data
         {
             // 自动扫描索引元数据（字段和方法）
             ScanIndexMetas();
-            _initFromJsonItems(textAsset);
+            InitFromJsonItems(textAsset);
         }
 
         /// <summary>自动扫描记录类型中标记 [Index] 的字段和方法，构建索引元数据</summary>
@@ -77,7 +77,7 @@ namespace Nova.Data
         ///     从TextAsset初始化配置数据(json文本)
         /// </summary>
         /// <param name="textAsset">包含json配置的文本资源</param>
-        private void _initFromJsonItems(TextAsset textAsset)
+        private void InitFromJsonItems(TextAsset textAsset)
         {
             var items = JsonUtil.FromJson<E[]>(textAsset.text);
             // list转字典

@@ -10,17 +10,17 @@ namespace Nova.Data
     public abstract class AbsConfigData
     {
         /// <summary>
-        ///     唯一标识
+        ///  唯一标识
         /// </summary>
         public int id;
 
         /// <summary>
-        ///    名称
+        ///  名称
         /// </summary>
         public string name;
 
         /// <summary>
-        ///     描述信息
+        ///   描述信息
         /// </summary>
         public string desc;
     }

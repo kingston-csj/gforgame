@@ -9,7 +9,6 @@ namespace Game.Configs
     /// </summary>
     public class ItemData : AbsConfigData
     {
-        public int id;
 
         public string icon;
 
