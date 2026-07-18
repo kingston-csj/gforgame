@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using frame.Assets;
 using Game.Configs;
+using Game.Login;
 using Game.Net;
 using Game.Net.Message;
 using Nova.Codec;
@@ -15,7 +16,7 @@ using UnityEngine;
 
 namespace Game.Core
 {
-    public class Engine : MonoBehaviour
+    public class Engine : MonoBehaviour, IUiFactory
     {
         [Header("UI层列表")] public UiLayer[] layers;
 
@@ -24,7 +25,6 @@ namespace Game.Core
         /// 是否开启日志
         /// </summary>
         public bool DebugLog = true;
-
 
         private void Awake()
         {
@@ -49,36 +49,15 @@ namespace Game.Core
                 return;
             }
 
-            // 网络连接
-            // _CreateSocketClient();
+            List<PanelPrefabConfig> _panelConfigs = PanelModules.GetAllPanelConfigs();
+            PanelManager.Init(this, _panelConfigs);
+
+            // 异步打开登录面板 
+            PanelManager.Instance.OpenPanel<LoginView>(R.Panels.Login);
         }
-
-        private void _CreateSocketClient()
+        public Transform GetNodeByLayer(LayerIds layer)
         {
-            // 连接服务器
-            SocketRuntimeEnvironment runtimeEnvironment =
-                new SocketRuntimeEnvironment(typeof(MessageRouter), new JsonCodec(), new MessageFactory());
-            // 自动注册所有的消息类型
-            foreach (Type item in ClassScanner.ListClassesWithAttribution<MessageMeta>())
-            {
-                // 获得class对应MessageMeta特性的cmd
-                MessageMeta messageMeta = item.GetCustomAttribute(typeof(MessageMeta)) as MessageMeta;
-                int cmd = messageMeta.Cmd;
-                runtimeEnvironment.MessageFactory.Register(cmd, item);
-            }
-
-            SocketClient socketClient = new TcpSocketClient(AppContext.gameConfig.serverUrl, runtimeEnvironment);
-            AppContext.socketClient = socketClient;
-
-            socketClient.ConnectAsync(() =>
-            {
-                // 连接成功
-                LoggerUtil.Info("连接成功");
-
-                // 发送登录请求
-                ReqPlayerLogin reqLogin = new ReqPlayerLogin { playerId = "1001" };
-                socketClient.Send(reqLogin, (ResPlayerLogin res) => Debug.Log($"登录成功，玩家名称：{res.name}"));
-            });
+            return layers[(int)layer].node;
         }
     }
 }
