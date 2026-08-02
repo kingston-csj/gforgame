@@ -32,7 +32,7 @@ type GameTaskHandler struct {
 	Router network.MessageRoute
 }
 
-func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+func (g *GameTaskHandler) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Error("", r.(error))
@@ -52,7 +52,7 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 			if len(values) > 0 {
 				err := session.Send(values[0].Interface(), frame.Header.Index)
 				if err != nil {
-					logger.Error("",fmt.Errorf("session.Send: %v", err))
+					logger.Error("", fmt.Errorf("session.Send: %v", err))
 					return false
 				}
 			}
@@ -90,7 +90,7 @@ func main() {
 	}
 
 	go func() {
-		for frame := range session.DataReceived {
+		for frame := range session.DataReceivedChan() {
 			ioDispatcher.OnMessageReceived(session, frame)
 		}
 	}()

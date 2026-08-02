@@ -12,413 +12,413 @@ import (
 
 func init() {
 	generatedRouteDispatchers = map[int32]generatedRouteInvoker{
-		-201: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.GmRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-201 expect=*route.GmRoute")
-		}
-		req, ok := msg.(*protos.ReqGmCommand)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-201 expect=*protos.ReqGmCommand")
-		}
-		return r.ReqAction(playerID, index, req), nil
+		-201: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.GmRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-201 expect=*route.GmRoute")
+			}
+			req, ok := msg.(*protos.ReqGmCommand)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-201 expect=*protos.ReqGmCommand")
+			}
+			return r.ReqAction(playerID, index, req), nil
 		},
-		-102: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-102 expect=*route.MixtureRoute")
-		}
-		req, ok := msg.(*protos.ReqGetServerTime)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-102 expect=*protos.ReqGetServerTime")
-		}
-		return r.ReqGetServerTime(playerID, index, req), nil
+		-102: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-102 expect=*route.MixtureRoute")
+			}
+			req, ok := msg.(*protos.ReqGetServerTime)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-102 expect=*protos.ReqGetServerTime")
+			}
+			return r.ReqGetServerTime(playerID, index, req), nil
 		},
-		-101: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-101 expect=*route.MixtureRoute")
-		}
-		req, ok := msg.(*protos.ReqHeartBeat)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-101 expect=*protos.ReqHeartBeat")
-		}
-		return r.ReqHeartBeat(playerID, index, req), nil
+		-101: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=-101 expect=*route.MixtureRoute")
+			}
+			req, ok := msg.(*protos.ReqHeartBeat)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=-101 expect=*protos.ReqHeartBeat")
+			}
+			return r.ReqHeartBeat(playerID, index, req), nil
 		},
-		103: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=103 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerLogin)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=103 expect=*protos.ReqPlayerLogin")
-		}
-		return r.ReqLogin(playerID, session, index, req), nil
+		103: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=103 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqPlayerLogin)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=103 expect=*protos.ReqPlayerLogin")
+			}
+			return r.ReqLogin(playerID, session, index, req), nil
 		},
-		105: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=105 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerUpLevel)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=105 expect=*protos.ReqPlayerUpLevel")
-		}
-		return r.ReqPlayerUpLevel(playerID, index, req), nil
+		105: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=105 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqPlayerUpLevel)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=105 expect=*protos.ReqPlayerUpLevel")
+			}
+			return r.ReqPlayerUpLevel(playerID, index, req), nil
 		},
-		106: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=106 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerUpStage)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=106 expect=*protos.ReqPlayerUpStage")
-		}
-		return r.ReqPlayerUpStage(playerID, index, req), nil
+		106: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=106 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqPlayerUpStage)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=106 expect=*protos.ReqPlayerUpStage")
+			}
+			return r.ReqPlayerUpStage(playerID, index, req), nil
 		},
-		109: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=109 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqEditClientData)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=109 expect=*protos.ReqEditClientData")
-		}
-		return r.ReqEditClientData(playerID, index, req), nil
+		109: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=109 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqEditClientData)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=109 expect=*protos.ReqEditClientData")
+			}
+			return r.ReqEditClientData(playerID, index, req), nil
 		},
-		110: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=110 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerRefreshScore)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=110 expect=*protos.ReqPlayerRefreshScore")
-		}
-		return r.ReqPlayerRefreshScore(playerID, index, req), nil
+		110: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=110 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqPlayerRefreshScore)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=110 expect=*protos.ReqPlayerRefreshScore")
+			}
+			return r.ReqPlayerRefreshScore(playerID, index, req), nil
 		},
-		501: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=501 expect=*route.MailRoute")
-		}
-		req, ok := msg.(*protos.ReqMailRead)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=501 expect=*protos.ReqMailRead")
-		}
-		return r.ReqRead(playerID, index, req), nil
+		501: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=501 expect=*route.MailRoute")
+			}
+			req, ok := msg.(*protos.ReqMailRead)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=501 expect=*protos.ReqMailRead")
+			}
+			return r.ReqRead(playerID, index, req), nil
 		},
-		502: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=502 expect=*route.MailRoute")
-		}
-		req, ok := msg.(*protos.ReqMailGetReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=502 expect=*protos.ReqMailGetReward")
-		}
-		return r.ReqGetReward(playerID, index, req), nil
+		502: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=502 expect=*route.MailRoute")
+			}
+			req, ok := msg.(*protos.ReqMailGetReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=502 expect=*protos.ReqMailGetReward")
+			}
+			return r.ReqGetReward(playerID, index, req), nil
 		},
-		504: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=504 expect=*route.MailRoute")
-		}
-		req, ok := msg.(*protos.ReqMailGetAllRewards)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=504 expect=*protos.ReqMailGetAllRewards")
-		}
-		return r.ReqGetAllRewards(playerID, index, req), nil
+		504: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=504 expect=*route.MailRoute")
+			}
+			req, ok := msg.(*protos.ReqMailGetAllRewards)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=504 expect=*protos.ReqMailGetAllRewards")
+			}
+			return r.ReqGetAllRewards(playerID, index, req), nil
 		},
-		505: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=505 expect=*route.MailRoute")
-		}
-		req, ok := msg.(*protos.ReqMailDeleteAll)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=505 expect=*protos.ReqMailDeleteAll")
-		}
-		return r.ReqDeleteAll(playerID, index, req), nil
+		505: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MailRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=505 expect=*route.MailRoute")
+			}
+			req, ok := msg.(*protos.ReqMailDeleteAll)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=505 expect=*protos.ReqMailDeleteAll")
+			}
+			return r.ReqDeleteAll(playerID, index, req), nil
 		},
-		701: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=701 expect=*route.QuestRoute")
-		}
-		req, ok := msg.(*protos.ReqQuestTakeReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=701 expect=*protos.ReqQuestTakeReward")
-		}
-		return r.ReqTakeReward(playerID, index, req), nil
+		701: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=701 expect=*route.QuestRoute")
+			}
+			req, ok := msg.(*protos.ReqQuestTakeReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=701 expect=*protos.ReqQuestTakeReward")
+			}
+			return r.ReqTakeReward(playerID, index, req), nil
 		},
-		702: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=702 expect=*route.QuestRoute")
-		}
-		req, ok := msg.(*protos.ReqQuestTakeProgressReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=702 expect=*protos.ReqQuestTakeProgressReward")
-		}
-		return r.ReqTakeProgressReward(playerID, index, req), nil
+		702: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=702 expect=*route.QuestRoute")
+			}
+			req, ok := msg.(*protos.ReqQuestTakeProgressReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=702 expect=*protos.ReqQuestTakeProgressReward")
+			}
+			return r.ReqTakeProgressReward(playerID, index, req), nil
 		},
-		707: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=707 expect=*route.QuestRoute")
-		}
-		req, ok := msg.(*protos.ReqQuestEntrust)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=707 expect=*protos.ReqQuestEntrust")
-		}
-		return r.ReqQuestEntrust(playerID, index, req), nil
+		707: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=707 expect=*route.QuestRoute")
+			}
+			req, ok := msg.(*protos.ReqQuestEntrust)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=707 expect=*protos.ReqQuestEntrust")
+			}
+			return r.ReqQuestEntrust(playerID, index, req), nil
 		},
-		801: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=801 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroRecruit)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=801 expect=*protos.ReqHeroRecruit")
-		}
-		return r.ReqRecruit(playerID, index, req), nil
+		801: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=801 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroRecruit)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=801 expect=*protos.ReqHeroRecruit")
+			}
+			return r.ReqRecruit(playerID, index, req), nil
 		},
-		802: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=802 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroUpFight)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=802 expect=*protos.ReqHeroUpFight")
-		}
-		return r.ReqHeroUpFight(playerID, index, req), nil
+		802: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=802 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroUpFight)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=802 expect=*protos.ReqHeroUpFight")
+			}
+			return r.ReqHeroUpFight(playerID, index, req), nil
 		},
-		803: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=803 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroOffFight)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=803 expect=*protos.ReqHeroOffFight")
-		}
-		return r.ReqHeroOffFight(playerID, index, req), nil
+		803: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=803 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroOffFight)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=803 expect=*protos.ReqHeroOffFight")
+			}
+			return r.ReqHeroOffFight(playerID, index, req), nil
 		},
-		804: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=804 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroLevelUp)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=804 expect=*protos.ReqHeroLevelUp")
-		}
-		return r.ReqHeroLevelUp(playerID, index, req), nil
+		804: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=804 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroLevelUp)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=804 expect=*protos.ReqHeroLevelUp")
+			}
+			return r.ReqHeroLevelUp(playerID, index, req), nil
 		},
-		805: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=805 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroUpStage)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=805 expect=*protos.ReqHeroUpStage")
-		}
-		return r.ReqHeroUpStage(playerID, index, req), nil
+		805: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=805 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroUpStage)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=805 expect=*protos.ReqHeroUpStage")
+			}
+			return r.ReqHeroUpStage(playerID, index, req), nil
 		},
-		807: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=807 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroCombine)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=807 expect=*protos.ReqHeroCombine")
-		}
-		return r.ReqHeroCombine(playerID, index, req), nil
+		807: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=807 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroCombine)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=807 expect=*protos.ReqHeroCombine")
+			}
+			return r.ReqHeroCombine(playerID, index, req), nil
 		},
-		808: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=808 expect=*route.HeroRoute")
-		}
-		req, ok := msg.(*protos.ReqHeroChangePosition)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=808 expect=*protos.ReqHeroChangePosition")
-		}
-		return r.ReqHeroChangePosition(playerID, index, req), nil
+		808: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=808 expect=*route.HeroRoute")
+			}
+			req, ok := msg.(*protos.ReqHeroChangePosition)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=808 expect=*protos.ReqHeroChangePosition")
+			}
+			return r.ReqHeroChangePosition(playerID, index, req), nil
 		},
-		1101: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MallRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1101 expect=*route.MallRoute")
-		}
-		req, ok := msg.(*protos.ReqMallBuy)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1101 expect=*protos.ReqMallBuy")
-		}
-		return r.ReqMallBuy(playerID, index, req), nil
+		1101: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MallRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1101 expect=*route.MallRoute")
+			}
+			req, ok := msg.(*protos.ReqMallBuy)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1101 expect=*protos.ReqMallBuy")
+			}
+			return r.ReqMallBuy(playerID, index, req), nil
 		},
-		1801: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.ChatRouter)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1801 expect=*route.ChatRouter")
-		}
-		req, ok := msg.(*protos.ReqChat)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1801 expect=*protos.ReqChat")
-		}
-		return r.ReqChat(playerID, index, req), nil
+		1801: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.ChatRouter)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1801 expect=*route.ChatRouter")
+			}
+			req, ok := msg.(*protos.ReqChat)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1801 expect=*protos.ReqChat")
+			}
+			return r.ReqChat(playerID, index, req), nil
 		},
-		1902: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1902 expect=*route.FriendRoute")
-		}
-		req, ok := msg.(*protos.ReqFriendSearchPlayers)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1902 expect=*protos.ReqFriendSearchPlayers")
-		}
-		return r.ReqSearchPlayers(playerID, index, req), nil
+		1902: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1902 expect=*route.FriendRoute")
+			}
+			req, ok := msg.(*protos.ReqFriendSearchPlayers)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1902 expect=*protos.ReqFriendSearchPlayers")
+			}
+			return r.ReqSearchPlayers(playerID, index, req), nil
 		},
-		1903: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1903 expect=*route.FriendRoute")
-		}
-		req, ok := msg.(*protos.ReqFriendQueryMyFriends)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1903 expect=*protos.ReqFriendQueryMyFriends")
-		}
-		return r.ReqQueryFriends(playerID, index, req), nil
+		1903: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1903 expect=*route.FriendRoute")
+			}
+			req, ok := msg.(*protos.ReqFriendQueryMyFriends)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1903 expect=*protos.ReqFriendQueryMyFriends")
+			}
+			return r.ReqQueryFriends(playerID, index, req), nil
 		},
-		1904: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1904 expect=*route.FriendRoute")
-		}
-		req, ok := msg.(*protos.ReqFriendApply)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1904 expect=*protos.ReqFriendApply")
-		}
-		return r.ReqApply(playerID, index, req), nil
+		1904: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1904 expect=*route.FriendRoute")
+			}
+			req, ok := msg.(*protos.ReqFriendApply)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1904 expect=*protos.ReqFriendApply")
+			}
+			return r.ReqApply(playerID, index, req), nil
 		},
-		1905: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1905 expect=*route.FriendRoute")
-		}
-		req, ok := msg.(*protos.ReqFriendDealApplyRecord)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1905 expect=*protos.ReqFriendDealApplyRecord")
-		}
-		return r.ReqDealApply(playerID, index, req), nil
+		1905: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1905 expect=*route.FriendRoute")
+			}
+			req, ok := msg.(*protos.ReqFriendDealApplyRecord)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1905 expect=*protos.ReqFriendDealApplyRecord")
+			}
+			return r.ReqDealApply(playerID, index, req), nil
 		},
-		1906: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1906 expect=*route.FriendRoute")
-		}
-		req, ok := msg.(*protos.ReqFriendDelete)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1906 expect=*protos.ReqFriendDelete")
-		}
-		return r.ReqDelete(playerID, index, req), nil
+		1906: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.FriendRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=1906 expect=*route.FriendRoute")
+			}
+			req, ok := msg.(*protos.ReqFriendDelete)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=1906 expect=*protos.ReqFriendDelete")
+			}
+			return r.ReqDelete(playerID, index, req), nil
 		},
-		2005: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2005 expect=*route.PlayerRoute")
-		}
-		req, ok := msg.(*protos.ReqPlayerLoadingFinish)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2005 expect=*protos.ReqPlayerLoadingFinish")
-		}
-		r.ReqLoadingFinish(playerID, index, req)
-		return nil, nil
+		2005: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.PlayerRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2005 expect=*route.PlayerRoute")
+			}
+			req, ok := msg.(*protos.ReqPlayerLoadingFinish)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2005 expect=*protos.ReqPlayerLoadingFinish")
+			}
+			r.ReqLoadingFinish(playerID, index, req)
+			return nil, nil
 		},
-		2102: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MonthCardRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2102 expect=*route.MonthCardRoute")
-		}
-		req, ok := msg.(*protos.ReqMonthCardGetReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2102 expect=*protos.ReqMonthCardGetReward")
-		}
-		return r.ReqGetReward(playerID, index, req), nil
+		2102: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MonthCardRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=2102 expect=*route.MonthCardRoute")
+			}
+			req, ok := msg.(*protos.ReqMonthCardGetReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=2102 expect=*protos.ReqMonthCardGetReward")
+			}
+			return r.ReqGetReward(playerID, index, req), nil
 		},
-		3001: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.SignInRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3001 expect=*route.SignInRoute")
-		}
-		req, ok := msg.(*protos.ReqSignIn)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3001 expect=*protos.ReqSignIn")
-		}
-		return r.ReqSignIn(playerID, index, req), nil
+		3001: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.SignInRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3001 expect=*route.SignInRoute")
+			}
+			req, ok := msg.(*protos.ReqSignIn)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3001 expect=*protos.ReqSignIn")
+			}
+			return r.ReqSignIn(playerID, index, req), nil
 		},
-		3002: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.SignInRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3002 expect=*route.SignInRoute")
-		}
-		req, ok := msg.(*protos.ReqSignInMakeup)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3002 expect=*protos.ReqSignInMakeup")
-		}
-		return r.ReqSignInMakeup(playerID, index, req), nil
+		3002: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.SignInRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3002 expect=*route.SignInRoute")
+			}
+			req, ok := msg.(*protos.ReqSignInMakeup)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3002 expect=*protos.ReqSignInMakeup")
+			}
+			return r.ReqSignInMakeup(playerID, index, req), nil
 		},
-		3101: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.CatalogRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3101 expect=*route.CatalogRoute")
-		}
-		req, ok := msg.(*protos.ReqCatalogReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3101 expect=*protos.ReqCatalogReward")
-		}
-		return r.ReqCatalogReward(playerID, index, req), nil
+		3101: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.CatalogRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=3101 expect=*route.CatalogRoute")
+			}
+			req, ok := msg.(*protos.ReqCatalogReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=3101 expect=*protos.ReqCatalogReward")
+			}
+			return r.ReqCatalogReward(playerID, index, req), nil
 		},
-		7001: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.RankRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=7001 expect=*route.RankRoute")
-		}
-		req, ok := msg.(*protos.ReqRankQuery)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=7001 expect=*protos.ReqRankQuery")
-		}
-		return r.ReqRankQuery(playerID, index, req), nil
+		7001: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.RankRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=7001 expect=*route.RankRoute")
+			}
+			req, ok := msg.(*protos.ReqRankQuery)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=7001 expect=*protos.ReqRankQuery")
+			}
+			return r.ReqRankQuery(playerID, index, req), nil
 		},
-		9902: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=9902 expect=*route.MixtureRoute")
-		}
-		req, ok := msg.(*protos.ReqIdleViewReward)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=9902 expect=*protos.ReqIdleViewReward")
-		}
-		return r.ReqIdleViewReward(playerID, index, req), nil
+		9902: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=9902 expect=*route.MixtureRoute")
+			}
+			req, ok := msg.(*protos.ReqIdleViewReward)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=9902 expect=*protos.ReqIdleViewReward")
+			}
+			return r.ReqIdleViewReward(playerID, index, req), nil
 		},
-		9906: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {
-		r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=9906 expect=*route.MixtureRoute")
-		}
-		req, ok := msg.(*protos.ReqClientUploadEvent)
-		if !ok {
-			return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=9906 expect=*protos.ReqClientUploadEvent")
-		}
-		return r.ReqClientUploadEvent(playerID, index, req), nil
+		9906: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
+			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=9906 expect=*route.MixtureRoute")
+			}
+			req, ok := msg.(*protos.ReqClientUploadEvent)
+			if !ok {
+				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=9906 expect=*protos.ReqClientUploadEvent")
+			}
+			return r.ReqClientUploadEvent(playerID, index, req), nil
 		},
 	}
 }

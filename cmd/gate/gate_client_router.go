@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
@@ -19,18 +20,46 @@ type MyMessageDispatch struct {
 	network.BaseIoDispatch
 }
 
-func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
+func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
+	// 两个session相同，才可以移除在线
+	// 否则，顶号会有问题
+	unbindPlayer := false
 	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
 		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
 			if current := network.GetSessionByPlayerId(sessionPlayerKey); current == session {
+				unbindPlayer = true
+				notifyLogicPlayerLogout(session)
 				unbindPlayerServer(sessionPlayerKey)
 			}
 		}
+		network.RemoveSession(session, unbindPlayer)
 	}
-	network.RemoveSession(session)
 }
 
-func (g *ClientRouter) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+// notifyLogicPlayerLogout 在网关确认玩家真正下线后通知逻辑服清理在线状态。
+func notifyLogicPlayerLogout(session network.Session) {
+	if session == nil {
+		return
+	}
+	playerID, _ := session.GetAttr("id")
+	serverID, _ := session.GetAttr("serverId")
+	playerIDStr, ok := playerID.(string)
+	if !ok || playerIDStr == "" {
+		return
+	}
+	targetServerID, ok := serverID.(int32)
+	if !ok || targetServerID <= 0 {
+		return
+	}
+	// req := &protos.NotifyPlayerLogoutToGame{
+	// 	PlayerId: playerIDStr,
+	// }
+	// if err := enqueueTransfer(targetServerID, req, 0); err != nil {
+	// 	logger.ErrorNoStack(fmt.Errorf("notify logic player logout failed, playerId=%s serverId=%d err=%v", playerIDStr, targetServerID, err))
+	// }
+}
+
+func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
@@ -52,6 +81,7 @@ func (g *ClientRouter) MessageReceived(session *network.Session, frame *protocol
 		logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
 		if err := HandleLoginReq(session, loginReq, frame); err != nil {
 			logger.ErrorNoStack(err)
+			return false
 		}
 		return true
 	}
@@ -61,7 +91,7 @@ func (g *ClientRouter) MessageReceived(session *network.Session, frame *protocol
 	return true
 }
 
-func HandleLoginReq(session *network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
+func HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
 	logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
 	playerID := loginReq.GetPlayerID()
 	serverID := loginReq.GetServerID()
@@ -80,6 +110,7 @@ func HandleLoginReq(session *network.Session, loginReq contract.GateLoginRequest
 	if oldSession != nil && oldSession != session {
 		logger.Info("玩家顶号登录[" + sessionPlayerKey + "]")
 		oldSession.SendAndClose(gateLoginAdapter.NewReplacingLoginPush())
+		// return fmt.Errorf("multi client login")
 	}
 	if oldSession == session {
 		logger.Info("玩家重复登录[" + sessionPlayerKey + "]")
@@ -93,7 +124,7 @@ func HandleLoginReq(session *network.Session, loginReq contract.GateLoginRequest
 }
 
 // 转发消息到logic层
-func transferMsgToLogic(session *network.Session, frame *protocol.RequestDataFrame, forceServerID int32) error {
+func transferMsgToLogic(session network.Session, frame *protocol.RequestDataFrame, forceServerID int32) error {
 	body, ok := frame.Msg.([]byte)
 	if !ok {
 		return fmt.Errorf("transfer payload type invalid, cmd=%d type=%T", frame.Header.Cmd, frame.Msg)
@@ -140,7 +171,21 @@ func getPlayerServer(playerID string) (int32, bool) {
 	return serverID, ok
 }
 
-func resolvePlayerServerID(session *network.Session, playerID string) int32 {
+func getPlayersByServerID(serverID int32) []string {
+	ids := make([]string, 0)
+	playerServerIDMapMu.RLock()
+	defer playerServerIDMapMu.RUnlock()
+	for playerID, sid := range playerServerIDMap {
+		if sid == serverID {
+			// 去掉serverId 前缀
+			playerID = strings.TrimPrefix(playerID, fmt.Sprintf("%d_", serverID))
+			ids = append(ids, playerID)
+		}
+	}
+	return ids
+}
+
+func resolvePlayerServerID(session network.Session, playerID string) int32 {
 	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
 		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
 			if serverID, ok := getPlayerServer(sessionPlayerKey); ok {

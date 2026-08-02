@@ -25,7 +25,7 @@ import (
 // 使用静态路由，避免反射调用，提高性能。
 // 代码生成内容见 route_dispatch_gen.go
 // 部署前请先执行 go generate .
-type generatedRouteInvoker func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error)
+type generatedRouteInvoker func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error)
 
 // 注册所有模块的路由
 var generatedRouteDispatchers = map[int32]generatedRouteInvoker{}
@@ -34,17 +34,17 @@ type MyMessageDispatch struct {
 	network.BaseIoDispatch
 }
 
-func (m *MyMessageDispatch) OnSessionCreated(session *network.Session) {
+func (m *MyMessageDispatch) OnSessionCreated(session network.Session) {
 	if serverconfig.ServerConfig.UseGateMode {
 		io.SetGateSession(session)
 	}
 	logger.Info(fmt.Sprintf("logic session created: %s", session.ToString()))
 }
 
-func (m *MyMessageDispatch) OnSessionClosed(session *network.Session) {
+func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
 	logger.Info(fmt.Sprintf("session closed: %s", session.ToString()))
 	// 关闭session
-	network.RemoveSession(session)
+	network.RemoveSession(session, true)
 }
 
 func main() {

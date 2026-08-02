@@ -44,11 +44,11 @@ type PlayerService struct {
 	idNameMapper *hashmap.SyncDualHashMap[string, string]
 	// 玩家名称字典树
 	nameDict *trie.TrieDictionary
-	
-	quest     *questservice.QuestService
+
+	quest *questservice.QuestService
 }
 
-func NewPlayerService( questService *questservice.QuestService) *PlayerService {
+func NewPlayerService(questService *questservice.QuestService) *PlayerService {
 	service := &PlayerService{
 		playerProfiles: hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
 		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
@@ -87,13 +87,14 @@ func (ps *PlayerService) Init() {
 	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
 		allSessions := network.GetAllOnlinePlayerSessions()
 		for _, s := range allSessions {
-			s.AsynTasks <- func() {
+			s.AsynTasksChan() <- func() {
 				player := ps.GetPlayerBySession(s)
 				ps.DailyReset(player, data.(int64))
 			}
 		}
 	})
 }
+
 // LoadPlayerProfile 加载玩家概况数据
 func (ps *PlayerService) LoadPlayerProfile() {
 	var profiles []*playerdomain.PlayerProfile
@@ -129,7 +130,7 @@ func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
 	return player
 }
 
-func (ps *PlayerService) GetPlayerBySession(session *network.Session) *playerdomain.Player {
+func (ps *PlayerService) GetPlayerBySession(session network.Session) *playerdomain.Player {
 	playerID, ok := network.GetPlayerIDBySession(session)
 	if !ok {
 		return nil
@@ -166,7 +167,7 @@ func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 	context.DbService.SaveToDb(player)
 }
 
-func (ps *PlayerService) DoLogin(playerId string, s *network.Session, index int32) *protos.ResPlayerLogin {
+func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32) *protos.ResPlayerLogin {
 	// 是否是新角色
 	newCreated := ps.GetPlayerProfileById(playerId) == nil
 	player := ps.GetOrCreatePlayer(playerId)

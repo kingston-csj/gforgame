@@ -13,6 +13,7 @@ import (
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/internal/service/dispatch"
 	mailservice "github.com/forfun/gforgame/internal/service/mail"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
@@ -52,8 +53,6 @@ func (s *FriendService) Init() {
 	}
 	context.CacheManager.Register("friend", dbLoader)
 }
-
-
 
 func (s *FriendService) GetFriendEnt(playerId string) *player.Friend {
 	cache, _ := context.CacheManager.GetCache("friend")
@@ -198,30 +197,29 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 		return constants.I18N_FRIEND_TIPS2
 	}
 
-	applyItem := &playerdomain.FriendApplyItem{
+	fromApplyItem := &playerdomain.FriendApplyItem{
 		FromId:   player.Id,
 		TargetId: friendId,
 		Time:     time.Now().Unix(),
 		Id:       idgen.GetNextID(),
 	}
-	fromFriendEnt.Applies[applyItem.Id] = applyItem
+	fromFriendEnt.Applies[fromApplyItem.Id] = fromApplyItem
 	s.SaveFriend(fromFriendEnt)
-	// 复制一份给对方
+	// 复制一份给对方(浅拷贝)
+	targetApplyItem := *fromApplyItem
+	// 在线，考虑线程问题
 	// 在线，考虑线程问题
 	if network.IsOnline(friendId) {
-		session := network.GetSessionByPlayerId(friendId)
-		if session != nil {
-			session.AsynTasks <- func() {
-				targetFriendEnt := s.GetFriendEntOrCreate(friendId)
-				targetFriendEnt.Applies[applyItem.Id] = applyItem
-				s.SaveFriend(targetFriendEnt)
-				s.RefreshClientInfo(s.player.GetPlayer(friendId))
-			}
-		}
+		dispatch.DispatchPlayerTask(friendId, func() {
+			targetFriendEnt := s.GetFriendEntOrCreate(friendId)
+			targetFriendEnt.AddApply(&targetApplyItem)
+			s.SaveFriend(targetFriendEnt)
+			s.RefreshClientInfo(s.player.GetPlayer(friendId))
+		})
 	} else {
-		// 离线，直接修改数据
+		// 离线，直接修改数据库
 		targetFriendEnt := s.GetFriendEntOrCreate(friendId)
-		targetFriendEnt.Applies[applyItem.Id] = applyItem
+		targetFriendEnt.AddApply(&targetApplyItem)
 		s.SaveFriend(targetFriendEnt)
 	}
 
@@ -257,7 +255,7 @@ func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId str
 			session := network.GetSessionByPlayerId(apply.FromId)
 			if session != nil {
 				players = append(players, s.player.GetPlayer(apply.FromId))
-				session.AsynTasks <- func() {
+				session.AsynTasksChan() <- func() {
 					s.dealApplyRecord0(s.player.GetPlayer(apply.TargetId), applyId, player.Id, status)
 				}
 			}

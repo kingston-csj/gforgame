@@ -9,12 +9,12 @@ import (
 type (
 	//Handler represents a message.Message's handler's meta information.
 	Handler struct {
-		Receiver   reflect.Value  // receiver of method
-		Method     reflect.Method // method stub
-		Type       reflect.Type   // arg type of method
-		Indindexed bool
-		HasPlayer  bool
-		HasSession bool
+		Receiver     reflect.Value  // receiver of method
+		Method       reflect.Method // method stub
+		Type         reflect.Type   // arg type of method
+		Indindexed   bool
+		HasPlayer    bool
+		HasSession   bool
 		NeedValidate bool // 是否需要参数校验
 	}
 
@@ -28,12 +28,15 @@ func NewMessageRoute() *MessageRoute {
 }
 
 var (
-	typeOfSession = reflect.TypeOf(&Session{})
+	typeOfSession = reflect.TypeOf((*Session)(nil)).Elem()
 	typeOfString  = reflect.TypeOf("")
 )
 
 func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 	clazz := reflect.TypeOf(comp)
+	if clazz.Name() == "CrossRoute" {
+		// log.Printf("RegisterMessageHandlers: %s", clazz.Name())
+	}
 	for m := 0; m < clazz.NumMethod(); m++ {
 		method := clazz.Method(m)
 		mt := method.Type
@@ -43,7 +46,7 @@ func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 			if err != nil {
 				return err
 			}
-			needValidate := r.needValidation(method.Name, mt.In(cmdFieldIndex))
+
 			r.Handlers[cmd] = &Handler{
 				Receiver:   reflect.ValueOf(comp),
 				Method:     method,
@@ -51,9 +54,8 @@ func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 				Indindexed: containsIndex,
 				HasPlayer:  hasPlayer,
 				HasSession: hasSession,
-				NeedValidate: needValidate,
 			}
-		}  
+		}
 	}
 	return nil
 }
@@ -66,12 +68,12 @@ func (r *MessageRoute) isHandlerMethod(method reflect.Method) bool {
 		return false
 	}
 	// 兼容签名（receiver后参数）：
-	// 1) *Session, *Req
-	// 2) *Session, index, *Req
+	// 1) Session, *Req
+	// 2) Session, index, *Req
 	// 3) playerId, *Req
 	// 4) playerId, index, *Req
-	// 5) playerId, *Session, *Req
-	// 6) playerId, *Session, index, *Req
+	// 5) playerId, Session, *Req
+	// 6) playerId, Session, index, *Req
 	if mt.NumIn() != 3 && mt.NumIn() != 4 && mt.NumIn() != 5 {
 		return false
 	}
@@ -132,7 +134,7 @@ func (r *MessageRoute) GetHandler(cmd int32) (*Handler, error) {
 	}
 }
 
-func (r *MessageRoute) needValidation(methodName string, msgType reflect.Type) bool {
+func (r *MessageRoute) NeedValidation(methodName string, msgType reflect.Type) bool {
 	if strings.HasPrefix(methodName, "Validatable") {
 		return true
 	}

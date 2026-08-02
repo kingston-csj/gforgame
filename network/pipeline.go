@@ -7,17 +7,17 @@ import (
 type IoDispatch interface {
 
 	// OnSessionCreated session创建时触发
-	OnSessionCreated(session *Session)
+	OnSessionCreated(session Session)
 
 	// OnMessageReceived 收到消息时触发
-	OnMessageReceived(session *Session, msg *protocol.RequestDataFrame)
+	OnMessageReceived(session Session, msg *protocol.RequestDataFrame)
 
 	// OnSessionClosed session关闭时触发
-	OnSessionClosed(session *Session)
+	OnSessionClosed(session Session)
 }
 
 type MessageHandler interface {
-	MessageReceived(session *Session, msg *protocol.RequestDataFrame) bool
+	MessageReceived(session Session, msg *protocol.RequestDataFrame) bool
 }
 
 type BaseIoDispatch struct {
@@ -28,11 +28,11 @@ func (d *BaseIoDispatch) AddHandler(h MessageHandler) {
 	d.Pipeline = append(d.Pipeline, h)
 }
 
-func (d *BaseIoDispatch) OnSessionCreated(session *Session) {
+func (d *BaseIoDispatch) OnSessionCreated(session Session) {
 
 }
 
-func (d *BaseIoDispatch) OnMessageReceived(session *Session, msg *protocol.RequestDataFrame) {
+func (d *BaseIoDispatch) OnMessageReceived(session Session, msg *protocol.RequestDataFrame) {
 	for _, d := range d.Pipeline {
 		// 只要有一个返回false，则终止执行
 		if !d.MessageReceived(session, msg) {
@@ -41,6 +41,6 @@ func (d *BaseIoDispatch) OnMessageReceived(session *Session, msg *protocol.Reque
 	}
 }
 
-func (d *BaseIoDispatch) OnSessionClosed(session *Session) {
+func (d *BaseIoDispatch) OnSessionClosed(session Session) {
 
 }

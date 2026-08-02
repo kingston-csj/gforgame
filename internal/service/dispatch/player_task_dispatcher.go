@@ -1,9 +1,10 @@
 package dispatch
 
 import (
+	"fmt"
 	"hash/fnv"
-	"log/slog"
 
+	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/network"
 )
@@ -32,7 +33,7 @@ func newPlayerTaskDispatcher(workerCount uint32) *playerTaskDispatcher {
 				func() {
 					defer func() {
 						if r := recover(); r != nil {
-							slog.Error("player task panic", "panic", r)
+							logger.ErrorNoStack(fmt.Sprintf("player task panic: %v", r))
 						}
 					}()
 					task()
@@ -54,9 +55,9 @@ func hashPlayerID(playerID string) uint32 {
 	return h.Sum32()
 }
 
-// DispatchPlayerTask 保证同一玩家任务串行：
+// DispatchPlayerTask 保证同一玩家任务线程安全
 // 1. 网关模式：统一走全局 playerId 分片队列，避免共享会话导致全玩家串行
-// 2. 直连模式：优先投递到玩家会话 AsynTasks（保持原有单玩家执行语义）
+// 2. 直连模式：优先投递到玩家会话 AsynTasks
 func DispatchPlayerTask(playerID string, task func()) {
 	if playerID == "" || task == nil {
 		return
@@ -67,9 +68,9 @@ func DispatchPlayerTask(playerID string, task func()) {
 	}
 	if session := network.GetSessionByPlayerId(playerID); session != nil {
 		select {
-		case <-session.Die:
+		case <-session.DieChan():
 		default:
-			session.AsynTasks <- task
+			session.AsynTasksChan() <- task
 			return
 		}
 	}

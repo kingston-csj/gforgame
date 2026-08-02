@@ -13,14 +13,14 @@ var (
 )
 
 // 客户端发送消息，并注册回调函数
-func Callback(session *network.Session, request any, callback RequestCallback) {
+func Callback(session network.Session, request any, callback RequestCallback) {
 	atomic.AddInt32(&counter, 1)
 	future := &RequestResponseFuture{RequestCallback: callback, start: time.Now().Second()}
 	CallBackManager.Register(counter, future)
 	session.Send(request, int32(counter))
 }
 
-func Request(session *network.Session, request any) (any, error) {
+func Request(session network.Session, request any) (any, error) {
 	atomic.AddInt32(&counter, 1)
 	session.Send(request, int32(counter))
 	future := &RequestResponseFuture{start: time.Now().Second()}

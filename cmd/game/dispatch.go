@@ -31,7 +31,7 @@ func NewGateTransformHandler() *GateTransformHandler {
 	}
 }
 
-func (g *GateTransformHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+func (g *GateTransformHandler) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
 	if frame.Header.Cmd != protos.CmdTransferMsgGateToLogic {
 		return true
 	}
@@ -61,13 +61,13 @@ type GameTaskHandler struct {
 	router *network.MessageRoute
 }
 
-func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+func (g *GameTaskHandler) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-	
+
 	// 补齐 playerId，后续路由和回包都依赖它。
 	fillFramePayloadFromSession(session, frame)
 	// 先定位消息处理器，找不到就直接终止当前消息。
@@ -95,19 +95,19 @@ func (g *GameTaskHandler) MessageReceived(session *network.Session, frame *proto
 	return g.dispatchMessage(session, frame, msgHandler)
 }
 
-func sendResponse(session *network.Session, frame *protocol.RequestDataFrame, resp any) error {
+func sendResponse(session network.Session, frame *protocol.RequestDataFrame, resp any) error {
 	if resp == nil {
 		return nil
 	}
 	if !serverconfig.ServerConfig.UseGateMode || frame.Header.Payload == "" {
 		return session.Send(resp, frame.Header.Index)
 	}
-	
+
 	io.NotifyByPlayerId(frame.Header.Payload, frame.Header.Index, resp)
 	return nil
 }
 
-func fillFramePayloadFromSession(session *network.Session, frame *protocol.RequestDataFrame) {
+func fillFramePayloadFromSession(session network.Session, frame *protocol.RequestDataFrame) {
 	if frame.Header.Payload != "" {
 		return
 	}
@@ -126,7 +126,7 @@ func (g *GameTaskHandler) getMessageHandler(frame *protocol.RequestDataFrame) *n
 	return msgHandler
 }
 
-func logInboundMessage(session *network.Session, frame *protocol.RequestDataFrame) {
+func logInboundMessage(session network.Session, frame *protocol.RequestDataFrame) {
 	msgName, _ := network.GetMsgName(frame.Header.Cmd)
 	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
 	if err != nil || strings.Index(msgName, "HeartBeat") != -1 {
@@ -141,11 +141,11 @@ func logInboundMessage(session *network.Session, frame *protocol.RequestDataFram
 			id = id.(string)
 		}
 	}
-	
+
 	logger.Info(fmt.Sprintf("[%s] 接收消息: cmd:%d, name:%s, 内容:%s", id, frame.Header.Cmd, msgName, jsonStr))
 }
 
-func (g *GameTaskHandler) dispatchMessage(session *network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler) bool {
+func (g *GameTaskHandler) dispatchMessage(session network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler) bool {
 	resp, handled, dispatchErr, panicErr := callGeneratedRouteHandlerSafely(frame.Header.Cmd, msgHandler, session, frame.Header.Index, frame.Msg, frame.Header.Payload)
 	if handled {
 		if panicErr != nil {
@@ -170,7 +170,7 @@ func (g *GameTaskHandler) dispatchMessage(session *network.Session, frame *proto
 	return sendHandlerResponse(session, frame, values[0].Interface())
 }
 
-func buildHandlerArgs(msgHandler *network.Handler, session *network.Session, index int32, msg any, playerID string) []reflect.Value {
+func buildHandlerArgs(msgHandler *network.Handler, session network.Session, index int32, msg any, playerID string) []reflect.Value {
 	args := make([]reflect.Value, 0, 5)
 	args = append(args, msgHandler.Receiver)
 	if msgHandler.HasPlayer {
@@ -186,7 +186,7 @@ func buildHandlerArgs(msgHandler *network.Handler, session *network.Session, ind
 	return args
 }
 
-func handleRoutePanic(session *network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler, title string, panicErr error) bool {
+func handleRoutePanic(session network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler, title string, panicErr error) bool {
 	logger.Error(fmt.Sprintf("%s: cmd=%d method=%s", title, frame.Header.Cmd, msgHandler.Method.Name), panicErr)
 	if errorResp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_INTERNAL_ERROR); ok {
 		if err := sendResponse(session, frame, errorResp); err != nil {
@@ -196,7 +196,7 @@ func handleRoutePanic(session *network.Session, frame *protocol.RequestDataFrame
 	return false
 }
 
-func sendHandlerResponse(session *network.Session, frame *protocol.RequestDataFrame, resp any) bool {
+func sendHandlerResponse(session network.Session, frame *protocol.RequestDataFrame, resp any) bool {
 	if err := sendResponse(session, frame, resp); err != nil {
 		logger.Error("send response failed: %v", err)
 		return false
@@ -204,7 +204,7 @@ func sendHandlerResponse(session *network.Session, frame *protocol.RequestDataFr
 	return true
 }
 
-func callGeneratedRouteHandlerSafely(cmd int32, msgHandler *network.Handler, session *network.Session, index int32, msg any, playerID string) (resp any, handled bool, dispatchErr error, panicErr error) {
+func callGeneratedRouteHandlerSafely(cmd int32, msgHandler *network.Handler, session network.Session, index int32, msg any, playerID string) (resp any, handled bool, dispatchErr error, panicErr error) {
 	invoker, ok := getGeneratedRouteInvoker(cmd)
 	if !ok {
 		return nil, false, nil, nil

@@ -17,7 +17,7 @@ type TcpSocketClient struct {
 	IoDispatcher network.IoDispatch
 }
 
-func (c *TcpSocketClient) OpenSession() (*network.Session, error) {
+func (c *TcpSocketClient) OpenSession() (network.Session, error) {
 	conn, err := net.Dial("tcp", c.RemoteAddress)
 	if err != nil {
 		return nil, err

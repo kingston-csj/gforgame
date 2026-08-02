@@ -21,10 +21,16 @@ func sendTransferToBackend(serverID int32, transfer any, index int32) error {
 		return fmt.Errorf("backend session not ready, serverId=%d", serverID)
 	}
 	if err := session.Send(transfer, index); err != nil {
-		// 发送失败通常意味着连接已失效，先摘除再重连。
-		removeBackendSession(serverID, session)
-		session.Close()
-		scheduleReconnect(serverID)
+		if !isSessionAlive(session) {
+			// 连接已死亡才执行重连。
+			removeBackendSession(serverID, session)
+			session.Close()
+			scheduleReconnect(serverID)
+		} else {
+			// 普通发送失败（如消息编解码异常），仅记录日志，
+			// 由上层出站队列决定是否重试。
+			logger.ErrorNoStack(fmt.Errorf("backend send failed, serverId=%d alive=%v err=%v", serverID, isSessionAlive(session), err))
+		}
 		return err
 	}
 	return nil
@@ -32,7 +38,7 @@ func sendTransferToBackend(serverID int32, transfer any, index int32) error {
 
 // pickBackendSession 获取某个 serverID 当前可用的单连接。
 // 如果连接已死亡会顺手清理为 nil。
-func pickBackendSession(serverID int32) *network.Session {
+func pickBackendSession(serverID int32) network.Session {
 	backendPoolsMu.Lock()
 	defer backendPoolsMu.Unlock()
 	pool, ok := backendPools[serverID]
@@ -46,12 +52,12 @@ func pickBackendSession(serverID int32) *network.Session {
 }
 
 // isSessionAlive 通过 Die 信号判断连接活性。
-func isSessionAlive(session *network.Session) bool {
+func isSessionAlive(session network.Session) bool {
 	if session == nil {
 		return false
 	}
 	select {
-	case <-session.Die:
+	case <-session.DieChan():
 		return false
 	default:
 		return true
@@ -59,7 +65,7 @@ func isSessionAlive(session *network.Session) bool {
 }
 
 // removeBackendSession 仅在目标会话匹配时才清理，避免误删新连接。
-func removeBackendSession(serverID int32, target *network.Session) bool {
+func removeBackendSession(serverID int32, target network.Session) bool {
 	backendPoolsMu.Lock()
 	defer backendPoolsMu.Unlock()
 	pool := backendPools[serverID]
@@ -108,7 +114,7 @@ func syncLocalBackendPools() {
 }
 
 func reconcileBackendPools(desired map[int32]string) {
-	sessionsToClose := make([]*network.Session, 0)
+	sessionsToClose := make([]network.Session, 0)
 	removedIDs := make([]int32, 0)
 	changedIDs := make([]int32, 0)
 
@@ -218,9 +224,15 @@ func connectBackendSession(serverID int32, addr string) error {
 	}
 	oldSession := pool.session
 	session.SetAttr("serverId", serverID)
+	// 后端 session 没有玩家 id，但 Send 要求 id 非空（用于日志），
+	// 这里给一个可识别的占位 id，避免 Send 误判为非法会话而关闭连接。
+	session.SetId(fmt.Sprintf("%d", serverID))
+
 	pool.session = session
 	pool.reconnecting = false
 	backendPoolsMu.Unlock()
+
+	logicIoDispatcher.OnSessionCreated(session)
 	if oldSession != nil {
 		// 替换成功后再关闭旧连接，避免短暂无连接窗口。
 		oldSession.Close()
@@ -235,16 +247,16 @@ func connectBackendSession(serverID int32, addr string) error {
 
 // consumeBackendSession 消费后端下行消息。
 // 一旦连接断开，清理状态并触发延迟重连。
-func consumeBackendSession(serverID int32, session *network.Session) {
+func consumeBackendSession(serverID int32, session network.Session) {
 	for {
 		select {
-		case <-session.Die:
+		case <-session.DieChan():
 			if removeBackendSession(serverID, session) {
 				logger.Info(fmt.Sprintf("backend session closed and removed: serverId=%d", serverID))
 				scheduleReconnect(serverID)
 			}
 			return
-		case frame := <-session.DataReceived:
+		case frame := <-session.DataReceivedChan():
 			if frame == nil {
 				continue
 			}
@@ -258,7 +270,7 @@ func consumeBackendSession(serverID int32, session *network.Session) {
 // 关服时关闭所有后端连接。
 func closeAllBackendSessions() {
 	backendPoolsMu.Lock()
-	all := make([]*network.Session, 0)
+	all := make([]network.Session, 0)
 	for _, pool := range backendPools {
 		if pool.session != nil {
 			all = append(all, pool.session)
@@ -328,7 +340,7 @@ func startBackendSessionMonitor() {
 
 func checkBackendSessions() {
 	serverIDs := make([]int32, 0)
-	sessionsToClose := make([]*network.Session, 0)
+	sessionsToClose := make([]network.Session, 0)
 
 	backendPoolsMu.Lock()
 	for serverID, pool := range backendPools {

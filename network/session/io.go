@@ -20,11 +20,15 @@ type WebSocketConn interface {
 	WriteMessage(messageType int, data []byte) error
 }
 
-func (s *Session) Write() {
+func (s *BaseSession) Write() {
 	for {
 		select {
 		case data := <-s.dataToSend:
-			if _, err := s.conn.Write(data); err != nil {
+			_, err := s.conn.Write(data.frame)
+			if data.done != nil {
+				data.done <- err
+			}
+			if err != nil {
 				logger.ErrorNoStack(fmt.Sprintf("session write failed %v", err))
 				s.Close()
 				return
@@ -35,7 +39,7 @@ func (s *Session) Write() {
 	}
 }
 
-func (s *Session) Read() {
+func (s *BaseSession) Read() {
 	defer func() {
 		s.Close()
 		if r := recover(); r != nil {
@@ -49,7 +53,7 @@ func (s *Session) Read() {
 	}
 }
 
-func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
+func (s *BaseSession) readWebSocketMessages(wsConn WebSocketConn) {
 	protocolDetermined := false
 
 	for {
@@ -124,7 +128,7 @@ func (s *Session) readWebSocketMessages(wsConn WebSocketConn) {
 	}
 }
 
-func (s *Session) readTCPStream() {
+func (s *BaseSession) readTCPStream() {
 	buf := make([]byte, 10240)
 
 	for {

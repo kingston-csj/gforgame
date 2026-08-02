@@ -18,6 +18,7 @@ type routeMethod struct {
 	ReceiverType string
 	MethodName   string
 	ReqType      string
+	HasPlayer    bool
 	HasIndex     bool
 	HasSession   bool
 	HasReturn    bool
@@ -96,7 +97,7 @@ func parseReqCmdMap(registerFile string) (map[string]int32, error) {
 			return true
 		}
 		reqType, ok := parseReqTypeExpr(call.Args[1])
-		if !ok || !strings.HasPrefix(reqType, "Req") {
+		if !ok || !isDispatchReqType(reqType) {
 			return true
 		}
 		result[reqType] = cmd
@@ -123,14 +124,14 @@ func parseRouteMethods(routeDir string, reqCmdMap map[string]int32) ([]routeMeth
 			if !ok || fd.Recv == nil || fd.Name == nil {
 				continue
 			}
-			if !strings.HasPrefix(fd.Name.Name, "Req") {
+			if !isDispatchMethodName(fd.Name.Name) {
 				continue
 			}
 			receiverType := parseReceiverType(fd.Recv.List[0].Type)
 			if receiverType == "" {
 				continue
 			}
-			reqType, hasIndex, hasSession := parseReqParam(fd.Type.Params)
+			reqType, hasPlayer, hasIndex, hasSession := parseReqParam(fd.Type.Params)
 			if reqType == "" {
 				continue
 			}
@@ -144,6 +145,7 @@ func parseRouteMethods(routeDir string, reqCmdMap map[string]int32) ([]routeMeth
 				ReceiverType: receiverType,
 				MethodName:   fd.Name.Name,
 				ReqType:      reqType,
+				HasPlayer:    hasPlayer,
 				HasIndex:     hasIndex,
 				HasSession:   hasSession,
 				HasReturn:    hasReturn,
@@ -235,14 +237,19 @@ func parseReceiverType(expr ast.Expr) string {
 	return ident.Name
 }
 
-func parseReqParam(params *ast.FieldList) (reqType string, hasIndex bool, hasSession bool) {
+func parseReqParam(params *ast.FieldList) (reqType string, hasPlayer bool, hasIndex bool, hasSession bool) {
 	if params == nil {
-		return "", false, false
+		return "", false, false, false
 	}
 	reqType = ""
+	hasPlayer = false
 	hasIndex = false
 	hasSession = false
 	for _, field := range params.List {
+		// 检测 playerId string 参数
+		if ident, ok := field.Type.(*ast.Ident); ok && ident.Name == "string" {
+			hasPlayer = true
+		}
 		// 检测 index int32 参数
 		if ident, ok := field.Type.(*ast.Ident); ok && ident.Name == "int32" {
 			hasIndex = true
@@ -266,11 +273,19 @@ func parseReqParam(params *ast.FieldList) (reqType string, hasIndex bool, hasSes
 		if !ok || pkgIdent.Name != "protos" {
 			continue
 		}
-		if strings.HasPrefix(sel.Sel.Name, "Req") {
+		if isDispatchReqType(sel.Sel.Name) {
 			reqType = sel.Sel.Name
 		}
 	}
-	return reqType, hasIndex, hasSession
+	return reqType, hasPlayer, hasIndex, hasSession
+}
+
+func isDispatchReqType(typeName string) bool {
+	return strings.HasPrefix(typeName, "Req") || strings.HasPrefix(typeName, "Cross")
+}
+
+func isDispatchMethodName(methodName string) bool {
+	return strings.HasPrefix(methodName, "Req") || strings.HasPrefix(methodName, "Cross")
 }
 
 func parseInt32Expr(expr ast.Expr) (int32, bool) {
@@ -321,7 +336,7 @@ func writeGeneratedFile(filePath string, methods []routeMethod, constructors []r
 	b.WriteString("\t\"github.com/forfun/gforgame/internal/route\"\n")
 	b.WriteString("\t\"github.com/forfun/gforgame/network\"\n")
 	b.WriteString(")\n\n")
-	
+
 	// b.WriteString("var generatedRouteModules = []bootstrap.RouteModule{\n")
 	// for _, c := range constructors {
 	// 	b.WriteString(fmt.Sprintf("\troute.%s(),\n", c.FuncName))
@@ -331,7 +346,7 @@ func writeGeneratedFile(filePath string, methods []routeMethod, constructors []r
 	b.WriteString("\tgeneratedRouteDispatchers = map[int32]generatedRouteInvoker{\n")
 
 	for _, m := range methods {
-		b.WriteString(fmt.Sprintf("\t\t%d: func(msgHandler *network.Handler, playerID string, session *network.Session, index int32, msg any) (any, error) {\n", m.Cmd))
+		b.WriteString(fmt.Sprintf("\t\t%d: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {\n", m.Cmd))
 		b.WriteString(fmt.Sprintf("\t\tr, ok := msgHandler.Receiver.Interface().(*route.%s)\n", m.ReceiverType))
 		b.WriteString("\t\tif !ok {\n")
 		b.WriteString(fmt.Sprintf("\t\t\treturn nil, fmt.Errorf(\"generated dispatch receiver type mismatch: cmd=%d expect=*route.%s\")\n", m.Cmd, m.ReceiverType))
@@ -355,7 +370,10 @@ func writeGeneratedFile(filePath string, methods []routeMethod, constructors []r
 }
 
 func buildRouteCallArgs(m routeMethod) string {
-	args := []string{"playerID"}
+	args := make([]string, 0, 4)
+	if m.HasPlayer {
+		args = append(args, "playerID")
+	}
 	if m.HasSession {
 		args = append(args, "session")
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/forfun/gforgame/common/container/set"
@@ -25,6 +26,7 @@ var (
 )
 
 func main() {
+	// serverconfig.Init()
 	logicIoDispatcher = newLogicIoDispatcher()
 	onlyLocalDiscovery, ok := serverconfig.GetExtraBool("discovery.onlylocal")
 	if !ok {
@@ -33,7 +35,7 @@ func main() {
 
 	var err error
 	if onlyLocalDiscovery {
-		err = startLocalServerDiscovery()
+		err = startLocalServerDiscoveryHeartbeat()
 	} else {
 		err = startServerDiscoveryHeartbeat()
 	}
@@ -58,13 +60,14 @@ func main() {
 		panic(err)
 	}
 
-	sg := make(chan os.Signal)
-	signal.Notify(sg, os.Interrupt, os.Kill)
+	sg := make(chan os.Signal, 1)
+	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sg)
 	select {
 	case sig := <-sg:
 		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
 	case <-node.RunningChan():
-		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
+		logger.Info("game server is closing (signal: http)")
 	}
 	// 执行所有关服逻辑
 	close(serverDiscoveryStop)

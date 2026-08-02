@@ -14,8 +14,13 @@ import (
 	"github.com/forfun/gforgame/network/protocol"
 )
 
-// Session 封装单条连接的运行时状态与基础发送能力。
-type Session struct {
+type queuedWrite struct {
+	frame []byte
+	done  chan error
+}
+
+// BaseSession 封装单条连接的运行时状态与基础发送能力。
+type BaseSession struct {
 	conn net.Conn
 	// 关闭标记
 	Die chan bool
@@ -24,11 +29,11 @@ type Session struct {
 	// 消息编解码
 	MessageCodec codec.MessageCodec
 	// 准备发送的出队消息(带缓冲)
-	dataToSend chan []byte
+	dataToSend chan queuedWrite
 	// 已经收到的入队消息(带缓冲)
 	DataReceived chan *protocol.RequestDataFrame
 	// session自定义属性
-	Attrs map[string]interface{}
+	Attrs map[string]any
 	// 当前链接的本地地址
 	localAddr string
 	// 当前链接的远程地址
@@ -45,15 +50,15 @@ type Session struct {
 	lastRecvUnixNano int64
 }
 
-func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
+func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *BaseSession {
 	nowUnixNano := time.Now().UnixNano()
-	return &Session{conn: conn,
+	return &BaseSession{conn: conn,
 		ProtocolCodec:    protocol.NewBinaryProtocolAdapter(),
 		MessageCodec:     messageCodec,
 		Die:              make(chan bool, 1),
-		dataToSend:       make(chan []byte, 128),
+		dataToSend:       make(chan queuedWrite, 128),
 		DataReceived:     make(chan *protocol.RequestDataFrame, 128),
-		Attrs:            map[string]interface{}{},
+		Attrs:            map[string]any{},
 		localAddr:        conn.LocalAddr().String(),
 		remoteAddr:       conn.RemoteAddr().String(),
 		AsynTasks:        make(chan func(), 16),
@@ -64,17 +69,17 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *Session {
 }
 
 // NewSessionWithProtocol 创建指定协议类型的Session
-func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType) *Session {
+func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType) *BaseSession {
 	factory := &protocol.ProtocolFactory{}
 	protocolAdapter := factory.NewProtocolAdapter(protocolType)
 	nowUnixNano := time.Now().UnixNano()
 
-	return &Session{
+	return &BaseSession{
 		conn:             conn,
 		ProtocolCodec:    protocolAdapter,
 		MessageCodec:     messageCodec,
 		Die:              make(chan bool, 1),
-		dataToSend:       make(chan []byte, 128),
+		dataToSend:       make(chan queuedWrite, 128),
 		DataReceived:     make(chan *protocol.RequestDataFrame, 128),
 		Attrs:            map[string]interface{}{},
 		localAddr:        conn.LocalAddr().String(),
@@ -86,20 +91,20 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 	}
 }
 
-func (s *Session) MarkReadActivity() {
+func (s *BaseSession) MarkReadActivity() {
 	atomic.StoreInt64(&s.lastRecvUnixNano, time.Now().UnixNano())
 }
 
-func (s *Session) LastReadAt() time.Time {
+func (s *BaseSession) LastReadAt() time.Time {
 	return time.Unix(0, atomic.LoadInt64(&s.lastRecvUnixNano))
 }
 
-func (s *Session) SetPayloadMode(mode PayloadMode) {
+func (s *BaseSession) SetPayloadMode(mode PayloadMode) {
 	s.payloadMode = mode
 }
 
 // Send 发送消息
-func (s *Session) Send(msg any, index int32) error {
+func (s *BaseSession) Send(msg any, index int32) error {
 	if msg == nil {
 		return nil
 	}
@@ -121,50 +126,53 @@ func (s *Session) Send(msg any, index int32) error {
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)
 	}
 	jsonStr, err := jsonutil.StructToJSON(msg)
-	id, ok := s.GetAttr("id")
-	if !ok {
-		id = ""
+	id := s.GetId()
+	if id == "" {
+		id = "anonymous"
 	}
 	if err == nil {
-		if cmd != -101 && cmd != -300 {
+		if cmd != -151 && cmd != -300 {
 			logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
 		}
 	}
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
-	select {
-	case <-s.Die:
-		return errors.New("session closed")
-	case s.dataToSend <- frame:
-		return nil
-	}
+	return s.enqueueFrame(frame, nil)
 }
 
 // SendRaw 发送原始消息
-func (s *Session) SendRaw(frame []byte) error {
+func (s *BaseSession) SendRaw(frame []byte) error {
+	return s.enqueueFrame(frame, nil)
+}
+
+func (s *BaseSession) enqueueFrame(frame []byte, done chan error) error {
 	select {
 	case <-s.Die:
 		return errors.New("session closed")
-	case s.dataToSend <- frame:
+	case s.dataToSend <- queuedWrite{frame: frame, done: done}:
 		return nil
 	}
 }
 
-func (s *Session) SendWithoutIndex(msg any) error {
+func (s *BaseSession) SendWithoutIndex(msg any) error {
 	return s.Send(msg, 0)
 }
 
-func (s *Session) SetAttr(key string, value any) error {
+func (s *BaseSession) SetAttr(key string, value any) error {
 	s.Attrs[key] = value
 	return nil
 }
 
-func (s *Session) GetAttr(key string) (any, bool) {
+func (s *BaseSession) GetAttr(key string) (any, bool) {
 	value, ok := s.Attrs[key]
 	return value, ok
 }
 
 // SendAndClose 发送消息并关闭连接
-func (s *Session) SendAndClose(msg any) error {
+// 同步阻塞，等待消息按发送队列写完后，再关闭连接
+// 注意：执行完毕仅代表数据已写入本地内核缓冲区，并不保证客户端一定会收到
+// @param msg 要发送的消息
+// @return 发送过程遇到的异常
+func (s *BaseSession) SendAndClose(msg any) error {
 	if msg == nil {
 		return nil
 	}
@@ -187,28 +195,88 @@ func (s *Session) SendAndClose(msg any) error {
 	if !ok {
 		id = ""
 	}
-	fmt.Println(fmt.Sprintf("id:%s 发送消息 cmd:%d, name:%s, 内容:%v", id, cmd, msgName, msg))
+	logger.Info(fmt.Sprintf("id:%s 发送消息 cmd:%d, name:%s, 内容:%v", id, cmd, msgName, msg))
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(-1), msgData)
-	_, err = s.conn.Write(frame)
-	if err != nil {
+	done := make(chan error, 1)
+	if err = s.enqueueFrame(frame, done); err != nil {
 		return err
 	}
-	err = s.conn.Close()
-	if err != nil {
-		return err
+
+	select {
+	case err = <-done:
+		if err != nil {
+			return err
+		}
+	case <-s.Die:
+		select {
+		case err = <-done:
+			if err != nil {
+				return err
+			}
+		default:
+			return errors.New("session closed")
+		}
 	}
-	return err
+
+	s.Close()
+	return nil
+}
+
+func (s *BaseSession) GetId() string {
+	val, exist := s.Attrs["id"]
+	if !exist {
+		return ""
+	}
+	str, ok := val.(string)
+	if !ok {
+		return ""
+	}
+	return str
+}
+
+func (s *BaseSession) SetId(id string) {
+	s.Attrs["id"] = id
+}
+
+// DieChan 会话关闭广播通道（仅用于读取）。
+func (s *BaseSession) DieChan() <-chan bool {
+	return s.Die
+}
+
+// AsynTasksChan 异步任务队列通道（可读可写）。
+func (s *BaseSession) AsynTasksChan() chan func() {
+	return s.AsynTasks
+}
+
+// DataReceivedChan 入站消息队列通道（仅用于读取）。
+func (s *BaseSession) DataReceivedChan() <-chan *protocol.RequestDataFrame {
+	return s.DataReceived
+}
+
+// Conn 返回底层连接。
+func (s *BaseSession) Conn() net.Conn {
+	return s.conn
+}
+
+// GetProtocolCodec 返回私有协议栈编解码器。
+func (s *BaseSession) GetProtocolCodec() protocol.ProtocolAdapter {
+	return s.ProtocolCodec
+}
+
+// GetMessageCodec 返回消息编解码器。
+func (s *BaseSession) GetMessageCodec() codec.MessageCodec {
+	return s.MessageCodec
 }
 
 // Close 关闭会话（幂等）
-func (s *Session) Close() {
+func (s *BaseSession) Close() {
 	s.closeOnce.Do(func() {
 		close(s.Die)
 		_ = s.conn.Close()
 	})
 }
 
-func (s *Session) ToString() string {
+func (s *BaseSession) ToString() string {
 	id, ok := s.GetAttr("id")
 	if !ok {
 		id = "anonymous"

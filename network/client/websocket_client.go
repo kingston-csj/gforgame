@@ -31,7 +31,7 @@ type WebSocketClient struct {
 	MessageType int
 }
 
-func (c *WebSocketClient) OpenSession() (*network.Session, error) {
+func (c *WebSocketClient) OpenSession() (network.Session, error) {
 	targetURL, err := c.buildURL()
 	if err != nil {
 		return nil, err

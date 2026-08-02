@@ -10,7 +10,7 @@ import (
 type backendPool struct {
 	serverID     int32
 	addr         string
-	session      *network.Session
+	session      network.Session
 	reconnecting bool
 }
 

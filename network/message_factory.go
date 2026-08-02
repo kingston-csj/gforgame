@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	id2Msg map[int32]reflect.Type = make(map[int32]reflect.Type)
-	msg2Id map[reflect.Type]int32 = make(map[reflect.Type]int32)
-	msgName2Id map[string]int32 = make(map[string]int32)
-	id2MsgName map[int32]string = make(map[int32]string)
+	id2Msg     map[int32]reflect.Type = make(map[int32]reflect.Type)
+	msg2Id     map[reflect.Type]int32 = make(map[reflect.Type]int32)
+	msgName2Id map[string]int32       = make(map[string]int32)
+	id2MsgName map[int32]string       = make(map[int32]string)
 )
 
 // RegisterMessage 注册消息
@@ -52,12 +52,12 @@ func GetMessageCmd(msg any) (int32, error) {
 		return value, nil
 	}
 	if typ.Kind() == reflect.Struct {
-		ptrType := reflect.PtrTo(typ)
+		ptrType := reflect.PointerTo(typ)
 		if value, ok := msg2Id[ptrType]; ok {
 			return value, nil
 		}
 	}
-	return 0, errors.New("GetMessageCmd not found")
+	return 0, fmt.Errorf("GetMessageCmd not found: %s", typ.String())
 }
 
 func GetMessageCmdFromType(typ reflect.Type) (int32, error) {
@@ -65,10 +65,9 @@ func GetMessageCmdFromType(typ reflect.Type) (int32, error) {
 	if ok {
 		return value, nil
 	} else {
-		return 0, errors.New(fmt.Sprintf("GetMessageCmdFromType not found: %s", typ.String()))
+		return 0, fmt.Errorf("GetMessageCmdFromType not found: %s", typ.String())
 	}
 }
-
 
 func GetMessageType(cmd int32) (reflect.Type, error) {
 	value, ok := id2Msg[cmd]

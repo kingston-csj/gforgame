@@ -15,11 +15,11 @@ import (
 
 var (
 	notifyCodec   = json.NewSerializer()
-	gateSession   *network.Session
+	gateSession   network.Session
 	gateSessionMu sync.RWMutex
 )
 
-func SetGateSession(session *network.Session) {
+func SetGateSession(session network.Session) {
 	if session == nil {
 		return
 	}
@@ -58,7 +58,6 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 		Index:    index,
 	}
 
-
 	msgName, _ := network.GetMsgName(cmd)
 	jsonStr, err := jsonutil.StructToJSON(data)
 	logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
@@ -73,7 +72,7 @@ func NotifyPlayer(player contract.Player, data any) {
 	NotifyByPlayerId(playerID, 0, data)
 }
 
-func getGateSession() (*network.Session, bool) {
+func getGateSession() (network.Session, bool) {
 	gateSessionMu.RLock()
 	defer gateSessionMu.RUnlock()
 	if gateSession == nil {

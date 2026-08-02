@@ -21,7 +21,7 @@ func NewPlayerRoute(service *player.PlayerService) *PlayerRoute {
 	}
 }
 
-func (ps *PlayerRoute) ReqLogin(playerId string, s *network.Session, index int32, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
+func (ps *PlayerRoute) ReqLogin(playerId string, s network.Session, index int32, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
 	if conv.IsBlankString(msg.PlayerId) {
 		s.Send(&protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}, index)
 		return &protos.ResPlayerLogin{Code: constants.I18N_COMMON_ILLEGAL_PARAMS}
@@ -33,7 +33,6 @@ func (ps *PlayerRoute) ReqLoadingFinish(playerId string, index int32, msg *proto
 	player := ps.service.GetPlayer(playerId)
 	context.EventBus.Publish(events.PlayerLoadingFinish, player)
 }
-
 
 func (ps *PlayerRoute) ReqPlayerUpLevel(playerId string, index int32, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
 	p := ps.service.GetPlayer(playerId)

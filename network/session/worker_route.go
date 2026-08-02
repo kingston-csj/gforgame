@@ -48,6 +48,7 @@ func extractPlayerID(ioFrame *protocol.RequestDataFrame) string {
 			return playerID
 		}
 	}
+	// 最好不要走到这里来，性能差
 	if playerID := extractPlayerIDFromJSON(msg); playerID != "" {
 		return playerID
 	}

@@ -15,7 +15,7 @@ type LogicRouter struct {
 	router *network.MessageRoute
 }
 
-func (g *LogicRouter) MessageReceived(session *network.Session, frame *protocol.RequestDataFrame) bool {
+func (g *LogicRouter) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
@@ -36,7 +36,7 @@ func (g *LogicRouter) MessageReceived(session *network.Session, frame *protocol.
 	return true
 }
 
-func forwardTransferToClient(logicSession *network.Session, transfer contract.GateTransferMessage) error {
+func forwardTransferToClient(logicSession network.Session, transfer contract.GateTransferMessage) error {
 	playerID := transfer.GetPlayerID()
 	cmd := transfer.GetTransferCmd()
 	index := transfer.GetTransferIndex()
@@ -53,7 +53,7 @@ func forwardTransferToClient(logicSession *network.Session, transfer contract.Ga
 	if clientSession == nil {
 		return fmt.Errorf("client session not found, sessionPlayerKey=%s cmd=%d", sessionPlayerKey, cmd)
 	}
-	frame, err := clientSession.ProtocolCodec.Encode(cmd, index, body)
+	frame, err := clientSession.GetProtocolCodec().Encode(cmd, index, body)
 	if err != nil {
 		return fmt.Errorf("encode transfer raw frame failed, sessionPlayerKey=%s cmd=%d err=%v", sessionPlayerKey, cmd, err)
 	}
@@ -64,7 +64,7 @@ func forwardTransferToClient(logicSession *network.Session, transfer contract.Ga
 	return nil
 }
 
-func resolveBackendServerID(session *network.Session) int32 {
+func resolveBackendServerID(session network.Session) int32 {
 	if session == nil {
 		return 0
 	}
@@ -74,9 +74,20 @@ func resolveBackendServerID(session *network.Session) int32 {
 	return 0
 }
 
+type GateAndLogicMessageDispatch struct {
+	network.BaseIoDispatch
+}
+
+// OnSessionCreated 会话创建时调用
+func (d *GateAndLogicMessageDispatch) OnSessionCreated(session network.Session) {
+	// playerIds := getPlayersByServerID(resolveBackendServerID(session))
+	// req := &protos.NotifyOnlinePlayerToGame{PlayerIds: playerIds}
+	// session.Send(req, 0)
+}
+
 func newLogicIoDispatcher() network.IoDispatch {
 	router := network.NewMessageRoute()
-	ioDispatcher := &network.BaseIoDispatch{}
+	ioDispatcher := &GateAndLogicMessageDispatch{}
 	ioDispatcher.AddHandler(&LogicRouter{router: router})
 	return ioDispatcher
 }

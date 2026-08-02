@@ -153,10 +153,23 @@ func startServerDiscoveryHeartbeat() error {
 	return nil
 }
 
-// startLocalServerDiscovery 仅基于本地配置同步一次后端节点。
-func startLocalServerDiscovery() error {
+// startLocalServerDiscoveryHeartbeat 启动本地路由心跳。
+// 启动时会先按本地配置同步一次，后续每 5 分钟再次收敛后端连接池。
+func startLocalServerDiscoveryHeartbeat() error {
 	syncLocalBackendPools()
-	logger.Info("onlyLocal=true，已按本地配置完成一次后端节点同步")
+	logger.Info("onlyLocal=true，已按本地配置完成首次后端节点同步")
+	go func() {
+		ticker := time.NewTicker(serverDiscoveryRefreshInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				syncLocalBackendPools()
+			case <-serverDiscoveryStop:
+				return
+			}
+		}
+	}()
 	return nil
 }
 
