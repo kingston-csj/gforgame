@@ -17,6 +17,7 @@ import (
 	"github.com/forfun/gforgame/internal/service/arena"
 	"github.com/forfun/gforgame/internal/service/catalog"
 	"github.com/forfun/gforgame/internal/service/chat"
+	"github.com/forfun/gforgame/internal/system"
 	"gorm.io/gorm"
 
 	"github.com/forfun/gforgame/internal/service/friend"
@@ -71,6 +72,7 @@ type Services struct {
 	Recharge  *recharge.RechargeService
 	SignIn    *signin.SignInService
 	Vip       *vip.VipService
+	System    *system.SystemService
 }
 
 // ServiceModule 定义 service 启动期初始化能力。
@@ -135,6 +137,8 @@ func registerServices(c *dig.Container) {
 	})
 	_ = c.Provide(systemrepo.NewMySQLSystemRepository)
 	_ = c.Provide(systemrepo.NewSystemRepository)
+
+	_ = c.Provide(system.NewSystemService)
 
 	_ = c.Provide(item.NewItemService)
 	_ = c.Provide(mail.NewMailService)

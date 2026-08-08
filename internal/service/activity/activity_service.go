@@ -1,22 +1,20 @@
 package activity
 
 import (
+	"github.com/forfun/gforgame/common/schedule"
 	"github.com/forfun/gforgame/internal/config"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 )
 
-
 type ActivityService struct {
 	activityScheduler *ActivityScheduler
 }
 
-var activityScheduler = NewActivityScheduler(context.TaskScheduler)
-
-func NewActivityService() *ActivityService {
+func NewActivityService(taskScheduler schedule.TaskScheduler) *ActivityService {
+	activityScheduler := NewActivityScheduler(taskScheduler)
 	s := &ActivityService{
 		activityScheduler: activityScheduler,
 	}

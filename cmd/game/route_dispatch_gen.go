@@ -166,17 +166,6 @@ func init() {
 			}
 			return r.ReqTakeProgressReward(playerID, index, req), nil
 		},
-		707: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
-			r, ok := msgHandler.Receiver.Interface().(*route.QuestRoute)
-			if !ok {
-				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=707 expect=*route.QuestRoute")
-			}
-			req, ok := msg.(*protos.ReqQuestEntrust)
-			if !ok {
-				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=707 expect=*protos.ReqQuestEntrust")
-			}
-			return r.ReqQuestEntrust(playerID, index, req), nil
-		},
 		801: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
 			r, ok := msgHandler.Receiver.Interface().(*route.HeroRoute)
 			if !ok {

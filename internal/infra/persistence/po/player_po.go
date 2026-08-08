@@ -26,11 +26,8 @@ type PlayerPO struct {
 	ArenaScore        int32  `gorm:"column:arena_score"`
 	BackpackJson      string `gorm:"column:backpack"`
 	RuneBackpackJson  string `gorm:"column:rune_backpack"`
-	SceneBackpackJson string `gorm:"column:scene_backpack"`
 	EquipBackpackJson string `gorm:"column:equip_backpack"`
-	CardBackpackJson  string `gorm:"column:card_backpack"`
 	HeroBoxJson       string `gorm:"column:hero_box"`
-	PetBoxJson        string `gorm:"column:pet_box"`
 	DailyResetJson    string `gorm:"column:daily_reset"`
 	WeeklyResetJson   string `gorm:"column:weeklyreset"`
 	MonthlyResetJson  string `gorm:"column:monthly_reset"`

@@ -40,7 +40,7 @@ func NewGmService(deps *GmDependencies) *GmService {
 
 func (s *GmService) init(deps *GmDependencies) {
 	s.registerHandlers(
-		NewSystemGmHandler(),
+		NewSystemGmHandler(deps.System, deps.Player),
 		NewPlayerGmHandler(deps.Player),
 		NewItemGmHandler(deps.Item),
 		NewQuestGmHandler(deps.Quest),

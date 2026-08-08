@@ -12,15 +12,16 @@ import (
 
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/http"
+	serverpkg "github.com/forfun/gforgame/network/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func NewHttpServer() *gin.Engine {
+func NewHttpServer(gameServer serverpkg.Server) *gin.Engine {
 	router := gin.Default()
 	// 关闭游戏服务器进
 	router.POST("/api/stop", func(c *gin.Context) {
-		http.StopServer(c)
+		http.StopServer(c, gameServer)
 	})
 	// 清理数据库
 	router.POST("/api/clearDb", clearDb)

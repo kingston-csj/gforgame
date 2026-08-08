@@ -9,7 +9,15 @@ import (
 
 // ---------------------- 开服天数解析器结构体 ----------------------
 // OpenServerScheduleExpressionParser 实现 ScheduleExpressionParser 接口
-type OpenServerScheduleExpressionParser struct{}
+type OpenServerScheduleExpressionParser struct {
+	system *SystemService
+}
+
+func NewOpenServerScheduleExpressionParser(system *SystemService) *OpenServerScheduleExpressionParser {
+	return &OpenServerScheduleExpressionParser{
+		system: system,
+	}
+}
 
 // IsValidExpression 校验表达式是否合法（固定格式：秒 分 时 天 *，分割后长度为5）
 func (o *OpenServerScheduleExpressionParser) IsValidExpression(expression string) bool {
@@ -20,7 +28,7 @@ func (o *OpenServerScheduleExpressionParser) IsValidExpression(expression string
 // GetNextTriggerTimeAfter 计算参考时间后，对应开服天数的下一次触发时间
 func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression string, _ time.Time) (time.Time, error) {
 	// 获取开服时间
-	openServerTime, err := getOpenServerDate()
+	openServerTime, err := o.getOpenServerDate()
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -57,10 +65,13 @@ func (o *OpenServerScheduleExpressionParser) GetNextTriggerTimeAfter(expression 
 }
 
 // getOpenServerDate 获取开服时间（需替换为你的项目实际逻辑）
-func getOpenServerDate() (time.Time, error) {
+func (o *OpenServerScheduleExpressionParser) getOpenServerDate() (time.Time, error) {
 	// 示例：此处返回一个固定时间，实际开发中请替换为从配置/数据库获取开服时间的逻辑
 	// 若开服时间不存在，返回 error
-	openServerStr := GetOpenSeverTime().GetValue().(string)
+	if o.system == nil || o.system.GetOpenSeverTime() == nil {
+		return time.Time{}, errors.New("system service is nil")
+	}
+	openServerStr := o.system.GetOpenSeverTime().GetValue().(string)
 	if openServerStr == "" {
 		return time.Time{}, errors.New("open server time is empty")
 	}

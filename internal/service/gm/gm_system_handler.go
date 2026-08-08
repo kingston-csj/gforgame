@@ -3,13 +3,17 @@ package gm
 import (
 	commonerrors "github.com/forfun/gforgame/common/errors"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/system"
 )
 
-type SystemGmHandler struct{}
+type SystemGmHandler struct {
+	system        *system.SystemService
+	playerService *playerservice.PlayerService
+}
 
-func NewSystemGmHandler() *SystemGmHandler {
-	return &SystemGmHandler{}
+func NewSystemGmHandler(systemService *system.SystemService, playerService *playerservice.PlayerService) *SystemGmHandler {
+	return &SystemGmHandler{system: systemService, playerService: playerService}
 }
 
 func (h *SystemGmHandler) RegisterTo(gm *GmService) {
@@ -18,6 +22,7 @@ func (h *SystemGmHandler) RegisterTo(gm *GmService) {
 }
 
 func (h *SystemGmHandler) handleDailyReset(player *playerdomain.Player, params string) *commonerrors.BusinessError {
-	system.PerformDailyUpdate()
+	resetTime := h.system.GetDailyReset().ResetTime
+	h.playerService.DailyReset(player, resetTime)
 	return nil
 }

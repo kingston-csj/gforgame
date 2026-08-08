@@ -47,10 +47,11 @@ type PlayerService struct {
 	// 玩家名称字典树
 	nameDict *trie.TrieDictionary
 
-	quest *questservice.QuestService
+	quest         *questservice.QuestService
+	systemService *system.SystemService
 }
 
-func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService) *PlayerService {
+func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService, systemService *system.SystemService) *PlayerService {
 	service := &PlayerService{
 		repo:           repo,
 		providers:      providers,
@@ -58,6 +59,7 @@ func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.
 		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
 		nameDict:       trie.NewTrieDictionary(),
 		quest:          questService,
+		systemService:  systemService,
 	}
 	return service
 }
@@ -167,13 +169,13 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 	// 异步推送
 	go func() {
 		// 离线，登录触发每日重置检测
-		dailyReset := system.GetDailyReset().GetValue().(int64)
+		dailyReset := ps.systemService.GetDailyReset().GetValue().(int64)
 		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {
 			ps.DailyReset(player, dailyReset)
 		} else {
 			ps.refreshDailyInfo(player)
 		}
-		weeklyReset := system.GetWeeklyReset().GetValue().(int64)
+		weeklyReset := ps.systemService.GetWeeklyReset().GetValue().(int64)
 		if player.WeeklyReset.LastWeeklyReset > 0 && player.WeeklyReset.LastWeeklyReset < weeklyReset {
 			ps.WeeklyReset(player, weeklyReset)
 		} else {

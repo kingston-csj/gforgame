@@ -1,14 +1,13 @@
 package http
 
 import (
-	"github.com/forfun/gforgame/internal/context"
-
+	serverpkg "github.com/forfun/gforgame/network/server"
 	"github.com/gin-gonic/gin"
 )
 
 // 关闭服务器
-func StopServer(c *gin.Context) {
-	if context.GameServer != nil {
-		context.GameServer.NotifyStop()
+func StopServer(c *gin.Context, gameServer serverpkg.Server) {
+	if gameServer != nil {
+		gameServer.NotifyStop()
 	}
 }

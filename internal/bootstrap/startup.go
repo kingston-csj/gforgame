@@ -2,10 +2,10 @@ package bootstrap
 
 import (
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
+	"github.com/forfun/gforgame/internal/infra/persistence/po"
 
 	dataconfig "github.com/forfun/gforgame/internal/config"
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	"github.com/forfun/gforgame/internal/system"
+	systemrepo "github.com/forfun/gforgame/internal/infra/repository/system"
 )
 
 // 生成顺序必须固定：
@@ -16,19 +16,15 @@ import (
 
 // InitMysqlDdl 初始化基础设施（数据库表结构等）。
 func InitMysqlDdl() {
-	err := mysqldb.Db.AutoMigrate(&playerdomain.Player{})
+	err := mysqldb.Db.AutoMigrate(&po.PlayerPO{})
 	if err != nil {
 		panic(err)
 	}
-	err = mysqldb.Db.AutoMigrate(&playerdomain.Friend{})
+	err = mysqldb.Db.AutoMigrate(&po.FriendPO{})
 	if err != nil {
 		panic(err)
 	}
-	err = mysqldb.Db.AutoMigrate(&playerdomain.Scene{})
-	if err != nil {
-		panic(err)
-	}
-	err = mysqldb.Db.AutoMigrate(&system.SystemParameterEnt{})
+	err = mysqldb.Db.AutoMigrate(&systemrepo.SystemParameterEnt{})
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +35,6 @@ func InitConfig() {
 	dataconfig.GetDataManager()
 }
 
-
 // InitBusiness 预热业务数据和计划任务。
 func InitBusiness(s *Services) {
 	s.Player.LoadPlayerProfile()
@@ -47,6 +42,6 @@ func InitBusiness(s *Services) {
 }
 
 // StartSchedulers 启动系统级定时任务。
-func StartSchedulers() {
-	system.StartSystemTask()
+func StartSchedulers(s *Services) {
+	s.System.StartSystemTask()
 }

@@ -8,14 +8,16 @@ import (
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/service/recharge"
+	"github.com/forfun/gforgame/internal/system"
 )
 
 type GmDependencies struct {
-	Player    *playerservice.PlayerService
-	Item      *item.ItemService
-	Quest     *questservice.QuestService
-	Recharge  *recharge.RechargeService
-	Mail      *mail.MailService
+	Player   *playerservice.PlayerService
+	Item     *item.ItemService
+	Quest    *questservice.QuestService
+	Recharge *recharge.RechargeService
+	Mail     *mail.MailService
+	System   *system.SystemService
 }
 
 var defaultDependencies *GmDependencies

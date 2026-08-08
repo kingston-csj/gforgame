@@ -1,16 +1,11 @@
 package quest
 
 import (
-	"time"
-
 	commonerrors "github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/eventbus"
-	"github.com/forfun/gforgame/common/util/conv"
-	"github.com/forfun/gforgame/common/util/timeutil"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -269,36 +264,6 @@ func (s *QuestService) TakeAllRewards(player *playerdomain.Player, catalog int32
 		QuestIds:    finishedIds,
 	}
 	return response, 0
-}
-
-func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, heroId int32) int32 {
-	questBox := player.QuestBox
-	quest := questBox.GetQuest(questId)
-	if quest == nil {
-		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	hero := player.HeroBox.GetHero(heroId)
-	if hero == nil {
-		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	if hero.EntrustQuestId != 0 {
-		return int32(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	}
-	quest.AcceptTime = time.Now().UnixMilli()
-	hero.EntrustQuestId = questId
-	quest.Status = constants.QuestStatusDoing
-	questData := config.QueryById[configdomain.QuestData](questId)
-
-	eventbus.Default().Publish(events.PlayerEntityChange, player)
-
-	context.TaskScheduler.Schedule(func() {
-		handler, ok := s.handlers[questData.Type]
-		if ok {
-			quest.AddProgress(1)
-			handler.CheckProgress(player, quest)
-		}
-	}, timeutil.MILLIS_PER_SECOND*int64(conv.Int32Value(questData.Extra)))
-	return 0
 }
 
 func (s *QuestService) GetQuestDirector(catalog int32) qcore.QuestDirector {

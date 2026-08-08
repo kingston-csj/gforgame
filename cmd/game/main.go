@@ -13,7 +13,6 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
-	"github.com/forfun/gforgame/internal/context"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
@@ -49,7 +48,7 @@ func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
 }
 
 func main() {
-	logger.Info(fmt.Sprintf("game server is starting..."))
+	logger.Info("game server is starting...")
 	startTime := time.Now()
 
 	router := network.NewMessageRoute()
@@ -71,7 +70,7 @@ func main() {
 	// 各自业务初始化
 	bootstrap.InitBusiness(s)
 	// 启动系统任务
-	bootstrap.StartSchedulers()
+	bootstrap.StartSchedulers(s)
 
 	var modules = []any{
 		route.NewCatalogRoute(s.Catalog, s.PlayerRepo),
@@ -111,7 +110,6 @@ func main() {
 		ws.WithUseGateway(serverconfig.ServerConfig.UseGateMode),
 		ws.WithWsPath("ws"),
 	)
-	context.GameServer = node
 
 	err := node.Start()
 	if err != nil {
@@ -121,7 +119,7 @@ func main() {
 
 	// 启动后台http服务
 	go func() {
-		context.HttpServer = NewHttpServer()
+		NewHttpServer(node)
 	}()
 
 	// 自启动，不会有额外消耗
@@ -150,7 +148,7 @@ func main() {
 	// 执行所有关服逻辑
 	node.Stop()
 	// 框架模块
-	context.DbService.Shutdown()
+	s.DbService.Shutdown()
 
 	logger.Info(fmt.Sprintf("game server is closed"))
 }
