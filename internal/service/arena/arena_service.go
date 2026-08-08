@@ -3,10 +3,10 @@ package arena
 import (
 	"math"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	player "github.com/forfun/gforgame/internal/domain/player"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -19,16 +19,16 @@ import (
 )
 
 type ArenaService struct {
-	player    *playerService.PlayerService
-	rank      *rank.RankService
-	mail      *mailService.MailService
+	player *playerService.PlayerService
+	rank   *rank.RankService
+	mail   *mailService.MailService
 }
 
 func NewArenaService(player *playerService.PlayerService, rankService *rank.RankService, mail *mailService.MailService) *ArenaService {
 	return &ArenaService{
-		player:    player,
-		rank:      rankService,
-		mail:      mail,
+		player: player,
+		rank:   rankService,
+		mail:   mail,
 	}
 }
 
@@ -57,7 +57,7 @@ func getTodayFreeTimes(player *player.Player) int32 {
 	return arenaDailyTimes
 }
 
-func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) *protos.ResArenaFightEnd{
+func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) *protos.ResArenaFightEnd {
 	res := &protos.ResArenaFightEnd{}
 	targetPlayer := s.player.GetPlayer(target)
 	if targetPlayer == nil {
@@ -82,13 +82,13 @@ func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) 
 	score1 := calcSettleScore(player, targetPlayer, win)
 	newScore1 := player.ArenaScore + score1
 	player.ArenaBox.ChallengeTimes++
-	context.EventBus.Publish(events.AreaScoreChanged, &events.AreaScoreChangedEvent{
+	eventbus.Default().Publish(events.AreaScoreChanged, &events.AreaScoreChangedEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: player,
 		},
-		Score:       score1,
+		Score: score1,
 	})
-	context.EventBus.Publish(events.PassArena, &events.PassArenaEvent{
+	eventbus.Default().Publish(events.PassArena, &events.PassArenaEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: player,
 		},
@@ -100,7 +100,7 @@ func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) 
 		rankParams1 = "未上榜"
 	}
 	mailId := Ternary(win, constants.MailIdArenaFightWin, constants.MailIdArenaFightLose)
-	s.mail.SendSimpleMail2(player, mailId, 
+	s.mail.SendSimpleMail2(player, mailId,
 		targetPlayer.Name, rankParams1, string(newScore1), rankParams1)
 	addFightRecord(player, targetPlayer, score1, true, win)
 	res.TargetInitScore = targetPlayer.ArenaScore
@@ -115,16 +115,16 @@ func (s *ArenaService) FightEnd(player *player.Player, target string, win bool) 
 		rankParams2 = "未上榜"
 	}
 	mailId2 := Ternary(win, constants.MailIdArenaFightLose, constants.MailIdArenaFightWin)
-	s.mail.SendSimpleMail2(targetPlayer, mailId2, 
+	s.mail.SendSimpleMail2(targetPlayer, mailId2,
 		player.Name, rankParams2, string(newScore2), rankParams2)
 	addFightRecord(targetPlayer, player, score2, false, !win)
-	context.EventBus.Publish(events.AreaScoreChanged, &events.AreaScoreChangedEvent{
+	eventbus.Default().Publish(events.AreaScoreChanged, &events.AreaScoreChangedEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: targetPlayer,
 		},
-		Score:       score2,
+		Score: score2,
 	})
-	
+
 	res.MyChangedScore = score1
 	res.TargetChangedScore = score2
 	return res
@@ -138,7 +138,7 @@ func Ternary[V any](condition bool, valTrue V, valFalse V) V {
 	return valFalse
 }
 
-func addFightRecord(player *player.Player, target *player.Player, score int32, isAttack bool,  win bool) {
+func addFightRecord(player *player.Player, target *player.Player, score int32, isAttack bool, win bool) {
 	winner := player.Id
 	if win {
 		winner = target.Id
@@ -154,12 +154,12 @@ func addFightRecord(player *player.Player, target *player.Player, score int32, i
 }
 
 func calcSettleScore(player *player.Player, target *player.Player, win bool) int32 {
- 	E := 1.0 / (1 + math.Pow(10, (float64(target.ArenaScore) - float64(player.ArenaScore)) / 400.0));
-	score := 32 * (1.0 - E);
+	E := 1.0 / (1 + math.Pow(10, (float64(target.ArenaScore)-float64(player.ArenaScore))/400.0))
+	score := 32 * (1.0 - E)
 	if win {
-		score = 32 * (1.0 - E);
+		score = 32 * (1.0 - E)
 	} else {
-		score = 32 * -E;
+		score = 32 * -E
 	}
-	return int32(math.Round(score));
+	return int32(math.Round(score))
 }

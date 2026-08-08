@@ -17,10 +17,6 @@ type ExtendBox struct {
 	LifeTimeBuyCount map[int32]int32
 	// 材料图鉴
 	ItemCatalogModel CatalogModel
-	// 店铺图鉴
-	SitemCatalogModel CatalogModel
-	// 菜单图鉴
-	MenuCatalogModel CatalogModel
 	// 装备升级次数
 	EquipUpLevelTimes int32
 }
@@ -36,8 +32,6 @@ func (b *ExtendBox) AfterLoad() {
 		b.LifeTimeBuyCount = make(map[int32]int32)
 	}
 	b.ItemCatalogModel.AfterLoad()
-	b.SitemCatalogModel.AfterLoad()
-	b.MenuCatalogModel.AfterLoad()
 }
 
 func (b *ExtendBox) AddNewMessage(message *ChatMessage) {

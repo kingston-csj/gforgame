@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	events "github.com/forfun/gforgame/internal/events"
@@ -54,7 +54,7 @@ func (h *BaseQuestHandler) SetResolver(resolver qcore.Resolver) {
 }
 
 func (h *BaseQuestHandler) Register(handler qcore.QuestHandler, topic string) {
-	context.EventBus.Subscribe(topic, func(data interface{}) {
+	eventbus.Default().Subscribe(topic, func(data interface{}) {
 		var player *playerdomain.Player
 		switch v := data.(type) {
 		case *playerdomain.Player:

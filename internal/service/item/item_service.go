@@ -2,12 +2,12 @@ package item
 
 import (
 	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/protos"
 
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
-	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/contract"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/domain/player"
@@ -27,9 +27,9 @@ type ItemService struct {
 }
 
 var (
-	itemservice           *ItemService
+	itemservice        *ItemService
 	errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
-	notEnoughError = errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
+	notEnoughError     = errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
 )
 
 var RecruitItemId int32 = 2002
@@ -43,9 +43,9 @@ func NewItemService(player *playerservice.PlayerService, catalogService *catalog
 }
 
 func (s *ItemService) Init() {
-	reward.SetItemOps( s)
+	reward.SetItemOps(s)
 	consume.SetItemOps(s)
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.OnPlayerLogin(data.(*player.Player))
 	})
 }
@@ -66,7 +66,6 @@ func (s *ItemService) OnPlayerLogin(player *player.Player) {
 	player.NotifyPurseChange()
 }
 
-
 func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) error {
 	p := s.player.GetPlayer(playerId)
 	backpack := p.Backpack
@@ -74,11 +73,11 @@ func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) e
 		return errorIllegalParams
 	}
 	changeResult := backpack.ReduceByModelId(itemId, count)
-	if !changeResult.Succ  {
+	if !changeResult.Succ {
 		return notEnoughError
 	}
 
-	context.EventBus.Publish(events.ItemConsume, &events.ItemConsumeEvent{
+	eventbus.Default().Publish(events.ItemConsume, &events.ItemConsumeEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: p,
 		},
@@ -86,8 +85,8 @@ func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) e
 		Count:  count,
 	})
 
-	notify :=  &protos.PushItemChanged{
-		Type: "item",
+	notify := &protos.PushItemChanged{
+		Type:    "item",
 		Changed: changeResult.ToChangeInfos(),
 	}
 	io.NotifyPlayer(p, notify)
@@ -124,18 +123,18 @@ func (s *ItemService) AddByModelId(playerId string, itemId int32, count int32) e
 	s.catalog.TryUnlock(p, 1, itemId)
 
 	// 发布事件，供任务系统使用
-	context.EventBus.Publish(events.PlayerEntityChange, p)
-	
+	eventbus.Default().Publish(events.PlayerEntityChange, p)
+
 	itemInfos := make([]protos.ItemInfo, 0, len(changeResult.ChangedItems))
 	for _, item := range changeResult.ChangedItems {
 		itemInfos = append(itemInfos, item.Item.ToVo())
 	}
 
 	notify := &protos.PushItemChanged{
-		Type: "item",
+		Type:    "item",
 		Changed: itemInfos,
 	}
 	io.NotifyPlayer(p, notify)
-	
+
 	return nil
 }

@@ -3,7 +3,9 @@ package bootstrap
 import (
 	"reflect"
 
+	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/service/activity"
 	"github.com/forfun/gforgame/internal/service/arena"
 
@@ -32,7 +34,7 @@ import (
 )
 
 type Services struct {
-	dig.In // 显式声明：这是一个「依赖输入组」
+	dig.In    // 显式声明：这是一个「依赖输入组」
 	Activity  *activity.ActivityService
 	Arena     *arena.ArenaService
 	Catalog   *catalog.CatalogService
@@ -52,7 +54,6 @@ type Services struct {
 	SignIn    *signin.SignInService
 	Vip       *vip.VipService
 }
-
 
 // ServiceModule 定义 service 启动期初始化能力。
 type ServiceModule interface {
@@ -82,10 +83,13 @@ func InitServices() *Services {
 
 func registerServices(c *dig.Container) {
 	// 基础服务
+	_ = c.Provide(cache.NewCacheManager)
+	_ = c.Provide(persistence.NewAsyncDbService)
+
 	_ = c.Provide(item.NewItemService)
 	_ = c.Provide(mail.NewMailService)
 	_ = c.Provide(catalog.NewCatalogService)
-	
+
 	_ = c.Provide(quest.NewQuestService)
 	_ = c.Provide(player.NewPlayerService)
 	_ = c.Provide(item.NewItemService)
@@ -93,7 +97,7 @@ func registerServices(c *dig.Container) {
 	_ = c.Provide(friend.NewFriendService)
 	_ = c.Provide(chat.NewChatService)
 	_ = c.Provide(monthcard.NewMonthCardService)
-	_ = c.Provide(rank.NewRankService)	
+	_ = c.Provide(rank.NewRankService)
 	_ = c.Provide(recharge.NewRechargeService)
 	_ = c.Provide(vip.NewVipService)
 	_ = c.Provide(mall.NewMallService)
@@ -101,7 +105,7 @@ func registerServices(c *dig.Container) {
 	_ = c.Provide(signin.NewSignInService)
 	_ = c.Provide(activity.NewActivityService)
 	_ = c.Provide(arena.NewArenaService)
-	
+
 	// GM 特殊处理
 	_ = c.Provide(newGmService)
 }
@@ -114,11 +118,11 @@ func newGmService(
 	mail *mail.MailService,
 ) *gm.GmService {
 	return gm.NewGmService(&gm.GmDependencies{
-		Player:    player,
-		Item:      item,
-		Quest:     quest,
-		Recharge:  recharge,
-		Mail:      mail,
+		Player:   player,
+		Item:     item,
+		Quest:    quest,
+		Recharge: recharge,
+		Mail:     mail,
 	})
 }
 

@@ -3,10 +3,10 @@ package mail
 import (
 	"time"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/timeutil"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/contract"
 	"github.com/forfun/gforgame/internal/idgen"
 
@@ -32,7 +32,7 @@ func NewMailService() *MailService {
 }
 
 func (s *MailService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.CheckMailsOnLogin(data.(*playerdomain.Player))
 	})
 }
@@ -63,7 +63,7 @@ func (s *MailService) Read(player *playerdomain.Player, mailId string) int {
 	}
 	mail.Status = constants.MailStatusRead
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	return 0
 }
 
@@ -76,7 +76,7 @@ func (s *MailService) TakeReward(player *playerdomain.Player, mailId string) (in
 	mail.Status = constants.MailStatusReceived
 	mailRewards.Reward(player, constants.ActionType_MailGetReward)
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	return 0, reward.ToRewardVos(mailRewards)
 }
 
@@ -92,7 +92,7 @@ func (s *MailService) TakeAllRewards(player *playerdomain.Player) []*protos.Rewa
 	}
 	andReward = andReward.Merge()
 	andReward.Reward(player, constants.ActionType_MailGetAll)
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	return reward.ToRewardVos(andReward)
 }
 
@@ -105,10 +105,10 @@ func (s *MailService) DeleteAll(player *playerdomain.Player) []string {
 			removed = append(removed, mail.Id)
 		}
 	}
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	return removed
 }
-func (s *MailService) SendSimpleMail(player *playerdomain.Player,id int32) {
+func (s *MailService) SendSimpleMail(player *playerdomain.Player, id int32) {
 	mailData := config.QueryById[configdomain.MailData](id)
 	if mailData == nil {
 		return
@@ -116,28 +116,28 @@ func (s *MailService) SendSimpleMail(player *playerdomain.Player,id int32) {
 	s.SendMail(player, id, "", "", nil, mailData.ValidTime)
 }
 
-func (s *MailService) SendSimpleMail2(player *playerdomain.Player,id int32, params ...string) {
+func (s *MailService) SendSimpleMail2(player *playerdomain.Player, id int32, params ...string) {
 	mailData := config.QueryById[configdomain.MailData](id)
 	if mailData == nil {
 		return
 	}
 	s.SendMail(player, id, "", "", nil, mailData.ValidTime, params...)
 }
-func (s *MailService) SendMail(player *playerdomain.Player,id int32, title string, content string, rewards []contract.RewardDefLite, validHours int32, params ...string) {
+func (s *MailService) SendMail(player *playerdomain.Player, id int32, title string, content string, rewards []contract.RewardDefLite, validHours int32, params ...string) {
 	mailId := idgen.GetNextID()
 	mailData := config.QueryById[configdomain.MailData](id)
-	if mailData != nil && validHours == 0{
+	if mailData != nil && validHours == 0 {
 		validHours = mailData.ValidTime
 	}
 	player.Mailbox.AddMail(&playerdomain.Mail{
-		Id:      mailId,
-		Title:   title,
-		Content: content,
-		Time:    time.Now().UnixMilli(),
-		Status:  constants.MailStatusUnread,
-		Rewards: rewards,
-		Params: params,
-		ExpiredTime: time.Now().UnixMilli() + int64(validHours) * timeutil.MILLIS_PER_SECOND,
+		Id:          mailId,
+		Title:       title,
+		Content:     content,
+		Time:        time.Now().UnixMilli(),
+		Status:      constants.MailStatusUnread,
+		Rewards:     rewards,
+		Params:      params,
+		ExpiredTime: time.Now().UnixMilli() + int64(validHours)*timeutil.MILLIS_PER_SECOND,
 	})
 }
 

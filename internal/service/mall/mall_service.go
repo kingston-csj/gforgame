@@ -2,10 +2,10 @@ package mall
 
 import (
 	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -65,13 +65,13 @@ func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32
 	andReward = andReward.Merge()
 	andReward.Reward(player, constants.ActionType_BuyMall)
 
-	context.EventBus.Publish(events.MallBuy, &events.MallBuyEvent{
+	eventbus.Default().Publish(events.MallBuy, &events.MallBuyEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: player,
 		},
 	})
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
-   
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
+
 	return nil
 }

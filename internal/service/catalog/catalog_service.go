@@ -1,9 +1,9 @@
 package catalog
 
 import (
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -20,18 +20,14 @@ func NewCatalogService() *CatalogService {
 }
 
 func (s *CatalogService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }
 
-
-
 func (s *CatalogService) OnPlayerLogin(player *playerdomain.Player) {
 	push := &protos.PushCatalogInfo{
-		SitemCatalog: buildCatalogVo(&player.ExtendBox.SitemCatalogModel),
-		ItemCatalog:  buildCatalogVo(&player.ExtendBox.ItemCatalogModel),
-		MenuCatalog:  buildCatalogVo(&player.ExtendBox.MenuCatalogModel),
+		ItemCatalog: buildCatalogVo(&player.ExtendBox.ItemCatalogModel),
 	}
 	io.NotifyPlayer(player, push)
 }
@@ -57,7 +53,7 @@ func (s *CatalogService) TakeReward(player *playerdomain.Player, typ int32, id i
 		rewardStr = itemData.ActivateRewards
 	}
 	if !catalogModel.CanReceived(id) {
-		 return constants.I18N_COMMON_ILLEGAL_PARAMS,nil
+		return constants.I18N_COMMON_ILLEGAL_PARAMS, nil
 	}
 	rewards := reward.ParseReward(rewardStr)
 	rewards.Reward(player, constants.ActionType_CatalogActivate)
@@ -69,8 +65,8 @@ func (s *CatalogService) TryUnlock(player *playerdomain.Player, typ int32, id in
 	succ := catalogModel.AddUnlock(id)
 	if succ {
 		push := &protos.PushCatalogAdd{
-			Typ: typ,
-			ItemId:  id,
+			Typ:    typ,
+			ItemId: id,
 		}
 		io.NotifyPlayer(player, push)
 	}
@@ -78,11 +74,5 @@ func (s *CatalogService) TryUnlock(player *playerdomain.Player, typ int32, id in
 }
 
 func getcatalogModel(player *playerdomain.Player, typ int32) *playerdomain.CatalogModel {
-	if typ == 0 {
-		return &player.ExtendBox.SitemCatalogModel
-	} else if typ == 1 {
-		return &player.ExtendBox.ItemCatalogModel
-	} else {
-		return &player.ExtendBox.MenuCatalogModel
-	}
+	return &player.ExtendBox.ItemCatalogModel
 }

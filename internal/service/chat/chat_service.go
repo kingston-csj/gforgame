@@ -3,8 +3,8 @@ package chat
 import (
 	"time"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
@@ -34,7 +34,7 @@ func NewChatService(player *playerservice.PlayerService, friend *friendservice.F
 }
 
 func (s *ChatService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.LoadOfflineMessages(data.(*playerdomain.Player))
 	})
 }

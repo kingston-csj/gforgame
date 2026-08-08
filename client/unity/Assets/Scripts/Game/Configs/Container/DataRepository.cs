@@ -7,7 +7,7 @@ using AppContext = Game.Core.AppContext;
 
 namespace Game.Configs
 {
-    public class DataManager
+    public class DataRepository
     {
         public ConfigItemContainer configItemContainer;
         public ConfigCommonContainer configCommonContainer;
@@ -22,7 +22,7 @@ namespace Game.Configs
             Debug.Log("开始自动初始化配置容器...");
 
             // 反射获取 DataManager 所有字段（包含 public/private，可按需调整）
-            FieldInfo[] fields = typeof(DataManager).GetFields(
+            FieldInfo[] fields = typeof(DataRepository).GetFields(
                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
 
             foreach (FieldInfo field in fields)

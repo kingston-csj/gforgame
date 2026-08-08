@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/timeutil"
-	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/events"
 
 	"github.com/robfig/cron/v3"
@@ -71,12 +71,12 @@ func PerformDailyUpdate() {
 	newResetTimestamp := int64(time.Now().Unix())
 	dailyReset.Save(newResetTimestamp)
 	fmt.Printf("当前每日重置时间: %d\n", newResetTimestamp)
-	context.EventBus.Publish(events.SystemDailyReset, newResetTimestamp)
+	eventbus.Default().Publish(events.SystemDailyReset, newResetTimestamp)
 }
 
 // performHourlyUpdate 执行每小时更新操作
 func performHourlyUpdate() {
-	log.Println("执行每小时更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))		
+	log.Println("执行每小时更新任务 -", time.Now().Format(timeutil.LayoutYmdHms))
 
 	// 在这里添加需要每小时更新的逻辑
 	// 例如：更新在线玩家状态、检查服务器负载?
@@ -92,13 +92,13 @@ func performWeeklyUpdate() {
 	newResetTimestamp := int64(time.Now().Unix())
 	weeklyReset.Save(newResetTimestamp)
 	fmt.Printf("当前每周重置时间: %d\n", newResetTimestamp)
-	context.EventBus.Publish(events.SystemWeeklyReset, newResetTimestamp)
+	eventbus.Default().Publish(events.SystemWeeklyReset, newResetTimestamp)
 }
 
 // performMonthlyUpdate 执行每月更新操作
 func performMonthlyUpdate() {
 	// cron库不支持每个月最后一天的表达式，这里加一个二次判断
-	// 如果当前日期不是1号，说明不是每个月的最后一天，直接返回		
+	// 如果当前日期不是1号，说明不是每个月的最后一天，直接返回
 	now := time.Now()
 	if now.AddDate(0, 0, 1).Day() != 1 {
 		return
@@ -111,7 +111,7 @@ func performMonthlyUpdate() {
 	newResetTimestamp := int64(time.Now().Unix())
 	monthlyReset.Save(newResetTimestamp)
 	fmt.Printf("当前每月重置时间? %d\n", newResetTimestamp)
-	context.EventBus.Publish(events.SystemMonthlyReset, newResetTimestamp)
+	eventbus.Default().Publish(events.SystemMonthlyReset, newResetTimestamp)
 }
 
 // AddCustomTask 添加自定义定时任务

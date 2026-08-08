@@ -1,9 +1,9 @@
 package route
 
 import (
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/service/player"
 
@@ -31,7 +31,7 @@ func (ps *PlayerRoute) ReqLogin(playerId string, s network.Session, index int32,
 
 func (ps *PlayerRoute) ReqLoadingFinish(playerId string, index int32, msg *protos.ReqPlayerLoadingFinish) {
 	player := ps.service.GetPlayer(playerId)
-	context.EventBus.Publish(events.PlayerLoadingFinish, player)
+	eventbus.Default().Publish(events.PlayerLoadingFinish, player)
 }
 
 func (ps *PlayerRoute) ReqPlayerUpLevel(playerId string, index int32, msg *protos.ReqPlayerUpLevel) *protos.ResPlayerUpLevel {
@@ -47,13 +47,13 @@ func (ps *PlayerRoute) ReqPlayerUpStage(playerId string, index int32, msg *proto
 func (ps *PlayerRoute) ReqPlayerRefreshScore(playerId string, index int32, msg *protos.ReqPlayerRefreshScore) *protos.ResPlayerRefreshScore {
 	player := ps.service.GetPlayer(playerId)
 	player.ClientScore = msg.Score
-	context.EventBus.Publish(events.PlayerAttrChange, player)
+	eventbus.Default().Publish(events.PlayerAttrChange, player)
 	return &protos.ResPlayerRefreshScore{Code: 0}
 }
 
 func (ps *PlayerRoute) ReqEditClientData(playerId string, index int32, msg *protos.ReqEditClientData) *protos.ResEditClientData {
 	player := ps.service.GetPlayer(playerId)
 	player.ClientData = msg.Data
-	context.EventBus.Publish(events.PlayerAttrChange, player)
+	eventbus.Default().Publish(events.PlayerAttrChange, player)
 	return &protos.ResEditClientData{Code: 0}
 }

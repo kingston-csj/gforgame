@@ -3,9 +3,10 @@ package friend
 import (
 	"time"
 
+	"github.com/forfun/gforgame/cache"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	"github.com/forfun/gforgame/internal/domain/player"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -22,19 +23,24 @@ import (
 
 // 好友模块
 type FriendService struct {
-	player *playerservice.PlayerService
-	mail   *mailservice.MailService
+	cache     *cache.Manager
+	dbService *mysqldb.AsyncDBService
+	player    *playerservice.PlayerService
+	mail      *mailservice.MailService
 }
 
-func NewFriendService(player *playerservice.PlayerService, mail *mailservice.MailService) *FriendService {
+func NewFriendService(cache *cache.Manager, dbService *mysqldb.AsyncDBService, player *playerservice.PlayerService, mail *mailservice.MailService,
+) *FriendService {
 	return &FriendService{
-		player: player,
-		mail:   mail,
+		cache:     cache,
+		dbService: dbService,
+		player:    player,
+		mail:      mail,
 	}
 }
 
 func (s *FriendService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.RefreshClientInfo(data.(*playerdomain.Player))
 	})
 
@@ -51,11 +57,11 @@ func (s *FriendService) Init() {
 		p.AfterFind(nil)
 		return &p, nil
 	}
-	context.CacheManager.Register("friend", dbLoader)
+	s.cache.Register("friend", dbLoader)
 }
 
 func (s *FriendService) GetFriendEnt(playerId string) *player.Friend {
-	cache, _ := context.CacheManager.GetCache("friend")
+	cache, _ := s.cache.GetCache("friend")
 	cacheEntity, err := cache.Get(playerId)
 	if err != nil {
 		return nil
@@ -303,7 +309,7 @@ func (s *FriendService) DeleteFriend(player *playerdomain.Player, friendId strin
 
 // 保存数据
 func (s *FriendService) SaveFriend(friend *player.Friend) {
-	cache, _ := context.CacheManager.GetCache("friend")
+	cache, _ := s.cache.GetCache("friend")
 	cache.Set(friend.Id, friend)
-	context.DbService.SaveToDb(friend)
+	s.dbService.SaveToDb(friend)
 }

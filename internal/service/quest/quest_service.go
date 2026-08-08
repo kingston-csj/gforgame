@@ -4,6 +4,7 @@ import (
 	"time"
 
 	commonerrors "github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/common/util/timeutil"
 	"github.com/forfun/gforgame/internal/config"
@@ -27,25 +28,25 @@ type QuestService struct {
 }
 
 func NewQuestService() *QuestService {
-		instance := &QuestService{}
+	instance := &QuestService{}
 
-		// 注册所有任务分类
-		instance.directors = make(map[int32]qcore.QuestDirector)
-		instance.directors[constants.QuestCategoryDaily] = questdirector.NewDailyQuestDirector()
-		instance.directors[constants.QuestCategoryMain] = questdirector.NewMainQuestDirector()
-		instance.directors[constants.QuestCategoryAchievement] = questdirector.NewAchievementQuestDirector()
+	// 注册所有任务分类
+	instance.directors = make(map[int32]qcore.QuestDirector)
+	instance.directors[constants.QuestCategoryDaily] = questdirector.NewDailyQuestDirector()
+	instance.directors[constants.QuestCategoryMain] = questdirector.NewMainQuestDirector()
+	instance.directors[constants.QuestCategoryAchievement] = questdirector.NewAchievementQuestDirector()
 
-		// 注册所有任务类型
-		instance.handlers = make(map[int32]qcore.QuestHandler)
-		instance.handlers[constants.QuestTypeRecruit] = &questhandler.RecruitQuestHandler{}
-		instance.handlers[constants.QuestTime] = &questhandler.TimeQuestHandler{}
-		instance.handlers[constants.QuestTypeHeroUpLevel] = &questhandler.HeroLevelUpQuestHandler{}
-		instance.handlers[constants.QuestTypeGoldConsume] = &questhandler.GoldConsumeQuestHandler{}
-		instance.handlers[constants.QuestTypeDiamondConsume] = &questhandler.DiamondConsumeQuestHandler{}
-		instance.handlers[constants.QuestTypeFuben] = &questhandler.FubenLevelQuestHandler{}
-		instance.handlers[constants.QuestTypeEquipUpLevel] = &questhandler.EquipUpLevelQuestHandler{}
-		instance.handlers[constants.QuestTypeLogin] = &questhandler.LoginQuestHandler{}
-		instance.handlers[constants.QuestTypePassGuanka] = &questhandler.MainGuanKaQuestHandler{}
+	// 注册所有任务类型
+	instance.handlers = make(map[int32]qcore.QuestHandler)
+	instance.handlers[constants.QuestTypeRecruit] = &questhandler.RecruitQuestHandler{}
+	instance.handlers[constants.QuestTime] = &questhandler.TimeQuestHandler{}
+	instance.handlers[constants.QuestTypeHeroUpLevel] = &questhandler.HeroLevelUpQuestHandler{}
+	instance.handlers[constants.QuestTypeGoldConsume] = &questhandler.GoldConsumeQuestHandler{}
+	instance.handlers[constants.QuestTypeDiamondConsume] = &questhandler.DiamondConsumeQuestHandler{}
+	instance.handlers[constants.QuestTypeFuben] = &questhandler.FubenLevelQuestHandler{}
+	instance.handlers[constants.QuestTypeEquipUpLevel] = &questhandler.EquipUpLevelQuestHandler{}
+	instance.handlers[constants.QuestTypeLogin] = &questhandler.LoginQuestHandler{}
+	instance.handlers[constants.QuestTypePassGuanka] = &questhandler.MainGuanKaQuestHandler{}
 
 	instance.wireResolver()
 	for _, handler := range instance.handlers {
@@ -68,7 +69,7 @@ func (s *QuestService) wireResolver() {
 }
 
 func (s *QuestService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		s.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }
@@ -98,7 +99,7 @@ func (s *QuestService) ResetQuests(player *playerdomain.Player, catalog int32) {
 	for _, quest := range quests {
 		s.AcceptQuest(player, quest.Id)
 	}
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 }
 
 func (s *QuestService) AcceptQuest(player *playerdomain.Player, questId int32) (*playerdomain.Quest, error) {
@@ -144,7 +145,7 @@ func (s *QuestService) TakeReward(player *playerdomain.Player, questId int32) (*
 		player.QuestBox.AddFinishedQuest(questId)
 	}
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 
 	response := &protos.ResQuestTakeReward{
 		DailyScore:  int32(player.DailyReset.DailyQuestScore),
@@ -188,7 +189,7 @@ func (s *QuestService) TakeAllReward(player *playerdomain.Player, catalog int32)
 	}
 	rewards.Reward(player, constants.ActionType_QuestRewardAll)
 	questBox.ClearQuestsByCategory(catalog)
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	response := &protos.ResQuestTakeAllRewards{
 		DailyScore:  int32(player.DailyReset.DailyQuestScore),
 		WeeklyScore: int32(player.WeeklyReset.WeeklyQuestScore),
@@ -259,7 +260,7 @@ func (s *QuestService) TakeAllRewards(player *playerdomain.Player, catalog int32
 	}
 	andReward.Reward(player, constants.ActionType_QuestRewardAll)
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 	response := &protos.ResQuestTakeAllRewards{
 		DailyScore:  int32(player.DailyReset.DailyQuestScore),
 		WeeklyScore: int32(player.WeeklyReset.WeeklyQuestScore),
@@ -288,7 +289,7 @@ func (s *QuestService) EntrustQuest(player *playerdomain.Player, questId int32, 
 	quest.Status = constants.QuestStatusDoing
 	questData := config.QueryById[configdomain.QuestData](questId)
 
-	context.EventBus.Publish(events.PlayerEntityChange, player)
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
 
 	context.TaskScheduler.Schedule(func() {
 		handler, ok := s.handlers[questData.Type]

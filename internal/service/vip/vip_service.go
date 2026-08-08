@@ -3,16 +3,15 @@ package vip
 import (
 	"time"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
-) 
-
+)
 
 type VipService struct{}
 
@@ -20,11 +19,11 @@ func NewVipService() *VipService {
 	return &VipService{}
 }
 
-func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32 ) {
+func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32) {
 	// rechargeData := config.QueryById[configdomain.RechargeData](int64(rechargeId))
 	vipContainer := config.GetSpecificContainer[*container.VipContainer]()
 	var result []*configdomain.VipData
-	 // 从最大开始找
+	// 从最大开始找
 	for _, vipData := range vipContainer.GetAllRecords() {
 		if p.RechargeRmb >= vipData.Money {
 			result = append(result, vipData)
@@ -41,20 +40,20 @@ func (v *VipService) CheckRecharge(p *playerdomain.Player, rechargeId int32 ) {
 	commonContainer := config.GetSpecificContainer[*container.CommonContainer]()
 	// vip每个周期的充值金额
 	periodMoney := commonContainer.GetFloat32Value("vipPeriodMoney")
-	newMoney :=p.ExtendBox.AddVipPeriodMoney(periodMoney)
+	newMoney := p.ExtendBox.AddVipPeriodMoney(periodMoney)
 	if newMoney >= periodMoney {
 		p.ExtendBox.VipExpiredTime = time.Now().Unix() + int64(commonContainer.GetInt32Value("vipPeriod"))
 		p.ExtendBox.VipPeriodMoney = newMoney - periodMoney
 	}
 
-	context.EventBus.Publish(events.PlayerEntityChange, p)
+	eventbus.Default().Publish(events.PlayerEntityChange, p)
 }
 
 func (v *VipService) RefreshVipInfo(p *playerdomain.Player) {
 	push := protos.PushVipQueryInfo{
-		VipLevel: p.VipLevel,
-		ExpiredTime: p.ExtendBox.VipExpiredTime,
-		RechargeRmb: float32(p.RechargeRmb),
+		VipLevel:          p.VipLevel,
+		ExpiredTime:       p.ExtendBox.VipExpiredTime,
+		RechargeRmb:       float32(p.RechargeRmb),
 		PeriodRechargeRmb: p.ExtendBox.VipPeriodMoney,
 	}
 	io.NotifyPlayer(p, push)

@@ -6,8 +6,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/container/hashmap"
 	commonerrors "github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/trie"
 	"github.com/forfun/gforgame/common/util/conv"
@@ -16,7 +18,6 @@ import (
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -39,6 +40,8 @@ var (
 
 // 玩家模块
 type PlayerService struct {
+	dbService      *mysqldb.AsyncDBService
+	cache          *cache.Manager
 	playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
 	// 双向map, id -> name
 	idNameMapper *hashmap.SyncDualHashMap[string, string]
@@ -48,8 +51,10 @@ type PlayerService struct {
 	quest *questservice.QuestService
 }
 
-func NewPlayerService(questService *questservice.QuestService) *PlayerService {
+func NewPlayerService(dbService *mysqldb.AsyncDBService, cache *cache.Manager, questService *questservice.QuestService) *PlayerService {
 	service := &PlayerService{
+		dbService:      dbService,
+		cache:          cache,
 		playerProfiles: hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
 		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
 		nameDict:       trie.NewTrieDictionary(),
@@ -70,21 +75,21 @@ func (ps *PlayerService) Init() {
 			}
 		}
 		p.AfterLoad()
-		context.EventBus.Publish(events.PlayerAfterLoad, &p)
+		eventbus.Default().Publish(events.PlayerAfterLoad, &p)
 		return &p, nil
 	}
-	context.CacheManager.Register("player", dbLoader)
+	ps.cache.Register("player", dbLoader)
 
-	context.EventBus.Subscribe(events.PlayerEntityChange, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerEntityChange, func(data interface{}) {
 		ps.SavePlayer(data.(*playerdomain.Player))
 	})
 
-	context.EventBus.Subscribe(events.PlayerAttrChange, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerAttrChange, func(data interface{}) {
 		ps.RefreshFighting(data.(*playerdomain.Player))
 	})
 
 	// 在线玩家每日重置
-	context.EventBus.Subscribe(events.SystemDailyReset, func(data interface{}) {
+	eventbus.Default().Subscribe(events.SystemDailyReset, func(data interface{}) {
 		allSessions := network.GetAllOnlinePlayerSessions()
 		for _, s := range allSessions {
 			s.AsynTasksChan() <- func() {
@@ -118,7 +123,7 @@ func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.Pla
 }
 
 func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
-	cache, _ := context.CacheManager.GetCache("player")
+	cache, _ := ps.cache.GetCache("player")
 	cacheEntity, err := cache.Get(playerId)
 	if err != nil {
 		return nil
@@ -162,9 +167,9 @@ func initPlayer(player *playerdomain.Player) {
 }
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
-	cache, _ := context.CacheManager.GetCache("player")
+	cache, _ := ps.cache.GetCache("player")
 	cache.Set(player.GetId(), player)
-	context.DbService.SaveToDb(player)
+	ps.dbService.SaveToDb(player)
 }
 
 func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32) *protos.ResPlayerLogin {
@@ -205,7 +210,7 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 		} else {
 			ps.refreshWeeklyInfo(player)
 		}
-		context.EventBus.Publish(events.PlayerLogin, player)
+		eventbus.Default().Publish(events.PlayerLogin, player)
 		// 客户端再切到主界面
 		s.SendWithoutIndex(&protos.PushLoadComplete{})
 	}()
@@ -405,7 +410,7 @@ func (ps *PlayerService) DailyReset(player *playerdomain.Player, resetTime int64
 	}
 	player.DailyReset.AfterLoad()
 	player.ExtendBox.AccumulatedLoginDays++
-	context.EventBus.Publish(events.PlayerDailyReset, player)
+	eventbus.Default().Publish(events.PlayerDailyReset, player)
 	ps.SavePlayer(player)
 	ps.refreshDailyInfo(player)
 }
@@ -421,7 +426,7 @@ func (ps *PlayerService) WeeklyReset(player *playerdomain.Player, resetTime int6
 		LastWeeklyReset: resetTime,
 	}
 	player.WeeklyReset.AfterLoad()
-	context.EventBus.Publish(events.PlayerWeeklyReset, player)
+	eventbus.Default().Publish(events.PlayerWeeklyReset, player)
 	ps.SavePlayer(player)
 	ps.refreshWeeklyInfo(player)
 }

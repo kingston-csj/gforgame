@@ -11,6 +11,15 @@ type EventBus struct {
 	mu       sync.Mutex
 }
 
+// defaultBus 是进程内默认的全局事件总线实例。
+var defaultBus = NewEventBus()
+
+// Default 返回进程内默认的全局事件总线实例。
+// 所有发布者/订阅者应通过它共享同一总线，保证事件能正确流转。
+func Default() *EventBus {
+	return defaultBus
+}
+
 // NewEventBus 创建一个新的 EventBus 实例
 func NewEventBus() *EventBus {
 	return &EventBus{

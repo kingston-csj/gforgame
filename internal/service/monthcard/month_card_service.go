@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/common/errors"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
-	"github.com/forfun/gforgame/internal/context"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -29,10 +29,10 @@ func NewMonthCardService(mail *mailservice.MailService) *MonthCardService {
 }
 
 func (ps *MonthCardService) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.OnPlayerLogin(data.(*player.Player))
 	})
-	context.EventBus.Subscribe(events.Recharge, func(data interface{}) {
+	eventbus.Default().Subscribe(events.Recharge, func(data interface{}) {
 		evt := data.(*events.RechargeEvent)
 		player := evt.Player.(*player.Player)
 		ps.OnRecharge(player, evt.RechargeId)
@@ -48,8 +48,8 @@ func (ps *MonthCardService) OnDailyReset(player *player.Player) {
 }
 
 func (ps *MonthCardService) sendInfo(player *player.Player) {
-    push := &protos.PushMonthCardInfo{}
-    silverCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver)
+	push := &protos.PushMonthCardInfo{}
+	silverCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver)
 	goldCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeGold)
 
 	silverCardVo := &protos.MonthlyCardVo{
@@ -60,8 +60,8 @@ func (ps *MonthCardService) sendInfo(player *player.Player) {
 	}
 	push.SilverCard = silverCardVo
 	push.GoldCard = goldCardVo
-	
-    io.NotifyPlayer(player, push)
+
+	io.NotifyPlayer(player, push)
 }
 
 func (ps *MonthCardService) OnRecharge(player *player.Player, rechargeId int32) {
@@ -81,12 +81,11 @@ func (ps *MonthCardService) OnRecharge(player *player.Player, rechargeId int32) 
 	monthCardData := config.QueryById[configdomain.MonthlyCardData](cardType)
 	now := time.Now().Unix()
 	//  过期，从今天开始算
-	if monthCard.ExpiredTime < now{
+	if monthCard.ExpiredTime < now {
 		monthCard.ExpiredTime, _ = calcExpiredTime(int(monthCardData.ValidDays))
 		ps.sendInfo(player)
 	}
 }
-
 
 // calcExpiredTime
 // 功能：当前时间截断到当天0点 → 加lastDays天 → 设为23:59:59 → 转东八区毫秒时间戳
@@ -100,14 +99,14 @@ func calcExpiredTime(lastDays int) (int64, error) {
 	// 2. 获取当前东八区时间，并截断到当天00:00:00
 	now := time.Now().In(loc)
 	truncatedNow := time.Date(
-		now.Year(),   // 年
-		now.Month(),  // 月
-		now.Day(),    // 日
-		0,            // 小时置0
-		0,            // 分钟置0
-		0,            // 秒置0
-		0,            // 纳秒置0
-		loc,          // 时区
+		now.Year(),  // 年
+		now.Month(), // 月
+		now.Day(),   // 日
+		0,           // 小时置0
+		0,           // 分钟置0
+		0,           // 秒置0
+		0,           // 纳秒置0
+		loc,         // 时区
 	)
 
 	// 3. 加上lastDays天，得到目标日期
@@ -116,14 +115,14 @@ func calcExpiredTime(lastDays int) (int64, error) {
 	// 4. 构造目标日期的23:59:59
 	// 用time.Date重新构造时间，指定时分秒为23:59:59，纳秒为0
 	targetDateTime := time.Date(
-		targetDate.Year(),   // 目标年
-		targetDate.Month(),  // 目标月
-		targetDate.Day(),    // 目标日
-		23,                  // 小时设为23
-		59,                  // 分钟设为59
-		59,                  // 秒设为59
-		0,                   // 纳秒置0
-		loc,                 // 东八区时区
+		targetDate.Year(),  // 目标年
+		targetDate.Month(), // 目标月
+		targetDate.Day(),   // 目标日
+		23,                 // 小时设为23
+		59,                 // 分钟设为59
+		59,                 // 秒设为59
+		0,                  // 纳秒置0
+		loc,                // 东八区时区
 	)
 
 	// 5. 转换为毫秒级时间戳
@@ -132,9 +131,8 @@ func calcExpiredTime(lastDays int) (int64, error) {
 	return epochMilli, nil
 }
 
-
-func (ps *MonthCardService) TakeReward( player *player.Player, typ int32) *errors.BusinessError {
-    monthCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver) 
+func (ps *MonthCardService) TakeReward(player *player.Player, typ int32) *errors.BusinessError {
+	monthCard := player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeSilver)
 	if typ == 1 {
 		monthCard = player.RechargeBox.GetOrCreateMonthlyCardVo(constants.MonthCardTypeGold)
 	}

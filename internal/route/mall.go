@@ -1,7 +1,7 @@
 package route
 
 import (
-	"github.com/forfun/gforgame/internal/context"
+	"github.com/forfun/gforgame/common/eventbus"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/protos"
@@ -21,14 +21,13 @@ func NewMallRoute(service *mall.MallService, playerService *player.PlayerService
 	}
 }
 
-
 func (ps *MallRoute) Init() {
-	context.EventBus.Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
 		ps.service.OnPlayerLogin(data.(*playerdomain.Player))
 	})
 }
 
-func (ps *MallRoute) ReqMallBuy(playerId string, index int32, msg *protos.ReqMallBuy) *protos.ResMallBuy{
+func (ps *MallRoute) ReqMallBuy(playerId string, index int32, msg *protos.ReqMallBuy) *protos.ResMallBuy {
 	player := ps.player.GetPlayer(playerId)
 	err := ps.service.Buy(player, msg.ProductId, msg.Count)
 	if err != nil {

@@ -2,7 +2,7 @@
 package mixture
 
 import (
-	"github.com/forfun/gforgame/internal/context"
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 )
@@ -14,9 +14,9 @@ func NewMixtureService() *MixtureService {
 	return &MixtureService{}
 }
 
-func (s *MixtureService) OnClientUploadEvent(player *player.Player, event int32)  {
+func (s *MixtureService) OnClientUploadEvent(player *player.Player, event int32) {
 	player.ExtendBox.ClientEvents[event]++
-	context.EventBus.Publish(events.ClientDiyEvent, events.ClientCustomEvent{
+	eventbus.Default().Publish(events.ClientDiyEvent, events.ClientCustomEvent{
 		PlayerEvent: events.PlayerEvent{
 			Player: player,
 		},
