@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/container/hashmap"
 	commonerrors "github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/eventbus"
@@ -24,12 +23,12 @@ import (
 	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/idgen"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/system"
 	"github.com/forfun/gforgame/network"
-	"gorm.io/gorm"
 )
 
 var (
@@ -40,9 +39,9 @@ var (
 
 // 玩家模块
 type PlayerService struct {
-	dbService      *mysqldb.AsyncDBService
-	cache          *cache.Manager
+	repo           *playerrepo.PlayerRepository
 	playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
+	providers      playerdomain.ItemConfigProviders
 	// 双向map, id -> name
 	idNameMapper *hashmap.SyncDualHashMap[string, string]
 	// 玩家名称字典树
@@ -51,10 +50,10 @@ type PlayerService struct {
 	quest *questservice.QuestService
 }
 
-func NewPlayerService(dbService *mysqldb.AsyncDBService, cache *cache.Manager, questService *questservice.QuestService) *PlayerService {
+func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService) *PlayerService {
 	service := &PlayerService{
-		dbService:      dbService,
-		cache:          cache,
+		repo:           repo,
+		providers:      providers,
 		playerProfiles: hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
 		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
 		nameDict:       trie.NewTrieDictionary(),
@@ -64,22 +63,7 @@ func NewPlayerService(dbService *mysqldb.AsyncDBService, cache *cache.Manager, q
 }
 
 func (ps *PlayerService) Init() {
-	// 缓存数据读取
-	dbLoader := func(key string) (interface{}, error) {
-		var p playerdomain.Player
-		result := mysqldb.Db.First(&p, "id=?", key)
-		if result.Error != nil {
-			if result.Error == gorm.ErrRecordNotFound {
-				// 未找到记录
-				return nil, nil
-			}
-		}
-		p.AfterLoad()
-		eventbus.Default().Publish(events.PlayerAfterLoad, &p)
-		return &p, nil
-	}
-	ps.cache.Register("player", dbLoader)
-
+	ps.repo.Init()
 	eventbus.Default().Subscribe(events.PlayerEntityChange, func(data interface{}) {
 		ps.SavePlayer(data.(*playerdomain.Player))
 	})
@@ -122,38 +106,25 @@ func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.Pla
 	return nil
 }
 
-func (ps *PlayerService) GetPlayer(playerId string) *playerdomain.Player {
-	cache, _ := ps.cache.GetCache("player")
-	cacheEntity, err := cache.Get(playerId)
-	if err != nil {
-		return nil
-	}
-	if cacheEntity == nil {
-		return nil
-	}
-	player, _ := cacheEntity.(*playerdomain.Player)
-	return player
-}
-
 func (ps *PlayerService) GetPlayerBySession(session network.Session) *playerdomain.Player {
 	playerID, ok := network.GetPlayerIDBySession(session)
 	if !ok {
 		return nil
 	}
-	return ps.GetPlayer(playerID)
+	return ps.repo.GetPlayer(playerID)
 }
 
 func (ps *PlayerService) GetPlayerByPlayerId(playerID string) *playerdomain.Player {
-	return ps.GetPlayer(playerID)
+	return ps.repo.GetPlayer(playerID)
 }
 
 func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player {
-	player := ps.GetPlayer(playerId)
+	player := ps.repo.GetPlayer(playerId)
 	if player == nil {
 		player = &playerdomain.Player{}
 		player.Id = playerId
 		player.Camp = camp.Camp_Hao
-		player.AfterFind(nil)
+		player.AfterLoad(ps.providers)
 		initPlayer(player)
 		ps.SavePlayer(player)
 	}
@@ -167,9 +138,7 @@ func initPlayer(player *playerdomain.Player) {
 }
 
 func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
-	cache, _ := ps.cache.GetCache("player")
-	cache.Set(player.GetId(), player)
-	ps.dbService.SaveToDb(player)
+	ps.repo.SavePlayer(player)
 }
 
 func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32) *protos.ResPlayerLogin {

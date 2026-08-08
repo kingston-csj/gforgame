@@ -3,8 +3,8 @@ package rank
 import (
 	"sync"
 
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protos"
-	"github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/rank/handler"
 )
 
@@ -24,28 +24,27 @@ var (
 
 // 排行榜模块
 type RankService struct {
-	player *player.PlayerService
+	playerRepo *playerrepo.PlayerRepository
 }
 
-func NewRankService(playerService *player.PlayerService) *RankService {
+func NewRankService(playerRepo *playerrepo.PlayerRepository) *RankService {
 	service := &RankService{
-		player: playerService,
+		playerRepo: playerRepo,
 	}
 	service.init()
 	return service
 }
 
-
 func (rs *RankService) init() {
-	playerLevelRank := handler.NewPlayerLevelRankHandler(rs.player)
+	playerLevelRank := handler.NewPlayerLevelRankHandler(rs.playerRepo)
 	playerLevelRank.Init()
 	handlers[PlayerLevelRank] = playerLevelRank
 
-	playerFightingRank := handler.NewPlayerFightingRankHandler(rs.player)
+	playerFightingRank := handler.NewPlayerFightingRankHandler(rs.playerRepo)
 	playerFightingRank.Init()
 	handlers[PlayerFightingRank] = playerFightingRank
 
-	playerArenaRank := handler.NewPlayerArenaRankHandler(rs.player)
+	playerArenaRank := handler.NewPlayerArenaRankHandler(rs.playerRepo)
 	playerArenaRank.Init()
 	handlers[PlayerArenaRank] = playerArenaRank
 }
@@ -56,7 +55,7 @@ func (rs *RankService) QueryRanks(rankType RankType, start int, end int) []proto
 	order := int32(start)
 	for _, record := range records {
 		vo := record.AsVo()
-		vo.Name = rs.player.GetPlayerProfileById(record.GetId()).Name
+		vo.Name = rs.playerRepo.GetPlayer(record.GetId()).Name
 		vo.Order = order
 		rankInfos = append(rankInfos, vo)
 		order++

@@ -1,30 +1,28 @@
 package route
 
 import (
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/catalog"
-	player "github.com/forfun/gforgame/internal/service/player"
 )
 
 type CatalogRoute struct {
-	service *catalog.CatalogService
-	player  *player.PlayerService
+	service    *catalog.CatalogService
+	playerrepo *playerrepo.PlayerRepository
 }
 
-func NewCatalogRoute(service *catalog.CatalogService, playerService *player.PlayerService) *CatalogRoute {
+func NewCatalogRoute(service *catalog.CatalogService, playerRepo *playerrepo.PlayerRepository) *CatalogRoute {
 	return &CatalogRoute{
-		service: service,
-		player:  playerService,
+		service:    service,
+		playerrepo: playerRepo,
 	}
 }
 
-
 func (ps *CatalogRoute) ReqCatalogReward(playerId string, index int32, msg *protos.ReqCatalogReward) *protos.ResCatalogReward {
-	p := ps.player.GetPlayer(playerId)
+	p := ps.playerrepo.GetPlayer(playerId)
 	code, rewards := ps.service.TakeReward(p, msg.Type, msg.Id)
 	return &protos.ResCatalogReward{
-		Code:  int32(code),
+		Code:      int32(code),
 		RewardVos: rewards,
 	}
 }
- 

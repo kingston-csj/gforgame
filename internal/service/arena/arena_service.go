@@ -11,22 +11,23 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protos"
 	heroService "github.com/forfun/gforgame/internal/service/hero"
 	mailService "github.com/forfun/gforgame/internal/service/mail"
-	playerService "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/rank"
 )
 
 type ArenaService struct {
-	player *playerService.PlayerService
-	rank   *rank.RankService
-	mail   *mailService.MailService
+	player  *playerrepo.PlayerRepository
+	profile *playerrepo.PlayerProfileService
+	rank    *rank.RankService
+	mail    *mailService.MailService
 }
 
-func NewArenaService(player *playerService.PlayerService, rankService *rank.RankService, mail *mailService.MailService) *ArenaService {
+func NewArenaService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, rankService *rank.RankService, mail *mailService.MailService) *ArenaService {
 	return &ArenaService{
-		player: player,
+		player: playerRepo,
 		rank:   rankService,
 		mail:   mail,
 	}

@@ -7,4 +7,5 @@ const (
 	LoggerMail        = "mail"
 	LoggerItem        = "item"
 	LoggerActivity    = "activity"
+	LoggerDebug       = "debug"
 )

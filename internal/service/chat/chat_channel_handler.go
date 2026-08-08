@@ -3,9 +3,9 @@ package chat
 import (
 	util "github.com/forfun/gforgame/common/util/conv"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
 )
 
@@ -34,12 +34,13 @@ type ChatChannelHandler interface {
 }
 
 type BaseChatChannelHandler struct {
-	self   ChatChannelHandler // 指向子类
-	player *playerservice.PlayerService
+	self    ChatChannelHandler // 指向子类
+	player  *playerrepo.PlayerRepository
+	profile *playerrepo.PlayerProfileService
 }
 
-func NewBaseChatChannelHandler(self ChatChannelHandler, player *playerservice.PlayerService) *BaseChatChannelHandler {
-	return &BaseChatChannelHandler{self: self, player: player}
+func NewBaseChatChannelHandler(self ChatChannelHandler, playerRepo *playerrepo.PlayerRepository, profileRepo *playerrepo.PlayerProfileService) *BaseChatChannelHandler {
+	return &BaseChatChannelHandler{self: self, player: playerRepo, profile: profileRepo}
 }
 
 func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
@@ -61,7 +62,7 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 		return
 	}
 
-	sender := b.player.GetPlayerProfileById(message.SenderId)
+	sender := b.profile.GetPlayerProfileById(message.SenderId)
 	messageVo := &protos.ChatMessageVo{
 		Id:         message.Id,
 		Channel:    message.Channel,
@@ -76,7 +77,7 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 	if util.IsEmptyString(message.SenderId) {
 		messageVo.SenderName = "系统"
 	} else {
-		playerProfile := b.player.GetPlayerProfileById(message.SenderId)
+		playerProfile := b.profile.GetPlayerProfileById(message.SenderId)
 		if playerProfile != nil {
 			messageVo.SenderName = playerProfile.Name
 		}

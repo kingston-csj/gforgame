@@ -1,21 +1,18 @@
 package route
 
 import (
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/service/item"
-	"github.com/forfun/gforgame/internal/service/player"
 )
 
 type ItemRoute struct {
-	service *item.ItemService
-	player  *player.PlayerService
+	service    *item.ItemService
+	playerrepo *playerrepo.PlayerRepository
 }
 
-func NewItemRoute(service *item.ItemService, playerService *player.PlayerService) *ItemRoute {
+func NewItemRoute(service *item.ItemService, playerRepo *playerrepo.PlayerRepository) *ItemRoute {
 	return &ItemRoute{
-		service: service,
-		player:  playerService,
+		service:    service,
+		playerrepo: playerRepo,
 	}
 }
-
-
-

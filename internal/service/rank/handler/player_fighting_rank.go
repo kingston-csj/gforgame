@@ -3,21 +3,21 @@ package handler
 import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protos"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/internal/service/rank/container"
 	"github.com/forfun/gforgame/internal/service/rank/model"
 )
 
 type PlayerFightingRankHandler struct {
 	BaseRankHandler
-	player *playerservice.PlayerService
+	playerRepo *playerrepo.PlayerRepository
 }
 
-func NewPlayerFightingRankHandler(player *playerservice.PlayerService) *PlayerFightingRankHandler {
+func NewPlayerFightingRankHandler(playerRepo *playerrepo.PlayerRepository) *PlayerFightingRankHandler {
 	return &PlayerFightingRankHandler{
 		BaseRankHandler: BaseRankHandler{rankContainer: container.NewConcurrentRankContainer(100)},
-		player:          player,
+		playerRepo:      playerRepo,
 	}
 }
 
@@ -33,7 +33,7 @@ func (p *PlayerFightingRankHandler) Init() {
 }
 
 func (p *PlayerFightingRankHandler) GetMyRankInfo(playerId string) *protos.RankInfo {
-	player := p.player.GetPlayer(playerId)
+	player := p.playerRepo.GetPlayer(playerId)
 	rankInfo := &protos.RankInfo{
 		Id:          player.Id,
 		Order:       int32(p.QueryRankOrder(player.Id)),

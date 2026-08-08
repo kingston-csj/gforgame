@@ -14,6 +14,7 @@ import (
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
 	"github.com/forfun/gforgame/internal/context"
+	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
 	"github.com/forfun/gforgame/network"
@@ -61,7 +62,7 @@ func main() {
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
-	// 自动建表
+	mysqldb.InitMysql()
 	bootstrap.InitMysqlDdl()
 	// 加载配置数据
 	bootstrap.InitConfig()
@@ -73,21 +74,21 @@ func main() {
 	bootstrap.StartSchedulers()
 
 	var modules = []any{
-		route.NewCatalogRoute(s.Catalog, s.Player),
-		route.NewChatRoute(s.Chat, s.Player),
-		route.NewFriendRoute(s.Friend, s.Player),
-		route.NewGmRoute(s.Gm, s.Player),
-		route.NewHeroRoute(s.Hero, s.Player),
-		route.NewItemRoute(s.Item, s.Player),
-		route.NewMailRoute(s.Mail, s.Player),
-		route.NewMallRoute(s.Mall, s.Player),
-		route.NewMixtureRoute(s.Mixture, s.Player),
-		route.NewMonthCardRoute(s.MonthCard, s.Player),
-		route.NewPlayerRoute(s.Player),
-		route.NewQuestRoute(s.Quest, s.Player),
+		route.NewCatalogRoute(s.Catalog, s.PlayerRepo),
+		route.NewChatRoute(s.Chat, s.PlayerRepo),
+		route.NewFriendRoute(s.Friend, s.PlayerRepo),
+		route.NewGmRoute(s.Gm, s.PlayerRepo),
+		route.NewHeroRoute(s.Hero, s.PlayerRepo),
+		route.NewItemRoute(s.Item, s.PlayerRepo),
+		route.NewMailRoute(s.Mail, s.PlayerRepo),
+		route.NewMallRoute(s.Mall, s.PlayerRepo),
+		route.NewMixtureRoute(s.Mixture, s.PlayerRepo),
+		route.NewMonthCardRoute(s.MonthCard, s.PlayerRepo),
+		route.NewPlayerRoute(s.Player, s.PlayerRepo),
+		route.NewQuestRoute(s.Quest, s.PlayerRepo),
 		route.NewRankRoute(s.Rank),
 		route.NewRechargeRoute(),
-		route.NewSignInRoute(s.SignIn, s.Player),
+		route.NewSignInRoute(s.SignIn, s.PlayerRepo),
 	}
 	if err := bootstrap.InitRouteModules(router, modules); err != nil {
 		logger.Error("init route modules fail", err)

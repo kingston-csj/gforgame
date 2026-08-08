@@ -3,31 +3,29 @@ package chat
 import (
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/service/friend"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
 type FriendChannelHandler struct {
 	*BaseChatChannelHandler
 	friend *friend.FriendService
-	player *playerservice.PlayerService
 }
 
 func (h *FriendChannelHandler) Init() {
 
 }
 
-func NewFriendChatChannelHandler(player *playerservice.PlayerService, friendService *friend.FriendService) *FriendChannelHandler {
+func NewFriendChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friendService *friend.FriendService) *FriendChannelHandler {
 	h := &FriendChannelHandler{
 		friend: friendService,
-		player: player,
 	}
-	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, player)
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile)
 	return h
 }
 
 func (h *FriendChannelHandler) CheckCanSend(player *playerdomain.Player, target string, content string) int {
-	if h.player.GetPlayerProfileById(target) == nil {
+	if h.profile.GetPlayerProfileById(target) == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
 	if !h.friend.IsFriend(player.Id, target) {

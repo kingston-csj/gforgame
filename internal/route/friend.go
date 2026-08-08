@@ -1,25 +1,25 @@
 package route
 
 import (
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/friend"
-	playerService "github.com/forfun/gforgame/internal/service/player"
 )
 
 type FriendRoute struct {
-	service *friend.FriendService
-	player  *playerService.PlayerService
+	service    *friend.FriendService
+	playerrepo *playerrepo.PlayerRepository
 }
 
-func NewFriendRoute(service *friend.FriendService, player *playerService.PlayerService) *FriendRoute {
+func NewFriendRoute(service *friend.FriendService, playerRepo *playerrepo.PlayerRepository) *FriendRoute {
 	return &FriendRoute{
-		service: service,
-		player:  player,
+		service:    service,
+		playerrepo: playerRepo,
 	}
 }
 
 func (r *FriendRoute) ReqSearchPlayers(playerId string, index int32, msg *protos.ReqFriendSearchPlayers) *protos.ResFriendSearchPlayers {
-	p := r.player.GetPlayer(playerId)
+	p := r.playerrepo.GetPlayer(playerId)
 	items := r.service.SearchByKey(msg.Key)
 	filteredItems := make([]*protos.FriendVo, 0)
 	for _, item := range items {
@@ -36,7 +36,7 @@ func (r *FriendRoute) ReqSearchPlayers(playerId string, index int32, msg *protos
 }
 
 func (r *FriendRoute) ReqQueryFriends(playerId string, index int32, msg *protos.ReqFriendQueryMyFriends) *protos.ResFriendQueryMyFriends {
-	p := r.player.GetPlayer(playerId)
+	p := r.playerrepo.GetPlayer(playerId)
 	items := r.service.QueryMyFriendVos(p.Id)
 	response := &protos.ResFriendQueryMyFriends{
 		Code:  0,
@@ -46,7 +46,7 @@ func (r *FriendRoute) ReqQueryFriends(playerId string, index int32, msg *protos.
 }
 
 func (r *FriendRoute) ReqApply(playerId string, index int32, msg *protos.ReqFriendApply) *protos.ResFriendApply {
-	p := r.player.GetPlayer(playerId)
+	p := r.playerrepo.GetPlayer(playerId)
 	code := r.service.ApplyFriend(p, msg.FriendId)
 	response := &protos.ResFriendApply{
 		Code: code,
@@ -55,7 +55,7 @@ func (r *FriendRoute) ReqApply(playerId string, index int32, msg *protos.ReqFrie
 }
 
 func (r *FriendRoute) ReqDealApply(playerId string, index int32, msg *protos.ReqFriendDealApplyRecord) *protos.ResFriendDealApplyRecord {
-	p := r.player.GetPlayer(playerId)
+	p := r.playerrepo.GetPlayer(playerId)
 	code := r.service.DealApplyRecord(p, msg.ApplyId, msg.Status)
 	response := &protos.ResFriendDealApplyRecord{
 		Code: code,
@@ -64,7 +64,7 @@ func (r *FriendRoute) ReqDealApply(playerId string, index int32, msg *protos.Req
 }
 
 func (r *FriendRoute) ReqDelete(playerId string, index int32, msg *protos.ReqFriendDelete) *protos.ResFriendDelete {
-	p := r.player.GetPlayer(playerId)
+	p := r.playerrepo.GetPlayer(playerId)
 	code := r.service.DeleteFriend(p, msg.FriendId)
 	response := &protos.ResFriendDelete{
 		Code: code,

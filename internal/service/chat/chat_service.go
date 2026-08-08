@@ -8,25 +8,25 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	friendservice "github.com/forfun/gforgame/internal/service/friend"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
 // 聊天模块
 type ChatService struct {
-	player   *playerservice.PlayerService
+	profile  *playerrepo.PlayerProfileService
 	handlers map[int32]ChatChannelHandler
 }
 
-func NewChatService(player *playerservice.PlayerService, friend *friendservice.FriendService) *ChatService {
+func NewChatService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friend *friendservice.FriendService) *ChatService {
 	service := &ChatService{
-		player:   player,
+		profile:  profile,
 		handlers: make(map[int32]ChatChannelHandler),
 	}
-	service.handlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler(player, friend)
-	service.handlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler(player)
+	service.handlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler(playerRepo, profile, friend)
+	service.handlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler(playerRepo, profile)
 	for _, chatHandler := range service.handlers {
 		chatHandler.Init()
 	}
@@ -46,7 +46,7 @@ func (s *ChatService) LoadOfflineMessages(player *playerdomain.Player) {
 	}
 	messages := make([]*protos.ChatMessageVo, 0)
 	for _, message := range offlineMessages {
-		sender := s.player.GetPlayerProfileById(message.SenderId)
+		sender := s.profile.GetPlayerProfileById(message.SenderId)
 		messageVo := &protos.ChatMessageVo{
 			Id:         message.Id,
 			Channel:    message.Channel,
@@ -80,7 +80,7 @@ func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqCh
 			Code: code,
 		}
 	}
-	playerProfile := s.player.GetPlayerProfileById(player.Id)
+	playerProfile := s.profile.GetPlayerProfileById(player.Id)
 	if playerProfile == nil {
 		return &protos.ResChat{
 			Code: -1,

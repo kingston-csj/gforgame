@@ -7,7 +7,7 @@ type ChatMessage struct {
 
 	SenderId string
 
-	SenderHead int
+	SenderHead int32
 
 	ReceiverId string
 

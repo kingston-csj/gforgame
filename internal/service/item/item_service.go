@@ -14,30 +14,29 @@ import (
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/service/catalog"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/reward"
 )
 
 // 普通道具模块
 type ItemService struct {
-	player  *playerservice.PlayerService
-	catalog *catalog.CatalogService
+	playerrepo *playerrepo.PlayerRepository
+	catalog    *catalog.CatalogService
 }
 
 var (
-	itemservice        *ItemService
 	errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	notEnoughError     = errors.NewBusinessError(constants.I18N_ITEM_NOT_ENOUGH)
 )
 
 var RecruitItemId int32 = 2002
 
-func NewItemService(player *playerservice.PlayerService, catalogService *catalog.CatalogService) *ItemService {
+func NewItemService(playerRepo *playerrepo.PlayerRepository, catalogService *catalog.CatalogService) *ItemService {
 	service := &ItemService{
-		player:  player,
-		catalog: catalogService,
+		playerrepo: playerRepo,
+		catalog:    catalogService,
 	}
 	return service
 }
@@ -67,7 +66,7 @@ func (s *ItemService) OnPlayerLogin(player *player.Player) {
 }
 
 func (s *ItemService) UseByModelId(playerId string, itemId int32, count int32) error {
-	p := s.player.GetPlayer(playerId)
+	p := s.playerrepo.GetPlayer(playerId)
 	backpack := p.Backpack
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
@@ -103,7 +102,7 @@ func (s *ItemService) UseByUid(p *playerdomain.Player, itemUid string, count int
 }
 
 func (s *ItemService) AddByModelId(playerId string, itemId int32, count int32) error {
-	p := s.player.GetPlayer(playerId)
+	p := s.playerrepo.GetPlayer(playerId)
 	if itemId <= 0 || count <= 0 {
 		return errorIllegalParams
 	}

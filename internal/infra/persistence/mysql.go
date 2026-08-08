@@ -3,6 +3,7 @@ package persistence
 import (
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/config"
@@ -13,29 +14,33 @@ import (
 )
 
 var (
-	Db *gorm.DB
+	Db     *gorm.DB
+	dbOnce sync.Once
 )
 
-func init() {
-	dbURL, ok := config.GetExtraString("db.url")
-	if !ok || dbURL == "" {
-		panic("配置项 db.url 为空，请在 config-game.yml 中配置")
-	}
-	gormLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Warn,
-			IgnoreRecordNotFoundError: true,
-			Colorful:                  false,
-		},
-	)
+// InitMysql 初始化数据库连接，必须在 config.Init() 之后调用。
+func InitMysql() {
+	dbOnce.Do(func() {
+		dbURL, ok := config.GetExtraString("db.url")
+		if !ok || dbURL == "" {
+			panic("配置项 db.url 为空，请在 config-logic.yml 中配置")
+		}
+		gormLogger := logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold:             time.Second,
+				LogLevel:                  logger.Warn,
+				IgnoreRecordNotFoundError: true,
+				Colorful:                  false,
+			},
+		)
 
-	var database, err = gorm.Open(mysql.Open(dbURL), &gorm.Config{
-		Logger: gormLogger,
+		database, err := gorm.Open(mysql.Open(dbURL), &gorm.Config{
+			Logger: gormLogger,
+		})
+		if err != nil {
+			panic(err)
+		}
+		Db = database
 	})
-	if err != nil {
-		panic(err)
-	}
-	Db = database
 }

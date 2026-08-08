@@ -10,11 +10,11 @@ import (
 	"github.com/forfun/gforgame/internal/fight/match"
 	"github.com/forfun/gforgame/internal/fight/report"
 	skillservice "github.com/forfun/gforgame/internal/fight/skill"
-	"github.com/forfun/gforgame/internal/service/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 )
 
 type FightService struct {
-	playerService *player.PlayerService
+	playerrepo *playerrepo.PlayerRepository
 }
 
 const (
@@ -22,9 +22,9 @@ const (
 	AREAN_MAP  = 100003
 )
 
-func NewFightService(playerService *player.PlayerService) *FightService {
+func NewFightService(playerRepo *playerrepo.PlayerRepository) *FightService {
 	return &FightService{
-		playerService: playerService,
+		playerrepo: playerRepo,
 	}
 }
 
@@ -110,8 +110,8 @@ func (s *FightService) RoundBegin(match *match.Match, round int32) {
 }
 
 func (s *FightService) Test() {
-	p1 := s.playerService.GetPlayer("111")
-	p2 := s.playerService.GetPlayer("aaa")
+	p1 := s.playerrepo.GetPlayer("111")
+	p2 := s.playerrepo.GetPlayer("aaa")
 	team1 := match.NewTeam(match.BlueCamp, s.getFightActors(p1))
 	team2 := match.NewTeam(match.RedCamp, s.getFightActors(p2))
 	match := match.NewMatch(team1, team2)

@@ -6,7 +6,7 @@ import (
 	"github.com/forfun/gforgame/common/container/list"
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	network "github.com/forfun/gforgame/network"
 )
 
@@ -15,11 +15,11 @@ type WorldChannelHandler struct {
 	MsgQueue *list.LimitedList[*playerdomain.ChatMessage]
 }
 
-func NewWorldChatChannelHandler(player *playerservice.PlayerService) *WorldChannelHandler {
+func NewWorldChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService) *WorldChannelHandler {
 	h := &WorldChannelHandler{
 		MsgQueue: list.NewLimitedList[*playerdomain.ChatMessage](100),
 	}
-	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, player)
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile)
 	return h
 }
 

@@ -3,7 +3,6 @@ package friend
 import (
 	"time"
 
-	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
@@ -11,74 +10,43 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
-	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/dispatch"
 	mailservice "github.com/forfun/gforgame/internal/service/mail"
-	playerservice "github.com/forfun/gforgame/internal/service/player"
 	"github.com/forfun/gforgame/network"
-	"gorm.io/gorm"
 )
 
 // 好友模块
 type FriendService struct {
-	cache     *cache.Manager
-	dbService *mysqldb.AsyncDBService
-	player    *playerservice.PlayerService
-	mail      *mailservice.MailService
+	playerRepo *playerrepo.PlayerRepository
+	profile    *playerrepo.PlayerProfileService
+	friendRepo playerdomain.FriendRepository
+	mail       *mailservice.MailService
 }
 
-func NewFriendService(cache *cache.Manager, dbService *mysqldb.AsyncDBService, player *playerservice.PlayerService, mail *mailservice.MailService,
-) *FriendService {
+func NewFriendService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friendRepo playerdomain.FriendRepository, mail *mailservice.MailService) *FriendService {
 	return &FriendService{
-		cache:     cache,
-		dbService: dbService,
-		player:    player,
-		mail:      mail,
+		playerRepo: playerRepo,
+		profile:    profile,
+		friendRepo: friendRepo,
+		mail:       mail,
 	}
 }
 
 func (s *FriendService) Init() {
-	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data any) {
 		s.RefreshClientInfo(data.(*playerdomain.Player))
 	})
-
-	// 缓存数据读取
-	dbLoader := func(key string) (interface{}, error) {
-		var p player.Friend
-		result := mysqldb.Db.First(&p, "id=?", key)
-		if result.Error != nil {
-			if result.Error == gorm.ErrRecordNotFound {
-				// 未找到记录
-				return nil, nil
-			}
-		}
-		p.AfterFind(nil)
-		return &p, nil
-	}
-	s.cache.Register("friend", dbLoader)
 }
 
-func (s *FriendService) GetFriendEnt(playerId string) *player.Friend {
-	cache, _ := s.cache.GetCache("friend")
-	cacheEntity, err := cache.Get(playerId)
-	if err != nil {
-		return nil
-	}
-	if cacheEntity == nil {
-		return nil
-	}
-	friend, _ := cacheEntity.(*playerdomain.Friend)
-	return friend
-}
-
-func (s *FriendService) GetFriendEntOrCreate(playerId string) *player.Friend {
-	friend := s.GetFriendEnt(playerId)
+func (s *FriendService) GetFriendEntOrCreate(playerId string) *playerdomain.Friend {
+	friend := s.friendRepo.GetFriendEnt(playerId)
 	if friend == nil {
-		friend = &player.Friend{}
+		friend = &playerdomain.Friend{}
 		friend.Id = playerId
-		friend.AfterFind(nil)
+		friend.AfterLoad()
 	}
 	return friend
 }
@@ -120,10 +88,14 @@ func (s *FriendService) QueryMyFriendVos(playerId string) []*protos.FriendVo {
 	}
 	friends := make([]*protos.FriendVo, 0)
 	for friendId := range friend.Friends {
-		friend := s.player.GetPlayerProfileById(friendId)
+		if friendId == playerId {
+			continue
+		}
+		friend := s.profile.GetPlayerProfileById(friendId)
 		friends = append(friends, &protos.FriendVo{
 			Id:       friendId,
 			Name:     friend.Name,
+			Head:     friend.Head,
 			Fighting: int64(friend.Fight),
 		})
 	}
@@ -131,7 +103,7 @@ func (s *FriendService) QueryMyFriendVos(playerId string) []*protos.FriendVo {
 }
 
 func (s *FriendService) IsFriend(playerId string, friendId string) bool {
-	friend := s.GetFriendEnt(playerId)
+	friend := s.friendRepo.GetFriendEnt(playerId)
 	if friend == nil {
 		return false
 	}
@@ -140,22 +112,24 @@ func (s *FriendService) IsFriend(playerId string, friendId string) bool {
 
 // 模糊搜索玩家 (key可能为名字或id)
 func (s *FriendService) SearchByKey(key string) []*protos.FriendVo {
-	playerIds := s.player.FuzzySearchPlayers(key)
+	playerIds := s.profile.FuzzySearchPlayers(key)
 	friends := make([]*protos.FriendVo, 0)
 	for _, playerId := range playerIds {
-		profile := s.player.GetPlayerProfileById(playerId)
+		profile := s.profile.GetPlayerProfileById(playerId)
 		friends = append(friends, &protos.FriendVo{
 			Id:       playerId,
 			Name:     profile.Name,
+			Head:     profile.Head,
 			Fighting: int64(profile.Fight),
 		})
 	}
 	// 如果是id,添加到结果中
-	playerByName := s.player.GetPlayerProfileById(key)
+	playerByName := s.profile.GetPlayerProfileById(key)
 	if playerByName != nil {
 		friends = append(friends, &protos.FriendVo{
 			Id:       playerByName.Id,
 			Name:     playerByName.Name,
+			Head:     playerByName.Head,
 			Fighting: int64(playerByName.Fight),
 		})
 	}
@@ -166,13 +140,14 @@ func (s *FriendService) RefreshClientInfo(player *playerdomain.Player) {
 	applyItems := s.QueryApplyRecords(player.Id)
 	applyVos := make([]*protos.FriendApplyVo, 0, len(applyItems))
 	for _, apply := range applyItems {
-		fromPlayer := s.player.GetPlayerProfileById(apply.FromId)
+		fromPlayer := s.profile.GetPlayerProfileById(apply.FromId)
 		applyVos = append(applyVos, &protos.FriendApplyVo{
 			FromId:     fromPlayer.Id,
 			FromName:   fromPlayer.Name,
+			FromHead:   fromPlayer.Head,
 			TargetId:   apply.TargetId,
 			TargetName: fromPlayer.Name,
-			Status:     int(apply.Status),
+			Status:     apply.Status,
 			Time:       apply.Time,
 		})
 	}
@@ -182,15 +157,15 @@ func (s *FriendService) RefreshClientInfo(player *playerdomain.Player) {
 	pushFriendInfo := &protos.PushFriendInfo{
 		ApplyItems:  applyVos,
 		FriendItems: friendVos,
-		FriendSum:   len(friendVos),
+		FriendSum:   int32(len(friendVos)),
 	}
 
 	io.NotifyPlayer(player, pushFriendInfo)
 }
 
 // 申请好友
-func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string) int {
-	targetPlayer := s.player.GetPlayerProfileById(friendId)
+func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string) int32 {
+	targetPlayer := s.profile.GetPlayerProfileById(friendId)
 	if targetPlayer == nil {
 		return constants.I18N_COMMON_NOT_FOUND
 	}
@@ -206,7 +181,7 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 	fromApplyItem := &playerdomain.FriendApplyItem{
 		FromId:   player.Id,
 		TargetId: friendId,
-		Time:     time.Now().Unix(),
+		Time:     time.Now().UnixMilli(),
 		Id:       idgen.GetNextID(),
 	}
 	fromFriendEnt.Applies[fromApplyItem.Id] = fromApplyItem
@@ -214,13 +189,12 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 	// 复制一份给对方(浅拷贝)
 	targetApplyItem := *fromApplyItem
 	// 在线，考虑线程问题
-	// 在线，考虑线程问题
 	if network.IsOnline(friendId) {
 		dispatch.DispatchPlayerTask(friendId, func() {
 			targetFriendEnt := s.GetFriendEntOrCreate(friendId)
 			targetFriendEnt.AddApply(&targetApplyItem)
 			s.SaveFriend(targetFriendEnt)
-			s.RefreshClientInfo(s.player.GetPlayer(friendId))
+			s.RefreshClientInfo(s.playerRepo.GetPlayer(friendId))
 		})
 	} else {
 		// 离线，直接修改数据库
@@ -232,9 +206,8 @@ func (s *FriendService) ApplyFriend(player *playerdomain.Player, friendId string
 	return 0
 }
 
-func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId string, status int) int {
+func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId string, status int32) int32 {
 	friend := s.GetFriendEntOrCreate(player.Id)
-	players := make([]*playerdomain.Player, 0)
 	applyIds := make([]string, 0)
 	if conv.IsBlankString(applyId) {
 		for applyId := range friend.Applies {
@@ -254,31 +227,28 @@ func (s *FriendService) DealApplyRecord(player *playerdomain.Player, applyId str
 	for _, applyId := range applyIds {
 		apply := friend.Applies[applyId]
 		// 处理自己的申请
-		s.dealApplyRecord0(player, applyId, apply.TargetId, status)
-
+		s.dealApplyRecord0(player, applyId, apply.FromId, status)
+		target := s.playerRepo.GetPlayer(apply.FromId)
 		// 处理对方的申请
 		if network.IsOnline(apply.FromId) {
-			session := network.GetSessionByPlayerId(apply.FromId)
-			if session != nil {
-				players = append(players, s.player.GetPlayer(apply.FromId))
-				session.AsynTasksChan() <- func() {
-					s.dealApplyRecord0(s.player.GetPlayer(apply.TargetId), applyId, player.Id, status)
+			dispatch.DispatchPlayerTask(apply.FromId, func() {
+				s.dealApplyRecord0(target, applyId, player.Id, status)
+				if status == constants.FriendApplyStatusAgree {
+					s.RefreshClientInfo(target)
 				}
-			}
+			})
 		} else {
-			s.dealApplyRecord0(s.player.GetPlayer(apply.TargetId), applyId, player.Id, status)
+			s.dealApplyRecord0(target, applyId, player.Id, status)
 		}
 	}
 
 	if status == constants.FriendApplyStatusAgree {
-		for _, player := range players {
-			s.RefreshClientInfo(player)
-		}
+		s.RefreshClientInfo(player)
 	}
 	return 0
 }
 
-func (s *FriendService) dealApplyRecord0(owner *playerdomain.Player, applyId string, target string, status int) {
+func (s *FriendService) dealApplyRecord0(owner *playerdomain.Player, applyId string, target string, status int32) {
 	friend := s.GetFriendEntOrCreate(owner.Id)
 	apply := friend.Applies[applyId]
 	if apply == nil {
@@ -288,28 +258,40 @@ func (s *FriendService) dealApplyRecord0(owner *playerdomain.Player, applyId str
 		return
 	}
 	friend.Applies[applyId].Status = int32(status)
-	s.SaveFriend(friend)
 
 	if status == constants.FriendApplyStatusAgree {
 		friend.AddFriend(target)
 		friend.ClearApply(owner.Id, target)
 	}
+	s.SaveFriend(friend)
 }
 
-func (s *FriendService) DeleteFriend(player *playerdomain.Player, friendId string) int {
+func (s *FriendService) DeleteFriend(player *playerdomain.Player, friendId string) int32 {
 	friend := s.GetFriendEntOrCreate(player.Id)
-	if friend.IsFriend(friendId) {
+	if !friend.IsFriend(friendId) {
 		//  A删除B，B也删除A，客户端界面未刷新，直接返回成功即可
 		return 0
 	}
 	friend.RemoveFriend(friendId)
 	s.SaveFriend(friend)
+	s.RefreshClientInfo(player)
+	// 处理对方
+	task := func() {
+		targetFriendEnt := s.GetFriendEntOrCreate(friendId)
+		targetFriendEnt.RemoveFriend(player.Id)
+		s.SaveFriend(targetFriendEnt)
+		s.RefreshClientInfo(s.playerRepo.GetPlayer(friendId))
+	}
+	if network.IsOnline(friendId) {
+		dispatch.DispatchPlayerTask(friendId, task)
+	} else {
+		task()
+	}
+
 	return 0
 }
 
 // 保存数据
 func (s *FriendService) SaveFriend(friend *player.Friend) {
-	cache, _ := s.cache.GetCache("friend")
-	cache.Set(friend.Id, friend)
-	s.dbService.SaveToDb(friend)
+	s.friendRepo.SaveFriend(friend)
 }
