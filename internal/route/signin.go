@@ -6,7 +6,7 @@ import (
 	"github.com/forfun/gforgame/internal/service/signin"
 )
 
-// SignInRoute 绛惧埌璺敱
+// SignInRoute 签到路由
 type SignInRoute struct {
 	service    *signin.SignInService
 	playerrepo *playerrepo.PlayerRepository

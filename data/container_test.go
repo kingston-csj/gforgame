@@ -2,7 +2,6 @@ package data_test
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/forfun/gforgame/data"
@@ -38,33 +37,23 @@ func TestDataContainer(t *testing.T) {
 	// 创建 ExcelDataReader
 	reader := data.NewExcelDataReader(true)
 
-	// 读取 Excel 文件
-	records, err := reader.Read("mall.xlsx", &Mall{})
+	// 读取 Excel 文件（强类型）
+	records, err := data.ReadTyped[Mall](reader, "mall.xlsx")
 	if err != nil {
 		fmt.Println("Failed to read Excel file:", err)
 		return
 	}
 
-	// 创建 Container
-	container := data.NewContainer[int32, Mall]()
-
-	// 定义 ID 获取函数和索引函数
-	getIdFunc := func(record *Mall) int32 {
-		return record.Id
-	}
-	indexFuncs := map[string]func(*Mall) any{
-		"type": func(record *Mall) any {
-			return record.Type
+	container, err := data.BuildContainer("mall", records,
+		func(record *Mall) int32 { return record.Id },
+		map[string]func(*Mall) any{
+			"type": func(record *Mall) any { return record.Type },
 		},
+	)
+	if err != nil {
+		fmt.Printf("Failed to build container: %v\n", err)
+		return
 	}
-
-	// 将记录注入容器
-	ptrRecords := make([]*Mall, len(records))
-	for i, record := range records {
-		mall := record.(Mall)
-		ptrRecords[i] = &mall
-	}
-	container.Inject(ptrRecords, getIdFunc, indexFuncs)
 
 	// 查询记录
 	fmt.Println("All records:", container.GetAllRecords())
@@ -76,49 +65,42 @@ func TestDataContainer(t *testing.T) {
 func TestMultiDataContainer(t *testing.T) {
 	// 创建 ExcelDataReader
 	reader := data.NewExcelDataReader(true)
-
-	// 定义表配置
-	tableConfigs := []data.TableMeta{
-		// 商城表
-		{
-			TableName:  "mall",
-			IDField:    "Id",
-			IndexFuncs: map[string]string{"type": "Type"},
-			RecordType: reflect.TypeOf(Mall{}),
+	// 处理商城表（强类型）
+	mallContainer, err := data.ProcessTableTyped[Mall](
+		reader,
+		"mall",
+		"mall.xlsx",
+		func(record *Mall) int32 { return record.Id },
+		map[string]func(*Mall) any{
+			"type": func(record *Mall) any { return record.Type },
 		},
-		// 道具表
-		{
-			TableName:  "Id",
-			IDField:    "Id",
-			RecordType: reflect.TypeOf(Item{}),
-		},
+	)
+	if err != nil {
+		fmt.Printf("Failed to process table mall: %v\n", err)
+		return
 	}
 
-	// 处理每张表
-	containers := make(map[string]interface{})
-	for _, config := range tableConfigs {
-		container, err := data.ProcessTable(reader, config.TableName+".xlsx", config)
-		if err != nil {
-			fmt.Printf("Failed to process table %s: %v\n", config.TableName, err)
-			continue
-		}
-		containers[config.TableName] = container
+	// 处理道具表（强类型）
+	itemContainer, err := data.ProcessTableTyped[Item](
+		reader,
+		"item",
+		"item.xlsx",
+		func(record *Item) int32 { return record.Id },
+		nil,
+	)
+	if err != nil {
+		fmt.Printf("Failed to process table item: %v\n", err)
+		return
 	}
 
-	// 查询商城记录
-	if mallContainer, ok := containers["mall"].(*data.Container[int32, Mall]); ok {
-		fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
-		target := mallContainer.GetRecord(1)
-		fmt.Println("Record with ID 1:", target)
-		fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsByIndex("type", 2))
-	}
+	fmt.Println("All records in Mall table:", mallContainer.GetAllRecords())
+	target := mallContainer.GetRecord(1)
+	fmt.Println("Record with ID 1:", target)
+	fmt.Println("Records with type 2 in Mall table:", mallContainer.GetRecordsByIndex("type", 2))
 
-	// 查询道具记录
-	if itemContainer, ok := containers["item"].(*data.Container[int32, Item]); ok {
-		fmt.Println("All records in Item table:", itemContainer.GetAllRecords())
-		target := itemContainer.GetRecord(1)
-		target2 := itemContainer.GetRecord(1)
-		fmt.Println(target == target2)
-		fmt.Println("Record with ID 1:", target)
-	}
+	fmt.Println("All records in Item table:", itemContainer.GetAllRecords())
+	target2 := itemContainer.GetRecord(1)
+	target3 := itemContainer.GetRecord(1)
+	fmt.Println(target2 == target3)
+	fmt.Println("Record with ID 1:", target2)
 }

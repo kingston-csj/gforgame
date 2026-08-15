@@ -20,12 +20,6 @@ func NewMixtureRoute(service *mixture.MixtureService, playerRepo *playerrepo.Pla
 	}
 }
 
-func (ps *MixtureRoute) ReqIdleViewReward(playerId string, index int32, msg *protos.ReqIdleViewReward) *protos.ResIdleViewReward {
-	return &protos.ResIdleViewReward{
-		Code: 0,
-	}
-}
-
 func (ps *MixtureRoute) ReqClientUploadEvent(playerId string, index int32, msg *protos.ReqClientUploadEvent) *protos.ResClientUploadEvent {
 	player := ps.playerrepo.GetPlayer(playerId)
 	ps.service.OnClientUploadEvent(player, msg.Type)

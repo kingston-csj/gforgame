@@ -13,6 +13,7 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
+	"github.com/forfun/gforgame/internal/config"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
@@ -64,7 +65,7 @@ func main() {
 	mysqldb.InitMysql()
 	bootstrap.InitMysqlDdl()
 	// 加载配置数据
-	bootstrap.InitConfig()
+	config.InitConfig()
 	// 注册所有服务
 	s := bootstrap.InitServices()
 	// 各自业务初始化

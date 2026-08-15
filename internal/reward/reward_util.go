@@ -36,14 +36,14 @@ func ParseRewardList(config string) []Reward {
 		if conv.EqualsIgnoreCase(rewardType, constants.CurrencyTypeGold) {
 			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &CurrencyReward{
-				Currency:   "Gold",
-				Amount:     amount,
+				Currency: "Gold",
+				Amount:   amount,
 			})
 		} else if conv.EqualsIgnoreCase(rewardType, constants.CurrencyTypeDiamond) {
 			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &CurrencyReward{
-				Currency:   "Diamond", 
-				Amount:     amount,
+				Currency: "Diamond",
+				Amount:   amount,
 			})
 		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeItem) {
 			itemId, _ := conv.StringToInt32(params[1])
@@ -56,13 +56,6 @@ func ParseRewardList(config string) []Reward {
 			amount, _ := conv.StringToInt32(params[1])
 			result = append(result, &RuneReward{
 				ItemId: amount,
-			})
-		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeTicket) {
-			mapId, _ := conv.StringToInt32(params[1])
-			amount, _ := conv.StringToInt32(params[2])
-			result = append(result, &TicketReward{
-				MapId: mapId,
-				Amount: amount,
 			})
 		} else if conv.EqualsIgnoreCase(rewardType, constants.RewardTypeHero) {
 			amount, _ := conv.StringToInt32(params[1])
@@ -81,13 +74,12 @@ func ParseRewardList(config string) []Reward {
 	return result
 }
 
-
 func ParseRewards(rewards []contract.RewardDefLite) *AndReward {
-    andReward := NewAndReward()
+	andReward := NewAndReward()
 
-    for _, rewardItem := range rewards {
-        split := strings.Split(rewardItem.Value, "_")
-        switch rewardItem.Type {
+	for _, rewardItem := range rewards {
+		split := strings.Split(rewardItem.Value, "_")
+		switch rewardItem.Type {
 		case "item":
 			itemId, _ := conv.StringToInt32(split[0])
 			amount, _ := conv.StringToInt32(split[1])
@@ -98,10 +90,10 @@ func ParseRewards(rewards []contract.RewardDefLite) *AndReward {
 		case "currency":
 			kind := split[0]
 			amount, _ := conv.StringToInt32(split[1])
-            andReward.AddReward(&CurrencyReward{Currency: kind, Amount: amount})
-        }
-    }
-    return andReward
+			andReward.AddReward(&CurrencyReward{Currency: kind, Amount: amount})
+		}
+	}
+	return andReward
 }
 
 func Serialize(andReward *AndReward) []contract.RewardDefLite {
@@ -128,19 +120,19 @@ func FromConsumes(consumes []consume.Consume) *AndReward {
 }
 
 func consume2Reward(c consume.Consume) (Reward, error) {
-    // 如果类型是CurrencyConsume，直接返回CurrencyReward
-    if currencyConsume, ok := c.(*consume.CurrencyConsume); ok {
-        return &CurrencyReward{
-            Currency: currencyConsume.Currency,
-            Amount:   currencyConsume.Amount,
-        }, nil
-    } else if itemConsume, ok := c.(*consume.ItemConsume); ok {
-        return &ItemReward{
-            ItemId: itemConsume.ItemId,
-            Amount: itemConsume.Amount,
-        }, nil
-    }
-    return nil, errors.New("unsupported consume type")
+	// 如果类型是CurrencyConsume，直接返回CurrencyReward
+	if currencyConsume, ok := c.(*consume.CurrencyConsume); ok {
+		return &CurrencyReward{
+			Currency: currencyConsume.Currency,
+			Amount:   currencyConsume.Amount,
+		}, nil
+	} else if itemConsume, ok := c.(*consume.ItemConsume); ok {
+		return &ItemReward{
+			ItemId: itemConsume.ItemId,
+			Amount: itemConsume.Amount,
+		}, nil
+	}
+	return nil, errors.New("unsupported consume type")
 }
 
 func ToRewardVos(rewards Reward) []*protos.RewardVo {
@@ -169,9 +161,9 @@ func multiplyAndReward(sourceRewards *AndReward, multiple float64) *AndReward {
 	for _, reward := range sourceRewards.Rewards {
 		// 数量全部向上取整
 		rewardAmount := int32(math.Ceil(float64(reward.GetAmount()) * multiple))
-		andReward.AddReward(modifyRewardAmount(reward, rewardAmount));
+		andReward.AddReward(modifyRewardAmount(reward, rewardAmount))
 	}
-	return andReward;
+	return andReward
 }
 
 func modifyRewardAmount(reward Reward, amount int32) Reward {
@@ -179,8 +171,6 @@ func modifyRewardAmount(reward Reward, amount int32) Reward {
 		return &CurrencyReward{Currency: reward.(*CurrencyReward).Currency, Amount: amount}
 	} else if _, ok := reward.(*ItemReward); ok {
 		return &ItemReward{ItemId: reward.(*ItemReward).ItemId, Amount: amount}
-	} else if _, ok := reward.(*TicketReward); ok {
-		return &TicketReward{MapId: reward.(*TicketReward).MapId, Amount: amount}
 	} else if _, ok := reward.(*RuneReward); ok {
 		return &RuneReward{ItemId: reward.(*RuneReward).ItemId, Amount: amount}
 	} else if _, ok := reward.(*HeroReward); ok {
@@ -195,9 +185,9 @@ func modifyRewardAmount(reward Reward, amount int32) Reward {
 // 奖励加倍（数量为向上取整）
 func Multiply(sourceRewards Reward, multiple float64) Reward {
 	if _, ok := sourceRewards.(*AndReward); ok {
-		return multiplyAndReward(sourceRewards.(*AndReward), multiple);
+		return multiplyAndReward(sourceRewards.(*AndReward), multiple)
 	} else {
-		return modifyRewardAmount(sourceRewards, int32(math.Ceil(float64(sourceRewards.GetAmount()) * multiple)));
+		return modifyRewardAmount(sourceRewards, int32(math.Ceil(float64(sourceRewards.GetAmount())*multiple)))
 	}
 }
 

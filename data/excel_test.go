@@ -29,8 +29,8 @@ func TestExcelReader(t *testing.T) {
 		Consumes []ConsumeDef `json:"consumes" excel:"consumes"`
 	}
 
-	// 读取 Excel 文件
-	result, err := reader.Read("mall.xlsx", &Name{})
+	// 读取 Excel 文件（强类型）
+	result, err := data.ReadTyped[Name](reader, "mall.xlsx")
 	if err != nil {
 		logger.Error("", fmt.Errorf("session.Send: %v", err))
 	}

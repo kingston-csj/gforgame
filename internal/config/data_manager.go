@@ -3,9 +3,10 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
-	"sync"
 
+	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/data"
 	"github.com/forfun/gforgame/internal/config/container"
 
@@ -17,112 +18,86 @@ type DataManager struct {
 	containers map[string]any
 }
 
-var (
-	instance *DataManager
-	once     sync.Once
-)
+type configTableLoader struct {
+	tableName     string
+	containerType reflect.Type
+	load          func(reader data.DataReader) (any, error)
+}
 
-// table名称对应Meta
-var tableConfigMap map[string]data.TableMeta
+// 表名称对应强类型加载器
+var tableLoaders map[string]configTableLoader
 
 // 容器类型对应表名
 var containerKeys map[reflect.Type]string
 
+// 全局唯一实例（包私有）
+var global *DataManager
+
 func init() {
-	tableConfigMap = make(map[string]data.TableMeta)
+	tableLoaders = make(map[string]configTableLoader)
 	containerKeys = make(map[reflect.Type]string)
-	// 定义表配置
-	tableConfigs := []data.TableMeta{
-		// 公共配置表
-		{
-			RecordType:    reflect.TypeOf(domain.CommonData{}),
-			ContainerType: reflect.TypeOf(&container.CommonContainer{}),
-		},
-		// 道具表
-		{
-			RecordType: reflect.TypeOf(domain.PropData{}),
-		},
-		// 抽奖表
-		{
-			RecordType:    reflect.TypeOf(domain.GachaData{}),
-			ContainerType: reflect.TypeOf(&container.GachaContainer{}),
-		},
-		// 英雄表
-		{
-			RecordType:    reflect.TypeOf(domain.HeroData{}),
-			ContainerType: reflect.TypeOf(&data.Container[int32, domain.HeroData]{}),
-		},
-		// 英雄等级表
-		{
-			RecordType:    reflect.TypeOf(domain.HeroLevelData{}),
-			ContainerType: reflect.TypeOf(&container.HeroLevelContainer{}),
-		},
-		// 英雄阶段表
-		{
-			RecordType:    reflect.TypeOf(domain.HeroStageData{}),
-			ContainerType: reflect.TypeOf(&container.HeroStageContainer{}),
-		},
-		// 技能表
-		{
-			RecordType:    reflect.TypeOf(domain.SkillData{}),
-			ContainerType: reflect.TypeOf(&data.Container[int32, domain.SkillData]{}),
-		},
-		// quest表
-		{
-			RecordType:    reflect.TypeOf(domain.QuestData{}),
-			ContainerType: reflect.TypeOf(&container.QuestContainer{}),
-			IndexFuncs:    map[string]string{"Category": "Category"},
-		},
-		// 活动表
-		{
-			RecordType: reflect.TypeOf(domain.ActivityData{}),
-		},
+	// TODO 联合索引
+	tableConfigs := []configTableLoader{
+		newContainerTableLoader[domain.CommonData](func() *container.CommonContainer { return &container.CommonContainer{} }, nil),
+		newDefaultTableLoader[domain.PropData](nil, nil),
+		newDefaultTableLoader[domain.HeroData](nil, nil),
+
+		newDefaultTableLoader[domain.PlayerLevelData](nil, map[string]string{"player_level": "Id,Level"}),
+		newContainerTableLoader[domain.HeroLevelData](func() *container.HeroLevelContainer { return &container.HeroLevelContainer{} }, nil),
+		newDefaultTableLoader[domain.HeroStageData](nil, map[string]string{"hero_stage": "TargetId,Stage"}),
+
+		newDefaultTableLoader[domain.SkillData](reflect.TypeOf(&data.Container[int32, domain.SkillData]{}), nil),
+		newContainerTableLoader[domain.QuestData](func() *container.QuestContainer { return &container.QuestContainer{} }, map[string]string{"Category": "Category"}),
+		newDefaultTableLoader[domain.ActivityData](nil, nil),
+		newDefaultTableLoader[domain.ActivityRewardData](nil, map[string]string{"ActivityId": "ActivityId"}),
+		newDefaultTableLoader[domain.SigninData](nil, nil),
+		newDefaultTableLoader[domain.RechargeData](nil, nil),
+		newDefaultTableLoader[domain.MallData](nil, nil),
+		newDefaultTableLoader[domain.MailData](nil, nil),
+		newDefaultTableLoader[domain.MonthlyCardData](nil, nil),
+		newContainerTableLoader[domain.GachaData](func() *container.GachaContainer { return &container.GachaContainer{} }, nil),
+		newContainerTableLoader[domain.NameData](func() *container.NameContainer { return &container.NameContainer{} }, nil),
+		newDefaultTableLoader[domain.RuneData](nil, map[string]string{"quality": "Quality"}),
+		newDefaultTableLoader[domain.VipData](nil, nil),
 	}
 
 	for _, config := range tableConfigs {
-		if config.IDField == "" {
-			config.IDField = "Id"
-		}
-		if config.TableName == "" {
-			// 去掉"Data"后缀
-			config.TableName = strings.ToLower(strings.ReplaceAll(config.RecordType.Name(), "Data", ""))
-		}
-		tableConfigMap[config.TableName] = config
-		if config.ContainerType != nil {
-			containerKeys[config.ContainerType] = config.TableName
+		tableLoaders[config.tableName] = config
+		if config.containerType != nil {
+			containerKeys[config.containerType] = config.tableName
 		}
 	}
 }
 
-// GetDataManager 获取单例实例
-func GetDataManager() *DataManager {
-	once.Do(func() {
-		instance = &DataManager{
-			containers: make(map[string]interface{}),
-		}
+func InitConfig() {
+	mgr := &DataManager{
+		containers: make(map[string]any),
+	}
+	reader := data.NewExcelDataReader(true)
 
-		// 创建 ExcelDataReader
-		reader := data.NewExcelDataReader(true)
+	tableNames := make([]string, 0, len(tableLoaders))
+	for name := range tableLoaders {
+		tableNames = append(tableNames, name)
+	}
+	sort.Strings(tableNames)
 
-		// 处理每张表
-		for name, config := range tableConfigMap {
-			container, err := data.ProcessTable(reader, name+".xlsx", config)
-			if err != nil {
-				fmt.Printf("Failed to process table %s: %v\n", name, err)
-				panic(err)
-			}
-			instance.containers[name] = container
+	for _, name := range tableNames {
+		config := tableLoaders[name]
+		container, err := config.load(reader)
+		if err != nil {
+			fmt.Printf("Failed to process table %s: %v\n", name, err)
+			continue
 		}
-	})
-	return instance
+		mgr.containers[name] = container
+	}
+
+	global = mgr
 }
 
-// GetContainer 获取原始容器
-func GetContainer(name string) interface{} {
-	return GetDataManager().containers[name]
+func GetContainer(name string) any {
+	return global.containers[name]
 }
 
-// GetSpecificContainer 获取特定类型的容器
 func GetSpecificContainer[C any]() C {
 	tableName := containerKeys[reflect.TypeOf((*C)(nil)).Elem()]
 	if tableName == "" {
@@ -141,45 +116,18 @@ func GetSpecificContainer[C any]() C {
 	return zero
 }
 
-// QueryAll 查询指定类型的所有记录
 func QueryAll[V any]() []*V {
 	tableName := getTableName[V]()
 	container := GetContainer(tableName)
 	if container == nil {
 		return nil
 	}
-	// 1. 尝试直接匹配泛型容器 (针对自定义容器，如 CommonContainer)
 	if c, ok := container.(data.IContainer[int32, V]); ok {
 		return c.GetAllRecords()
 	}
-
-	// 2. 尝试作为 IAnyContainer 处理 (针对默认容器 Container[int32, any])
-	// 注意：这里必须断言为 IContainer[int32, any] 才能调用 GetAllRecords
-	if c, ok := container.(data.IContainer[int32, any]); ok {
-		anyRecords := c.GetAllRecords() // 返回 []*any
-		results := make([]*V, 0, len(anyRecords))
-
-		for _, ptrAny := range anyRecords {
-			if ptrAny == nil {
-				continue
-			}
-			val := *ptrAny // 获取 interface{}，内部可能是 V 或 *V
-
-			// 类型断言
-			if v, ok := val.(V); ok {
-				results = append(results, &v)
-			} else if vPtr, ok := val.(*V); ok {
-				results = append(results, vPtr)
-			}
-		}
-		return results
-	}
-
 	return nil
 }
 
-// QueryById 根据ID查询指定类型的记录
-// 这段恶心的代码先凑合着用，后续再干掉
 func QueryById[V any](id int32) *V {
 	tableName := getTableName[V]()
 	container := GetContainer(tableName)
@@ -189,43 +137,9 @@ func QueryById[V any](id int32) *V {
 	if c, ok := container.(data.IContainer[int32, V]); ok {
 		return c.GetRecord(id)
 	}
-
-	// 尝试作为 IAnyContainer 处理 (兼容 Container[int32, any])
-	if c, ok := container.(data.IAnyContainer); ok {
-		val := c.GetRecordAny(id)
-		if val == nil {
-			return nil
-		}
-
-		// 1. 如果容器本身存储的就是目标类型的指针 (Container[int32, V])
-		// 虽然前面的 IContainer 检查应该已经涵盖了这种情况，但为了保险起见保留
-		if v, ok := val.(*V); ok {
-			return v
-		}
-
-		// 2. 如果容器是 Container[int32, any]，则 val 是 *any
-		if ptrAny, ok := val.(*any); ok {
-			if ptrAny == nil {
-				return nil
-			}
-			inner := *ptrAny // 获取 any 内部持有的值
-
-			// 如果内部值是目标类型 V (struct)
-			if v, ok := inner.(V); ok {
-				return &v
-			}
-			// 如果内部值是目标类型的指针 *V
-			if v, ok := inner.(*V); ok {
-				return v
-			}
-		}
-	}
-
 	return nil
-
 }
 
-// QueryContainer 获取指定类型的容器
 func QueryContainer[V any, C any]() C {
 	tableName := getTableName[V]()
 	container := GetContainer(tableName)
@@ -240,13 +154,105 @@ func QueryContainer[V any, C any]() C {
 	return zero
 }
 
-// getTableName 根据类型获取表名
 func getTableName[V any]() string {
 	t := reflect.TypeOf((*V)(nil)).Elem()
-	// 移除Data后缀
-	name := t.Name()
-	if strings.HasSuffix(name, "Data") {
-		name = name[:len(name)-4]
-	}
+	name := strings.TrimSuffix(t.Name(), "Data")
 	return strings.ToLower(name)
+}
+
+func newDefaultTableLoader[T any](containerType reflect.Type, indexFields map[string]string) configTableLoader {
+	tableName := getTableName[T]()
+	filePath := tableName + ".xlsx"
+	return configTableLoader{
+		tableName:     tableName,
+		containerType: containerType,
+		load: func(reader data.DataReader) (any, error) {
+			return data.ProcessTableTyped(reader, tableName, filePath, func(record *T) int32 {
+				return mustGetInt32Field(record, "Id")
+			}, buildFieldIndexFuncs[T](indexFields))
+		},
+	}
+}
+
+func newContainerTableLoader[T any, C interface {
+	data.IBaseContainer
+	data.IDataInjector
+}](newContainer func() C, indexFields map[string]string) configTableLoader {
+	tableName := getTableName[T]()
+	filePath := tableName + ".xlsx"
+	return configTableLoader{
+		tableName:     tableName,
+		containerType: reflect.TypeOf(newContainer()),
+		load: func(reader data.DataReader) (any, error) {
+			records, err := data.ReadTyped[T](reader, filePath)
+			if err != nil {
+				return nil, err
+			}
+			container := newContainer()
+			container.Init()
+			if err := container.Inject(tableName, records, func(record *T) int32 {
+				return mustGetInt32Field(record, "Id")
+			}, buildFieldIndexFuncs[T](indexFields)); err != nil {
+				logger.ErrorNoStack(err)
+				// 配置错误，直接panic
+				panic(err)
+			}
+			container.AfterLoad()
+			logger.Info(fmt.Sprintf("Loaded table [%s] with %d records", tableName, len(records)))
+			return container, nil
+		},
+	}
+}
+
+func buildFieldIndexFuncs[T any](indexFields map[string]string) map[string]func(*T) any {
+	if len(indexFields) == 0 {
+		return nil
+	}
+	indexFuncs := make(map[string]func(*T) any, len(indexFields))
+	for indexName, fieldExpr := range indexFields {
+		// 支持联合索引：value 用逗号分隔多字段名，例如 "TargetId,LevelStart"。
+		// 单字段时返回字段值本身；多字段时返回 []any，由 data 层 indexKey 拼成 name@v1_v2。
+		fieldNames := strings.Split(fieldExpr, ",")
+		for i, f := range fieldNames {
+			fieldNames[i] = strings.TrimSpace(f)
+		}
+		if len(fieldNames) == 1 {
+			fieldName := fieldNames[0]
+			indexFuncs[indexName] = func(record *T) any {
+				return mustGetFieldValue(record, fieldName)
+			}
+		} else {
+			names := fieldNames
+			indexFuncs[indexName] = func(record *T) any {
+				values := make([]any, len(names))
+				for i, fieldName := range names {
+					values[i] = mustGetFieldValue(record, fieldName)
+				}
+				return values
+			}
+		}
+	}
+	return indexFuncs
+}
+
+func mustGetInt32Field[T any](record *T, fieldName string) int32 {
+	value := mustGetFieldValue(record, fieldName)
+	resultValue := reflect.ValueOf(value)
+	if !resultValue.IsValid() || !resultValue.Type().ConvertibleTo(reflect.TypeOf(int32(0))) {
+		panic(fmt.Errorf("field %s value type %T cannot convert to int32", fieldName, value))
+	}
+	return int32(resultValue.Convert(reflect.TypeOf(int32(0))).Int())
+}
+
+func mustGetFieldValue[T any](record *T, fieldName string) any {
+	recordValue := reflect.ValueOf(record)
+	if !recordValue.IsValid() || recordValue.IsNil() {
+		panic(fmt.Errorf("record is nil when accessing field %s", fieldName))
+	}
+	value := recordValue.Elem()
+	field := value.FieldByName(fieldName)
+	if !field.IsValid() {
+		panic(fmt.Errorf("field %s not found in %v", fieldName, value.Type()))
+	}
+	return field.Interface()
 }

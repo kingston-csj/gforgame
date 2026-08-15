@@ -1,15 +1,11 @@
 package gm
 
 import (
-	"fmt"
-
 	commonerrors "github.com/forfun/gforgame/common/errors"
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/common/util/jsonutil"
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
-	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
@@ -59,11 +55,5 @@ func (h *PlayerGmHandler) handleClone(player *playerdomain.Player, params string
 	to.Name = h.player.RandomName()
 	h.player.SavePlayer(&to)
 
-	var scenes []playerdomain.Scene
-	err = mysqldb.Db.Where(fmt.Sprintf("id like '%s%%'", player.Id)).Find(&scenes).Error
-	if err != nil {
-		logger.Error("gm reset scene fail", err)
-		return commonerrors.NewBusinessError(constants.I18N_COMMON_INTERNAL_ERROR)
-	}
 	return nil
 }

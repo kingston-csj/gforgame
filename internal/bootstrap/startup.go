@@ -3,8 +3,6 @@ package bootstrap
 import (
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/infra/persistence/po"
-
-	dataconfig "github.com/forfun/gforgame/internal/config"
 	systemrepo "github.com/forfun/gforgame/internal/infra/repository/system"
 )
 
@@ -28,11 +26,6 @@ func InitMysqlDdl() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-// InitConfig 初始化配置数据。
-func InitConfig() {
-	dataconfig.GetDataManager()
 }
 
 // InitBusiness 预热业务数据和计划任务。

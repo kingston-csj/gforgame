@@ -387,17 +387,7 @@ func init() {
 			}
 			return r.ReqRankQuery(playerID, index, req), nil
 		},
-		9902: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
-			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
-			if !ok {
-				return nil, fmt.Errorf("generated dispatch receiver type mismatch: cmd=9902 expect=*route.MixtureRoute")
-			}
-			req, ok := msg.(*protos.ReqIdleViewReward)
-			if !ok {
-				return nil, fmt.Errorf("generated dispatch msg type mismatch: cmd=9902 expect=*protos.ReqIdleViewReward")
-			}
-			return r.ReqIdleViewReward(playerID, index, req), nil
-		},
+
 		9906: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
 			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
 			if !ok {

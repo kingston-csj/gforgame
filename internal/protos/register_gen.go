@@ -80,12 +80,8 @@ func init() {
 	network.RegisterMessage(1151, &ResMallBuy{})
 
 	// ----from mixture.go----
-	network.RegisterMessage(9902, &ReqIdleViewReward{})
-	network.RegisterMessage(9903, &ReqIdleGetReward{})
 	network.RegisterMessage(9906, &ReqClientUploadEvent{})
-	network.RegisterMessage(9953, &ResIdleGetReward{})
 	network.RegisterMessage(9956, &ResClientUploadEvent{})
-	network.RegisterMessage(9999, &PushIdleInfo{})
 
 	// ----from monthcard.go----
 	network.RegisterMessage(2102, &ReqMonthCardGetReward{})
@@ -130,12 +126,6 @@ func init() {
 	// ----from recharge.go----
 	network.RegisterMessage(2298, &PushRechargeInfo{})
 	network.RegisterMessage(2299, &PushRechargePay{})
-
-	// ----from scene.go----
-	network.RegisterMessage(2801, &ResSceneGetData{})
-	network.RegisterMessage(2802, &ReqSceneSetData{})
-	network.RegisterMessage(2851, &ReqSceneGetData{})
-	network.RegisterMessage(2852, &ResSceneSetData{})
 
 	// ----from sigin.go----
 	network.RegisterMessage(3001, &ReqSignIn{})

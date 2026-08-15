@@ -3,14 +3,13 @@ package data
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
 
-	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/common/util/conv"
+	util "github.com/forfun/gforgame/common/util/conv"
+	"github.com/forfun/gforgame/common/util/pathutil"
 
 	"github.com/tealeg/xlsx"
 )
@@ -41,18 +40,18 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 	// 遍历每一行
 	for _, row := range rows {
 		rowLine++
-		if rowLine < 3  {
+		if rowLine < 3 {
 			continue
 		}
 		if rowLine == 3 {
-			headers, err = r.readHeader(clazz, row.Cells)
+			headers, err = r.readHeader(row.Cells)
 			if err != nil {
 				return nil, err
 			}
 			continue
 		}
 		firstCell := getCellValue(row.Cells[0])
-		if conv.EqualsIgnoreCase(firstCell, "") {
+		if util.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 
@@ -63,7 +62,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if conv.EqualsIgnoreCase(firstCell, "") {
+		if util.EqualsIgnoreCase(firstCell, "") {
 			break
 		}
 	}
@@ -75,73 +74,22 @@ func resolveExcelFilePath(filePath string) string {
 	if filepath.IsAbs(filePath) {
 		return filePath
 	}
-	// 优先从 exe 目录向上查找，兼容打包和 IDE 的 __debug_bin。
-	if exePath, err := os.Executable(); err == nil {
-		exeDir := filepath.Dir(exePath)
-		if path, ok := findExcelFileFromBase(exeDir, filePath); ok {
-			return path
-		}
-		if root, ok := findProjectRoot(exeDir); ok {
-			return filepath.Join(root, "config", "excel", filePath)
-		}
-	}
-	// 再从当前工作目录向上查找，兼容 `go test` 等场景。
-	if cwd, err := os.Getwd(); err == nil {
-		if path, ok := findExcelFileFromBase(cwd, filePath); ok {
-			return path
-		}
-		if root, ok := findProjectRoot(cwd); ok {
-			return filepath.Join(root, "config", "excel", filePath)
-		}
-	}
-	// 兜底：保持原有相对路径行为。
-	if abs, err := filepath.Abs(filepath.Join("config", "excel", filePath)); err == nil {
-		return abs
-	}
-	return filepath.Join("config", "excel", filePath)
+	return pathutil.ResolveFilePath(filepath.Join("config", "excel", filePath))
 }
 
-func findExcelFileFromBase(baseDir, filePath string) (string, bool) {
-	dir := filepath.Clean(baseDir)
-	for {
-		candidate := filepath.Join(dir, "config", "excel", filePath)
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate, true
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-	return "", false
-}
-
-func findProjectRoot(baseDir string) (string, bool) {
-	dir := filepath.Clean(baseDir)
-	for {
-		goModPath := filepath.Join(dir, "go.mod")
-		if _, err := os.Stat(goModPath); err == nil {
-			return dir, true
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-	return "", false
-}
-
-func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, error) {
+func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) (records []any, err error) {
 	defer func() {
-		if err := recover(); err != nil {
-			logger.Error("",fmt.Errorf("readRecords panic recovered: %v", err))
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("read records panic recovered: %v", recovered)
+			records = nil
 		}
 	}()
 
-	var records []any
-	clazzType := reflect.TypeOf(clazz).Elem()
+	clazzType := reflect.TypeOf(clazz)
+	if clazzType == nil || clazzType.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("clazz must be a non-nil pointer, got %T", clazz)
+	}
+	clazzType = clazzType.Elem()
 
 	for i, row := range rows {
 		obj := reflect.New(clazzType).Elem()
@@ -166,7 +114,18 @@ func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, er
 				return nil, fmt.Errorf("row %d, column '%s': %v", i+1, colName, err)
 			}
 
-			field.Set(reflect.ValueOf(fieldVal))
+			if !field.CanSet() {
+				return nil, fmt.Errorf("row %d, column '%s': field cannot be set", i+1, colName)
+			}
+			convertedValue := reflect.ValueOf(fieldVal)
+			if !convertedValue.Type().AssignableTo(field.Type()) {
+				if convertedValue.Type().ConvertibleTo(field.Type()) {
+					convertedValue = convertedValue.Convert(field.Type())
+				} else {
+					return nil, fmt.Errorf("row %d, column '%s': value type %v cannot be assigned to %v", i+1, colName, convertedValue.Type(), field.Type())
+				}
+			}
+			field.Set(convertedValue)
 		}
 
 		records = append(records, obj.Interface())
@@ -175,11 +134,15 @@ func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) ([]any, er
 	return records, nil
 }
 
-func (r *ExcelDataReader) readHeader(clazz any, cells []*xlsx.Cell) ([]CellHeader, error) {
+func (r *ExcelDataReader) readHeader(cells []*xlsx.Cell) ([]CellHeader, error) {
 	var headers []CellHeader
 
 	for _, cell := range cells {
 		cellValue := getCellValue(cell)
+		// 空值表示列头结束
+		if util.EqualsIgnoreCase(cellValue, "") {
+			break
+		}
 		header := CellHeader{
 			Column: cellValue,
 		}
@@ -201,7 +164,7 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 	var columns []CellColumn
 
 	for i, cell := range row.Cells {
-		if i > len(headers) {
+		if i >= len(headers) {
 			break
 		}
 
@@ -216,115 +179,114 @@ func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []Ce
 	return columns
 }
 
-// 处理分号分隔的切片数?
-func parseSliceValue(value string, fieldType reflect.Type) (interface{}, error) {
+func parseScalarValue(value string, fieldType reflect.Type) (reflect.Value, error) {
+	if value == "" {
+		return reflect.Zero(fieldType), nil
+	}
+
+	switch fieldType.Kind() {
+	case reflect.String:
+		return reflect.ValueOf(value).Convert(fieldType), nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		num, err := strconv.ParseInt(value, 10, fieldType.Bits())
+		if err != nil {
+			return reflect.Value{}, fmt.Errorf("failed to parse int: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
+		}
+		val := reflect.New(fieldType).Elem()
+		val.SetInt(num)
+		return val, nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		num, err := strconv.ParseUint(value, 10, fieldType.Bits())
+		if err != nil {
+			return reflect.Value{}, fmt.Errorf("failed to parse uint: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
+		}
+		val := reflect.New(fieldType).Elem()
+		val.SetUint(num)
+		return val, nil
+	case reflect.Float32, reflect.Float64:
+		num, err := strconv.ParseFloat(value, fieldType.Bits())
+		if err != nil {
+			return reflect.Value{}, fmt.Errorf("failed to parse float: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
+		}
+		val := reflect.New(fieldType).Elem()
+		val.SetFloat(num)
+		return val, nil
+	case reflect.Bool:
+		b, err := strconv.ParseBool(value)
+		if err != nil {
+			return reflect.Value{}, fmt.Errorf("failed to parse bool: value='%s', error=%v", value, err)
+		}
+		val := reflect.New(fieldType).Elem()
+		val.SetBool(b)
+		return val, nil
+	default:
+		return reflect.Value{}, fmt.Errorf("unsupported scalar type: %v", fieldType.Kind())
+	}
+}
+
+// 处理分号分隔的切片数值
+func parseSliceValue(value string, fieldType reflect.Type) (any, error) {
 	strValues := strings.Split(value, ";")
 	sliceVal := reflect.MakeSlice(fieldType, len(strValues), len(strValues))
 
 	// 根据切片的元素类型进行转换
-		elemType := fieldType.Elem()
+	elemType := fieldType.Elem()
 	for i, strVal := range strValues {
 		strVal = strings.TrimSpace(strVal)
-
-		var elemVal reflect.Value
-		switch elemType.Kind() {
-		case reflect.String:
-			elemVal = reflect.ValueOf(strVal)
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			if strVal == "" {
-				elemVal = reflect.Zero(elemType)
-				break
-			}
-			num, err := strconv.ParseInt(strVal, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
-			}
-			elemVal = reflect.ValueOf(num).Convert(elemType)
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			if strVal == "" {
-				elemVal = reflect.Zero(elemType)
-				break
-			}
-			num, err := strconv.ParseUint(strVal, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
-			}
-			elemVal = reflect.ValueOf(num).Convert(elemType)
-		case reflect.Float32, reflect.Float64:
-			if strVal == "" {
-				elemVal = reflect.Zero(elemType)
-				break
-			}
-			num, err := strconv.ParseFloat(strVal, 64)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
-			}
-			elemVal = reflect.ValueOf(num).Convert(elemType)
-		case reflect.Bool:
-			if strVal == "" {
-				elemVal = reflect.Zero(elemType)
-				break
-			}
-			b, err := strconv.ParseBool(strVal)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse slice element '%s' as bool: %w", strVal, err)
-			}
-			elemVal = reflect.ValueOf(b)
-		default:
-			return nil, fmt.Errorf("unsupported slice element type: %s", elemType.Kind())
+		elemVal, err := parseScalarValue(strVal, elemType)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse slice element '%s' as %s: %w", strVal, elemType.Kind(), err)
 		}
-
 		sliceVal.Index(i).Set(elemVal)
 	}
 	return sliceVal.Interface(), nil
 }
 
+func parseArrayValue(value string, fieldType reflect.Type) (any, error) {
+	strValues := strings.Split(value, ";")
+	arrayVal := reflect.New(fieldType).Elem()
+	elemType := fieldType.Elem()
+	if len(strValues) > fieldType.Len() {
+		return nil, fmt.Errorf("array element count %d exceeds fixed length %d", len(strValues), fieldType.Len())
+	}
+	for i, strVal := range strValues {
+		elemVal, err := parseScalarValue(strings.TrimSpace(strVal), elemType)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse array element '%s' as %s: %w", strVal, elemType.Kind(), err)
+		}
+		arrayVal.Index(i).Set(elemVal)
+	}
+	return arrayVal.Interface(), nil
+}
+
 func convertValue(value string, fieldType reflect.Type) (any, error) {
 	switch fieldType.Kind() {
-	case reflect.String:
-		return value, nil
-	case reflect.Int8, reflect.Int16, reflect.Int32:
-		if value == "" {
-			return int32(0), nil
-		}
-		num, err := strconv.ParseInt(value, 10, 64)
+	case reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64, reflect.Bool:
+		val, err := parseScalarValue(value, fieldType)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse int: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
+			return nil, err
 		}
-		return int32(num), nil
-	case reflect.Int:
-		if value == "" {
-			return int32(0), nil
-		}
-		num, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse int: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
-		}
-		return int32(num), nil
-	case reflect.Float32, reflect.Float64:
-		if value == "" {
-			return float32(0), nil
-		}
-		num, err := strconv.ParseFloat(value, 64)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse float: value='%s', type=%v, error=%v", value, fieldType.Kind(), err)
-		}
-		return float32(num), nil
-	case reflect.Bool:
-		return strconv.ParseBool(value)
+		return val.Interface(), nil
 	case reflect.Array:
-		return strings.Split(value, ";"), nil
+		return parseArrayValue(value, fieldType)
 	case reflect.Slice, reflect.Struct:
-		// 处理嵌套 JSON 对象
 		fieldVal := reflect.New(fieldType).Interface()
 		if err := json.Unmarshal([]byte(value), &fieldVal); err != nil {
-			// 如果解析失败，尝试解析为数组
 			if fieldType.Kind() == reflect.Slice {
 				return parseSliceValue(value, fieldType)
 			}
 			return nil, fmt.Errorf("failed to unmarshal JSON and not a simple slice: %v", err)
 		}
 		return reflect.ValueOf(fieldVal).Elem().Interface(), nil
+	case reflect.Interface:
+		if result, err := ConvertRegistryInstance.Convert(value, fieldType); err != nil {
+			return nil, err
+		} else if result != nil {
+			return result, nil
+		}
+		return nil, fmt.Errorf("no converter registered for interface type: %v", fieldType)
 	default:
 		return nil, fmt.Errorf("unsupported type: %v", fieldType.Kind())
 	}
@@ -347,8 +309,8 @@ func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
 
 	for i := 0; i < objType.NumField(); i++ {
 		field := objType.Field(i)
-		tag := field.Tag.Get("excel") // 获取 Tag ?
-		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹?
+		tag := field.Tag.Get("excel")         // 获取 Tag 值
+		if strings.EqualFold(tag, tagValue) { // 忽略大小写匹配
 			return obj.Field(i), nil
 		}
 
@@ -373,14 +335,4 @@ func findFieldByTag(obj reflect.Value, tagValue string) (reflect.Value, error) {
 		}
 	}
 	return reflect.Value{}, fmt.Errorf("field with tag %s not found", tagValue)
-}
-
-type CellHeader struct {
-	Column string
-	Field  reflect.Value
-}
-
-type CellColumn struct {
-	Header CellHeader
-	Value  string
 }
