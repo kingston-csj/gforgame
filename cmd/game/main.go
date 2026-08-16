@@ -14,6 +14,7 @@ import (
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
 	"github.com/forfun/gforgame/internal/config"
+	"github.com/forfun/gforgame/internal/infra/net"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
@@ -33,6 +34,7 @@ var generatedRouteDispatchers = map[int32]generatedRouteInvoker{}
 
 type MyMessageDispatch struct {
 	network.BaseIoDispatch
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
 func (m *MyMessageDispatch) OnSessionCreated(session network.Session) {
@@ -44,8 +46,18 @@ func (m *MyMessageDispatch) OnSessionCreated(session network.Session) {
 
 func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
 	logger.Info(fmt.Sprintf("session closed: %s", session.ToString()))
+	// 两个session相同，才可以移除在线
+	// 否则，顶号会有问题
+	unbindPlayer := false
 	// 关闭session
-	network.RemoveSession(session, true)
+	if v, ok := session.GetAttr("id"); ok {
+		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
+			if current := m.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey); current == session {
+				unbindPlayer = true
+			}
+		}
+		m.onlinePlayerRegistry.RemovePlayerSession(session, unbindPlayer)
+	}
 }
 
 func main() {
@@ -53,12 +65,7 @@ func main() {
 	startTime := time.Now()
 
 	router := network.NewMessageRoute()
-	ioDispatcher := &MyMessageDispatch{}
-	// 如果是网关模式，需要添加网关消息转换处理程序
-	if serverconfig.ServerConfig.UseGateMode {
-		ioDispatcher.AddHandler(NewGateTransformHandler())
-	}
-	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
+
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
@@ -102,7 +109,15 @@ func main() {
 	// 	tcp.WithCodec(codec),
 	// 	tcp.WithDispatchWorkers(8),
 	// )
-	// context.GameServer = node
+
+	io.SetOnlinePlayerRegistry(s.OnlinePlayerRegistry)
+
+	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: s.OnlinePlayerRegistry}
+	if serverconfig.ServerConfig.UseGateMode {
+		ioDispatcher.AddHandler(NewGateTransformHandler())
+	}
+	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
+
 	node := ws.NewServer(
 		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
 		ws.WithRouter(router),

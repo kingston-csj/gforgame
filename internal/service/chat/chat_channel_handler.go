@@ -3,10 +3,10 @@ package chat
 import (
 	util "github.com/forfun/gforgame/common/util/conv"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/infra/net"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
-	"github.com/forfun/gforgame/network"
 )
 
 type ChatChannelHandler interface {
@@ -34,13 +34,14 @@ type ChatChannelHandler interface {
 }
 
 type BaseChatChannelHandler struct {
-	self    ChatChannelHandler // 指向子类
-	player  *playerrepo.PlayerRepository
-	profile *playerrepo.PlayerProfileService
+	self                 ChatChannelHandler // 指向子类
+	player               *playerrepo.PlayerRepository
+	profile              *playerrepo.PlayerProfileService
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
-func NewBaseChatChannelHandler(self ChatChannelHandler, playerRepo *playerrepo.PlayerRepository, profileRepo *playerrepo.PlayerProfileService) *BaseChatChannelHandler {
-	return &BaseChatChannelHandler{self: self, player: playerRepo, profile: profileRepo}
+func NewBaseChatChannelHandler(self ChatChannelHandler, playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, onlinePlayerRegistry *net.OnlinePlayerRegistry) *BaseChatChannelHandler {
+	return &BaseChatChannelHandler{self: self, player: playerRepo, profile: profile, onlinePlayerRegistry: onlinePlayerRegistry}
 }
 
 func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
@@ -50,7 +51,7 @@ func (b *BaseChatChannelHandler) Broadcast(message *playerdomain.ChatMessage) {
 	onlines := make([]*playerdomain.Player, 0)
 	// 广播消息
 	for _, receiver := range receivers {
-		if network.IsOnline(receiver) {
+		if b.onlinePlayerRegistry.IsOnline(receiver) {
 			player := b.player.GetPlayer(receiver)
 			if player != nil {
 				onlines = append(onlines, player)

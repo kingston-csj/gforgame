@@ -38,3 +38,13 @@ type ResServerLogin struct { // 服务节点登录响应
 	_    struct{} `cmd_ref:"CmdResServerLogin"`
 	Code int32    `json:"code"`
 }
+
+type NotifyPlayerLogoutToGame struct { // 网关-游戏服：玩家退出游戏请求
+	_        struct{} `cmd_ref:"CmdNotifyPlayerLogoutToGame"`
+	PlayerId string   `json:"playerId"`
+}
+
+type NotifyOnlinePlayerToGame struct { // 网关-游戏服：游戏服重启时，批量同步在线玩家到游戏服
+	_         struct{} `cmd_ref:"CmdNotifyOnlinePlayerToGame"`
+	PlayerIds []string `json:"playerIds"`
+}

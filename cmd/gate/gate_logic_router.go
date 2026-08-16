@@ -6,13 +6,16 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/gateway/contract"
+	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 )
 
 // 作为逻辑层，接收logic层的推送
 type LogicRouter struct {
-	router *network.MessageRoute
+	router               *network.MessageRoute
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
 func (g *LogicRouter) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
@@ -27,7 +30,7 @@ func (g *LogicRouter) MessageReceived(session network.Session, frame *protocol.R
 			logger.ErrorNoStack(fmt.Errorf("decode transfer response failed: %v", err))
 			return false
 		}
-		if err := forwardTransferToClient(session, transferResp); err != nil {
+		if err := g.forwardTransferToClient(session, transferResp); err != nil {
 			logger.ErrorNoStack(err)
 			return false
 		}
@@ -36,7 +39,7 @@ func (g *LogicRouter) MessageReceived(session network.Session, frame *protocol.R
 	return true
 }
 
-func forwardTransferToClient(logicSession network.Session, transfer contract.GateTransferMessage) error {
+func (g *LogicRouter) forwardTransferToClient(logicSession network.Session, transfer contract.GateTransferMessage) error {
 	playerID := transfer.GetPlayerID()
 	cmd := transfer.GetTransferCmd()
 	index := transfer.GetTransferIndex()
@@ -49,7 +52,7 @@ func forwardTransferToClient(logicSession network.Session, transfer contract.Gat
 		return fmt.Errorf("logic session serverId is empty, playerId=%s cmd=%d", playerID, cmd)
 	}
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	clientSession := network.GetSessionByPlayerId(sessionPlayerKey)
+	clientSession := g.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey)
 	if clientSession == nil {
 		return fmt.Errorf("client session not found, sessionPlayerKey=%s cmd=%d", sessionPlayerKey, cmd)
 	}
@@ -80,14 +83,14 @@ type GateAndLogicMessageDispatch struct {
 
 // OnSessionCreated 会话创建时调用
 func (d *GateAndLogicMessageDispatch) OnSessionCreated(session network.Session) {
-	// playerIds := getPlayersByServerID(resolveBackendServerID(session))
-	// req := &protos.NotifyOnlinePlayerToGame{PlayerIds: playerIds}
-	// session.Send(req, 0)
+	playerIds := getPlayersByServerID(resolveBackendServerID(session))
+	req := &protos.NotifyOnlinePlayerToGame{PlayerIds: playerIds}
+	session.Send(req, 0)
 }
 
-func newLogicIoDispatcher() network.IoDispatch {
+func newLogicIoDispatcher(onlinePlayerRegistry *net.OnlinePlayerRegistry) network.IoDispatch {
 	router := network.NewMessageRoute()
 	ioDispatcher := &GateAndLogicMessageDispatch{}
-	ioDispatcher.AddHandler(&LogicRouter{router: router})
+	ioDispatcher.AddHandler(&LogicRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})
 	return ioDispatcher
 }

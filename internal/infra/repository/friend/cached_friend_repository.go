@@ -2,7 +2,7 @@ package friend
 
 import (
 	"github.com/forfun/gforgame/cache"
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	frienddomain "github.com/forfun/gforgame/internal/domain/friend"
 	"go.uber.org/dig"
 )
 
@@ -34,7 +34,7 @@ func NewCachedFriendRepository(params CachedFriendRepositoryParams) *CachedFrien
 	return repo
 }
 
-func (r *CachedFriendRepository) GetFriendEnt(playerId string) *playerdomain.Friend {
+func (r *CachedFriendRepository) GetFriendEnt(playerId string) *frienddomain.Friend {
 	c, err := r.cache.GetCache("friend")
 	if err != nil {
 		return nil
@@ -43,11 +43,11 @@ func (r *CachedFriendRepository) GetFriendEnt(playerId string) *playerdomain.Fri
 	if err != nil || entity == nil {
 		return nil
 	}
-	friend, _ := entity.(*playerdomain.Friend)
+	friend, _ := entity.(*frienddomain.Friend)
 	return friend
 }
 
-func (r *CachedFriendRepository) SaveFriend(friend *playerdomain.Friend) {
+func (r *CachedFriendRepository) SaveFriend(friend *frienddomain.Friend) {
 	r.inner.SaveFriend(friend)
 	if c, err := r.cache.GetCache("friend"); err == nil {
 		c.Set(friend.Id, friend)

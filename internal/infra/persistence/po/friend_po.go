@@ -3,7 +3,7 @@ package po
 import (
 	"encoding/json"
 
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	frienddomain "github.com/forfun/gforgame/internal/domain/friend"
 	"github.com/forfun/gforgame/persist"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -40,7 +40,7 @@ func (p *FriendPO) AfterFind(tx *gorm.DB) error {
 	return p.AfterLoad()
 }
 
-func NewFriendPOFromDomain(f *playerdomain.Friend) (*FriendPO, error) {
+func NewFriendPOFromDomain(f *frienddomain.Friend) (*FriendPO, error) {
 	result := &FriendPO{
 		BaseEntity: f.BaseEntity,
 	}
@@ -58,8 +58,8 @@ func NewFriendPOFromDomain(f *playerdomain.Friend) (*FriendPO, error) {
 	return result, nil
 }
 
-func (p *FriendPO) ToDomain() (*playerdomain.Friend, error) {
-	f := &playerdomain.Friend{
+func (p *FriendPO) ToDomain() (*frienddomain.Friend, error) {
+	f := &frienddomain.Friend{
 		BaseEntity: p.BaseEntity,
 	}
 	var err error

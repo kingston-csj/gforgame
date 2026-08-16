@@ -21,70 +21,6 @@ const (
 type SerialSessionLoopOptions = sessionpkg.SerialSessionLoopOptions
 type DispatchSessionLoopOptions = sessionpkg.DispatchSessionLoopOptions
 
-func NewSession(conn net.Conn, messageCodec codec.MessageCodec) Session {
-	return sessionpkg.NewSession(conn, messageCodec)
-}
-
-func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType) Session {
-	return sessionpkg.NewSessionWithProtocol(conn, messageCodec, protocolType)
-}
-
-func RegisterSession(conn net.Conn, s Session) {
-	sessionpkg.RegisterSession(conn, s)
-}
-
-func GetSession(conn net.Conn) Session {
-	return sessionpkg.GetSession(conn)
-}
-
-func UnregisterSession(conn net.Conn) {
-	sessionpkg.UnregisterSession(conn)
-}
-
-func CloseAllSessions() {
-	sessionpkg.CloseAllSessions()
-}
-
-func AddSession(session Session, playerID string) {
-	sessionpkg.AddSession(session, playerID)
-}
-
-func AddOnlinePlayer(playerID string) {
-	sessionpkg.AddOnlinePlayer(playerID)
-}
-
-func RemoveSession(session Session, unbindPlayer bool) {
-	sessionpkg.RemoveSession(session, unbindPlayer)
-}
-
-func GetPlayerIDBySession(session Session) (string, bool) {
-	return sessionpkg.GetPlayerIDBySession(session)
-}
-
-func GetSessionByPlayerId(playerID string) Session {
-	return sessionpkg.GetSessionByPlayerId(playerID)
-}
-
-func GetAllSessions() []Session {
-	return sessionpkg.GetAllSessions()
-}
-
-func GetAllOnlinePlayerIds() []string {
-	return sessionpkg.GetAllOnlinePlayerIds()
-}
-
-func GetAllOnlinePlayerSessions() []Session {
-	return sessionpkg.GetAllOnlinePlayerSessions()
-}
-
-func IsOnline(playerID string) bool {
-	return sessionpkg.IsOnline(playerID)
-}
-
-func RemoveOnlinePlayer(playerID string) bool {
-	return sessionpkg.RemoveOnlinePlayer(playerID)
-}
-
 func HashSessionWorkerIndex(sessionKey string, workerCount int) int {
 	return sessionpkg.HashSessionWorkerIndex(sessionKey, workerCount)
 }
@@ -99,14 +35,6 @@ func ServeSession(session Session, ioDispatch IoDispatch, run func(session Sessi
 
 func ServeSessionConn(conn net.Conn, messageCodec codec.MessageCodec, ioDispatch IoDispatch, dispatchWorkers int32, payloadMode PayloadMode) {
 	sessionpkg.ServeSessionConn(conn, messageCodec, ioDispatch, dispatchWorkers, payloadMode)
-}
-
-func RunDispatchSessionLoop(session Session, ioDispatch IoDispatch, opts *DispatchSessionLoopOptions) {
-	sessionpkg.RunDispatchSessionLoop(session, ioDispatch, opts)
-}
-
-func RunSerialSessionLoop(session Session, ioDispatch IoDispatch, opts *SerialSessionLoopOptions) {
-	sessionpkg.RunSerialSessionLoop(session, ioDispatch, opts)
 }
 
 const DefaultDirectSessionIdleTimeout = sessionpkg.DefaultDirectSessionIdleTimeout

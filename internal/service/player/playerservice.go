@@ -12,6 +12,7 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/trie"
 	"github.com/forfun/gforgame/common/util/conv"
+	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/camp"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/config/container"
@@ -22,10 +23,12 @@ import (
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/idgen"
+	"github.com/forfun/gforgame/internal/infra/net"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/internal/service/dispatch"
 	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/system"
 	"github.com/forfun/gforgame/network"
@@ -47,19 +50,26 @@ type PlayerService struct {
 	// 玩家名称字典树
 	nameDict *trie.TrieDictionary
 
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
+	playerTaskDispatcher *dispatch.PlayerTaskDispatcher
+
 	quest         *questservice.QuestService
 	systemService *system.SystemService
 }
 
-func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService, systemService *system.SystemService) *PlayerService {
+func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService, systemService *system.SystemService,
+	onlinePlayerRegistry *net.OnlinePlayerRegistry, playerTaskDispatcher *dispatch.PlayerTaskDispatcher,
+) *PlayerService {
 	service := &PlayerService{
-		repo:           repo,
-		providers:      providers,
-		playerProfiles: hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
-		idNameMapper:   hashmap.NewSyncDualHashMap[string, string](),
-		nameDict:       trie.NewTrieDictionary(),
-		quest:          questService,
-		systemService:  systemService,
+		repo:                 repo,
+		providers:            providers,
+		playerProfiles:       hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
+		idNameMapper:         hashmap.NewSyncDualHashMap[string, string](),
+		nameDict:             trie.NewTrieDictionary(),
+		quest:                questService,
+		systemService:        systemService,
+		onlinePlayerRegistry: onlinePlayerRegistry,
+		playerTaskDispatcher: playerTaskDispatcher,
 	}
 	return service
 }
@@ -75,13 +85,13 @@ func (ps *PlayerService) Init() {
 	})
 
 	// 在线玩家每日重置
-	eventbus.Default().Subscribe(events.SystemDailyReset, func(data interface{}) {
-		allSessions := network.GetAllOnlinePlayerSessions()
-		for _, s := range allSessions {
-			s.AsynTasksChan() <- func() {
-				player := ps.GetPlayerBySession(s)
+	eventbus.Default().Subscribe(events.SystemDailyReset, func(data any) {
+		allPlayers := ps.onlinePlayerRegistry.GetAllOnlinePlayerIDs()
+		for _, pid := range allPlayers {
+			ps.playerTaskDispatcher.DispatchPlayerTask(pid, func() {
+				player := ps.repo.GetPlayer(pid)
 				ps.DailyReset(player, data.(int64))
-			}
+			})
 		}
 	})
 }
@@ -106,14 +116,6 @@ func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.Pla
 		return v
 	}
 	return nil
-}
-
-func (ps *PlayerService) GetPlayerBySession(session network.Session) *playerdomain.Player {
-	playerID, ok := network.GetPlayerIDBySession(session)
-	if !ok {
-		return nil
-	}
-	return ps.repo.GetPlayer(playerID)
 }
 
 func (ps *PlayerService) GetPlayerByPlayerId(playerID string) *playerdomain.Player {
@@ -147,23 +149,32 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 	// 是否是新角色
 	newCreated := ps.GetPlayerProfileById(playerId) == nil
 	player := ps.GetOrCreatePlayer(playerId)
-	if !newCreated {
-		oldSession := network.GetSessionByPlayerId(player.Id)
-		if oldSession != nil {
-			if oldSession == s {
-				logger.Info("玩家重复登录[" + player.Id + "]")
-			} else {
-				// 旧会话存在，关闭旧会话
-				logger.Info("玩家顶号登录[" + player.Id + "]")
-				oldSession.SendAndClose(&protos.PushReplacingLogin{})
+
+	// 非网关模式下，检查是否重复登录
+	// 网关模式下， 在网关端检查是否重复登录
+	if !serverconfig.ServerConfig.UseGateMode {
+		if !newCreated {
+			oldSession := ps.onlinePlayerRegistry.GetSessionByPlayerID(player.Id)
+			if oldSession != nil {
+				if oldSession == s {
+					logger.Info("玩家重复登录[" + player.Id + "]")
+				} else {
+					// 旧会话存在，关闭旧会话
+					logger.Info("玩家顶号登录[" + player.Id + "]")
+					oldSession.SendAndClose(&protos.PushReplacingLogin{})
+				}
 			}
 		}
-	}
-	fmt.Println("登录成功，id为：", player.Id)
-	s.SetAttr("id", player.Id)
 
-	// 添加session
-	network.AddSession(s, player.Id)
+		s.SetAttr("id", player.Id)
+		// 添加session
+		ps.onlinePlayerRegistry.AddPlayerSession(s, player.Id)
+		ps.onlinePlayerRegistry.AddOnlinePlayer(player.Id)
+	} else {
+		ps.onlinePlayerRegistry.AddOnlinePlayer(player.Id)
+	}
+
+	fmt.Println("登录成功，id为：", player.Id)
 
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送

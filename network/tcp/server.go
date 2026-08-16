@@ -100,6 +100,5 @@ func (n *TcpServer) Stop() {
 		if n.listener != nil {
 			_ = n.listener.Close()
 		}
-		network.CloseAllSessions()
 	})
 }

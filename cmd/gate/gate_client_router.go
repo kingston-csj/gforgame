@@ -7,17 +7,21 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/gateway/contract"
+	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 )
 
 // 作为网关，处理客户端请求
 type ClientRouter struct {
-	router *network.MessageRoute
+	router               *network.MessageRoute
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
 type MyMessageDispatch struct {
 	network.BaseIoDispatch
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
 func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
@@ -26,13 +30,13 @@ func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
 	unbindPlayer := false
 	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
 		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
-			if current := network.GetSessionByPlayerId(sessionPlayerKey); current == session {
+			if current := m.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey); current == session {
 				unbindPlayer = true
 				notifyLogicPlayerLogout(session)
 				unbindPlayerServer(sessionPlayerKey)
 			}
 		}
-		network.RemoveSession(session, unbindPlayer)
+		m.onlinePlayerRegistry.RemovePlayerSession(session, unbindPlayer)
 	}
 }
 
@@ -51,12 +55,12 @@ func notifyLogicPlayerLogout(session network.Session) {
 	if !ok || targetServerID <= 0 {
 		return
 	}
-	// req := &protos.NotifyPlayerLogoutToGame{
-	// 	PlayerId: playerIDStr,
-	// }
-	// if err := enqueueTransfer(targetServerID, req, 0); err != nil {
-	// 	logger.ErrorNoStack(fmt.Errorf("notify logic player logout failed, playerId=%s serverId=%d err=%v", playerIDStr, targetServerID, err))
-	// }
+	req := &protos.NotifyPlayerLogoutToGame{
+		PlayerId: playerIDStr,
+	}
+	if err := enqueueTransfer(targetServerID, req, 0); err != nil {
+		logger.ErrorNoStack(fmt.Errorf("notify logic player logout failed, playerId=%s serverId=%d err=%v", playerIDStr, targetServerID, err))
+	}
 }
 
 func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
@@ -79,7 +83,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 			return false
 		}
 		logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
-		if err := HandleLoginReq(session, loginReq, frame); err != nil {
+		if err := g.HandleLoginReq(session, loginReq, frame); err != nil {
 			logger.ErrorNoStack(err)
 			return false
 		}
@@ -91,7 +95,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 	return true
 }
 
-func HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
+func (g *ClientRouter) HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
 	logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
 	playerID := loginReq.GetPlayerID()
 	serverID := loginReq.GetServerID()
@@ -106,7 +110,7 @@ func HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest,
 	}
 
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	oldSession := network.GetSessionByPlayerId(sessionPlayerKey)
+	oldSession := g.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey)
 	if oldSession != nil && oldSession != session {
 		logger.Info("玩家顶号登录[" + sessionPlayerKey + "]")
 		oldSession.SendAndClose(gateLoginAdapter.NewReplacingLoginPush())
@@ -118,7 +122,9 @@ func HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest,
 	session.SetAttr("id", playerID)
 	session.SetAttr("serverId", serverID)
 	session.SetAttr("sessionPlayerKey", sessionPlayerKey)
-	network.AddSession(session, sessionPlayerKey)
+	g.onlinePlayerRegistry.AddPlayerSession(session, sessionPlayerKey)
+	g.onlinePlayerRegistry.AddOnlinePlayer(playerID)
+
 	bindPlayerServer(sessionPlayerKey, serverID)
 	return transferMsgToLogic(session, frame, serverID)
 }

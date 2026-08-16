@@ -1,7 +1,7 @@
 package friend
 
 import (
-	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	frienddomain "github.com/forfun/gforgame/internal/domain/friend"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/infra/persistence/po"
 	"go.uber.org/dig"
@@ -28,7 +28,7 @@ func NewMySQLFriendRepository(params MySQLFriendRepositoryParams) *MySQLFriendRe
 	}
 }
 
-func (r *MySQLFriendRepository) GetFriendEnt(playerId string) *playerdomain.Friend {
+func (r *MySQLFriendRepository) GetFriendEnt(playerId string) *frienddomain.Friend {
 	var p po.FriendPO
 	result := r.db.Where("id=?", playerId).Limit(1).Find(&p)
 	if result.Error != nil || result.RowsAffected == 0 {
@@ -41,7 +41,7 @@ func (r *MySQLFriendRepository) GetFriendEnt(playerId string) *playerdomain.Frie
 	return friend
 }
 
-func (r *MySQLFriendRepository) SaveFriend(friend *playerdomain.Friend) {
+func (r *MySQLFriendRepository) SaveFriend(friend *frienddomain.Friend) {
 	record, err := po.NewFriendPOFromDomain(friend)
 	if err != nil {
 		panic(err)

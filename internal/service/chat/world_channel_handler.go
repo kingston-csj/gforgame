@@ -6,8 +6,8 @@ import (
 	"github.com/forfun/gforgame/common/container/list"
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/infra/net"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
-	network "github.com/forfun/gforgame/network"
 )
 
 type WorldChannelHandler struct {
@@ -15,11 +15,11 @@ type WorldChannelHandler struct {
 	MsgQueue *list.LimitedList[*playerdomain.ChatMessage]
 }
 
-func NewWorldChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService) *WorldChannelHandler {
+func NewWorldChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, onlinePlayerRegistry *net.OnlinePlayerRegistry) *WorldChannelHandler {
 	h := &WorldChannelHandler{
 		MsgQueue: list.NewLimitedList[*playerdomain.ChatMessage](100),
 	}
-	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile)
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile, onlinePlayerRegistry)
 	return h
 }
 
@@ -30,7 +30,7 @@ func (h *WorldChannelHandler) Init() {
 		SenderId:   "",
 		SenderHead: 0,
 		Timestamp:  time.Now().Unix(),
-		Content:    "亲爱的玩家，请友好交流，共建美好聊天环境！",
+		Content:    "亲爱的玩家，请友好交流，共建美好聊天环境。",
 	}
 
 	h.MsgQueue.Push(msg)
@@ -53,7 +53,7 @@ func (h *WorldChannelHandler) LoadOfflineMessages(player *playerdomain.Player) [
 }
 
 func (h *WorldChannelHandler) Receivers(message *playerdomain.ChatMessage) []string {
-	onlinePlayerIds := network.GetAllOnlinePlayerIds()
+	onlinePlayerIds := h.onlinePlayerRegistry.GetAllOnlinePlayerIDs()
 	receivers := make([]string, 0)
 	for _, playerId := range onlinePlayerIds {
 		receivers = append(receivers, playerId)

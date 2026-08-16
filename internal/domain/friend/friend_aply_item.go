@@ -1,4 +1,4 @@
-package player
+package friend
 
 type FriendApplyItem struct {
 	FromId   string `json:"player_id"`

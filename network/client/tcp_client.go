@@ -5,6 +5,7 @@ import (
 
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/session"
 )
 
 type TcpSocketClient struct {
@@ -23,7 +24,7 @@ func (c *TcpSocketClient) OpenSession() (network.Session, error) {
 		return nil, err
 	}
 	// defer conn.Close()
-	session := network.NewSession(conn, c.MsgCodec)
+	session := session.NewSession(conn, c.MsgCodec)
 	go session.Write()
 	go session.Read()
 	return session, nil

@@ -6,24 +6,25 @@ import (
 
 	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
-	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/internal/infra/net"
 )
 
-// playerTaskDispatcher 用于在无玩家会话时，按 playerId 串行执行任务。
-type playerTaskDispatcher struct {
+// PlayerTaskDispatcher 用于在无玩家会话时，按 playerId 串行执行任务。
+type PlayerTaskDispatcher struct {
 	workerCount uint32
 	queues      []chan func()
+
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
-var globalPlayerTaskDispatcher = newPlayerTaskDispatcher(32)
-
-func newPlayerTaskDispatcher(workerCount uint32) *playerTaskDispatcher {
+func NewPlayerTaskDispatcher(workerCount uint32, onlinePlayerRegistry *net.OnlinePlayerRegistry) *PlayerTaskDispatcher {
 	if workerCount == 0 {
 		workerCount = 1
 	}
-	d := &playerTaskDispatcher{
-		workerCount: workerCount,
-		queues:      make([]chan func(), workerCount),
+	d := &PlayerTaskDispatcher{
+		workerCount:          workerCount,
+		queues:               make([]chan func(), workerCount),
+		onlinePlayerRegistry: onlinePlayerRegistry,
 	}
 	for i := uint32(0); i < workerCount; i++ {
 		q := make(chan func(), 512)
@@ -33,7 +34,7 @@ func newPlayerTaskDispatcher(workerCount uint32) *playerTaskDispatcher {
 				func() {
 					defer func() {
 						if r := recover(); r != nil {
-							logger.ErrorNoStack(fmt.Sprintf("player task panic: %v", r))
+							logger.Error("player task dispatcher: panic recovered: %v", fmt.Errorf("player task panic: %v", r))
 						}
 					}()
 					task()
@@ -44,7 +45,7 @@ func newPlayerTaskDispatcher(workerCount uint32) *playerTaskDispatcher {
 	return d
 }
 
-func (d *playerTaskDispatcher) submit(playerID string, task func()) {
+func (d *PlayerTaskDispatcher) submit(playerID string, task func()) {
 	idx := hashPlayerID(playerID) % d.workerCount
 	d.queues[idx] <- task
 }
@@ -58,15 +59,15 @@ func hashPlayerID(playerID string) uint32 {
 // DispatchPlayerTask 保证同一玩家任务线程安全
 // 1. 网关模式：统一走全局 playerId 分片队列，避免共享会话导致全玩家串行
 // 2. 直连模式：优先投递到玩家会话 AsynTasks
-func DispatchPlayerTask(playerID string, task func()) {
+func (d *PlayerTaskDispatcher) DispatchPlayerTask(playerID string, task func()) {
 	if playerID == "" || task == nil {
 		return
 	}
 	if serverconfig.ServerConfig.UseGateMode {
-		globalPlayerTaskDispatcher.submit(playerID, task)
+		d.submit(playerID, task)
 		return
 	}
-	if session := network.GetSessionByPlayerId(playerID); session != nil {
+	if session := d.onlinePlayerRegistry.GetSessionByPlayerID(playerID); session != nil {
 		select {
 		case <-session.DieChan():
 		default:
@@ -74,5 +75,5 @@ func DispatchPlayerTask(playerID string, task func()) {
 			return
 		}
 	}
-	globalPlayerTaskDispatcher.submit(playerID, task)
+	d.submit(playerID, task)
 }

@@ -3,6 +3,7 @@ package chat
 import (
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/infra/net"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/service/friend"
 )
@@ -16,11 +17,11 @@ func (h *FriendChannelHandler) Init() {
 
 }
 
-func NewFriendChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friendService *friend.FriendService) *FriendChannelHandler {
+func NewFriendChatChannelHandler(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friendService *friend.FriendService, onlinePlayerRegistry *net.OnlinePlayerRegistry) *FriendChannelHandler {
 	h := &FriendChannelHandler{
 		friend: friendService,
 	}
-	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile)
+	h.BaseChatChannelHandler = NewBaseChatChannelHandler(h, playerRepo, profile, onlinePlayerRegistry)
 	return h
 }
 

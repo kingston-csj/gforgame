@@ -9,14 +9,16 @@ import (
 	"github.com/forfun/gforgame/common/util/jsonutil"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/contract"
+	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 )
 
 var (
-	notifyCodec   = json.NewSerializer()
-	gateSession   network.Session
-	gateSessionMu sync.RWMutex
+	notifyCodec          = json.NewSerializer()
+	gateSession          network.Session
+	gateSessionMu        sync.RWMutex
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 )
 
 func SetGateSession(session network.Session) {
@@ -28,10 +30,14 @@ func SetGateSession(session network.Session) {
 	gateSession = session
 }
 
+func SetOnlinePlayerRegistry(registry *net.OnlinePlayerRegistry) {
+	onlinePlayerRegistry = registry
+}
+
 func NotifyByPlayerId(playerID string, index int32, data any) {
 	if !serverconfig.ServerConfig.UseGateMode {
 		// 直连模式：playerId 映射的是客户端会话，直接发送即可
-		if s := network.GetSessionByPlayerId(playerID); s != nil {
+		if s := onlinePlayerRegistry.GetSessionByPlayerID(playerID); s != nil {
 			_ = s.Send(data, index)
 		}
 		return

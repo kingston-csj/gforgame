@@ -134,6 +134,5 @@ func (n *WsServer) Stop() {
 			_ = n.listener.Close()
 		}
 
-		network.CloseAllSessions()
 	})
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/session"
 	"github.com/gorilla/websocket"
 )
 
@@ -51,7 +52,7 @@ func (c *WebSocketClient) OpenSession() (network.Session, error) {
 		conn:        conn,
 		messageType: c.resolveMessageType(),
 	}
-	session := network.NewSession(wsConn, c.MsgCodec)
+	session := session.NewSession(wsConn, c.MsgCodec)
 	go session.Write()
 	go session.Read()
 	return session, nil

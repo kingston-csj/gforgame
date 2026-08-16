@@ -8,6 +8,7 @@ import (
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/idgen"
+	"github.com/forfun/gforgame/internal/infra/net"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
@@ -16,17 +17,20 @@ import (
 
 // 聊天模块
 type ChatService struct {
-	profile  *playerrepo.PlayerProfileService
-	handlers map[int32]ChatChannelHandler
+	profile              *playerrepo.PlayerProfileService
+	handlers             map[int32]ChatChannelHandler
+	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
-func NewChatService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friend *friendservice.FriendService) *ChatService {
+func NewChatService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo.PlayerProfileService, friend *friendservice.FriendService, onlinePlayerRegistry *net.OnlinePlayerRegistry) *ChatService {
 	service := &ChatService{
-		profile:  profile,
-		handlers: make(map[int32]ChatChannelHandler),
+		profile: profile,
+
+		onlinePlayerRegistry: onlinePlayerRegistry,
+		handlers:             make(map[int32]ChatChannelHandler),
 	}
-	service.handlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler(playerRepo, profile, friend)
-	service.handlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler(playerRepo, profile)
+	service.handlers[constants.ChannelTypeFriend] = NewFriendChatChannelHandler(playerRepo, profile, friend, onlinePlayerRegistry)
+	service.handlers[constants.ChannelTypeWorld] = NewWorldChatChannelHandler(playerRepo, profile, onlinePlayerRegistry)
 	for _, chatHandler := range service.handlers {
 		chatHandler.Init()
 	}
@@ -34,7 +38,7 @@ func NewChatService(playerRepo *playerrepo.PlayerRepository, profile *playerrepo
 }
 
 func (s *ChatService) Init() {
-	eventbus.Default().Subscribe(events.PlayerLogin, func(data interface{}) {
+	eventbus.Default().Subscribe(events.PlayerLogin, func(data any) {
 		s.LoadOfflineMessages(data.(*playerdomain.Player))
 	})
 }
@@ -86,6 +90,8 @@ func (s *ChatService) SendMessage(player *playerdomain.Player, msg *protos.ReqCh
 			Code: -1,
 		}
 	}
+
+	//TODO 将屏蔽词转为 ***
 	message := &playerdomain.ChatMessage{
 		Id:         idgen.GetNextID(),
 		Channel:    int32(msg.Channel),

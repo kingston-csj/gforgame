@@ -248,6 +248,11 @@ func connectBackendSession(serverID int32, addr string) error {
 // consumeBackendSession 消费后端下行消息。
 // 一旦连接断开，清理状态并触发延迟重连。
 func consumeBackendSession(serverID int32, session network.Session) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("", fmt.Errorf("consumeBackendSession panic: %v", r))
+		}
+	}()
 	for {
 		select {
 		case <-session.DieChan():
@@ -303,6 +308,11 @@ func scheduleReconnect(serverID int32) {
 	backendPoolsMu.Unlock()
 
 	go func(sid int32, remoteAddr string) {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("", fmt.Errorf("scheduleReconnect panic: %v", r))
+			}
+		}()
 		time.Sleep(time.Duration(backendReconnectDelay) * time.Millisecond)
 		if err := connectBackendSession(sid, remoteAddr); err != nil {
 			// 日志限流
@@ -325,6 +335,11 @@ func scheduleReconnect(serverID int32) {
 // 若发现连接已断开，会立刻走统一的重连流程恢复。
 func startBackendSessionMonitor() {
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("", fmt.Errorf("startBackendSessionMonitor panic: %v", r))
+			}
+		}()
 		ticker := time.NewTicker(time.Duration(backendMonitorInterval) * time.Millisecond)
 		defer ticker.Stop()
 		for {

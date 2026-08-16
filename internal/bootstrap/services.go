@@ -7,7 +7,9 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/schedule"
 	configcontract "github.com/forfun/gforgame/internal/config/contracts"
+	frienddomain "github.com/forfun/gforgame/internal/domain/friend"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/infra/persistence"
 	itemconfigprovider "github.com/forfun/gforgame/internal/infra/provider/itemconfig"
 	friendrepo "github.com/forfun/gforgame/internal/infra/repository/friend"
@@ -17,6 +19,7 @@ import (
 	"github.com/forfun/gforgame/internal/service/arena"
 	"github.com/forfun/gforgame/internal/service/catalog"
 	"github.com/forfun/gforgame/internal/service/chat"
+	"github.com/forfun/gforgame/internal/service/dispatch"
 	"github.com/forfun/gforgame/internal/system"
 	"gorm.io/gorm"
 
@@ -45,13 +48,15 @@ type Services struct {
 	dig.In // 显式声明：这是一个「依赖输入组」
 
 	// 基础设施
-	DbService    *persistence.AsyncDBService
-	CacheManager *cache.Manager
+	DbService            *persistence.AsyncDBService
+	CacheManager         *cache.Manager
+	OnlinePlayerRegistry *net.OnlinePlayerRegistry
+	PlayerTaskDispatcher *dispatch.PlayerTaskDispatcher
 
 	// dao层
 	PlayerRepo     *playerrepo.PlayerRepository
 	ProfileService *playerrepo.PlayerProfileService
-	FriendRepo     playerdomain.FriendRepository
+	FriendRepo     frienddomain.FriendRepository
 	SystemRepo     *systemrepo.SystemRepository
 
 	Activity  *activity.ActivityService
@@ -116,6 +121,10 @@ func registerServices(c *dig.Container) {
 	_ = c.Provide(func() *gorm.DB { return persistence.Db })
 	// TaskScheduler 是接口类型，dig 按精确类型匹配，需显式 provider 返回接口
 	_ = c.Provide(func() schedule.TaskScheduler { return schedule.NewDefaultTaskScheduler() })
+	_ = c.Provide(net.NewOnlinePlayerRegistry)
+	_ = c.Provide(func(onlinePlayerRegistry *net.OnlinePlayerRegistry) *dispatch.PlayerTaskDispatcher {
+		return dispatch.NewPlayerTaskDispatcher(32, onlinePlayerRegistry)
+	})
 
 	_ = c.Provide(itemconfigprovider.NewBaseItemConfigProvider, dig.Name("base_item"))
 	_ = c.Provide(itemconfigprovider.NewRuneConfigProvider, dig.Name("rune_item"))
@@ -132,7 +141,7 @@ func registerServices(c *dig.Container) {
 	_ = c.Provide(friendrepo.NewMySQLFriendRepository)
 	_ = c.Provide(friendrepo.NewCachedFriendRepository)
 	// 对外以 domain 接口形式提供好友仓储，dig 装配时注入缓存装饰器实现
-	_ = c.Provide(func(repo *friendrepo.CachedFriendRepository) playerdomain.FriendRepository {
+	_ = c.Provide(func(repo *friendrepo.CachedFriendRepository) frienddomain.FriendRepository {
 		return repo
 	})
 	_ = c.Provide(systemrepo.NewMySQLSystemRepository)

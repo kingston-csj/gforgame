@@ -1,4 +1,4 @@
-package player
+package friend
 
 // FriendRepository 是好友聚合根的仓储接口（依赖倒置锚点）。
 // infra/repository/friend 提供实现，dig 装配时注入缓存装饰器。
