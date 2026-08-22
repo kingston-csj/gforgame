@@ -179,6 +179,11 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 	// 客户端红点系统，要求服务器先下发所有基础数据
 	// 异步推送
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("玩家登录异常", fmt.Errorf("panic recovered: %v", r))
+			}
+		}()
 		// 离线，登录触发每日重置检测
 		dailyReset := ps.systemService.GetDailyReset().GetValue().(int64)
 		if player.DailyReset.LastDailyReset > 0 && player.DailyReset.LastDailyReset < dailyReset {

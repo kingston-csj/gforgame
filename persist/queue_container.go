@@ -64,7 +64,11 @@ func (qc *QueueContainer) Receive(entity Entity) {
 // run 后台消费协程
 func (qc *QueueContainer) run() {
 	defer qc.wg.Done()
-
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("", fmt.Errorf("QueueContainer %s: run panic: %v", qc.name, r))
+		}
+	}()
 	for qc.running.Load() {
 		select {
 		case key, ok := <-qc.queue:

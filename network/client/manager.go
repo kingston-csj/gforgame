@@ -2,8 +2,11 @@ package client
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
+
+	"github.com/forfun/gforgame/common/logger"
 )
 
 // CallBackService 定义了回调服务
@@ -54,6 +57,11 @@ func (s *CallBackService) Remove(correlationId int32) *RequestResponseFuture {
 func (s *CallBackService) Start() {
 	s.ticker = time.NewTicker(2 * time.Second)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("", fmt.Errorf("CallBackService panic: %v", r))
+			}
+		}()
 		for {
 			select {
 			case <-s.ticker.C:

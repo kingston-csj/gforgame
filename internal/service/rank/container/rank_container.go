@@ -3,6 +3,7 @@ package container
 import (
 	"fmt"
 
+	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/internal/service/rank/model"
 
 	"github.com/emirpasic/gods/maps/treemap"
@@ -11,7 +12,7 @@ import (
 // ConcurrentRankContainer 并发排行榜容器
 // 只通过channel和内部goroutine并发安全
 type ConcurrentRankContainer struct {
-	ranks    *treemap.Map  // 红黑树数据结构
+	ranks    *treemap.Map // 红黑树数据结构
 	capacity int          // 容量
 	cmdChan  chan any     // 命令通道
 }
@@ -59,7 +60,7 @@ type closeCmd struct {
 func NewConcurrentRankContainer(capacity int) *ConcurrentRankContainer {
 	c := &ConcurrentRankContainer{
 		ranks:    treemap.NewWith(model.CompareRank),
-		capacity: capacity, 
+		capacity: capacity,
 		cmdChan:  make(chan any, 1000),
 	}
 	go c.run()
@@ -68,6 +69,11 @@ func NewConcurrentRankContainer(capacity int) *ConcurrentRankContainer {
 
 // run goroutine，串行处理所有命令
 func (c *ConcurrentRankContainer) run() {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("", fmt.Errorf("runcurrentRankContainer panic: %v", r))
+		}
+	}()
 	for cmd := range c.cmdChan {
 		switch v := cmd.(type) {
 		case addCmd:
