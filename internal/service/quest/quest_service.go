@@ -130,7 +130,7 @@ func (s *QuestService) TakeReward(player *playerdomain.Player, questId int32) (*
 		return nil, commonerrors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
 	questData := config.QueryById[configdomain.QuestData](questId)
-	rewards := reward.ParseReward(questData.Rewards)
+	rewards := questData.Rewards.(reward.Reward)
 	rewards.Reward(player, constants.ActionType_QuestReward)
 	quest.Status = constants.QuestStatusRewarded
 
@@ -163,9 +163,9 @@ func (s *QuestService) TakeAllReward(player *playerdomain.Player, catalog int32)
 	rewards := reward.NewAndReward()
 	for _, quest := range quests {
 		questData := config.QueryById[configdomain.QuestData](quest.Id)
-		rewards.AddReward(reward.ParseReward(questData.Rewards))
+		rewards.AddReward(questData.Rewards.(reward.Reward))
 	}
-	rewards.Merge()
+	rewards = rewards.Merge()
 	if err := rewards.Verify(player); err != nil {
 		return nil, commonerrors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 	}
@@ -235,7 +235,7 @@ func (s *QuestService) TakeAllRewards(player *playerdomain.Player, catalog int32
 	andReward := reward.NewAndReward()
 	for _, quest := range quests {
 		questData := config.QueryById[configdomain.QuestData](quest.Id)
-		andReward.AddReward(reward.ParseReward(questData.Rewards))
+		andReward.AddReward(questData.Rewards.(reward.Reward))
 	}
 	andReward = andReward.Merge()
 	if err := andReward.Verify(player); err != nil {

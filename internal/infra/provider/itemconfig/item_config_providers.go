@@ -27,14 +27,3 @@ func NewRuneConfigProvider() configcontract.ItemConfigProvider {
 func (p *RuneConfigProvider) GetConfig(itemID int32) configcontract.ItemConfig {
 	return config.QueryById[configdomain.RuneData](itemID)
 }
-
-// SceneItemConfigProvider 提供场景道具配置查询。
-type SceneItemConfigProvider struct{}
-
-func NewSceneItemConfigProvider() configcontract.ItemConfigProvider {
-	return &SceneItemConfigProvider{}
-}
-
-func (p *SceneItemConfigProvider) GetConfig(itemID int32) configcontract.ItemConfig {
-	return config.QueryById[configdomain.ScenePropData](itemID)
-}

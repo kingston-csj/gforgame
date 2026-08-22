@@ -42,14 +42,8 @@ func buildCatalogVo(catalogModel *playerdomain.CatalogModel) protos.CatalogModel
 func (s *CatalogService) TakeReward(player *playerdomain.Player, typ int32, id int32) (int, []*protos.RewardVo) {
 	catalogModel := getcatalogModel(player, typ)
 	rewardStr := ""
-	if typ == 0 {
-		itemData := config.QueryById[configdomain.ScenePropData](id)
-		rewardStr = itemData.ActivateRewards
-	} else if typ == 1 {
+	if typ == 1 {
 		itemData := config.QueryById[configdomain.PropData](id)
-		rewardStr = itemData.ActivateRewards
-	} else {
-		itemData := config.QueryById[configdomain.MenuData](id)
 		rewardStr = itemData.ActivateRewards
 	}
 	if !catalogModel.CanReceived(id) {

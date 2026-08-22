@@ -2,7 +2,6 @@ package persist
 
 import (
 	"fmt"
-	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -27,7 +26,7 @@ type QueueContainer struct {
 func NewQueueContainer(name string, savingStrategy SavingStrategy) *QueueContainer {
 	qc := &QueueContainer{
 		name:           name,
-		queue:          make(chan string, 1024*1024), // 大容量缓冲队列
+		queue:          make(chan string, 1024), // 大容量缓冲队列
 		savingStrategy: savingStrategy,
 	}
 	qc.running.Store(true)
@@ -42,11 +41,11 @@ func NewQueueContainer(name string, savingStrategy SavingStrategy) *QueueContain
 // Receive 接收实体
 func (qc *QueueContainer) Receive(entity Entity) {
 	if !qc.running.Load() {
-		slog.Info("db closed, received entity", "key", entity.GetId())
+		logger.Info(fmt.Sprintf("db closed, received entity: %s", entity.GetId()))
 		return
 	}
 
-	key := entity.GetId()
+	key := entity.GetKey()
 	snapshot, err := copyEntitySnapshot(entity)
 	if err != nil {
 		logger.ErrorNoStack("snapshot entity failed, key " + key + ", error: " + err.Error())
@@ -130,7 +129,7 @@ func (qc *QueueContainer) consumeKey(key string) {
 func (qc *QueueContainer) doSave(entity Entity) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			slog.Error("panic when save entity", "err", r, "key", entity.GetId())
+			logger.ErrorNoStack(fmt.Sprintf("panic when save entity: %s", entity.GetId()))
 			err = fmt.Errorf("panic when save entity: %v", r)
 		}
 	}()
@@ -157,7 +156,7 @@ func (qc *QueueContainer) ShutdownGraceful() {
 		return true
 	})
 
-	slog.Info("persist container shutdown gracefully", "name", qc.name)
+	logger.Info(fmt.Sprintf("queue container shutdown gracefully: %s", qc.name))
 }
 
 // Size 当前队列大小

@@ -16,7 +16,7 @@ type Item struct {
 	ItemId int32
 	Count  int32
 	Level  int32
-	Extra string 
+	Extra  string
 }
 
 func (i *Item) ChangeAmount(change int32) int32 {
@@ -25,23 +25,23 @@ func (i *Item) ChangeAmount(change int32) int32 {
 }
 
 func (i *Item) ToVo() protos.ItemInfo {
-	vo :=  protos.ItemInfo{
+	vo := protos.ItemInfo{
 		Cf_id: i.ItemId,
-		Uid: i.Uid,
+		Uid:   i.Uid,
 		Count: i.Count,
 		Level: i.Level,
-		Extra:  i.Extra,
+		Extra: i.Extra,
 	}
 	return vo
 }
 
 var errorIllegalParams = errors.NewBusinessError(constants.I18N_COMMON_ILLEGAL_PARAMS)
 
-/// 背包
+// / 背包
 type Backpack struct {
-	Items map[string]*Item
-	configProvider      configcontract.ItemConfigProvider `gorm:"-"`
-	Capacity            int32 `gorm:"-"`
+	Items          map[string]*Item
+	configProvider configcontract.ItemConfigProvider `gorm:"-"`
+	Capacity       int32                             `gorm:"-"`
 }
 
 func (b *Backpack) AfterLoad() {
@@ -50,7 +50,7 @@ func (b *Backpack) AfterLoad() {
 	}
 }
 
-/// 基础道具配置提供器
+// / 基础道具配置提供器
 type BaseItemConfigProvider struct {
 }
 
@@ -58,7 +58,7 @@ func (p *BaseItemConfigProvider) GetConfig(itemId int32) configcontract.ItemConf
 	return config.QueryById[configdomain.PropData](itemId)
 }
 
-/// 符文配置提供器
+// / 符文配置提供器
 type RuneConfigProvider struct {
 }
 
@@ -66,30 +66,21 @@ func (p *RuneConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
 	return config.QueryById[configdomain.RuneData](itemId)
 }
 
-/// 场景道具配置提供器
-type SceneItemConfigProvider struct {
-}
-
-func (p *SceneItemConfigProvider) GetConfig(itemId int32) configcontract.ItemConfig {
-	return config.QueryById[configdomain.ScenePropData](itemId)
-}
-
 var (
 	BaseItemConfigProviderInstance = &BaseItemConfigProvider{}
-	RuneConfigProviderInstance = &RuneConfigProvider{}
-	SceneItemConfigProviderInstance = &SceneItemConfigProvider{}
+	RuneConfigProviderInstance     = &RuneConfigProvider{}
 )
 
 type ChangeItem struct {
-	from int32
-	to  int32
+	from   int32
+	to     int32
 	change int32
 	Item   *Item
 }
 
-/// 道具变更结果
+// / 道具变更结果
 type ChangeResult struct {
-	Succ bool
+	Succ         bool
 	ChangedItems []*ChangeItem
 }
 
@@ -105,14 +96,14 @@ func (r *ChangeResult) addChanged(item *Item, from int32, to int32, change int32
 	changeItem := &ChangeItem{
 		from:   from,
 		to:     to,
-		change: change,	
-		Item: item,
+		change: change,
+		Item:   item,
 	}
 	r.Succ = true
 	r.ChangedItems = append(r.ChangedItems, changeItem)
 }
 
-/// 添加道具
+// / 添加道具
 func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item)) (*ChangeResult, error) {
 	if itemId <= 0 || count <= 0 {
 		return nil, errorIllegalParams
@@ -125,7 +116,7 @@ func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item))
 	// 先尝试往已有物品堆叠
 	for _, item := range b.Items {
 		if item.ItemId == itemId && (maxOverlap == 0 || item.Count < maxOverlap) {
-			canAdd := remaining 
+			canAdd := remaining
 			if maxOverlap > 0 {
 				canAdd = min(remaining, maxOverlap-item.Count)
 			}
@@ -139,12 +130,12 @@ func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item))
 			}
 		}
 	}
-	 // 若还有剩余，创建新物品
-	 for remaining > 0 {
+	// 若还有剩余，创建新物品
+	for remaining > 0 {
 		newItemAmount := remaining
-		if (maxOverlap == 0) {
+		if maxOverlap == 0 {
 			newItemAmount = remaining
-		} else{
+		} else {
 			newItemAmount = min(remaining, maxOverlap)
 		}
 		remaining -= newItemAmount
@@ -159,28 +150,28 @@ func (b *Backpack) AddByModelId(itemId int32, count int32, initFunc func(*Item))
 		}
 		b.Items[newItem.Uid] = newItem
 		changeResult.addChanged(newItem, 0, newItemAmount, newItemAmount)
-	 }
+	}
 	return changeResult, nil
 }
 
-/// 通过配置模型ID减少道具
+// / 通过配置模型ID减少道具
 func (b *Backpack) ReduceByModelId(itemId int32, count int32) *ChangeResult {
 	toRemove := count
 	hasNum := b.GetItemCount(itemId)
-	result :=  &ChangeResult{
+	result := &ChangeResult{
 		Succ: false,
 	}
 	if hasNum < toRemove {
 		return result
 	}
-	
+
 	for _, item := range b.Items {
 		if item.ItemId == itemId {
 			fromNum := item.Count
 			if item.Count >= toRemove {
 				item.ChangeAmount(-toRemove)
 				curr := item.Count
-				if (curr == 0) {
+				if curr == 0 {
 					delete(b.Items, item.Uid)
 				}
 				result.addChanged(item, fromNum, curr, -toRemove)
@@ -197,7 +188,7 @@ func (b *Backpack) ReduceByModelId(itemId int32, count int32) *ChangeResult {
 	return result
 }
 
-/// 通过道具UID减少道具
+// / 通过道具UID减少道具
 func (b *Backpack) ReduceByUid(uid string, count int32) (*ChangeResult, error) {
 	if count <= 0 {
 		return nil, errorIllegalParams
@@ -218,7 +209,7 @@ func (b *Backpack) ReduceByUid(uid string, count int32) (*ChangeResult, error) {
 	return result, nil
 }
 
-/// 通过道具UID获取道具
+// / 通过道具UID获取道具
 func (b *Backpack) GetItemByUid(uid string) *Item {
 	item, ok := b.Items[uid]
 	if ok {
@@ -227,7 +218,7 @@ func (b *Backpack) GetItemByUid(uid string) *Item {
 	return nil
 }
 
-/// 获取道具数量
+// / 获取道具数量
 func (b *Backpack) GetItemCount(itemId int32) int32 {
 	sum := int32(0)
 	for _, item := range b.Items {
@@ -249,7 +240,7 @@ func (b *Backpack) IsEnough2(cost map[int32]int32) bool {
 	owned := make(map[int32]int32)
 	for _, item := range b.Items {
 		itemId := item.ItemId
-		if _,ok := cost[itemId];ok {
+		if _, ok := cost[itemId]; ok {
 			prev := owned[itemId]
 			owned[itemId] = prev + item.Count
 		}

@@ -1,7 +1,7 @@
 package persist
 
 import (
-	"log/slog"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -41,7 +41,7 @@ func (dc *DelayContainer) Receive(entity Entity) {
 		return
 	}
 
-	key := entity.GetId()
+	key := entity.GetKey()
 	snapshot, err := copyEntitySnapshot(entity)
 	if err != nil {
 		logger.ErrorNoStack("snapshot entity failed, key " + key + ", error: " + err.Error())
@@ -135,7 +135,7 @@ func (dc *DelayContainer) ShutdownGraceful() {
 		return true
 	})
 
-	slog.Info("delay container shutdown gracefully", "name", dc.name)
+	logger.Info(fmt.Sprintf("delay container shutdown gracefully: %s", dc.name))
 }
 
 // Size 获取当前待持久化数量

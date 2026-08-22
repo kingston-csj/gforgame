@@ -30,7 +30,7 @@ func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32
 	}
 	andConsume := &consume.AndConsume{}
 	for i := 0; i < int(count); i++ {
-		andConsume.Add(consume.ParseConsume(mallData.Consumes))
+		andConsume.Add(mallData.Consumes.(consume.Consume))
 	}
 	andConsume = andConsume.Merge()
 	err := andConsume.Verify(player)
@@ -60,7 +60,7 @@ func (s *MallService) Buy(player *playerdomain.Player, mallId int32, count int32
 	// 奖励
 	andReward := &reward.AndReward{}
 	for i := 0; i < int(count); i++ {
-		andReward.AddReward(reward.ParseReward(mallData.Rewards))
+		andReward.AddReward(mallData.Rewards.(reward.Reward))
 	}
 	andReward = andReward.Merge()
 	andReward.Reward(player, constants.ActionType_BuyMall)

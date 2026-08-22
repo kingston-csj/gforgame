@@ -1,8 +1,11 @@
 package persist
 
 import (
+	"fmt"
 	"hash/fnv"
 	"sync"
+
+	"github.com/forfun/gforgame/common/logger"
 )
 
 // PersistContainerGroup 持久化容器组（分片并发持久化）
@@ -57,6 +60,11 @@ func (g *PersistContainerGroup) ShutdownGraceful() {
 		wg.Add(1)
 		go func(c PersistContainer) {
 			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error("", fmt.Errorf("PersistContainerGroup ShutdownGraceful panic: %v", r))
+				}
+			}()
 			c.ShutdownGraceful()
 		}(container)
 	}

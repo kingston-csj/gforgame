@@ -1,5 +1,9 @@
 package config
 
+import (
+	domainreward "github.com/forfun/gforgame/internal/domain/reward"
+)
+
 // 任务表
 type QuestData struct {
 	Id int32 `json:"id" excel:"id"`
@@ -21,8 +25,8 @@ type QuestData struct {
 	PreviousId int32 `json:"previousId" excel:"previousId"`
 	// 下一个任务（主线）
 	Next int32 `json:"next" excel:"next"`
-	// 奖励数组字符串
-	Rewards string `json:"rewards" excel:"rewards"`
+	// 奖励
+	Rewards domainreward.Reward `json:"rewards" excel:"rewards"`
 	// 1继承历史进度（0不继承）
 	History int32 `json:"history" excel:"history"`
 	// 额外参数

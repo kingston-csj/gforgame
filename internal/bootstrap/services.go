@@ -128,7 +128,6 @@ func registerServices(c *dig.Container) {
 
 	_ = c.Provide(itemconfigprovider.NewBaseItemConfigProvider, dig.Name("base_item"))
 	_ = c.Provide(itemconfigprovider.NewRuneConfigProvider, dig.Name("rune_item"))
-	_ = c.Provide(itemconfigprovider.NewSceneItemConfigProvider, dig.Name("scene_item"))
 	// 将 几个 named provider 聚合成 ItemConfigProviders，供 PlayerRepository/PlayerService 注入
 	_ = c.Provide(func(in itemConfigProvidersIn) playerdomain.ItemConfigProviders {
 		return playerdomain.ItemConfigProviders{Base: in.Base, Rune: in.Rune}
