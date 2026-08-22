@@ -1,6 +1,6 @@
 package player
 
-import "github.com/forfun/gforgame/internal/fight/attribute"
+import "github.com/forfun/gforgame/internal/domain/attr"
 
 type Hero struct {
 	// 模型ID
@@ -10,7 +10,7 @@ type Hero struct {
 	// 阶段
 	Stage int32
 	// 属性
-	AttrBox *attribute.AttrBox `json:"-"` // 该字段不参与序列化
+	AttrBox *attr.AttrBox `json:"-"` // 该字段不参与序列化
 	// 战斗力
 	Fight int32
 	// 位置 1-5 0为空闲位置

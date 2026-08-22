@@ -5,14 +5,14 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/internal/config"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/fight/buff"
 	"github.com/forfun/gforgame/internal/fight/state"
 )
 
 type baseActor struct {
-	attrBox  *attribute.AttrBox
+	attrBox  *attr.AttrBox
 	id       string
 	modelId  int32
 	hp       int32
@@ -22,7 +22,7 @@ type baseActor struct {
 	stateBox *state.StateBox
 }
 
-func (a *baseActor) GetAttrContainer() *attribute.AttrBox {
+func (a *baseActor) GetAttrContainer() *attr.AttrBox {
 	return a.attrBox
 }
 
@@ -51,7 +51,7 @@ func (a *baseActor) ChangeHp(delta int32) {
 }
 
 func (a *baseActor) GetAttackSpeed() int32 {
-	return int32(a.attrBox.GetAttr(attribute.Speed).Value)
+	return int32(a.attrBox.GetAttr(attr.Speed).Value)
 }
 
 func (a *baseActor) GetSkills() []int32 {
@@ -91,7 +91,7 @@ func (a *baseActor) NextSkill() int32 {
 }
 
 // 属性值由两部分组成： 本身养成属性+战斗触发buff
-func (a *baseActor) GetAttrValue(attrType attribute.AttrType) int32 {
+func (a *baseActor) GetAttrValue(attrType attr.AttrType) int32 {
 	return a.attrBox.GetAttrValue(attrType) + a.buffBox.GetAttrValue(attrType)
 }
 

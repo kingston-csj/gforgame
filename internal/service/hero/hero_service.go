@@ -10,6 +10,7 @@ import (
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	"github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
@@ -432,14 +433,14 @@ func (ps *HeroService) DoChangePosition(p *player.Player, heroId int32, position
 func (ps *HeroService) ReCalculateHeroAttr(p *player.Player, hero *player.Hero, notify bool) {
 	// 英雄本身属性
 	heroData := config.QueryById[configdomain.HeroData](hero.ModelId)
-	attrContainer := attribute.NewAttrBox()
-	attrContainer.AddAttrs(heroData.GetHeroAttrs())
+	attrContainer := attr.NewAttrBox()
+	attrContainer.AddAttrs(heroData.GetAttrs())
 
 	// 英雄等级属性
 	levelContainer := config.GetSpecificContainer[*container.HeroLevelContainer]()
 	levelData := levelContainer.GetLevelData(hero.ModelId, hero.Level)
 	if levelData != nil {
-		attrContainer.AddAttrs(levelData.GetHeroLevelAttrs())
+		attrContainer.AddAttrs(levelData.GetAttrs())
 	}
 
 	// 英雄突破属性

@@ -2,7 +2,7 @@ package player
 
 import (
 	configcontract "github.com/forfun/gforgame/internal/config/contracts"
-	"github.com/forfun/gforgame/internal/fight/attribute"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/persist"
@@ -10,24 +10,24 @@ import (
 
 type Player struct {
 	persist.BaseEntity
-	Name         string             `gorm:"player's name"`
-	Head         int32              `gorm:"player's head default:0"`
-	ClientScore  int32              `gorm:"player's client score"`
-	ClientData   string             `gorm:"player's client data"`
-	RechargeRmb  int32              `gorm:"player's recharge rmb"`
-	VipLevel     int32              `gorm:"player's vip level"`
-	CreateTime   int64              `gorm:"player's create time"`
-	Level        int32              `gorm:"player's' level"`
-	Guanka       int32              `gorm:"player's' guanka"`
-	Stage        int32              `gorm:"player's stage"`
-	ArenaScore   int32              `gorm:"player's arena score"`
-	Backpack     *Backpack          `gorm:"-"`
-	RuneBackpack *Backpack          `gorm:"-"`
-	HeroBox      *HeroBox           `gorm:"-"`
-	Purse        *Purse             `gorm:"-"`
-	AttrBox      *attribute.AttrBox `gorm:"-"`
-	DailyReset   *DailyReset        `gorm:"-"`
-	WeeklyReset  *WeeklyReset       `gorm:"-"`
+	Name         string        `gorm:"player's name"`
+	Head         int32         `gorm:"player's head default:0"`
+	ClientScore  int32         `gorm:"player's client score"`
+	ClientData   string        `gorm:"player's client data"`
+	RechargeRmb  int32         `gorm:"player's recharge rmb"`
+	VipLevel     int32         `gorm:"player's vip level"`
+	CreateTime   int64         `gorm:"player's create time"`
+	Level        int32         `gorm:"player's' level"`
+	Guanka       int32         `gorm:"player's' guanka"`
+	Stage        int32         `gorm:"player's stage"`
+	ArenaScore   int32         `gorm:"player's arena score"`
+	Backpack     *Backpack     `gorm:"-"`
+	RuneBackpack *Backpack     `gorm:"-"`
+	HeroBox      *HeroBox      `gorm:"-"`
+	Purse        *Purse        `gorm:"-"`
+	AttrBox      *attr.AttrBox `gorm:"-"`
+	DailyReset   *DailyReset   `gorm:"-"`
+	WeeklyReset  *WeeklyReset  `gorm:"-"`
 	// 月度重置
 	MonthlyReset *MonthlyResetBox `gorm:"-"`
 	Fight        int32            `gorm:"player's fight"`
@@ -78,9 +78,9 @@ func (p *Player) AfterLoad(providers ItemConfigProviders) error {
 	p.ensureComponent(&p.ExtendBox, func() *ExtendBox {
 		return &ExtendBox{}
 	})
-	p.AttrBox = attribute.NewAttrBox()
+	p.AttrBox = attr.NewAttrBox()
 	for _, hero := range p.HeroBox.Heros {
-		hero.AttrBox = attribute.NewAttrBox()
+		hero.AttrBox = attr.NewAttrBox()
 	}
 	p.ensureComponent(&p.QuestBox, func() *QuestBox {
 		return &QuestBox{

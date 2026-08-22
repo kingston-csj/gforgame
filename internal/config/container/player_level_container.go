@@ -3,13 +3,12 @@ package container
 import (
 	"github.com/forfun/gforgame/data"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 )
 
 type PlayerLevelContainer struct {
 	*data.Container[int32, configdomain.PlayerLevelData]
 	levelDataMap map[int32]map[int32]*configdomain.PlayerLevelData
-	MaxLevel int32
+	MaxLevel     int32
 }
 
 func (c *PlayerLevelContainer) Init() {
@@ -42,13 +41,4 @@ func (c *PlayerLevelContainer) GetLevelData(playerId int32, level int32) *config
 		return modelMap[level]
 	}
 	return nil
-}
-
-// GetHeroLevelAttrs 获取玩家等级属性
-func (c *PlayerLevelContainer) GetPlayerLevelAttrs(heroId int32, level int32) []attribute.Attribute {
-	data := c.GetLevelData(heroId, level)
-	if data == nil {
-		return nil
-	}
-	return data.GetPlayerLevelAttrs()
 }

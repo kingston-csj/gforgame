@@ -1,8 +1,8 @@
 package fight
 
 import (
+	"github.com/forfun/gforgame/internal/domain/attr"
 	"github.com/forfun/gforgame/internal/fight/actor"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/fight/skill"
 )
 
@@ -46,8 +46,8 @@ func (b *BattleUnit) CalculateHurt() int32 {
 	attacker := b.GetAttacker()
 	defender := b.GetDefender()
 	// 攻方攻击力*伤害倍率-对方防御力
-	damage := int32(float32(attacker.GetAttrValue(attribute.Attack)) * float32(damageRate) / 10000)
-	damage = max(damage-int32(defender.GetAttrValue(attribute.Defense)), 1)
+	damage := int32(float32(attacker.GetAttrValue(attr.Attack)) * float32(damageRate) / 10000)
+	damage = max(damage-int32(defender.GetAttrValue(attr.Defense)), 1)
 
 	return damage
 }

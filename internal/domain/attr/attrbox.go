@@ -1,4 +1,4 @@
-package attribute
+package attr
 
 type AttrBox struct {
 	Attrs map[AttrType]int32 `json:"-"`

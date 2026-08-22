@@ -5,27 +5,27 @@ import (
 
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/config"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/idgen"
 )
 
 type AttrBuff struct {
 	Buff
-	Attrs map[attribute.AttrType]int32
+	Attrs map[attr.AttrType]int32
 }
 
 // NewAttrBuff creates a new attribute buff
 func NewAttrBuff(modelId int32) *AttrBuff {
 	buffData := config.QueryById[configdomain.BuffData](modelId)
 
-	attr_map := make(map[attribute.AttrType]int32)
+	attr_map := make(map[attr.AttrType]int32)
 	// attack_10;defense_11
 	attrStrs := strings.Split(buffData.Params, ";")
 	for _, attrStr := range attrStrs {
 		attrType := strings.Split(attrStr, "_")[0]
 		attrValue := strings.Split(attrStr, "_")[1]
-		attr_map[attribute.AttrType(attrType)], _ = conv.StringToInt32(attrValue)
+		attr_map[attr.AttrType(attrType)], _ = conv.StringToInt32(attrValue)
 	}
 	return &AttrBuff{
 		Buff: Buff{

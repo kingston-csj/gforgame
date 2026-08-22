@@ -4,19 +4,19 @@ import (
 	"unsafe"
 
 	"github.com/forfun/gforgame/internal/config"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 )
 
 type BuffBox struct {
 	buffs map[int32][]*Buff
-	Attrs map[attribute.AttrType]int32
+	Attrs map[attr.AttrType]int32
 }
 
 func NewBuffBox() *BuffBox {
 	return &BuffBox{
 		buffs: make(map[int32][]*Buff),
-		Attrs: make(map[attribute.AttrType]int32),
+		Attrs: make(map[attr.AttrType]int32),
 	}
 }
 
@@ -69,11 +69,11 @@ func NewBuff(modelId int32) *Buff {
 	}
 }
 
-func (b *BuffBox) GetAttrs() map[attribute.AttrType]int32 {
+func (b *BuffBox) GetAttrs() map[attr.AttrType]int32 {
 	return b.Attrs
 }
 
-func (b *BuffBox) GetAttrValue(attrType attribute.AttrType) int32 {
+func (b *BuffBox) GetAttrValue(attrType attr.AttrType) int32 {
 	v, ok := b.Attrs[attrType]
 	if !ok {
 		return 0

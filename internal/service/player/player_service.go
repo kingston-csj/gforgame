@@ -18,10 +18,10 @@ import (
 	"github.com/forfun/gforgame/internal/config/container"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/consume"
+	"github.com/forfun/gforgame/internal/domain/attr"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
 	"github.com/forfun/gforgame/internal/events"
-	"github.com/forfun/gforgame/internal/fight/attribute"
 	"github.com/forfun/gforgame/internal/idgen"
 	"github.com/forfun/gforgame/internal/infra/net"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
@@ -351,16 +351,16 @@ func (ps *PlayerService) RefreshFighting(player *playerdomain.Player) {
 }
 
 func (ps *PlayerService) recomputeAttribute(player *playerdomain.Player) {
-	attrContainer := attribute.NewAttrBox()
+	attrContainer := attr.NewAttrBox()
 	// 主公等级属性
 
 	heroLevelData := config.QueryById[configdomain.HeroLevelData](player.Level)
-	attrContainer.AddAttrs(heroLevelData.GetHeroLevelAttrs())
+	attrContainer.AddAttrs(heroLevelData.GetAttrs())
 
 	// 主公突破属性
 	stageContainer := config.GetSpecificContainer[*container.HeroStageContainer]()
 	stageData := stageContainer.GetRecordByStage(player.Stage)
-	attrContainer.AddAttrs(stageData.GetHeroStageAttrs())
+	attrContainer.AddAttrs(stageData.GetAttrs())
 
 	player.AttrBox = attrContainer
 }
