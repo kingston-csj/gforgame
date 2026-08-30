@@ -14,6 +14,7 @@ import (
 	"github.com/forfun/gforgame/internal/gatewayadapter"
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
 )
 
@@ -55,7 +56,7 @@ func main() {
 		ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher),
 		ws.WithCodec(codec),
-		ws.WithPayloadMode(network.PayloadModeRawBody),
+		ws.WithPayloadMode(protocol.PayloadModeRawBody),
 	)
 	err = node.Start()
 	if err != nil {

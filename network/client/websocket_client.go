@@ -11,6 +11,7 @@ import (
 
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/session"
 	"github.com/gorilla/websocket"
 )
@@ -23,7 +24,7 @@ type WebSocketClient struct {
 	// 消息编解码
 	MsgCodec codec.MessageCodec
 	// 消息分发器
-	IoDispatcher network.IoDispatch
+	IoDispatcher dispatch.IoDispatch
 	// 可选请求头
 	Header http.Header
 	// 可选自定义拨号器
@@ -52,10 +53,10 @@ func (c *WebSocketClient) OpenSession() (network.Session, error) {
 		conn:        conn,
 		messageType: c.resolveMessageType(),
 	}
-	session := session.NewSession(wsConn, c.MsgCodec)
-	go session.Write()
-	go session.Read()
-	return session, nil
+	s := session.NewSession(wsConn, c.MsgCodec)
+	go s.Write()
+	go s.Read()
+	return s, nil
 }
 
 func (c *WebSocketClient) buildURL() (string, error) {

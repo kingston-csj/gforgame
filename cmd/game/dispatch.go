@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/forfun/gforgame/actor"
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
@@ -18,7 +19,7 @@ import (
 	"github.com/forfun/gforgame/network/protocol"
 )
 
-var logicResponseCodec = json.NewSerializer()
+// var logicResponseCodec = json.NewSerializer()
 
 // GateTransformHandler 将网关消息TransferGateToLogic转换为实际的消息
 type GateTransformHandler struct {
@@ -40,7 +41,7 @@ func (g *GateTransformHandler) MessageReceived(session network.Session, frame *p
 		logger.ErrorNoStack(fmt.Errorf("invalid transfer message: %T", frame.Msg))
 		return false
 	}
-	typ, _ := network.GetMessageType(transfer.Cmd)
+	typ, _ := protocol.GetMessageType(transfer.Cmd)
 	if typ == nil {
 		logger.ErrorNoStack(fmt.Errorf("message type not found: %d", transfer.Cmd))
 		return false
@@ -59,9 +60,20 @@ func (g *GateTransformHandler) MessageReceived(session network.Session, frame *p
 
 type GameTaskHandler struct {
 	router *network.MessageRoute
+	actorSystem *actor.ActorSystem
 }
 
-func (g *GameTaskHandler) MessageReceived(session network.Session, frame *protocol.RequestDataFrame) bool {
+func NewGameTaskHandler(router *network.MessageRoute, actorSystem *actor.ActorSystem) *GameTaskHandler {
+	path := actor.NewActorPath("game", "gate", "shared_anonymous")
+	sharedActor := NewSharedAnonymousActor(router)
+	actorSystem.Spawn(path, sharedActor) // mailbox容量256
+	return &GameTaskHandler{
+		router: router,
+		actorSystem: actorSystem,
+	}
+}
+
+func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.RequestDataFrame) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
@@ -69,7 +81,7 @@ func (g *GameTaskHandler) MessageReceived(session network.Session, frame *protoc
 	}()
 
 	// 补齐 playerId，后续路由和回包都依赖它。
-	fillFramePayloadFromSession(session, frame)
+	fillFramePayloadFromSession(s, frame)
 	// 先定位消息处理器，找不到就直接终止当前消息。
 	msgHandler := g.getMessageHandler(frame)
 	if msgHandler == nil {
@@ -83,16 +95,37 @@ func (g *GameTaskHandler) MessageReceived(session network.Session, frame *protoc
 			if errMsg != "" {
 				// logger.Info(fmt.Sprintf("validation failed for cmd=%d: %s", frame.Header.Cmd, errMsg))
 				if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_PROTOCOL_VALIDATION_FAILED); ok {
-					session.Send(resp, frame.Header.Index)
+					s.Send(resp, frame.Header.Index)
 				}
 				return false
 			}
 		}
 	}
 	// 直连模式下打印入站消息，便于本地排查。
-	logInboundMessage(session, frame)
-	// 优先走代码生成分发，失败时再回退到反射调用。
-	return g.dispatchMessage(session, frame, msgHandler)
+	logInboundMessage(s, frame)
+	playerId := frame.Header.Payload
+	var ref *actor.ActorRef
+	if frame.Header.Cmd != protos.CmdReqPlayerLogin {
+		// 构造actor路径，示例：game/player/10001
+		path := actor.NewActorPath("game", "player", playerId)
+		ref, _ = g.actorSystem.GetOrCreate(path,  func() (actor.Actor, error) {
+			// 只有当actor不存在的时候，这个闭包才执行
+			return NewPlayerActor(frame.Header.Payload, g.router), nil
+		})
+	} else {
+		ref = g.actorSystem.Find("game/gate/shared_anonymous")			
+	}
+	task := &PlayerMsgTask{
+		session:    s,
+		frame:      frame,
+		msgHandler: msgHandler,
+	}
+	err := ref.Tell(task)
+	if err != nil {
+		logger.ErrorNoStack(fmt.Errorf("player mailbox full, drop msg playerId=%s cmd=%d", frame.Header.Payload, frame.Header.Cmd))
+		return false
+	}
+	return true
 }
 
 func sendResponse(session network.Session, frame *protocol.RequestDataFrame, resp any) error {
@@ -111,10 +144,8 @@ func fillFramePayloadFromSession(session network.Session, frame *protocol.Reques
 	if frame.Header.Payload != "" {
 		return
 	}
-	if id, ok := session.GetAttr("id"); ok {
-		if sid, ok := id.(string); ok {
-			frame.Header.Payload = sid
-		}
+	if id := session.GetOwnerId(); id != "" {
+		frame.Header.Payload = session.GetOwnerId()
 	}
 }
 
@@ -127,25 +158,22 @@ func (g *GameTaskHandler) getMessageHandler(frame *protocol.RequestDataFrame) *n
 }
 
 func logInboundMessage(session network.Session, frame *protocol.RequestDataFrame) {
-	msgName, _ := network.GetMsgName(frame.Header.Cmd)
+	msgName, _ := protocol.GetMsgName(frame.Header.Cmd)
 	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
-	if err != nil || strings.Index(msgName, "HeartBeat") != -1 {
+	if err != nil || strings.Contains(msgName, "HeartBeat") {
 		return
 	}
 	id := "anonymous"
 	if serverconfig.ServerConfig.UseGateMode {
 		id = frame.Header.Payload
 	} else {
-		id, ok := session.GetAttr("id")
-		if ok {
-			id = id.(string)
-		}
+		id = session.GetOwnerId()
 	}
 
 	logger.Info(fmt.Sprintf("[%s] 接收消息: cmd:%d, name:%s, 内容:%s", id, frame.Header.Cmd, msgName, jsonStr))
 }
 
-func (g *GameTaskHandler) dispatchMessage(session network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler) bool {
+func dispatchMessage(session network.Session, frame *protocol.RequestDataFrame, msgHandler *network.Handler) bool {
 	resp, handled, dispatchErr, panicErr := callGeneratedRouteHandlerSafely(frame.Header.Cmd, msgHandler, session, frame.Header.Index, frame.Msg, frame.Header.Payload)
 	if handled {
 		if panicErr != nil {

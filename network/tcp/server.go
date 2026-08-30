@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"runtime"
 	"sync"
 
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	serverpkg "github.com/forfun/gforgame/network/server"
 )
 
@@ -23,14 +22,10 @@ type TcpServer struct {
 var _ serverpkg.Server = (*TcpServer)(nil)
 
 func NewServer(opts ...Option) *TcpServer {
-	opt := Options{BaseServerOptions: serverpkg.BaseServerOptions{DispatchWorkers: 1}}
+	opt := Options{}
 	for _, option := range opts {
 		option(&opt)
 	}
-	if opt.UseGateway && opt.DispatchWorkers <= 0 {
-		opt.DispatchWorkers = int32(runtime.NumCPU())
-	}
-
 	s := &TcpServer{
 		Options: opt,
 		Running: make(chan bool),
@@ -90,7 +85,7 @@ func (s *TcpServer) startListen() {
 			return
 		}
 		go func(conn net.Conn) {
-			network.ServeSessionConn(conn, s.MessageCodec, s.IoDispatch, s.DispatchWorkers, s.PayloadMode)
+			dispatch.CreateServeSession(conn, s.MessageCodec, s.IoDispatch, s.PayloadMode)
 		}(conn)
 	}
 }

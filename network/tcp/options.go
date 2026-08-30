@@ -3,6 +3,8 @@ package tcp
 import (
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
+	"github.com/forfun/gforgame/network/protocol"
 	serverpkg "github.com/forfun/gforgame/network/server"
 )
 
@@ -20,7 +22,7 @@ func WithAddress(addr string) Option {
 }
 
 // WithIoDispatch 消息处理链
-func WithIoDispatch(dispatch network.IoDispatch) Option {
+func WithIoDispatch(dispatch dispatch.IoDispatch) Option {
 	return func(opt *Options) {
 		opt.IoDispatch = dispatch
 	}
@@ -40,16 +42,8 @@ func WithRouter(r *network.MessageRoute) Option {
 	}
 }
 
-// WithDispatchWorkers 设置每条连接的消息消费 worker 数。
-// 值 <= 0 时按 1 处理。
-func WithDispatchWorkers(n int32) Option {
-	return func(opt *Options) {
-		opt.DispatchWorkers = n
-	}
-}
-
 // WithPayloadMode 设置消息体处理模式（解析 or 原始转发）。
-func WithPayloadMode(mode network.PayloadMode) Option {
+func WithPayloadMode(mode protocol.PayloadMode) Option {
 	return func(opt *Options) {
 		opt.PayloadMode = mode
 	}

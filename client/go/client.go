@@ -13,6 +13,7 @@ import (
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/client"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/persist"
 )
@@ -73,15 +74,15 @@ func main() {
 		Level:      999,
 	}
 	cross.PlayerLoginRemote(p, cross.Island)
-	network.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
-	network.RegisterMessage(protos.CmdResPlayerLogin, &protos.ResPlayerLogin{})
+	protocol.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
+	protocol.RegisterMessage(protos.CmdResPlayerLogin, &protos.ResPlayerLogin{})
 
 	// 服务器地址和端口
 	address := "127.0.0.1:9090"
 	// msgCodec := protobuf.NewSerializer()
 	msgCodec := json.NewSerializer()
 
-	ioDispatcher := &network.BaseIoDispatch{}
+	ioDispatcher := &dispatch.BaseIoDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{})
 	tcpClient := &client.TcpSocketClient{RemoteAddress: address, MsgCodec: msgCodec}
 	session, err := tcpClient.OpenSession()

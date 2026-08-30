@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"reflect"
 
+	"github.com/forfun/gforgame/actor"
 	"github.com/forfun/gforgame/cache"
 	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/schedule"
@@ -52,7 +53,7 @@ type Services struct {
 	CacheManager         *cache.Manager
 	OnlinePlayerRegistry *net.OnlinePlayerRegistry
 	PlayerTaskDispatcher *dispatch.PlayerTaskDispatcher
-
+	ActorSystem  *actor.ActorSystem
 	// dao层
 	PlayerRepo     *playerrepo.PlayerRepository
 	ProfileService *playerrepo.PlayerProfileService
@@ -117,13 +118,14 @@ func registerServices(c *dig.Container) {
 	// 基础设施：缓存管理器 + 异步落库服务 + 任务调度器（单例，供所有 repository/service 注入）
 	_ = c.Provide(cache.NewCacheManager)
 	_ = c.Provide(persistence.NewAsyncDbService)
+	_ = c.Provide(actor.NewActorSystem)
 	// gorm.DB 单例：InitMysql() 已在容器建立前完成初始化，provider 直接返回全局 Db 供 repository 注入
 	_ = c.Provide(func() *gorm.DB { return persistence.Db })
 	// TaskScheduler 是接口类型，dig 按精确类型匹配，需显式 provider 返回接口
 	_ = c.Provide(func() schedule.TaskScheduler { return schedule.NewDefaultTaskScheduler() })
 	_ = c.Provide(net.NewOnlinePlayerRegistry)
-	_ = c.Provide(func(onlinePlayerRegistry *net.OnlinePlayerRegistry) *dispatch.PlayerTaskDispatcher {
-		return dispatch.NewPlayerTaskDispatcher(32, onlinePlayerRegistry)
+	_ = c.Provide(func(actorSystem *actor.ActorSystem) *dispatch.PlayerTaskDispatcher {
+		return dispatch.NewPlayerTaskDispatcher(actorSystem)
 	})
 
 	_ = c.Provide(itemconfigprovider.NewBaseItemConfigProvider, dig.Name("base_item"))

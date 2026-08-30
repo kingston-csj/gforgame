@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/forfun/gforgame/network/protocol"
 )
 
 type (
@@ -42,7 +44,7 @@ func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 		mt := method.Type
 		if r.isHandlerMethod(method) {
 			hasPlayer, hasSession, containsIndex, cmdFieldIndex := parseHandlerSignature(mt)
-			cmd, err := GetMessageCmdFromType(mt.In(cmdFieldIndex))
+			cmd, err := protocol.GetMessageCmdFromType(mt.In(cmdFieldIndex))
 			if err != nil {
 				return err
 			}

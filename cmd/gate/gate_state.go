@@ -5,6 +5,7 @@ import (
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 )
 
 type backendPool struct {
@@ -16,7 +17,7 @@ type backendPool struct {
 
 var (
 	gateMsgCodec        = json.NewSerializer()
-	logicIoDispatcher   network.IoDispatch
+	logicIoDispatcher   dispatch.IoDispatch
 	backendPools        = make(map[int32]*backendPool)
 	backendPoolsMu      sync.RWMutex
 	serverDiscoveryStop = make(chan struct{})

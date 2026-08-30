@@ -19,6 +19,7 @@ import (
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/route"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/ws"
 )
 
@@ -33,7 +34,7 @@ type generatedRouteInvoker func(msgHandler *network.Handler, playerID string, se
 var generatedRouteDispatchers = map[int32]generatedRouteInvoker{}
 
 type MyMessageDispatch struct {
-	network.BaseIoDispatch
+	dispatch.BaseIoDispatch
 	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 

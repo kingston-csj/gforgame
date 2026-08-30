@@ -12,6 +12,8 @@ import (
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/protocol"
+	"github.com/forfun/gforgame/network/session"
 )
 
 var (
@@ -35,9 +37,12 @@ func SetOnlinePlayerRegistry(registry *net.OnlinePlayerRegistry) {
 }
 
 func NotifyByPlayerId(playerID string, index int32, data any) {
+	if !onlinePlayerRegistry.IsOnline(playerID) {
+		return
+	}
 	if !serverconfig.ServerConfig.UseGateMode {
 		// 直连模式：playerId 映射的是客户端会话，直接发送即可
-		if s := onlinePlayerRegistry.GetSessionByPlayerID(playerID); s != nil {
+		if s, found := session.GetSessionByOwnerId(playerID); found {
 			_ = s.Send(data, index)
 		}
 		return
@@ -49,7 +54,7 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 		logger.ErrorNoStack(fmt.Errorf("gate session not ready, player=%s", playerID))
 		return
 	}
-	cmd, err := network.GetMessageCmd(data)
+	cmd, err := protocol.GetMessageCmd(data)
 	if err != nil {
 		return
 	}
@@ -64,9 +69,9 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 		Index:    index,
 	}
 
-	msgName, _ := network.GetMsgName(cmd)
+	msgName, _ := protocol.GetMsgName(cmd)
 	jsonStr, err := jsonutil.StructToJSON(data)
-	logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
+	logger.Info(fmt.Sprintf("[%s] 发送消息:  cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
 	_ = gs.Send(transferBody, index)
 }
 

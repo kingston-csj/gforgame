@@ -1,4 +1,4 @@
-package session
+package dispatch
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package session
+package protocol
 
 // PayloadMode controls whether a session decodes message body into typed structs
 // or forwards raw payload bytes with only protocol headers parsed.

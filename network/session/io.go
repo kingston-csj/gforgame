@@ -21,6 +21,11 @@ type WebSocketConn interface {
 }
 
 func (s *BaseSession) Write() {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.ErrorNoStack(fmt.Sprintf("session write panic %v", r))
+		}
+	}()
 	for {
 		select {
 		case data := <-s.dataToSend:
@@ -46,20 +51,60 @@ func (s *BaseSession) Read() {
 			logger.ErrorNoStack(fmt.Sprintf("panic recovered: %v", r))
 		}
 	}()
+
 	if wsConn, ok := s.conn.(WebSocketConn); ok {
-		s.readWebSocketMessages(wsConn)
+		s.readWebSocketStream(wsConn)
 	} else {
-		s.readTCPStream()
+		s.readTcpStream()
 	}
 }
 
-func (s *BaseSession) readWebSocketMessages(wsConn WebSocketConn) {
-	protocolDetermined := false
+// 【公共抽取：解析数据包并投递到DataReceived，统一处理Die信号】
+func (s *BaseSession) decodeAndDeliverPackets(packets []*protocol.Packet) {
+	for _, p := range packets {
+		var ioFrame *protocol.RequestDataFrame
+		if s.payloadMode == protocol.PayloadModeRawBody {
+			ioFrame = &protocol.RequestDataFrame{
+				Header: p.Header,
+				Msg:    p.Data,
+			}
+		} else {
+			typ, _ := protocol.GetMessageType(p.Header.Cmd)
+			if typ == nil {
+				logger.ErrorNoStack(fmt.Sprintf("message type not found %v", p.Header.Cmd))
+				continue
+			}
+			msg := reflect.New(typ.Elem()).Interface()
+			err := s.MessageCodec.Decode(p.Data, msg)
+			if err != nil {
+				logger.ErrorNoStack(fmt.Sprintf("decode message failed %v", err))
+				continue
+			}
+			ioFrame = &protocol.RequestDataFrame{
+				Header: p.Header,
+				Msg:    msg,
+			}
+		}
 
+		// 投递前监听Die，防止向关闭的DataReceived写入panic
+		select {
+		case <-s.Die:
+			return
+		case s.DataReceived <- ioFrame:
+		}
+	}
+}
+
+func (s *BaseSession) readWebSocketStream(wsConn WebSocketConn) {
+	protocolDetermined := false
 	for {
+		// WebSocket ReadMessage是阻塞调用，无法被Die直接唤醒，依赖底层conn关闭唤醒
 		messageType, messageData, err := wsConn.ReadMessage()
 		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived) {
+			if websocket.IsCloseError(err,
+				websocket.CloseNormalClosure,
+				websocket.CloseGoingAway,
+				websocket.CloseNoStatusReceived) {
 				return
 			}
 			errMsg := err.Error()
@@ -69,13 +114,15 @@ func (s *BaseSession) readWebSocketMessages(wsConn WebSocketConn) {
 			logger.ErrorNoStack(fmt.Sprintf("websocket read failed %v", err))
 			return
 		}
-		s.MarkReadActivity()
 
+		// 读到数据后先检查Die
 		select {
 		case <-s.Die:
 			return
 		default:
 		}
+
+		s.MarkReadActivity()
 
 		if !protocolDetermined {
 			var newProtocolType protocol.ProtocolType
@@ -84,7 +131,6 @@ func (s *BaseSession) readWebSocketMessages(wsConn WebSocketConn) {
 			} else {
 				newProtocolType = protocol.ProtocolTypeBinary
 			}
-
 			if s.protocolType != newProtocolType {
 				factory := &protocol.ProtocolFactory{}
 				s.ProtocolCodec = factory.NewProtocolAdapter(newProtocolType)
@@ -101,36 +147,12 @@ func (s *BaseSession) readWebSocketMessages(wsConn WebSocketConn) {
 			}
 			continue
 		}
-
-		if s.payloadMode == PayloadModeRawBody {
-			for _, p := range packets {
-				ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: p.Data}
-				s.DataReceived <- ioFrame
-			}
-			continue
-		}
-
-		for _, p := range packets {
-			typ, _ := messageResolver.GetMessageType(p.Header.Cmd)
-			if typ == nil {
-				logger.ErrorNoStack(fmt.Sprintf("message type not found %v", p.Header.Cmd))
-				continue
-			}
-			msg := reflect.New(typ.Elem()).Interface()
-			err := s.MessageCodec.Decode(p.Data, msg)
-			if err != nil {
-				logger.ErrorNoStack(fmt.Sprintf("decode message failed %v", err))
-				continue
-			}
-			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
-			s.DataReceived <- ioFrame
-		}
+		s.decodeAndDeliverPackets(packets)
 	}
 }
 
-func (s *BaseSession) readTCPStream() {
+func (s *BaseSession) readTcpStream() {
 	buf := make([]byte, 10240)
-
 	for {
 		select {
 		case <-s.Die:
@@ -146,31 +168,14 @@ func (s *BaseSession) readTCPStream() {
 		if n <= 0 {
 			continue
 		}
+
 		s.MarkReadActivity()
 		packets, err := s.ProtocolCodec.Decode(buf[:n])
 		if err != nil {
 			logger.ErrorNoStack(fmt.Errorf("decode protocol failed %v", err))
 			return
 		}
-		for _, p := range packets {
-			if s.payloadMode == PayloadModeRawBody {
-				ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: p.Data}
-				s.DataReceived <- ioFrame
-				continue
-			}
-			typ, _ := messageResolver.GetMessageType(p.Header.Cmd)
-			if typ == nil {
-				logger.ErrorNoStack(fmt.Sprintf("message type not found %v", p.Header.Cmd))
-				continue
-			}
-			msg := reflect.New(typ.Elem()).Interface()
-			err := s.MessageCodec.Decode(p.Data, msg)
-			if err != nil {
-				logger.ErrorNoStack(fmt.Sprintf("decode message failed %v", err))
-				continue
-			}
-			ioFrame := &protocol.RequestDataFrame{Header: p.Header, Msg: msg}
-			s.DataReceived <- ioFrame
-		}
+		s.decodeAndDeliverPackets(packets)
 	}
 }
+

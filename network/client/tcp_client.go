@@ -5,6 +5,7 @@ import (
 
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/session"
 )
 
@@ -15,7 +16,7 @@ type TcpSocketClient struct {
 	// 消息编解码
 	MsgCodec codec.MessageCodec
 	// 消息分发器
-	IoDispatcher network.IoDispatch
+	IoDispatcher dispatch.IoDispatch
 }
 
 func (c *TcpSocketClient) OpenSession() (network.Session, error) {
@@ -24,8 +25,8 @@ func (c *TcpSocketClient) OpenSession() (network.Session, error) {
 		return nil, err
 	}
 	// defer conn.Close()
-	session := session.NewSession(conn, c.MsgCodec)
-	go session.Write()
-	go session.Read()
-	return session, nil
+	s := session.NewSession(conn, c.MsgCodec)
+	go s.Write()
+	go s.Read()
+	return s, nil
 }

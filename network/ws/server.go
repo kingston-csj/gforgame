@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"runtime"
 	"sync"
 	"time"
 
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	serverpkg "github.com/forfun/gforgame/network/server"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -29,14 +27,10 @@ type WsServer struct {
 var _ serverpkg.Server = (*WsServer)(nil)
 
 func NewServer(opts ...Option) *WsServer {
-	opt := Options{BaseServerOptions: serverpkg.BaseServerOptions{DispatchWorkers: 1}}
+	opt := Options{}
 	for _, option := range opts {
 		option(&opt)
 	}
-	if opt.UseGateway && opt.DispatchWorkers <= 0 {
-		opt.DispatchWorkers = int32(runtime.NumCPU())
-	}
-
 	if opt.wsPath == "" {
 		opt.wsPath = "ws"
 	}
@@ -101,7 +95,7 @@ func (n *WsServer) startListen() error {
 			return
 		}
 		go func(conn net.Conn) {
-			network.ServeSessionConn(conn, n.MessageCodec, n.IoDispatch, n.DispatchWorkers, n.PayloadMode)
+			dispatch.CreateServeSession(conn, n.MessageCodec, n.IoDispatch, n.PayloadMode)
 		}(c)
 	})
 

@@ -10,7 +10,9 @@ import (
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/protocol"
+	"github.com/forfun/gforgame/network/session"
 )
 
 // 作为网关，处理客户端请求
@@ -20,23 +22,26 @@ type ClientRouter struct {
 }
 
 type MyMessageDispatch struct {
-	network.BaseIoDispatch
+	dispatch.BaseIoDispatch
 	onlinePlayerRegistry *net.OnlinePlayerRegistry
 }
 
-func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
+func (m *MyMessageDispatch) OnSessionClosed(s network.Session) {
 	// 两个session相同，才可以移除在线
 	// 否则，顶号会有问题
 	unbindPlayer := false
-	if v, ok := session.GetAttr("sessionPlayerKey"); ok {
-		if sessionPlayerKey, ok := v.(string); ok && sessionPlayerKey != "" {
-			if current := m.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey); current == session {
-				unbindPlayer = true
-				notifyLogicPlayerLogout(session)
-				unbindPlayerServer(sessionPlayerKey)
-			}
+	if v, ok := s.GetAttr("sessionPlayerKey"); ok {
+		sessionPlayerKey := v.(string)
+		if current, found := session.GetSessionByOwnerId(sessionPlayerKey); found && current == s {
+			unbindPlayer = true
+			notifyLogicPlayerLogout(s)
+			unbindPlayerServer(sessionPlayerKey)
 		}
-		m.onlinePlayerRegistry.RemovePlayerSession(session, unbindPlayer)
+		if unbindPlayer {
+			// fmt.Sprintf("%d_%s", serverID, playerID)
+			uid := strings.Split(sessionPlayerKey, "_")[1]
+			m.onlinePlayerRegistry.RemoveOnlinePlayer(uid)
+		}
 	}
 }
 
@@ -69,7 +74,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-	msgName, _ := network.GetMsgName(frame.Header.Cmd)
+	msgName, _ := protocol.GetMsgName(frame.Header.Cmd)
 	logger.Info(fmt.Sprintf("接收消息: cmd:%d, name:%s, 内容:%s", frame.Header.Cmd, msgName, frame.Msg))
 	if frame.Header.Cmd == gateLoginAdapter.LoginCmd() {
 		body, ok := frame.Msg.([]byte)
@@ -95,7 +100,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 	return true
 }
 
-func (g *ClientRouter) HandleLoginReq(session network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
+func (g *ClientRouter) HandleLoginReq(s network.Session, loginReq contract.GateLoginRequest, frame *protocol.RequestDataFrame) error {
 	logger.Info(fmt.Sprintf("登录请求: %v", loginReq))
 	playerID := loginReq.GetPlayerID()
 	serverID := loginReq.GetServerID()
@@ -110,23 +115,23 @@ func (g *ClientRouter) HandleLoginReq(session network.Session, loginReq contract
 	}
 
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	oldSession := g.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey)
-	if oldSession != nil && oldSession != session {
+	oldSession, found := session.GetSessionByOwnerId(sessionPlayerKey)
+	if found && oldSession != s {
 		logger.Info("玩家顶号登录[" + sessionPlayerKey + "]")
 		oldSession.SendAndClose(gateLoginAdapter.NewReplacingLoginPush())
 		// return fmt.Errorf("multi client login")
 	}
-	if oldSession == session {
+	if oldSession == s {
 		logger.Info("玩家重复登录[" + sessionPlayerKey + "]")
 	}
-	session.SetAttr("id", playerID)
-	session.SetAttr("serverId", serverID)
-	session.SetAttr("sessionPlayerKey", sessionPlayerKey)
-	g.onlinePlayerRegistry.AddPlayerSession(session, sessionPlayerKey)
+	s.SetOwnerId(playerID)
+	s.SetAttr("serverId", serverID)
+	s.SetAttr("sessionPlayerKey", sessionPlayerKey)
+	session.Bind(s.GetOwnerId(), playerID)
 	g.onlinePlayerRegistry.AddOnlinePlayer(playerID)
 
 	bindPlayerServer(sessionPlayerKey, serverID)
-	return transferMsgToLogic(session, frame, serverID)
+	return transferMsgToLogic(s, frame, serverID)
 }
 
 // 转发消息到logic层

@@ -8,7 +8,7 @@ import (
 	"github.com/forfun/gforgame/network/protocol"
 )
 
-// Session 抽象一条连接上的会话能力，面向业务层暴露。
+// Session 抽象一条连接上的会话能力
 type Session interface {
 	// Read 启动读循环（应作为 goroutine 启动）。
 	Read()
@@ -21,7 +21,7 @@ type Session interface {
 	LastReadAt() time.Time
 
 	// SetPayloadMode 切换消息体解码模式。
-	SetPayloadMode(mode PayloadMode)
+	SetPayloadMode(mode protocol.PayloadMode)
 
 	// Send 发送一条经过 MessageCodec + ProtocolCodec 编码的消息，带上请求索引。
 	Send(msg any, index int32) error
@@ -36,30 +36,31 @@ type Session interface {
 	SetAttr(key string, value any) error
 	// GetAttr 读取自定义属性。
 	GetAttr(key string) (any, bool)
-	// GetId 读取会话绑定的玩家/节点 ID（内部从 Attrs["id"] 读取）。
-	GetId() string
-	// SetId 设置会话绑定的玩家/节点 ID。
-	SetId(id string)
-
-	// Close 关闭会话（幂等）。
-	Close()
+	// GetId 读取会话唯一 ID。
+	GetId() ID
+	// GetOwnerId 读取会话绑定的用户 ID。
+	GetOwnerId() OwnerID
+	// SetOwnerId 设置会话绑定的用户 ID。
+	SetOwnerId(id OwnerID)
 
 	// DieChan 会话关闭广播通道。
 	DieChan() <-chan bool
-	// AsynTasksChan 异步任务队列（可读可写）。
-	AsynTasksChan() chan func()
 	// DataReceivedChan 入站消息队列。
 	DataReceivedChan() <-chan *protocol.RequestDataFrame
-	// Conn 返回底层连接。
-	Conn() net.Conn
+	// RawConn 返回底层连接。
+	RawConn() net.Conn
 
 	// GetProtocolCodec 返回私有协议栈编解码器。
 	GetProtocolCodec() protocol.ProtocolAdapter
 	// GetMessageCodec 返回消息编解码器。
 	GetMessageCodec() codec.MessageCodec
-
+	
+	// Close 关闭会话（幂等）。
+	Close()
 	// ToString 打印会话关键信息，用于日志。
 	ToString() string
+	// IsAlive 判断会话是否存活。
+	IsAlive() bool
 }
 
 // 编译期断言：*BaseSession 必须实现 Session 接口。

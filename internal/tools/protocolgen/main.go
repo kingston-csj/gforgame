@@ -8,7 +8,7 @@ import (
 	"github.com/forfun/gforgame/common/logger"
 	_ "github.com/forfun/gforgame/internal/protos"
 	protocolexporter "github.com/forfun/gforgame/internal/tools/protocol"
-	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/protocol"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		csharpOutDir,
 		templatePath,
 	)
-	if err := generator.Generate(network.GetMsgName2IdMapper()); err != nil {
+	if err := generator.Generate(protocol.GetMsgName2IdMapper()); err != nil {
 		panic(err)
 	}
 	if err := generator.BaseGenerator.GenerateRegisterFromTags(protosDir, registerFile, nil); err != nil {

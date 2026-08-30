@@ -415,7 +415,7 @@ func (b *BaseGenerator) GenerateRegisterFromTags(goDir string, outputFile string
 		})
 		buf.WriteString(fmt.Sprintf("\t// ----from %s----\n", fileName))
 		for _, e := range list {
-			buf.WriteString(fmt.Sprintf("\tnetwork.RegisterMessage(%d, &%s{})\n", e.Cmd, e.Type))
+			buf.WriteString(fmt.Sprintf("\tprotocol.RegisterMessage(%d, &%s{})\n", e.Cmd, e.Type))
 		}
 		buf.WriteString("\n")
 	}

@@ -128,12 +128,3 @@ func (f *ProtocolFactory) NewProtocolAdapter(protocolType ProtocolType) Protocol
 		return NewBinaryProtocolAdapter() // 默认使用二进制协议
 	}
 }
-
-// DetectProtocolType 检测协议类型
-func DetectProtocolType(data []byte) ProtocolType {
-	// 检查是否为JSON格式
-	if len(data) > 0 && (data[0] == '{' || data[0] == '[') {
-		return ProtocolTypeJSON
-	}
-	return ProtocolTypeBinary
-}

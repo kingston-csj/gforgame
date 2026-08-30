@@ -9,7 +9,9 @@ import (
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/protocol"
+	"github.com/forfun/gforgame/network/session"
 )
 
 // 作为逻辑层，接收logic层的推送
@@ -52,8 +54,8 @@ func (g *LogicRouter) forwardTransferToClient(logicSession network.Session, tran
 		return fmt.Errorf("logic session serverId is empty, playerId=%s cmd=%d", playerID, cmd)
 	}
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	clientSession := g.onlinePlayerRegistry.GetSessionByPlayerID(sessionPlayerKey)
-	if clientSession == nil {
+	clientSession, found := session.GetSessionByOwnerId(sessionPlayerKey)
+	if !found {
 		return fmt.Errorf("client session not found, sessionPlayerKey=%s cmd=%d", sessionPlayerKey, cmd)
 	}
 	frame, err := clientSession.GetProtocolCodec().Encode(cmd, index, body)
@@ -78,7 +80,7 @@ func resolveBackendServerID(session network.Session) int32 {
 }
 
 type GateAndLogicMessageDispatch struct {
-	network.BaseIoDispatch
+	dispatch.BaseIoDispatch
 }
 
 // OnSessionCreated 会话创建时调用
@@ -88,7 +90,7 @@ func (d *GateAndLogicMessageDispatch) OnSessionCreated(session network.Session) 
 	session.Send(req, 0)
 }
 
-func newLogicIoDispatcher(onlinePlayerRegistry *net.OnlinePlayerRegistry) network.IoDispatch {
+func newLogicIoDispatcher(onlinePlayerRegistry *net.OnlinePlayerRegistry) dispatch.IoDispatch {
 	router := network.NewMessageRoute()
 	ioDispatcher := &GateAndLogicMessageDispatch{}
 	ioDispatcher.AddHandler(&LogicRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})

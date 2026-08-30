@@ -21,7 +21,7 @@ func sendTransferToBackend(serverID int32, transfer any, index int32) error {
 		return fmt.Errorf("backend session not ready, serverId=%d", serverID)
 	}
 	if err := session.Send(transfer, index); err != nil {
-		if !isSessionAlive(session) {
+		if !session.IsAlive() {
 			// 连接已死亡才执行重连。
 			removeBackendSession(serverID, session)
 			session.Close()
@@ -29,7 +29,7 @@ func sendTransferToBackend(serverID int32, transfer any, index int32) error {
 		} else {
 			// 普通发送失败（如消息编解码异常），仅记录日志，
 			// 由上层出站队列决定是否重试。
-			logger.ErrorNoStack(fmt.Errorf("backend send failed, serverId=%d alive=%v err=%v", serverID, isSessionAlive(session), err))
+			logger.ErrorNoStack(fmt.Errorf("backend send failed, serverId=%d alive=%v err=%v", serverID, session.IsAlive(), err))
 		}
 		return err
 	}
@@ -45,23 +45,10 @@ func pickBackendSession(serverID int32) network.Session {
 	if !ok {
 		return nil
 	}
-	if !isSessionAlive(pool.session) {
+	if !pool.session.IsAlive() {
 		pool.session = nil
 	}
 	return pool.session
-}
-
-// isSessionAlive 通过 Die 信号判断连接活性。
-func isSessionAlive(session network.Session) bool {
-	if session == nil {
-		return false
-	}
-	select {
-	case <-session.DieChan():
-		return false
-	default:
-		return true
-	}
 }
 
 // removeBackendSession 仅在目标会话匹配时才清理，避免误删新连接。
@@ -171,7 +158,7 @@ func ensureBackendPool(serverID int32, addr string) {
 	} else {
 		pool.addr = addr
 	}
-	connected := isSessionAlive(pool.session)
+	connected := pool.session.IsAlive()
 	backendPoolsMu.Unlock()
 	if connected {
 		return
@@ -216,7 +203,7 @@ func connectBackendSession(serverID int32, addr string) error {
 		session.Close()
 		return nil
 	}
-	if isSessionAlive(pool.session) {
+	if pool.session.IsAlive() {
 		backendPoolsMu.Unlock()
 		// 并发重连时可能已经有人先连上，直接放弃当前新连接。
 		session.Close()
@@ -226,7 +213,7 @@ func connectBackendSession(serverID int32, addr string) error {
 	session.SetAttr("serverId", serverID)
 	// 后端 session 没有玩家 id，但 Send 要求 id 非空（用于日志），
 	// 这里给一个可识别的占位 id，避免 Send 误判为非法会话而关闭连接。
-	session.SetId(fmt.Sprintf("%d", serverID))
+	session.SetOwnerId(fmt.Sprintf("%d", serverID))
 
 	pool.session = session
 	pool.reconnecting = false
@@ -362,7 +349,7 @@ func checkBackendSessions() {
 		if pool == nil {
 			continue
 		}
-		if isSessionAlive(pool.session) {
+		if pool.session.IsAlive() {
 			continue
 		}
 		if pool.session != nil {
