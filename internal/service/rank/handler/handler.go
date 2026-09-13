@@ -13,6 +13,7 @@ type RankHandler interface {
 	QueryRanks(start int, end int) []model.BaseRank
 	QueryRankOrder(key any) int
 	UpdateRank(rank model.BaseRank)
+	Shutdown()
 	GetMyRankInfo(playerId string) *protos.RankInfo
 }
 
@@ -35,7 +36,7 @@ func (h *BaseRankHandler) QueryRanks(start int, end int) []model.BaseRank {
 		if index >= int(maxSize) {
 			break
 		}
-		rankEntries = append(rankEntries, item.Value.(model.BaseRank))
+		rankEntries = append(rankEntries, item.Value)
 	}
 
 	return rankEntries
@@ -54,4 +55,8 @@ func (h *BaseRankHandler) QueryRankOrder(key any) int {
 
 func (h *BaseRankHandler) UpdateRank(rank model.BaseRank) {
 	h.rankContainer.Update(rank.GetId(), rank)
+}
+
+func (h *BaseRankHandler) Shutdown() {
+	h.rankContainer.Stop()
 }

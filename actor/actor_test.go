@@ -88,25 +88,15 @@ func (p *playerActor) OnStop() {}
 func TestActorSystem_TwoPlayerDonate(t *testing.T) {
 	sys := actor.NewActorSystem()
 	guildPath := actor.NewActorPath("game", "guild", "1")
-	guildRef, err := sys.Spawn(guildPath, newGuildActor(1))
-	if err != nil {
-		t.Fatalf("spawn guild failed: %v", err)
-	}
+	guildRef := sys.Spawn(guildPath, newGuildActor(1))
 
 	p1Path := actor.NewActorPath("game", "player", "1001")
-	player1Ref, err := sys.Spawn(p1Path, newPlayerActor(1001, guildRef))
-	if err != nil {
-		t.Fatalf("spawn player1 failed: %v", err)
-	}
-
+	player1Ref := sys.Spawn(p1Path, newPlayerActor(1001, guildRef))
 	p2Path := actor.NewActorPath("game", "player", "1002")
-	player2Ref, err := sys.Spawn(p2Path, newPlayerActor(1002, guildRef))
-	if err != nil {
-		t.Fatalf("spawn player2 failed: %v", err)
-	}
+	player2Ref := sys.Spawn(p2Path, newPlayerActor(1002, guildRef))
 
 	for i := 0; i < 3; i++ {
-		err = player1Ref.Tell(MsgDoDonate{Val: 100})
+		err := player1Ref.Tell(MsgDoDonate{Val: 100})
 		if err != nil {
 			t.Fatalf("player1 tell fail: %v", err)
 		}
@@ -118,7 +108,7 @@ func TestActorSystem_TwoPlayerDonate(t *testing.T) {
 
 	// FIFO栅栏，等待前面全部消息处理完成
 	type syncBarrier struct{}
-	_, err = guildRef.Ask(syncBarrier{} )
+	_, err := guildRef.Ask(syncBarrier{} )
 	if err != nil {
 		t.Fatalf("barrier wait fail %v", err)
 	}
@@ -142,22 +132,14 @@ func TestActorSystem_TwoPlayerDonate(t *testing.T) {
 func ExampleActorSystem_TwoPlayerDonate() {
 	sys := actor.NewActorSystem()
 	guildPath := actor.NewActorPath("game", "guild", "g1")
-	guildRef, err := sys.Spawn(guildPath, newGuildActor(1))
-	if err != nil {
-		return
-	}
+	guildRef := sys.Spawn(guildPath, newGuildActor(1))
 
 	p1Path := actor.NewActorPath("game", "player", "p1001")
-	player1Ref, err := sys.Spawn(p1Path, newPlayerActor(1001, guildRef))
-	if err != nil {
-		return
-	}
+	player1Ref := sys.Spawn(p1Path, newPlayerActor(1001, guildRef))
+
 
 	p2Path := actor.NewActorPath("game", "player", "p1002")
-	player2Ref, err := sys.Spawn(p2Path, newPlayerActor(1002, guildRef))
-	if err != nil {
-		return
-	}
+	player2Ref := sys.Spawn(p2Path, newPlayerActor(1002, guildRef))
 
 	for i := 0; i < 3; i++ {
 		_ = player1Ref.Tell(MsgDoDonate{Val: 100})

@@ -14,9 +14,9 @@ type PlayerFightingRankHandler struct {
 	playerRepo *playerrepo.PlayerRepository
 }
 
-func NewPlayerFightingRankHandler(playerRepo *playerrepo.PlayerRepository) *PlayerFightingRankHandler {
+func NewPlayerFightingRankHandler(playerRepo *playerrepo.PlayerRepository, rankContainer *container.ConcurrentRankContainer) *PlayerFightingRankHandler {
 	return &PlayerFightingRankHandler{
-		BaseRankHandler: BaseRankHandler{rankContainer: container.NewConcurrentRankContainer(100)},
+		BaseRankHandler: BaseRankHandler{rankContainer: rankContainer},
 		playerRepo:      playerRepo,
 	}
 }

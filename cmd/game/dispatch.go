@@ -108,9 +108,9 @@ func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.Req
 	if frame.Header.Cmd != protos.CmdReqPlayerLogin {
 		// 构造actor路径，示例：game/player/10001
 		path := actor.NewActorPath("game", "player", playerId)
-		ref, _ = g.actorSystem.GetOrCreate(path,  func() (actor.Actor, error) {
+		ref = g.actorSystem.GetOrCreate(path,  func() (actor.Actor)  {
 			// 只有当actor不存在的时候，这个闭包才执行
-			return NewPlayerActor(frame.Header.Payload, g.router), nil
+			return NewPlayerActor(frame.Header.Payload, g.router)
 		})
 	} else {
 		ref = g.actorSystem.Find("game/gate/shared_anonymous")			

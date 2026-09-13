@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/emirpasic/gods/maps/treemap"
+	"github.com/forfun/gforgame/actor"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/service/rank/model"
 )
@@ -36,15 +38,103 @@ func (r TestRank) CompareTo(other model.BaseRank) int {
 	return strings.Compare(r.Id, o.Id)
 }
 
+type testRankActor struct {
+	ranks    *treemap.Map
+	capacity int
+}
+
+func newTestRankActor(capacity int) *testRankActor {
+	return &testRankActor{capacity: capacity}
+}
+
+func (a *testRankActor) OnStart() {
+	a.ranks = treemap.NewWith(model.CompareRank)
+}
+
+func (a *testRankActor) OnMessage(raw actor.Message) actor.Message {
+	switch cmd := raw.(type) {
+	case *AddCmd:
+		a.ranks.Put(cmd.Value, cmd.Key)
+		if a.ranks.Size() > a.capacity {
+			it := a.ranks.Iterator()
+			it.Last()
+			a.ranks.Remove(it.Key())
+		}
+		return &AddResp{}
+	case *RemoveCmd:
+		it := a.ranks.Iterator()
+		for it.Next() {
+			if it.Value() == cmd.Key {
+				a.ranks.Remove(it.Key())
+				break
+			}
+		}
+		return &RemoveResp{}
+	case *UpdateCmd:
+		it := a.ranks.Iterator()
+		for it.Next() {
+			if it.Value() == cmd.Key {
+				a.ranks.Remove(it.Key())
+				break
+			}
+		}
+		a.ranks.Put(cmd.Value, cmd.Key)
+		if a.ranks.Size() > a.capacity {
+			it := a.ranks.Iterator()
+			it.Last()
+			a.ranks.Remove(it.Key())
+		}
+		return &UpdateResp{}
+	case *GetCmd:
+		it := a.ranks.Iterator()
+		for it.Next() {
+			if it.Value() == cmd.Key {
+				return &GetResp{Value: it.Key()}
+			}
+		}
+		return &GetResp{Value: nil}
+	case *GetItemsCmd:
+		items := make([]RankEntry, 0, a.ranks.Size())
+		it := a.ranks.Iterator()
+		for it.Next() {
+			items = append(items, RankEntry{
+				Key:   it.Value(),
+				Value: it.Key().(model.BaseRank),
+			})
+		}
+		return &GetItemsResp{Items: items}
+	case *ContainsCmd:
+		exists := false
+		it := a.ranks.Iterator()
+		for it.Next() {
+			if it.Value() == cmd.Key {
+				exists = true
+				break
+			}
+		}
+		return &ContainsResp{Exists: exists}
+	case *SizeCmd:
+		return &SizeResp{Size: a.ranks.Size()}
+	}
+	return nil
+}
+
+func (a *testRankActor) OnStop() {}
+
+func newTestRankContainer(capacity int) *ConcurrentRankContainer {
+	sys := actor.NewActorSystem()
+	path := actor.NewActorPath("test", "rank", "test_rank")
+	ref := sys.Spawn(path, newTestRankActor(capacity))
+	return NewConcurrentRankContainer(ref)
+}
+
 func TestPlayerLevelRankHandler_UpdateRank(t *testing.T) {
 
 }
 
 func TestRankContainer_RemoveOrdering(t *testing.T) {
-	// 创建一个容量为7的排行榜容器
-	container := NewConcurrentRankContainer(7)
+	container := newTestRankContainer(7)
 
-	// 添加一些测试数据
 	testData := []struct {
 		key   string
 		score int64
@@ -58,18 +148,15 @@ func TestRankContainer_RemoveOrdering(t *testing.T) {
 		{"player7", 700},
 	}
 
-	// 添加数据
 	for _, data := range testData {
 		container.Add(data.key, TestRank{Id: data.key, Score: data.score})
 	}
 
-	// 验证初始顺序
 	items := container.GetItems()
 	if len(items) != 7 {
 		t.Errorf("Expected 7 items, got %d", len(items))
 	}
 
-	// 验证初始顺序是否正确（应该是从大到小，同分按ID排序）
 	expectedInitialOrder := []struct {
 		id    string
 		score int64
@@ -94,16 +181,13 @@ func TestRankContainer_RemoveOrdering(t *testing.T) {
 		}
 	}
 
-	// 删除中间的元素（player2，分数200）
 	container.Remove("player2")
 
-	// 获取删除后的数据
 	items = container.GetItems()
 	if len(items) != 6 {
 		t.Errorf("Expected 6 items after removal, got %d", len(items))
 	}
 
-	// 验证删除后的顺序是否正确
 	expectedAfterRemoval := []struct {
 		id    string
 		score int64
