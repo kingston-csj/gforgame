@@ -1,7 +1,7 @@
 /**
  * {{.ClassComment}}
  */
-export default class {{.ClassName}} {
+export  class {{.ClassName}} {
     {{if .Cmd}} public static cmd: number =  {{.Cmd}}; {{end}}
         {{range .Fields}}
         /** {{.Comment}} */

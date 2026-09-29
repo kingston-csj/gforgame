@@ -1,4 +1,4 @@
-import RewardVo from "../../net/protocol/items/RewardVo";
+import RewardVo from "../../net/protocol/hero/items/RewardVo";
 
 export class RewardUtil {
     

@@ -7,7 +7,7 @@ import UiViewFactory from '../../ui/UiViewFactory';
 import { BaseController } from '../../frame/mvc/BaseController';
 
 import GameContext from '../../GameContext';
-import { ReqLoadingFinish } from '../../net/protocol/ReqLoadingFinish';
+import { ReqPlayerLoadingFinish } from '../../net/protocol/player/ReqPlayerLoadingFinish';
 import { NumberUtils } from '../../utils/NumberUtils';
 import { MainPaneView } from './MainPaneView';
 import { PurseModel } from './PurseModel';
@@ -27,7 +27,7 @@ export class MainPaneController extends BaseController {
     this.getInstance().then((controller) => {
       if (controller.mainView) {
         controller.mainView.display();
-        GameContext.wsClient.sendMessage(ReqLoadingFinish.cmd, {});
+        GameContext.wsClient.sendMessage(ReqPlayerLoadingFinish.cmd, {});
       }
     });
   }

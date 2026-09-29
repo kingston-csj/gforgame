@@ -1,5 +1,5 @@
 import { BaseModel } from "../../frame/mvc/BaseModel";
-import { ItemInfo } from "../../net/protocol/items/ItemInfo";
+import { ItemInfo } from "../../net/protocol/hero/items/ItemInfo";
 
 export default class BagpackModel extends BaseModel {
   private static instance: BagpackModel;

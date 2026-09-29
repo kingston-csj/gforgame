@@ -1,7 +1,7 @@
 import GameContext from "../../GameContext";
-import RewardVo from "../../net/protocol/items/RewardVo";
-import { ReqHeroRecruit } from "../../net/protocol/ReqHeroRecruit";
-import { ResHeroRecruit } from "../../net/protocol/ResHeroRecruit";
+import { RewardVo } from "../../net/protocol/common/RewardVo";
+import { ReqHeroRecruit } from "../../net/protocol/hero/ReqHeroRecruit";
+import { ResHeroRecruit } from "../../net/protocol/hero/ResHeroRecruit";
 
 export class RecruitSettleModel {
   public static instance: RecruitSettleModel;

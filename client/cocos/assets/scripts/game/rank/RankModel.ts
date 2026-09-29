@@ -1,8 +1,8 @@
 import { BaseModel } from '../../frame/mvc/BaseModel';
 import GameContext from '../../GameContext';
-import { RankInfo } from '../../net/protocol/items/RankInfo';
-import { ReqRankQuery } from '../../net/protocol/ReqRankQuery';
-import { ResRankQuery } from '../../net/protocol/ResRankQuery';
+import { RankInfo } from '../../net/protocol/rank/RankInfo';
+import { ReqRankQuery } from '../../net/protocol/rank/ReqRankQuery';
+import { ResRankQuery } from '../../net/protocol/rank/ResRankQuery';
 
 export class RankModel extends BaseModel {
   public static readonly RANK_TYPE_LEVEL = 1;

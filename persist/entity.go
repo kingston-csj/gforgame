@@ -16,7 +16,7 @@ type Entity interface {
 }
 
 type BaseEntity struct {
-	Id     string `json:"id"`
+	Id     string `gorm:"column:id;primaryKey"`
 	Delete bool   `json:"delete"`
 }
 

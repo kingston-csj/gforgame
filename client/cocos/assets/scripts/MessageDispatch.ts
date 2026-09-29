@@ -4,24 +4,24 @@ import { HeroBoxModel } from "./game/hero/HeroBoxModel";
 import BagpackModel from "./game/item/BagpackModel";
 import { MailBoxModel } from "./game/mail/MailBoxModel";
 import { PurseModel } from "./game/main/PurseModel";
-import { HeroVo } from "./net/protocol/items/HeroVo";
-import { MailVo } from "./net/protocol/items/MailVo";
-import PushHeroAttrChanged from "./net/protocol/PushHeroAttrChanged";
-import { PushItemChanged } from "./net/protocol/PushItemChanged";
-import { PushPlayerFightChange } from "./net/protocol/PushPlayerFightChange";
-import PushPurseInfo from "./net/protocol/PushPurseInfo";
-import { ResHeroPushInfo } from "./net/protocol/ResAllHeroInfo";
-import PushBackpackInfo from "./net/protocol/PushBackpackInfo";
-import { PushMailAll } from "./net/protocol/ResMailList";
-import PushQuestRefreshVo from "./net/protocol/PushQuestRefreshVo";
+import { HeroInfo as HeroVo} from "./net/protocol/hero/HeroInfo";
+import { MailVo } from "./net/protocol/mail/MailVo";
+import { PushHeroAttrChange } from "./net/protocol/hero/PushHeroAttrChange";
+import { PushItemChanged } from "./net/protocol/item/PushItemChanged";
+import { PushPlayerFightChange } from "./net/protocol/player/PushPlayerFightChange";
+import { PushPurseInfo } from "./net/protocol/item/PushPurseInfo";
+import { PushAllHeroInfo } from "./net/protocol/hero/PushAllHeroInfo";
+import { PushBackpackInfo } from "./net/protocol/item/PushBackpackInfo";
+import { PushMailAll } from "./net/protocol/mail/PushMailAll";
+import { PushQuestRefreshVo } from "./net/protocol/quest/PushQuestRefreshVo";
 import { QuestBoxModel } from "./game/quest/QuestBoxModel";
 import { ConfigContext } from "./data/config/container/ConfigContext";
 import GameConstants from "./game/constants/GameConstants";
 import eventBus from "./frame/commons/eventbus/EventBus";
 import GameEvent from "./game/constants/GameEvent";
-import { PushLoadComplete } from "./net/protocol/PushLoadComplete";
+import { PushLoadComplete } from "./net/protocol/player/PushLoadComplete";
 import { MainPaneController } from "./game/main/MainPaneController";
-import PushQuestDailyInfo from "./net/protocol/PushQuestDailyInfo";
+import { PushQuestDailyInfo } from "./net/protocol/quest/PushQuestDailyInfo";
 
 // 存储待注册的处理器
 const pendingHandlers: Array<{ cmd: number; handler: Function }> = [];
@@ -69,8 +69,8 @@ export class MessageDispatch {
     }
   }
 
-  @MessageHandler(ResHeroPushInfo.cmd)
-  private static onReceiveResHeroPushInfo(msg: ResHeroPushInfo) {
+  @MessageHandler(PushAllHeroInfo.cmd)
+  private static onReceivePushAllHeroInfo(msg: PushAllHeroInfo) {
     if (msg.heros) {
       HeroBoxModel.getInstance().reset(
         new Map(msg.heros.map((hero) => [hero.id, hero])),
@@ -87,8 +87,8 @@ export class MessageDispatch {
     }
   }
 
-  @MessageHandler(PushHeroAttrChanged.cmd)
-  private static onReceivePushHeroAttrChanged(msg: PushHeroAttrChanged) {
+  @MessageHandler(PushHeroAttrChange.cmd)
+  private static onReceivePushHeroAttrChanged(msg: PushHeroAttrChange) {
     const hero = HeroBoxModel.getInstance().getHero(msg.heroId);
     if (hero) {
       // 更新英雄属性

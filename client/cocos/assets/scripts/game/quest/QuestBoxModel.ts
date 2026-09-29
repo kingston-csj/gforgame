@@ -1,6 +1,6 @@
 import { ConfigContext } from "../../data/config/container/ConfigContext";
 import { BaseModel } from "../../frame/mvc/BaseModel";
-import QuestVo from "../../net/protocol/items/QuestVo";
+import QuestVo from "../../net/protocol/hero/items/QuestVo";
 import GameConstants from "../constants/GameConstants";
 import GameEvent from "../constants/GameEvent";
 export class QuestBoxModel extends BaseModel {

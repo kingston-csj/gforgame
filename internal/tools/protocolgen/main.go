@@ -22,13 +22,13 @@ func main() {
 	}
 
 	protosDir := filepath.Join("internal", "protos")
-	csharpOutDir := filepath.Join("internal","tools", "protocol", "output", "csharp")
-	templatePath := filepath.Join("internal","tools", "protocol", "templates", "csharptemplate.tpl")
+	clientProtoOutDir := filepath.Join("internal", "tools", "protocol", "output", "ts")
+	templatePath := filepath.Join("internal", "tools", "protocol", "templates", "tstemplate.tpl")
 	registerFile := filepath.Join("internal", "protos", "register_gen.go")
 
-	generator := protocolexporter.NewCSharpGenerator(
+	generator := protocolexporter.NewTypeScriptGenerator(
 		protosDir,
-		csharpOutDir,
+		clientProtoOutDir,
 		templatePath,
 	)
 	if err := generator.Generate(protocol.GetMsgName2IdMapper()); err != nil {

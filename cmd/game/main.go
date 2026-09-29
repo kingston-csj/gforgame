@@ -6,6 +6,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -152,6 +153,9 @@ func main() {
 	endTime := time.Now()
 	costSeconds := endTime.Sub(startTime).Seconds()
 	logger.Info(fmt.Sprintf("game server is starting at %s, cost %.2fs", serverconfig.ServerConfig.ServerUrl, costSeconds))
+
+	p := s.Player.GetOrCreatePlayer("aaa")
+	logger.Info("p.level " + strconv.Itoa(int(p.Level)))
 
 	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)

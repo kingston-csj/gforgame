@@ -3,10 +3,10 @@ import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { RedDotComponent } from '../../frame/reddot/RedDotCompoent';
 import { RedDotManager } from '../../frame/reddot/RedDotManager';
 import GameContext from '../../GameContext';
-import { ReqMailDeleteAll } from '../../net/protocol/ReqMailDeleteAll';
-import { ReqMailGetAllReward } from '../../net/protocol/ReqMailGetAllReward';
-import { ResMailDeleteAll } from '../../net/protocol/ResMailDeleteAll';
-import { ResMailGetAllReward } from '../../net/protocol/ResMailGetAllReward';
+import { ReqMailDeleteAll } from '../../net/protocol/mail/ReqMailDeleteAll';
+import { ReqMailGetAllRewards } from '../../net/protocol/mail/ReqMailGetAllRewards';
+import { ResMailDeleteAll } from '../../net/protocol/mail/ResMailDeleteAll';
+import { ResMailGetAllRewards } from '../../net/protocol/mail/ResMailGetAllRewards';
 import { MailBoxModel } from './MailBoxModel';
 import { MailItemView } from './MailItemView';
 import { MailManager } from './MailManager';
@@ -41,9 +41,9 @@ export class MailView extends BaseUiView {
 
   private onRewardBtnClick(): void {
     GameContext.wsClient.sendMessage(
-      ReqMailGetAllReward.cmd,
-      new ReqMailGetAllReward(),
-      (res: ResMailGetAllReward) => {
+      ReqMailGetAllRewards.cmd,
+      new ReqMailGetAllRewards(),
+      (res: ResMailGetAllRewards) => {
         if (res.code === 0) {
           // 所有邮件，设置为已领奖
           MailBoxModel.getInstance()
@@ -65,7 +65,7 @@ export class MailView extends BaseUiView {
       (res: ResMailDeleteAll) => {
         if (res.removed.length > 0) {
           // 删除邮件
-          MailBoxModel.getInstance().deleteMails(res.removed);
+          MailBoxModel.getInstance().deleteMails(res.removed.map((id) => Number(id)));
           // 刷新邮件列表
           this.onDisplay();
         }

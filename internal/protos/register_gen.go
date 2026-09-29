@@ -2,7 +2,9 @@
 
 package protos
 
-import "github.com/forfun/gforgame/network/protocol"
+import (
+	"github.com/forfun/gforgame/network/protocol"
+)
 
 func init() {
 	// ----from activity.go----
@@ -18,6 +20,11 @@ func init() {
 	protocol.RegisterMessage(1801, &ReqChat{})
 	protocol.RegisterMessage(1851, &ResChat{})
 	protocol.RegisterMessage(1899, &PushChatNewMessage{})
+
+	// ----from cross.go----
+	protocol.RegisterMessage(-352, &ResServerLogin{})
+	protocol.RegisterMessage(-302, &ReqServerLogin{})
+	protocol.RegisterMessage(-300, &TransferGateToLogic{})
 
 	// ----from friend.go----
 	protocol.RegisterMessage(1902, &ReqFriendSearchPlayers{})
@@ -137,10 +144,5 @@ func init() {
 	protocol.RegisterMessage(-151, &ResHeartBeat{})
 	protocol.RegisterMessage(-102, &ReqGetServerTime{})
 	protocol.RegisterMessage(-101, &ReqHeartBeat{})
-
-	// ----from transfer.go----
-	protocol.RegisterMessage(-352, &ResServerLogin{})
-	protocol.RegisterMessage(-302, &ReqServerLogin{})
-	protocol.RegisterMessage(-300, &TransferGateToLogic{})
 
 }

@@ -387,7 +387,6 @@ func init() {
 			}
 			return r.ReqRankQuery(playerID, index, req), nil
 		},
-
 		9906: func(msgHandler *network.Handler, playerID string, session network.Session, index int32, msg any) (any, error) {
 			r, ok := msgHandler.Receiver.Interface().(*route.MixtureRoute)
 			if !ok {

@@ -1,8 +1,8 @@
 import { _decorator, EditBox } from "cc";
 import { BaseUiView } from "../../frame/mvc/BaseUiView";
 import GameContext from "../../GameContext";
-import ReqGmAction from "../../net/protocol/ReqGmAction";
-import ResGmAction from "../../net/protocol/ResGmAction";
+import { ReqGmCommand } from "../../net/protocol/gm/ReqGmCommand";
+import { ResGmCommand } from "../../net/protocol/gm/ResGmCommand";
 
 const { ccclass, property } = _decorator;
 
@@ -27,11 +27,11 @@ export class GmPaneView extends BaseUiView {
     const itemNum = this.itemNumBox.string;
 
     GameContext.wsClient.sendMessage(
-      ReqGmAction.cmd,
+      ReqGmCommand.cmd,
       {
         args: "add_items " + itemId + "=" + itemNum,
       },
-      (msg: ResGmAction) => {},
+      (msg: ResGmCommand) => {},
     );
   }
 
@@ -39,11 +39,11 @@ export class GmPaneView extends BaseUiView {
     const gold = this.goldBox.string;
 
     GameContext.wsClient.sendMessage(
-      ReqGmAction.cmd,
+      ReqGmCommand.cmd,
       {
         args: "add_gold " + gold,
       },
-      (msg: ResGmAction) => {},
+      (msg: ResGmCommand) => {},
     );
   }
 
@@ -51,11 +51,11 @@ export class GmPaneView extends BaseUiView {
     const diamond = this.diamondBox.string;
 
     GameContext.wsClient.sendMessage(
-      ReqGmAction.cmd,
+      ReqGmCommand.cmd,
       {
         args: "add_diamond " + diamond,
       },
-      (msg: ResGmAction) => {},
+      (msg: ResGmCommand) => {},
     );
   }
 }

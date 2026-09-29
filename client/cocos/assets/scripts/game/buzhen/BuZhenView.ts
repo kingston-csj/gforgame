@@ -1,7 +1,7 @@
 import { _decorator, instantiate, Label, Node, Prefab, ScrollView, Toggle } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { HeroVo } from '../../net/protocol/items/HeroVo';
+import { HeroInfo } from '../../net/protocol/hero/HeroInfo';
 import { NumberUtils } from '../../utils/NumberUtils';
 import { HeroBoxModel } from '../hero/HeroBoxModel';
 import { BuZhenHeroDownItem } from './BuZhenHeroDownItem';
@@ -84,7 +84,7 @@ export class BuZhenView extends BaseUiView {
       child.destroy();
     });
 
-    let items: Array<HeroVo> = this.getAllItems();
+    let items: Array<HeroInfo> = this.getAllItems();
     // 根据品质排序
     items.sort((a, b) => {
       const config1 = ConfigContext.configHeroContainer.getRecord(a.id);
@@ -106,7 +106,7 @@ export class BuZhenView extends BaseUiView {
     }
   }
 
-  private getAllItems(): Array<HeroVo> {
+  private getAllItems(): Array<HeroInfo> {
     if (this.selectedType === 0) {
       return HeroBoxModel.getInstance()
         .getHeroes()
@@ -115,7 +115,7 @@ export class BuZhenView extends BaseUiView {
           return heroData.quality > 0;
         });
     }
-    let items: Array<HeroVo> = HeroBoxModel.getInstance()
+    let items: Array<HeroInfo> = HeroBoxModel.getInstance()
       .getHeroes()
       .filter((hero) => {
         let heroData = ConfigContext.configHeroContainer.getRecord(hero.id);
@@ -132,7 +132,7 @@ export class BuZhenView extends BaseUiView {
   }
 
   public showLineupHeros(): void {
-    let items: Array<HeroVo> = this.getAllItems();
+    let items: Array<HeroInfo> = this.getAllItems();
 
     this.posList.forEach((pos) => {
       pos.getChildByName('pos').active = true;

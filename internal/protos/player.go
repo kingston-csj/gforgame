@@ -45,7 +45,7 @@ type ResPlayerUpLevel struct {
 }
 
 type PushPlayerFightChange struct {
-	_     struct{} `cmd_ref:"CmdPushPlayerFightChange" type:"push"`
+	_     struct{} `cmd_ref:"CmdPlayerPushFightChange" type:"push"`
 	Fight int32    `json:"fight"`
 }
 

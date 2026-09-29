@@ -2,7 +2,7 @@ import { _decorator, Button, instantiate, Label, Node, Prefab, ScrollView } from
 
 import { ConfigContext } from '../../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../../frame/mvc/BaseUiView';
-import { HeroVo } from '../../../net/protocol/items/HeroVo';
+import { HeroInfo as HeroVo} from '../../../net/protocol/hero/HeroInfo';
 import { BuZhenPaneController } from '../../buzhen/BuZhenPaneController';
 import BagpackModel from '../../item/BagpackModel';
 import { PurseModel } from '../../main/PurseModel';

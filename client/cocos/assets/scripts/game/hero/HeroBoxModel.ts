@@ -3,24 +3,24 @@ import HeroData from "../../data/config/model/HeroData";
 import HeroLevelData from "../../data/config/model/HeroLevelData";
 import HerostageData from "../../data/config/model/HerostageData";
 import GameContext from "../../GameContext";
-import { HeroVo } from "../../net/protocol/items/HeroVo";
-import { ReqHeroChangePosition } from "../../net/protocol/ReqHeroChangePosition";
-import { ReqHeroCombine } from "../../net/protocol/ReqHeroCombine";
+import { HeroInfo as HeroVo } from "../../net/protocol/hero/HeroInfo";
+import { ReqHeroChangePosition } from "../../net/protocol/hero/ReqHeroChangePosition";
+import { ReqHeroCombine } from "../../net/protocol/hero/ReqHeroCombine";
 
-import { ReqHeroOffFight } from "../../net/protocol/ReqHeroOffFight";
-import { ReqHeroUpFight } from "../../net/protocol/ReqHeroUpFight";
-import { ReqHeroUpLevel } from "../../net/protocol/ReqHeroUpLevel";
-import { ReqHeroUpStage } from "../../net/protocol/ReqHeroUpStage";
-import { ReqPlayerUpLevel } from "../../net/protocol/ReqPlayerUpLevel";
-import { ReqPlayerUpStage } from "../../net/protocol/ReqPlayerUpStage";
-import { ResHeroChangePosition } from "../../net/protocol/ResHeroChangePosition";
-import { ResHeroCombine } from "../../net/protocol/ResHeroCombine";
-import { ResHeroOffFight } from "../../net/protocol/ResHeroOffFight";
-import { ResHeroUpFight } from "../../net/protocol/ResHeroUpFight";
-import { ResHeroUpLevel } from "../../net/protocol/ResHeroUpLevel";
-import { ResHeroUpStage } from "../../net/protocol/ResHeroUpStage";
-import { ResPlayerUpLevel } from "../../net/protocol/ResPlayerUpLevel";
-import { ResPlayerUpStage } from "../../net/protocol/ResPlayerUpStage";
+import { ReqHeroOffFight } from "../../net/protocol/hero/ReqHeroOffFight";
+import { ReqHeroUpFight } from "../../net/protocol/hero/ReqHeroUpFight";
+import { ReqHeroLevelUp } from "../../net/protocol/hero/ReqHeroLevelUp";
+import { ReqHeroUpStage } from "../../net/protocol/hero/ReqHeroUpStage";
+import { ReqPlayerUpLevel } from "../../net/protocol/player/ReqPlayerUpLevel";
+import { ReqPlayerUpStage } from "../../net/protocol/player/ReqPlayerUpStage";
+import { ResHeroChangePosition } from "../../net/protocol/hero/ResHeroChangePosition";
+import { ResHeroCombine } from "../../net/protocol/hero/ResHeroCombine";
+import { ResHeroOffFight } from "../../net/protocol/hero/ResHeroOffFight";
+import { ResHeroUpFight } from "../../net/protocol/hero/ResHeroUpFight";
+import { ResHeroLevelUp } from "../../net/protocol/hero/ResHeroLevelUp";
+import { ResHeroUpStage } from "../../net/protocol/hero/ResHeroUpStage";
+import { ResPlayerUpLevel } from "../../net/protocol/player/ResPlayerUpLevel";
+import { ResPlayerUpStage } from "../../net/protocol/player/ResPlayerUpStage";
 
 import { AttributeBox } from "../attribute/attributebox";
 import GameConstants from "../constants/GameConstants";
@@ -55,7 +55,7 @@ export class HeroBoxModel {
   public reset(heros: Map<number, HeroVo>) {
     this.heros = heros;
     for (const hero of this.heros.values()) {
-      hero.attrBox = new AttributeBox(hero.attrs);
+      // hero.attrBox = new AttributeBox(hero.attrs);
     }
   }
 
@@ -65,8 +65,6 @@ export class HeroBoxModel {
 
   public addHero(hero: HeroVo) {
     this.heros.set(hero.id, hero);
-    hero.attrBox = new AttributeBox(hero.attrs);
-
     this.notifyHeroAttrChanged();
   }
 
@@ -190,12 +188,12 @@ export class HeroBoxModel {
         );
       } else {
         GameContext.wsClient.sendMessage(
-          ReqHeroUpLevel.cmd,
+          ReqHeroLevelUp.cmd,
           {
             heroId: heroId,
             toLevel: toLevel,
           },
-          (msg: ResHeroUpLevel) => {
+          (msg: ResHeroLevelUp) => {
             resolve(msg.code);
           }
         );

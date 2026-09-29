@@ -4,8 +4,8 @@ import GameContext from '../../GameContext';
 
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { RedDotManager } from '../../frame/reddot/RedDotManager';
-import { ReqMailGetReward } from '../../net/protocol/ReqMailGetReward';
-import { ResMailGetReward } from '../../net/protocol/ResMailGetReward';
+import { ReqMailGetReward } from '../../net/protocol/mail/ReqMailGetReward';
+import { ResMailGetReward } from '../../net/protocol/mail/ResMailGetReward';
 import { TimeUtils } from '../../utils/TimeUtils';
 import { RewardItem } from '../reward/RewardItem';
 import { MailBoxModel } from './MailBoxModel';
@@ -36,7 +36,7 @@ export class MailDetailView extends BaseUiView {
   @property(Node)
   closeBtn: Node;
 
-  selectedMailId: number = 0;
+  selectedMailId: string = "";
 
   protected start(): void {
     this.registerClickEvent(this.rewardBtn, this.onRewardBtnClick, this);
@@ -67,7 +67,7 @@ export class MailDetailView extends BaseUiView {
     this.rewardContainer.children.forEach((child) => {
       child.destroy();
     });
-    if (this.selectedMailId > 0) {
+    if (this.selectedMailId !== "") {
       const mail = MailBoxModel.getInstance().getMail(this.selectedMailId);
       this.titleLabel.string = mail.title;
       this.contentLabel.string = mail.content;

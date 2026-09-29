@@ -1,7 +1,7 @@
 import { _decorator, EventTouch, Label, Node, Vec2, Vec3 } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { HeroVo } from '../../net/protocol/items/HeroVo';
+import { HeroInfo } from '../../net/protocol/hero/HeroInfo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import R from '../../ui/R';
 import { UiUtil } from '../../utils/UiUtil';
@@ -26,11 +26,11 @@ export class BuZhenHeroUpItem extends BaseUiView {
 
   private touchStartPos: Vec2 = new Vec2();
   private nodeStartPos: Vec3 = new Vec3();
-  private hero: HeroVo;
+  private hero: HeroInfo;
 
   private allPositions: Node[] = [];
 
-  public fillData(hero: HeroVo) {
+  public fillData(hero: HeroInfo) {
     this.hero = hero;
 
     let heroData = ConfigContext.configHeroContainer.getRecord(hero.id);

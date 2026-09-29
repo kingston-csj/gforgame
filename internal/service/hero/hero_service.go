@@ -202,6 +202,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*err
 func (ps *HeroService) NewHero(p *player.Player, heroId int32) {
 	p.HeroBox.AddHero(&player.Hero{
 		ModelId: heroId,
+		Stage:   1,
 		Level:   1,
 	})
 	eventbus.Default().Publish(events.HeroGain, &events.HeroGainEvent{

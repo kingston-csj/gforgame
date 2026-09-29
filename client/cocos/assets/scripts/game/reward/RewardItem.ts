@@ -4,7 +4,7 @@ import ConfigItemContainer from "../../data/config/container/ConfigItemContainer
 import HeroData from "../../data/config/model/HeroData";
 import PropData from "../../data/config/model/PropData";
 import { BaseUiView } from "../../frame/mvc/BaseUiView";
-import RewardVo from "../../net/protocol/items/RewardVo";
+import RewardVo from "../../net/protocol/hero/items/RewardVo";
 import AssetResourceFactory from "../../ui/AssetResourceFactory";
 import R from "../../ui/R";
 import { UiUtil } from "../../utils/UiUtil";

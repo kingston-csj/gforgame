@@ -1,7 +1,7 @@
 import { _decorator, Label, Node } from 'cc';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { HeroVo } from '../../net/protocol/items/HeroVo';
+import { HeroInfo } from '../../net/protocol/hero/HeroInfo';
 import AssetResourceFactory from '../../ui/AssetResourceFactory';
 import R from '../../ui/R';
 import { UiUtil } from '../../utils/UiUtil';
@@ -29,7 +29,7 @@ export class BuZhenHeroDownItem extends BaseUiView {
 
   private heroId: number = 0;
 
-  public fillData(hero: HeroVo) {
+  public fillData(hero: HeroInfo) {
     this.heroId = hero.id;
     let heroData = ConfigContext.configHeroContainer.getRecord(hero.id);
     this.heroName.string = heroData.name;

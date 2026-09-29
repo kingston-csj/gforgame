@@ -1,6 +1,6 @@
 import GameContext from '../../GameContext';
-import ReqLogin from '../../net/protocol/ReqLogin';
-import RespLogin from '../../net/protocol/RespLogin';
+import { ReqPlayerLogin } from '../../net/protocol/player/ReqPlayerLogin';
+import { ResPlayerLogin } from '../../net/protocol/player/ResPlayerLogin';
 import { StringUtils } from '../../utils/StringUtils';
 
 export class LoginModel {
@@ -33,18 +33,18 @@ export class LoginModel {
     return this.userPwd;
   }
 
-  public login(): Promise<RespLogin> {
+  public login(): Promise<ResPlayerLogin> {
     if (StringUtils.isBlank(this.userId) || StringUtils.isBlank(this.userPwd)) {
       return Promise.reject(new Error('用户名或密码不能为空'));
     }
-    return new Promise<RespLogin>((resolve, reject) => {
+    return new Promise<ResPlayerLogin>((resolve, reject) => {
       GameContext.wsClient.sendMessage(
-        ReqLogin.cmd,
+        ReqPlayerLogin.cmd,
         {
           PlayerId: this.userId,
           pwd: this.userPwd,
         },
-        (msg: RespLogin) => {
+        (msg: ResPlayerLogin) => {
           resolve(msg);
         }
       );

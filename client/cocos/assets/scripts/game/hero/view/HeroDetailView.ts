@@ -2,7 +2,7 @@ import { _decorator, Button, Color, Label, Node, Sprite } from 'cc';
 
 import { ConfigContext } from '../../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../../frame/mvc/BaseUiView';
-import { HeroVo } from '../../../net/protocol/items/HeroVo';
+import { HeroInfo as HeroVo} from '../../../net/protocol/hero/HeroInfo';
 import AssetResourceFactory from '../../../ui/AssetResourceFactory';
 import R from '../../../ui/R';
 import { UiUtil } from '../../../utils/UiUtil';
@@ -179,10 +179,10 @@ export class HeroDetailView extends BaseUiView {
       this.description.node.active = false;
       this.fightArea.active = true;
       this.attrGroup.active = true;
-      this.attr1Label.string = hero.attrBox.getHp().toString();
-      this.attr2Label.string = hero.attrBox.getAttack().toString();
-      this.attr3Label.string = hero.attrBox.getDefense().toString();
-      this.attr4Label.string = hero.attrBox.getSpeed().toString();
+      this.attr1Label.string = "111"
+      this.attr2Label.string = "222"
+      this.attr3Label.string =  "333"
+      this.attr4Label.string =  "444"
     }
 
     this.fightNum.string = hero.fight.toString();

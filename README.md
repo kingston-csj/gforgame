@@ -53,7 +53,7 @@ go 客户端入口：client/go/client.go
 
 ```golang
     // 消息处理器格式1： 方法第一个参数要求是session,第二个参数要求是已注册的消息; 若方法有返回值且不为空，则自动将返回值下发给客户端
-    func (rs PlayerController) ReqLogin(s *network.Session, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
+    func (rs PlayerController) ReqPlayerLogin(s *network.Session, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
 
     }
 ```
@@ -61,7 +61,7 @@ go 客户端入口：client/go/client.go
 ```golang
     // 消息处理器格式2： 方法第一个参数要求是session,第二个参数是一个index; 第三个参数要求是已注册的消息
     // 索引用于异步给客户端发送请求(例如另起协程)，如果是同步的话，直接通过格式1即可
-    func (rs PlayerController) ReqLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin)  {
+    func (rs PlayerController) ReqPlayerLogin(s *network.Session, index int32, msg *protos.ReqPlayerLogin) *protos.ResPlayerLogin {
 
     }
 ```

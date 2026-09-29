@@ -4,7 +4,7 @@ import { ConfigContext } from '../../../data/config/container/ConfigContext';
 import { BaseUiView } from '../../../frame/mvc/BaseUiView';
 import { RedDotComponent } from '../../../frame/reddot/RedDotCompoent';
 import { RedDotManager } from '../../../frame/reddot/RedDotManager';
-import { HeroVo } from '../../../net/protocol/items/HeroVo';
+import { HeroInfo as HeroVo} from '../../../net/protocol/hero/HeroInfo';
 import AssetResourceFactory from '../../../ui/AssetResourceFactory';
 import R from '../../../ui/R';
 import { UiUtil } from '../../../utils/UiUtil';
