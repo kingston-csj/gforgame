@@ -41,7 +41,7 @@ func (cm *Manager) GetCache(table string) (*Cache, error) {
 	if !ok {
 		return nil, fmt.Errorf("cache table %s not found", table)
 	}
-	cache := NewCache(5*time.Second, 10*time.Second, dbLoader)
+	cache := NewCache(30*time.Minute, 10*time.Second, dbLoader)
 	cm.caches[table] = cache
 	return cache, nil
 }
