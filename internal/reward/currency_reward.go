@@ -3,21 +3,23 @@ package reward
 import (
 	"strconv"
 
+	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/internal/constants"
 	"github.com/forfun/gforgame/internal/domain/player"
+	"github.com/forfun/gforgame/internal/events"
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 )
 
 type CurrencyReward struct {
-	Currency   string
-	Amount int32
+	Currency string
+	Amount   int32
 }
 
 func NewCurrencyReward(kind string, amount int32) *CurrencyReward {
 	return &CurrencyReward{
-		Currency:   kind,
-		Amount: amount,
+		Currency: kind,
+		Amount:   amount,
 	}
 }
 
@@ -38,19 +40,20 @@ func (r *CurrencyReward) VerifySliently(player *player.Player) bool {
 }
 
 func (r *CurrencyReward) Reward(player *player.Player, actionType int) {
-    if ops := getCurrencyOps(); ops != nil {
-        ops.Add(player.Id, r.Currency, r.Amount)
-        return
-    }
-    if r.Currency == "gold" {
-        player.Purse.AddGold(r.Amount)
-    } else if r.Currency == "diamond" {
-        player.Purse.AddDiamond(r.Amount)
-    }
-    io.NotifyPlayer(player, &protos.PushPurseInfo{
-        Gold:    player.Purse.Gold,
-        Diamond: player.Purse.Diamond,
-    })
+	if ops := getCurrencyOps(); ops != nil {
+		ops.Add(player.Id, r.Currency, r.Amount)
+		return
+	}
+	if r.Currency == "gold" {
+		player.Purse.AddGold(r.Amount)
+	} else if r.Currency == "diamond" {
+		player.Purse.AddDiamond(r.Amount)
+	}
+	eventbus.Default().Publish(events.PlayerEntityChange, player)
+	io.NotifyPlayer(player, &protos.PushPurseInfo{
+		Gold:    player.Purse.Gold,
+		Diamond: player.Purse.Diamond,
+	})
 }
 
 func (r *CurrencyReward) GetType() string {
@@ -60,5 +63,3 @@ func (r *CurrencyReward) GetType() string {
 func (r *CurrencyReward) Serial() string {
 	return r.Currency + "_" + strconv.Itoa(int(r.Amount))
 }
-
-

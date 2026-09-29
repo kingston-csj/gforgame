@@ -5,3 +5,7 @@ type NameData struct {
 	First string `json:"first" excel:"first"`
 	Last  string `json:"last" excel:"last"`
 }
+
+func (i *NameData) GetId() int32 {
+	return i.Id
+}

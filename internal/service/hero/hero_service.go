@@ -170,7 +170,7 @@ func (ps *HeroService) DoRecruit(p *player.Player, typ int32, times int32) (*err
 	rewardVos := make([]*protos.RewardVo, 0)
 	for i := 0; i < int(times); i++ {
 		gachaData := gachaContainer.RandItem(typ)
-		rewards := reward.ParseReward(gachaData.Rewards)
+		rewards := gachaData.Rewards.(*reward.AndReward)
 		realReward := reward.GetSingleReward(rewards)
 		if realReward.(*reward.HeroReward) != nil {
 			heroReward := realReward.(*reward.HeroReward)

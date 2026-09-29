@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/forfun/gforgame/common/container/hashmap"
 	commonerrors "github.com/forfun/gforgame/common/errors"
@@ -32,12 +31,11 @@ import (
 	questservice "github.com/forfun/gforgame/internal/service/quest"
 	"github.com/forfun/gforgame/internal/system"
 	"github.com/forfun/gforgame/network"
+	"github.com/forfun/gforgame/network/session"
 )
 
 var (
-	ErrCast  = errors.New("cast exception")
-	instance *PlayerService
-	once     sync.Once
+	ErrCast = errors.New("cast exception")
 )
 
 // 玩家模块
@@ -129,14 +127,14 @@ func (ps *PlayerService) GetOrCreatePlayer(playerId string) *playerdomain.Player
 		player.Id = playerId
 		player.Camp = camp.Camp_Hao
 		player.AfterLoad(ps.providers)
-		initPlayer(player)
+		ps.InitPlayer(player)
 		ps.SavePlayer(player)
 	}
 	return player
 }
 
-func initPlayer(player *playerdomain.Player) {
-	player.Name = instance.RandomName()
+func (ps *PlayerService) InitPlayer(player *playerdomain.Player) {
+	player.Name = ps.RandomName()
 	player.Level = 1
 	player.Stage = 1
 }
@@ -166,7 +164,8 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 			}
 		}
 
-		s.SetAttr("id", player.Id)
+		s.SetOwnerId(player.Id)
+		session.Bind(s.GetId(), player.Id)
 		// 添加session
 		ps.onlinePlayerRegistry.AddPlayerSession(s, player.Id)
 		ps.onlinePlayerRegistry.AddOnlinePlayer(player.Id)

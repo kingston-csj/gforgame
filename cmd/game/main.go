@@ -117,7 +117,7 @@ func main() {
 	if serverconfig.ServerConfig.UseGateMode {
 		ioDispatcher.AddHandler(NewGateTransformHandler())
 	}
-	ioDispatcher.AddHandler(&GameTaskHandler{router: router})
+	ioDispatcher.AddHandler(NewGameTaskHandler(router, s.ActorSystem))
 
 	node := ws.NewServer(
 		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),

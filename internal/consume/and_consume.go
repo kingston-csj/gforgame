@@ -34,7 +34,6 @@ func (c *AndConsume) Consume(player *player.Player, actionType int32) {
 	}
 }
 
-
 func (c *AndConsume) Merge() *AndConsume {
 	merged := &AndConsume{}
 	consumes := make(map[string]Consume)
@@ -67,4 +66,12 @@ func (c *AndConsume) merge0(consumes map[string]Consume, e Consume) {
 			consumes[key] = currencyConsume
 		}
 	}
+}
+
+func (c *AndConsume) GetType() string {
+	return "and"
+}
+
+func (c *AndConsume) Serial() string {
+	return ""
 }

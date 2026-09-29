@@ -6,7 +6,7 @@ import (
 	"github.com/forfun/gforgame/common/util/conv"
 )
 
-func ParseConsume(config string) *AndConsume{
+func ParseConsume(config string) *AndConsume {
 	if conv.IsBlankString(config) {
 		return &AndConsume{}
 	}
@@ -20,20 +20,13 @@ func ParseConsume(config string) *AndConsume{
 			count, _ := conv.StringToInt32(params[2])
 			itemConsume := &ItemConsume{
 				ItemId: itemId,
-				Amount:  count,
+				Amount: count,
 			}
 			andConsume.Add(itemConsume)
-		} else if conv.EqualsIgnoreCase(consumeType, "Gold") {
-			amount, _ := conv.StringToInt32(params[1])
+		} else if conv.EqualsIgnoreCase(consumeType, "currency") {
+			amount, _ := conv.StringToInt32(params[2])
 			currencyConsume := &CurrencyConsume{
-				Currency: "Gold",	
-				Amount:   amount,
-			}
-			andConsume.Add(currencyConsume)
-		} else if conv.EqualsIgnoreCase(consumeType, "Diamond") {
-			amount, _ := conv.StringToInt32(params[1])
-			currencyConsume := &CurrencyConsume{
-				Currency: "Diamond",	
+				Currency: params[1],
 				Amount:   amount,
 			}
 			andConsume.Add(currencyConsume)

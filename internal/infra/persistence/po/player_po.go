@@ -36,6 +36,7 @@ type PlayerPO struct {
 	MailboxJson       string `gorm:"column:mailbox"`
 	ExtendBoxJson     string `gorm:"column:extend_box"`
 	QuestBoxJson      string `gorm:"column:quest_box"`
+	PurseJson         string `gorm:"column:purse"`
 	RechargeBoxJson   string `gorm:"column:recharge_box"`
 	ArenaBoxJson      string `gorm:"column:arena_box"`
 	ActivityBoxJson   string `gorm:"column:activity_box"`
@@ -125,6 +126,9 @@ func NewPlayerPOFromDomain(player *playerdomain.Player) (*PlayerPO, error) {
 	if result.ActivityBoxJson, err = marshalJSON(player.ActivityBox); err != nil {
 		return nil, err
 	}
+	if result.PurseJson, err = marshalJSON(player.Purse); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
@@ -161,6 +165,7 @@ func (p *PlayerPO) ToDomain() (*playerdomain.Player, error) {
 	loadJSON(p.RechargeBoxJson, &result.RechargeBox)
 	loadJSON(p.ArenaBoxJson, &result.ArenaBox)
 	loadJSON(p.ActivityBoxJson, &result.ActivityBox)
+	loadJSON(p.PurseJson, &result.Purse)
 	return result, nil
 }
 

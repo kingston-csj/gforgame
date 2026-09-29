@@ -97,6 +97,9 @@ func (p *Player) AfterLoad(providers ItemConfigProviders) error {
 	p.ensureComponent(&p.ActivityBox, func() *ActivityBox {
 		return &ActivityBox{}
 	})
+	p.ensureComponent(&p.Purse, func() *Purse {
+		return &Purse{}
+	})
 
 	return nil
 }
@@ -137,6 +140,8 @@ func (p *Player) ensureComponent(target any, factory any) {
 		ensureValue(t, factory.(func() *ArenaBox))
 	case **ActivityBox:
 		ensureValue(t, factory.(func() *ActivityBox))
+	case **Purse:
+		ensureValue(t, factory.(func() *Purse))
 	}
 }
 

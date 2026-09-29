@@ -51,9 +51,9 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 			continue
 		}
 		firstCell := getCellValue(row.Cells[0])
-		if util.EqualsIgnoreCase(firstCell, "") {
-			break
-		}
+		// if util.EqualsIgnoreCase(firstCell, "") {
+		// 	break
+		// }
 
 		// if len(headers) == 0 {
 		// 	continue
@@ -62,7 +62,7 @@ func (r *ExcelDataReader) Read(filePath string, clazz any) ([]any, error) {
 		record := r.readExcelRow(headers, row)
 		records = append(records, record)
 
-		if util.EqualsIgnoreCase(firstCell, "") {
+		if util.EqualsIgnoreCase(firstCell, "end") {
 			break
 		}
 	}
@@ -136,8 +136,12 @@ func (r *ExcelDataReader) readRecords(clazz any, rows [][]CellColumn) (records [
 
 func (r *ExcelDataReader) readHeader(cells []*xlsx.Cell) ([]CellHeader, error) {
 	var headers []CellHeader
-
+	skipFirst := true
 	for _, cell := range cells {
+		if skipFirst {
+			skipFirst = false
+			continue
+		}
 		cellValue := getCellValue(cell)
 		// 空值表示列头结束
 		if util.EqualsIgnoreCase(cellValue, "") {
@@ -162,15 +166,19 @@ func getCellValue(cell *xlsx.Cell) string {
 
 func (r *ExcelDataReader) readExcelRow(headers []CellHeader, row *xlsx.Row) []CellColumn {
 	var columns []CellColumn
-
+	skipFirst := true
 	for i, cell := range row.Cells {
-		if i >= len(headers) {
+		if skipFirst {
+			skipFirst = false
+			continue
+		}
+		if i > len(headers) {
 			break
 		}
 
 		cellValue := getCellValue(cell)
 		column := CellColumn{
-			Header: headers[i],
+			Header: headers[i-1],
 			Value:  cellValue,
 		}
 		columns = append(columns, column)

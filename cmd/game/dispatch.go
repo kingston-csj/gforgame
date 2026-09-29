@@ -19,8 +19,6 @@ import (
 	"github.com/forfun/gforgame/network/protocol"
 )
 
-// var logicResponseCodec = json.NewSerializer()
-
 // GateTransformHandler 将网关消息TransferGateToLogic转换为实际的消息
 type GateTransformHandler struct {
 	codec codec.MessageCodec
@@ -59,7 +57,7 @@ func (g *GateTransformHandler) MessageReceived(session network.Session, frame *p
 }
 
 type GameTaskHandler struct {
-	router *network.MessageRoute
+	router      *network.MessageRoute
 	actorSystem *actor.ActorSystem
 }
 
@@ -68,7 +66,7 @@ func NewGameTaskHandler(router *network.MessageRoute, actorSystem *actor.ActorSy
 	sharedActor := NewSharedAnonymousActor(router)
 	actorSystem.Spawn(path, sharedActor) // mailbox容量256
 	return &GameTaskHandler{
-		router: router,
+		router:      router,
 		actorSystem: actorSystem,
 	}
 }
@@ -79,7 +77,6 @@ func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.Req
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-
 	// 补齐 playerId，后续路由和回包都依赖它。
 	fillFramePayloadFromSession(s, frame)
 	// 先定位消息处理器，找不到就直接终止当前消息。
@@ -93,7 +90,6 @@ func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.Req
 		if len(validationErrors) > 0 {
 			errMsg := protocolValidator.FormatValidationErrors(validationErrors)
 			if errMsg != "" {
-				// logger.Info(fmt.Sprintf("validation failed for cmd=%d: %s", frame.Header.Cmd, errMsg))
 				if resp, ok := buildErrorResponse(msgHandler, constants.I18N_COMMON_PROTOCOL_VALIDATION_FAILED); ok {
 					s.Send(resp, frame.Header.Index)
 				}
@@ -104,17 +100,20 @@ func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.Req
 	// 直连模式下打印入站消息，便于本地排查。
 	logInboundMessage(s, frame)
 	playerId := frame.Header.Payload
+
 	var ref *actor.ActorRef
-	if frame.Header.Cmd != protos.CmdReqPlayerLogin {
+	// 修正判断：登录消息 == CmdReqPlayerLogin，走shared_anonymous；其他消息走玩家Actor
+	if frame.Header.Cmd == int32(protos.CmdReqPlayerLogin) {
+		ref = g.actorSystem.Find("game/gate/shared_anonymous")
+	} else {
 		// 构造actor路径，示例：game/player/10001
 		path := actor.NewActorPath("game", "player", playerId)
-		ref = g.actorSystem.GetOrCreate(path,  func() (actor.Actor)  {
+		ref = g.actorSystem.GetOrCreate(path, func() actor.Actor {
 			// 只有当actor不存在的时候，这个闭包才执行
 			return NewPlayerActor(frame.Header.Payload, g.router)
 		})
-	} else {
-		ref = g.actorSystem.Find("game/gate/shared_anonymous")			
 	}
+
 	task := &PlayerMsgTask{
 		session:    s,
 		frame:      frame,
@@ -135,7 +134,6 @@ func sendResponse(session network.Session, frame *protocol.RequestDataFrame, res
 	if !serverconfig.ServerConfig.UseGateMode || frame.Header.Payload == "" {
 		return session.Send(resp, frame.Header.Index)
 	}
-
 	io.NotifyByPlayerId(frame.Header.Payload, frame.Header.Index, resp)
 	return nil
 }
@@ -169,7 +167,6 @@ func logInboundMessage(session network.Session, frame *protocol.RequestDataFrame
 	} else {
 		id = session.GetOwnerId()
 	}
-
 	logger.Info(fmt.Sprintf("[%s] 接收消息: cmd:%d, name:%s, 内容:%s", id, frame.Header.Cmd, msgName, jsonStr))
 }
 
@@ -185,7 +182,6 @@ func dispatchMessage(session network.Session, frame *protocol.RequestDataFrame, 
 		// 静态分发失败时回退反射调用，保证兼容性。
 		logger.ErrorNoStack(fmt.Errorf("generated dispatch failed, fallback to reflect: cmd=%d err=%v", frame.Header.Cmd, dispatchErr))
 	}
-
 	// 反射分发只作为兜底路径，避免生成代码缺失时消息直接丢失。
 	args := buildHandlerArgs(msgHandler, session, frame.Header.Index, frame.Msg, frame.Header.Payload)
 	values, panicErr := callRouteHandlerSafely(msgHandler, args)
@@ -220,8 +216,9 @@ func handleRoutePanic(session network.Session, frame *protocol.RequestDataFrame,
 		if err := sendResponse(session, frame, errorResp); err != nil {
 			logger.Error("send error response failed: %v", err)
 		}
+		return false
 	}
-	return false
+	return true
 }
 
 func sendHandlerResponse(session network.Session, frame *protocol.RequestDataFrame, resp any) bool {

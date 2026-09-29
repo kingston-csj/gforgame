@@ -39,7 +39,7 @@ coverage.*
 ~/.cache/go-build/
 
 **/logs/
-
+tools/
 internal/tools/protocol/output
 #go执行文件
 *.exe*  
