@@ -20,6 +20,7 @@ import GameEvent from '../constants/GameEvent';
 import { ConfigContext } from '../../data/config/container/ConfigContext';
 import QuestPanelController from '../quest/QuestPanelController';
 import { QuestBoxModel } from '../quest/QuestBoxModel';
+import { FriendMainController } from '../friend/FriendMainController';
 const { ccclass, property } = _decorator;
 
 @ccclass('MainPaneView')
@@ -45,6 +46,10 @@ export class MainPaneView extends BaseUiView {
   
   @property(Node)
   questPane: Node;
+
+  @property(Node)
+  friendPane: Node;
+
 
   @property(Label)
   diamondLabel: Label;
@@ -83,6 +88,7 @@ export class MainPaneView extends BaseUiView {
     this.registerClickEvent(this.mailPane, this.onMailClick, this);
     this.registerClickEvent(this.rankPane, this.onRankClick, this);
     this.registerClickEvent(this.questPane, this.onQuestClick, this);
+    this.registerClickEvent(this.friendPane, this.onFriendClick, this);
     eventBus.on(GameEvent.MainQuestRefresh, this.onMainQuestRefresh);
 
     this.nameLabel.string = PlayerData.instance.name;
@@ -175,4 +181,9 @@ export class MainPaneView extends BaseUiView {
   onQuestClick() {
     QuestPanelController.openUi();
   }
+
+  onFriendClick() {
+    FriendMainController.openUi();
+  }
+
 }

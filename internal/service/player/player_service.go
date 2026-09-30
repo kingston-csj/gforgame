@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/forfun/gforgame/common/container/hashmap"
 	commonerrors "github.com/forfun/gforgame/common/errors"
 	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/logger"
@@ -40,34 +39,32 @@ var (
 
 // 玩家模块
 type PlayerService struct {
-	repo           *playerrepo.PlayerRepository
-	playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
-	providers      playerdomain.ItemConfigProviders
-	// 双向map, id -> name
-	idNameMapper *hashmap.SyncDualHashMap[string, string]
+	repo *playerrepo.PlayerRepository
+	// playerProfiles *hashmap.ConcurrentMap[string, *playerdomain.PlayerProfile]
+	providers playerdomain.ItemConfigProviders
 	// 玩家名称字典树
 	nameDict *trie.TrieDictionary
 
 	onlinePlayerRegistry *net.OnlinePlayerRegistry
 	playerTaskDispatcher *dispatch.PlayerTaskDispatcher
-
-	quest         *questservice.QuestService
-	systemService *system.SystemService
+	playerProfile        *playerrepo.PlayerProfileService
+	quest                *questservice.QuestService
+	systemService        *system.SystemService
 }
 
 func NewPlayerService(repo *playerrepo.PlayerRepository, providers playerdomain.ItemConfigProviders, questService *questservice.QuestService, systemService *system.SystemService,
 	onlinePlayerRegistry *net.OnlinePlayerRegistry, playerTaskDispatcher *dispatch.PlayerTaskDispatcher,
+	playerProfile *playerrepo.PlayerProfileService,
 ) *PlayerService {
 	service := &PlayerService{
 		repo:                 repo,
 		providers:            providers,
-		playerProfiles:       hashmap.NewConcurrentMap[string, *playerdomain.PlayerProfile](),
-		idNameMapper:         hashmap.NewSyncDualHashMap[string, string](),
 		nameDict:             trie.NewTrieDictionary(),
 		quest:                questService,
 		systemService:        systemService,
 		onlinePlayerRegistry: onlinePlayerRegistry,
 		playerTaskDispatcher: playerTaskDispatcher,
+		playerProfile:        playerProfile,
 	}
 	return service
 }
@@ -92,28 +89,6 @@ func (ps *PlayerService) Init() {
 			})
 		}
 	})
-}
-
-// LoadPlayerProfile 加载玩家概况数据
-func (ps *PlayerService) LoadPlayerProfile() {
-	var profiles []*playerdomain.PlayerProfile
-	err := mysqldb.Db.Model(&playerdomain.Player{}).Select("id, name, level, camp, fight").Scan(&profiles).Error
-	if err != nil {
-		panic(err)
-	}
-
-	for _, profile := range profiles {
-		ps.playerProfiles.Set(profile.Id, profile)
-		ps.idNameMapper.Put(profile.Id, profile.Name)
-	}
-}
-
-func (ps *PlayerService) GetPlayerProfileById(playerId string) *playerdomain.PlayerProfile {
-	v, ok := ps.playerProfiles.Get(playerId)
-	if ok {
-		return v
-	}
-	return nil
 }
 
 func (ps *PlayerService) GetPlayerByPlayerId(playerID string) *playerdomain.Player {
@@ -145,7 +120,7 @@ func (ps *PlayerService) SavePlayer(player *playerdomain.Player) {
 
 func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32) *protos.ResPlayerLogin {
 	// 是否是新角色
-	newCreated := ps.GetPlayerProfileById(playerId) == nil
+	newCreated := ps.playerProfile.GetPlayerProfileById(playerId) == nil
 	player := ps.GetOrCreatePlayer(playerId)
 
 	// 非网关模式下，检查是否重复登录
@@ -380,7 +355,7 @@ func (ps *PlayerService) GetHeroIdByCamp(camp int32) int32 {
 // 模糊搜索玩家(名字包含关键字)
 func (ps *PlayerService) FuzzySearchPlayers(name string) []string {
 	playerIds := make([]string, 0)
-	profiles := ps.playerProfiles.Values()
+	profiles := ps.playerProfile.GetAllPlayerProfiles()
 	for _, profile := range profiles {
 		if strings.Contains(profile.Name, name) {
 			playerIds = append(playerIds, profile.Id)
@@ -427,7 +402,7 @@ func (ps *PlayerService) RandomName() string {
 	nameContainer := config.GetSpecificContainer[*container.NameContainer]()
 	for i := 0; i < 10; i++ {
 		name := nameContainer.GetRandomName()
-		if _, ok := ps.idNameMapper.GetByKey(name); !ok {
+		if found := ps.playerProfile.IsPlayerNameTaken(name); !found {
 			return name
 		}
 	}
@@ -436,22 +411,17 @@ func (ps *PlayerService) RandomName() string {
 
 func (ps *PlayerService) EditPlayer(p *playerdomain.Player, head int32, name string) int32 {
 	if p.Name != name {
-		if _, ok := ps.idNameMapper.GetByKey(name); ok {
+		if found := ps.playerProfile.IsPlayerNameTaken(name); found {
 			return constants.I18N_PLAYER_NAME_REPEATED
 		}
 		oldName := p.Name
 		p.Name = name
-		ps.idNameMapper.Put(p.Id, name)
+		ps.playerProfile.UpdatePlayerProfile(p.Id, name, head)
 		ps.nameDict.DeleteNode(oldName)
 		ps.nameDict.AddNode(name)
 	}
 
-	profile := ps.GetPlayerProfileById(p.Id)
-	if profile != nil {
-		profile.Name = name
-	}
-	ps.playerProfiles.Set(p.Id, profile)
-	p.Head = head
+	ps.playerProfile.UpdatePlayerProfile(p.Id, name, head)
 	ps.SavePlayer(p)
 	return 0
 }

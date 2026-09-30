@@ -30,7 +30,7 @@ func InitMysqlDdl() {
 
 // InitBusiness 预热业务数据和计划任务。
 func InitBusiness(s *Services) {
-	s.Player.LoadPlayerProfile()
+	s.PlayerProfile.LoadPlayerProfiles()
 	s.Activity.ScheduleAllActivity()
 }
 

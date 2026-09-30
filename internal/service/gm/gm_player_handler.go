@@ -6,11 +6,13 @@ import (
 	"github.com/forfun/gforgame/common/util/jsonutil"
 	"github.com/forfun/gforgame/internal/constants"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
 )
 
 type PlayerGmHandler struct {
-	player *playerservice.PlayerService
+	player        *playerservice.PlayerService
+	playerProfile *playerrepo.PlayerProfileService
 }
 
 func NewPlayerGmHandler(playerService *playerservice.PlayerService) *PlayerGmHandler {
@@ -32,7 +34,10 @@ func (h *PlayerGmHandler) handleReset(player *playerdomain.Player, params string
 
 func (h *PlayerGmHandler) handleLevel(player *playerdomain.Player, params string) *commonerrors.BusinessError {
 	player.Level = conv.Int32Value(params)
-	h.player.GetPlayerProfileById(player.Id)
+	profile := h.playerProfile.GetPlayerProfileById(player.Id)
+	if profile != nil {
+		profile.Level = player.Level
+	}
 	return nil
 }
 

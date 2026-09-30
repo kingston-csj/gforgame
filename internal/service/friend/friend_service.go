@@ -5,6 +5,7 @@ import (
 
 	"github.com/forfun/gforgame/common/eventbus"
 	"github.com/forfun/gforgame/common/util/conv"
+	util "github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/internal/constants"
 	frienddomain "github.com/forfun/gforgame/internal/domain/friend"
 	playerdomain "github.com/forfun/gforgame/internal/domain/player"
@@ -114,12 +115,20 @@ func (s *FriendService) IsFriend(playerId string, friendId string) bool {
 // 模糊搜索玩家 (key可能为名字或id)
 func (s *FriendService) SearchByKey(key string) []*protos.FriendVo {
 	// 如果是名字,模糊搜索
-	playerIds := s.profile.FuzzySearchPlayers(key)
-	// 如果是id,添加到结果中
-	playerByName := s.profile.GetPlayerProfileById(key)
-	if playerByName != nil {
-		playerIds = append(playerIds, playerByName.Id)
+	playerIds := make([]string, 0)
+	if util.IsEmptyString(key) {
+		for _, profile := range s.profile.GetAllPlayerProfiles() {
+			playerIds = append(playerIds, profile.Id)
+		}
+	} else {
+		playerIds = s.profile.FuzzySearchPlayers(key)
+		// 如果是id,添加到结果中
+		playerByName := s.profile.GetPlayerProfileById(key)
+		if playerByName != nil {
+			playerIds = append(playerIds, playerByName.Id)
+		}
 	}
+
 	friends := make([]*protos.FriendVo, 0)
 	for _, playerId := range playerIds {
 		profile := s.profile.GetPlayerProfileById(playerId)

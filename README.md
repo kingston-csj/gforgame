@@ -191,3 +191,6 @@ example/unity同时兼容websocket/socket通信方式。
 
 排行榜界面  
 ![](/screenshots/rank.jpg "排行榜界面")
+
+好友界面  
+![](/screenshots/friend.jpg "好友界面")

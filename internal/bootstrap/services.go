@@ -53,32 +53,33 @@ type Services struct {
 	CacheManager         *cache.Manager
 	OnlinePlayerRegistry *net.OnlinePlayerRegistry
 	PlayerTaskDispatcher *dispatch.PlayerTaskDispatcher
-	ActorSystem  *actor.ActorSystem
+	ActorSystem          *actor.ActorSystem
 	// dao层
 	PlayerRepo     *playerrepo.PlayerRepository
 	ProfileService *playerrepo.PlayerProfileService
 	FriendRepo     frienddomain.FriendRepository
 	SystemRepo     *systemrepo.SystemRepository
 
-	Activity  *activity.ActivityService
-	Arena     *arena.ArenaService
-	Catalog   *catalog.CatalogService
-	Chat      *chat.ChatService
-	Friend    *friend.FriendService
-	Gm        *gm.GmService
-	Hero      *hero.HeroService
-	Item      *item.ItemService
-	Mail      *mail.MailService
-	Mall      *mall.MallService
-	Mixture   *mixture.MixtureService
-	MonthCard *monthcard.MonthCardService
-	Player    *player.PlayerService
-	Quest     *quest.QuestService
-	Rank      *rank.RankService
-	Recharge  *recharge.RechargeService
-	SignIn    *signin.SignInService
-	Vip       *vip.VipService
-	System    *system.SystemService
+	Activity      *activity.ActivityService
+	Arena         *arena.ArenaService
+	Catalog       *catalog.CatalogService
+	Chat          *chat.ChatService
+	Friend        *friend.FriendService
+	Gm            *gm.GmService
+	Hero          *hero.HeroService
+	Item          *item.ItemService
+	Mail          *mail.MailService
+	Mall          *mall.MallService
+	Mixture       *mixture.MixtureService
+	MonthCard     *monthcard.MonthCardService
+	Player        *player.PlayerService
+	PlayerProfile *playerrepo.PlayerProfileService
+	Quest         *quest.QuestService
+	Rank          *rank.RankService
+	Recharge      *recharge.RechargeService
+	SignIn        *signin.SignInService
+	Vip           *vip.VipService
+	System        *system.SystemService
 }
 
 // ServiceModule 定义 service 启动期初始化能力。

@@ -1,10 +1,10 @@
 import { _decorator, instantiate, Label, Node, Prefab } from 'cc';
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { FriendVo } from '../../net/protocol/friend/FriendVo';
+import { FriendItem } from './FriendModel';
 const { ccclass, property } = _decorator;
 
-@ccclass('FriendListItemView')
-export class FriendListItemView extends BaseUiView {
+@ccclass('FriendSearchItemView')
+export class FriendSearchItemView extends BaseUiView {
   @property(Label)
   nameTxt: Label;
 
@@ -12,17 +12,13 @@ export class FriendListItemView extends BaseUiView {
   levelTxt: Label;
 
   @property(Node)
-  chatBtnNode: Node;
-
-  @property(Node)
-  deleteBtnNode: Node;
-
+  addBtn: Node;
 
   protected start(): void {
   }
 
 
-  public fillData(friend: FriendVo): void {
+  public fillData(friend: FriendItem): void {
     this.nameTxt.string = friend.name;
   }
 }

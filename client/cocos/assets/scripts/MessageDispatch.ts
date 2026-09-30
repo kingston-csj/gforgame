@@ -22,6 +22,8 @@ import GameEvent from "./game/constants/GameEvent";
 import { PushLoadComplete } from "./net/protocol/player/PushLoadComplete";
 import { MainPaneController } from "./game/main/MainPaneController";
 import { PushQuestDailyInfo } from "./net/protocol/quest/PushQuestDailyInfo";
+import { PushFriendInfo } from "./net/protocol/friend/PushFriendInfo";
+import { FriendModel } from "./game/friend/FriendModel";
 
 // 存储待注册的处理器
 const pendingHandlers: Array<{ cmd: number; handler: Function }> = [];
@@ -164,6 +166,15 @@ export class MessageDispatch {
     MainPaneController.openUi();
     // eventBus.emit(GameEvent.LoadComplete);
   }
+
+
+  @MessageHandler(PushFriendInfo.cmd)
+  private static onReceivePushFriendList(msg: PushFriendInfo) {
+    if (msg.friendItems) {
+       FriendModel.getInstance().refreshFriendList(msg.friendItems);
+    }
+  }
+
 
   /**
    * 注册消息处理器

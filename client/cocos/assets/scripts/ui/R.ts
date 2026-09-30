@@ -75,6 +75,10 @@ export default class R {
       name: 'questPanel',
       path: 'prefabs/panel/quest/QuestPane',
     },
+    FriendMain: {
+      name: 'friendMain',
+      path: 'prefabs/panel/friend/FriendlPane',
+    },
   };
 
   // 图片纹理图集枚举

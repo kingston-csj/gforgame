@@ -65,7 +65,7 @@ export class MailView extends BaseUiView {
       (res: ResMailDeleteAll) => {
         if (res.removed.length > 0) {
           // 删除邮件
-          MailBoxModel.getInstance().deleteMails(res.removed.map((id) => Number(id)));
+          MailBoxModel.getInstance().deleteMails(res.removed);
           // 刷新邮件列表
           this.onDisplay();
         }

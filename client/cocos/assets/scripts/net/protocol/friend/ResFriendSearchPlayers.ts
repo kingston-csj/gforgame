@@ -1,6 +1,7 @@
 /**
  * 
  */
+import { FriendVo } from "./FriendVo";
 export  class ResFriendSearchPlayers {
      public static cmd: number =  1952; 
         
