@@ -4,6 +4,7 @@ import { BaseUiView } from '../../frame/mvc/BaseUiView';
 import { FriendTabType } from './FriendTabType';
 import { FriendListSubView } from './FriendListSubView';
 import { FriendSearchSubView } from './FriendSearchSubView';
+import { FriendApplySubView } from './FriendApplySubView';
 
 @ccclass('FriendMainView')
 export class FriendMainView extends BaseUiView {
@@ -12,6 +13,8 @@ export class FriendMainView extends BaseUiView {
     friendListSubView: FriendListSubView = null;
     @property(FriendSearchSubView)
     friendSearchSubView: FriendSearchSubView = null;
+    @property(FriendApplySubView)
+    friendApplySubView: FriendApplySubView = null;
 
     @property(Node)
     listPanelTag: Node;      //好友列表页签容器
@@ -48,6 +51,7 @@ export class FriendMainView extends BaseUiView {
     public setActiveTab(tab: FriendTabType) {
         this.friendListSubView.node.active = tab === FriendTabType.FriendList;
         this.friendSearchSubView.node.active = tab === FriendTabType.FriendSearch;
+        this.friendApplySubView.node.active = tab === FriendTabType.FriendApply;
     }
 
     protected onDisplay(): void {

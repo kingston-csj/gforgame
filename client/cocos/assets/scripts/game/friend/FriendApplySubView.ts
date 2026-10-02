@@ -1,24 +1,22 @@
-import { _decorator, Node, Prefab, ScrollView } from 'cc';
+import { _decorator, EditBox, Node, Prefab, ScrollView } from 'cc';
 const { ccclass, property } = _decorator;
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { FriendVo } from '../../net/protocol/friend/FriendVo';
-import { FriendListItemView } from './FriendListItemView';
+import { FriendApplyVo } from '../../net/protocol/friend/FriendApplyVo';
+import { FriendApplyItemView } from './FriendApplyItemView';
 import { instantiate } from 'cc';
 
-@ccclass('FriendListSubView')
-export class FriendListSubView extends BaseUiView {
+@ccclass('FriendApplySubView')
+export class FriendApplySubView extends BaseUiView {
     @property(ScrollView)
     scrollView: ScrollView = null!;
     @property(Prefab)
-    friendItemPrefab: Prefab = null!;
+    applyItemPrefab: Prefab = null!;
     @property(Node)
     content: Node = null!;
-
+    
     // ---------------- 向外抛出事件，由Controller赋值监听 ----------------
-    /** 点击私聊 */
-    public onChatClick: ((uid: string) => void) | null = null;
-    /** 点击删除好友 */
-    public onDeleteClick: ((uid: string) => void) | null = null;
+    /** 点击添加好友 */
+    public onApplyFriendClick: ((uid: string, status: number) => void) | null = null;
 
     private _itemNodes: Node[] = [];
 
@@ -29,7 +27,7 @@ export class FriendListSubView extends BaseUiView {
     /**
      * 【对外接口】由SubController调用，刷新好友列表
      */
-    public setData(dataList: FriendVo[]) {
+    public setData(dataList: FriendApplyVo[]) {
         this.recycleAllItem();
         for (const item of dataList) {
             const node = this.createOneItem(item);
@@ -38,29 +36,28 @@ export class FriendListSubView extends BaseUiView {
         }
     }
 
-    private createOneItem(data: FriendVo): Node {
-        const node = instantiate(this.friendItemPrefab);
+    private createOneItem(data: FriendApplyVo): Node {
+        const node = instantiate(this.applyItemPrefab);
         // 假设item节点上组件叫 FriendItemComp，负责填充name/avatar
-        const comp = node.getComponent( FriendListItemView)!;
-        comp.fillData(data);
-
+        const comp = node.getComponent(  FriendApplyItemView)!;
         // item内部按钮抛出事件
-        this.registerClickEvent(comp.chatBtnNode, () => {
-            this.onChatClick?.(data.id);
+        this.registerClickEvent(comp.addBtn, () => {
+            this.onApplyFriendClick?.(data.id, 1);
         }, this);
-        this.registerClickEvent(comp.deleteBtnNode, () => {
-            this.onDeleteClick?.(data.id);
+        this.registerClickEvent(comp.rejectBtn, () => {
+            this.onApplyFriendClick?.(data.id, 2);
         }, this);
+        comp.fillData(data);
         return node;
     }
 
     private recycleAllItem() {
-       this.content.removeAllChildren();
+        this.content.removeAllChildren();
         this._itemNodes.length = 0;
     }
 
     protected onHide(): void {
-        this.content.removeAllChildren();
-        this._itemNodes.length = 0;
+        // 子页签隐藏，清空列表
+        this.recycleAllItem();
     }
 }

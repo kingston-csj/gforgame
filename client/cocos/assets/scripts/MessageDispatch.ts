@@ -170,9 +170,8 @@ export class MessageDispatch {
 
   @MessageHandler(PushFriendInfo.cmd)
   private static onReceivePushFriendList(msg: PushFriendInfo) {
-    if (msg.friendItems) {
-       FriendModel.getInstance().refreshFriendList(msg.friendItems);
-    }
+       FriendModel.getInstance().refreshFriendListCache(msg.friendItems || []);
+       FriendModel.getInstance().refreshApplyListCache(msg.applyItems || []);
   }
 
 

@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "FriendItem",
+    "_name": "FriendApplyItem",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "FriendItem",
+    "_name": "FriendApplyItem",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -724,7 +724,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "chatBtn",
+    "_name": "addBtn",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -752,8 +752,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 84.65699999999998,
-      "y": 0,
+      "x": 98.657,
+      "y": -2,
       "z": 0
     },
     "_lrot": {
@@ -879,7 +879,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "聊天",
+    "_string": "同意",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -1096,7 +1096,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "delBtn",
+    "_name": "rejectBtn",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -1124,8 +1124,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 208.88300000000004,
-      "y": 0,
+      "x": 209.657,
+      "y": -1,
       "z": 0
     },
     "_lrot": {
@@ -1227,7 +1227,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "12WYo9vyZOxqPrvs9Ss2CT"
+    "fileId": "342TOdu3NEtr/GfanhZO9U"
   },
   {
     "__type__": "cc.Label",
@@ -1251,7 +1251,7 @@
       "b": 0,
       "a": 255
     },
-    "_string": "删除",
+    "_string": "拒绝",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -1295,7 +1295,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "57c+Cq7QVDKpQEEmFP0Ktc"
+    "fileId": "aar+dP7FtGdoMkqcQvPlFH"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -1305,7 +1305,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "7a/Z/sTH5L5Yl/11OFieAp",
+    "fileId": "5b/LkUN99Lj4rnYKJlNF4l",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -1336,7 +1336,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "dbLDWJ/2VGJopyPbeYb02t"
+    "fileId": "14SLuFC3dMSpk2yjKyo45U"
   },
   {
     "__type__": "cc.Sprite",
@@ -1381,7 +1381,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "2bhSoVMz5Hw5fgmgvLRDFF"
+    "fileId": "4f/m8NDUFHQZtl4Xgj0K4y"
   },
   {
     "__type__": "cc.Button",
@@ -1451,7 +1451,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "31vWUIiu5EeLMfTX3D7uIY"
+    "fileId": "57jgtgrrhLdrJKvK00kFPi"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -1461,7 +1461,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "b9sC1c7Q1N17nGe/TaHGXx",
+    "fileId": "c2+XAKZmBJybSG1kU7uDI4",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -1699,7 +1699,7 @@
     "fileId": "a2UgwD45dHhq7it4jkAoyO"
   },
   {
-    "__type__": "e99215G6wtBnYjZ2YHMVJjo",
+    "__type__": "30616yybf5N0ZqH8oQB+g2H",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -1716,17 +1716,17 @@
     "levelTxt": {
       "__id__": 24
     },
-    "chatBtnNode": {
+    "addBtn": {
       "__id__": 27
     },
-    "deleteBtnNode": {
+    "rejectBtn": {
       "__id__": 41
     },
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "13nmgRxSJLE5oCLnCEdQgt"
+    "fileId": "d0g3D+Ts5Au5bNcV9C3rlQ"
   },
   {
     "__type__": "cc.PrefabInfo",

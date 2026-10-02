@@ -6,32 +6,8 @@ import { ReqFriendSearchPlayers } from '../../net/protocol/friend/ReqFriendSearc
 import { ResFriendSearchPlayers } from '../../net/protocol/friend/ResFriendSearchPlayers';
 import { ReqFriendApply } from '../../net/protocol/friend/ReqFriendApply';
 import { ResFriendApply } from '../../net/protocol/friend/ResFriendApply';
-
-//定义数据结构
-export interface FriendItem {
-    id: string;
-    name: string;
-    head: number;
-   
-}
-
-export interface FriendApplyItem {
-    id : string;
-
-    fromId : string;
-
-    fromName : string;
-
-    fromHead : number;
-
-    targetId : string;
-
-    targetName : string;
-
-    /** 申请结果：1同意 2拒绝 0未处理 */
-    status : number;
-    time : number;
-}
+import { ReqFriendDealApplyRecord } from '../../net/protocol/friend/ReqFriendDealApplyRecord';
+import { ResFriendDealApplyRecord } from '../../net/protocol/friend/ResFriendDealApplyRecord';
 
 export class FriendModel extends BaseModel {
     public static getInstance(): FriendModel {
@@ -43,24 +19,24 @@ export class FriendModel extends BaseModel {
     private static _instance: FriendModel;
 
     //三份核心数据
-    public friendList: FriendItem[] = [];
-    public applyList: FriendApplyItem[] = [];
-    public searchResult: FriendItem[] = [];
+    public friendList: FriendVo[] = [];
+    public applyList: FriendApplyVo[] = [];
+    public searchResult: FriendVo[] = [];
 
     /** 请求好友列表 */
-    public refreshFriendList(friends: Array<FriendVo>) {
-        this.friendList = friends.map((item) => ({
-            id: item.id,
-            name: item.name,
-            head: item.head,
-        }));
+    public refreshFriendListCache(friends: Array<FriendVo>) {
+        this.friendList = friends;
         this.notifyChange("friendList", this.friendList);
+    }
+
+        /** 请求好友申请列表 */
+    public refreshApplyListCache(applies: Array<FriendApplyVo>) {
+        this.applyList = applies;
+        this.notifyChange("applyList", this.applyList);
     }
 
     /** 请求好友申请列表 */
     public async requestApplyList() {
-        //const resp = await net.post("getApplyList")
-        //this.applyList = resp.list;
         this.notifyChange("applyList", this.applyList);
     }
 
@@ -78,16 +54,40 @@ export class FriendModel extends BaseModel {
           );
     }
 
-     public requestApplyFriend(uid: string) {
-                  GameContext.wsClient.sendMessage(
+
+    public requestApplyFriend(uid: string): Promise<ResFriendApply> {
+        return new Promise<ResFriendApply>((resolve, reject) => {
+        GameContext.wsClient.sendMessage(
             ReqFriendApply.cmd,
             {
-              uid: uid,
+            friendId: uid,
             },
             (msg: ResFriendApply) => {
+            resolve(msg);
             }
-          );
+        );
+        });
     }
 
+    /**
+     * 处理好友申请
+     * @param uid 好友id
+     * @param status 申请结果：1同意 2拒绝
+     * @returns 
+     */
+    public requestDealApplyFriend(uid: string, status: number): Promise<ResFriendDealApplyRecord> {
+        return new Promise<ResFriendDealApplyRecord>((resolve, reject) => {
+        GameContext.wsClient.sendMessage(
+            ReqFriendDealApplyRecord.cmd,
+            {
+            applyId: uid,
+            status: status,
+            },
+            (msg: ResFriendDealApplyRecord) => {
+            resolve(msg);
+            }
+        );
+        });
+    }
 
 }

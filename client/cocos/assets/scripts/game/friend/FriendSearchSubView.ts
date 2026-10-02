@@ -1,7 +1,8 @@
 import { _decorator, EditBox, Node, Prefab, ScrollView } from 'cc';
 const { ccclass, property } = _decorator;
 import { BaseUiView } from '../../frame/mvc/BaseUiView';
-import { FriendItem, FriendModel } from './FriendModel';
+import {  FriendModel } from './FriendModel';
+import { FriendVo } from '../../net/protocol/friend/FriendVo';
 import { FriendSearchItemView } from './FriendSearchItemView';
 import { instantiate } from 'cc';
 
@@ -28,6 +29,7 @@ export class FriendSearchSubView extends BaseUiView {
     private _itemNodes: Node[] = [];
 
     protected start(): void {
+        this.recycleAllItem();
         this.registerClickEvent(this.searchBtn, () => {
            FriendModel.getInstance().requestSearchFriend(this.searchBox.string)
         }, this);
@@ -36,7 +38,7 @@ export class FriendSearchSubView extends BaseUiView {
     /**
      * 【对外接口】由SubController调用，刷新好友列表
      */
-    public setData(dataList: FriendItem[]) {
+    public setData(dataList: FriendVo[]) {
         this.recycleAllItem();
         for (const item of dataList) {
             const node = this.createOneItem(item);
@@ -45,7 +47,7 @@ export class FriendSearchSubView extends BaseUiView {
         }
     }
 
-    private createOneItem(data: FriendItem): Node {
+    private createOneItem(data: FriendVo): Node {
         const node = instantiate(this.searchItemPrefab);
         // 假设item节点上组件叫 FriendItemComp，负责填充name/avatar
         const comp = node.getComponent(  FriendSearchItemView)!;
@@ -58,9 +60,10 @@ export class FriendSearchSubView extends BaseUiView {
     }
 
     private recycleAllItem() {
-        for (const n of this._itemNodes) {
-            n.destroy();
-        }
+        // for (const n of this._itemNodes) {
+        //     n.destroy();
+        // }
+        this.content.removeAllChildren();
         this._itemNodes.length = 0;
     }
 

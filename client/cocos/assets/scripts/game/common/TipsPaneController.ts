@@ -23,7 +23,8 @@ export class TipsPaneController extends BaseController {
   public static showI18nContent(code: number) {
     this.getInstance().then((controller) => {
       if (controller.tipsView) {
-        let tips = ConfigContext.configI18nContainer.getRecord(code).content;
+        let record = ConfigContext.configI18nContainer.getRecord(code);
+        let tips = record?.content || "未知状态码:" + code;
         controller.tipsView.setTips(tips);
         controller.tipsView.display();
         // 显示后多等X秒

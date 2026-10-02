@@ -7,7 +7,13 @@ import { FriendModel } from './FriendModel';
 import { LayerIdx } from '../../ui/LayerIds';
 import R from '../../ui/R';
 import UiViewFactory from '../../ui/UiViewFactory';
-import {FriendItem} from  './FriendModel'
+import { FriendApplyVo } from '../../net/protocol/friend/FriendApplyVo';
+import { FriendVo } from '../../net/protocol/friend/FriendVo';
+
+
+
+import { TipsPaneController } from '../common/TipsPaneController';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('FriendMainController')
@@ -29,7 +35,7 @@ export class FriendMainController extends BaseController  {
         if (!this.view) return;
 
         //监听view抛出的页签切换事件
-        this.view.onTabChange = (tab) => {
+        this.mainView.onTabChange = (tab) => {
             this.handlerTabSwitch(tab);
         }
 
@@ -41,17 +47,34 @@ export class FriendMainController extends BaseController  {
 
         const unsubApplyList = this._friendModel.onChange("applyList", (data) => {
             //刷新【申请列表子页面】UI
+             this.mainView.friendApplySubView.setData(data as FriendApplyVo[] ) 
         });
         this._unsubList.push(unsubApplyList);
 
         const unsubSearchResult = this._friendModel.onChange("searchResult", (data) => {
             //刷新【搜索页子页面】UI
-            this.mainView.friendSearchSubView.setData(data as FriendItem[] ) 
+            this.mainView.friendSearchSubView.setData(data as FriendVo[] ) 
         });
         this._unsubList.push(unsubSearchResult);
 
         this.mainView.friendSearchSubView.onAddFriendClick = (uid) => {
-            this._friendModel.requestApplyFriend(uid);
+            this._friendModel.requestApplyFriend(uid).then((msg) => {
+              if (msg.code == 0) {
+                  TipsPaneController.showStringContent("申请成功");
+                  return;
+              }
+              TipsPaneController.showI18nContent(msg.code);
+            });
+        }
+
+        this.mainView.friendApplySubView.onApplyFriendClick = (applyId, status) => {
+            this._friendModel.requestDealApplyFriend(applyId ,status).then((msg) => {
+              if (msg.code == 0) {
+                  TipsPaneController.showStringContent("操作成功");
+                  return;
+              }
+              TipsPaneController.showI18nContent(msg.code);
+            });
         }
     }
 
