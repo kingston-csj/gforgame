@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/conv"
 	"github.com/forfun/gforgame/gateway/contract"
 	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/dispatch"
@@ -54,7 +54,7 @@ func (g *LogicRouter) forwardTransferToClient(logicSession network.Session, tran
 		return fmt.Errorf("logic session serverId is empty, playerId=%s cmd=%d", playerID, cmd)
 	}
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	clientSession, found := session.GetSessionByOwnerId(sessionPlayerKey)
+	clientSession, found := session.GetSessionByUid(sessionPlayerKey)
 	if !found {
 		return fmt.Errorf("client session not found, sessionPlayerKey=%s cmd=%d", sessionPlayerKey, cmd)
 	}

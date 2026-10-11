@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/client"
 )
@@ -158,7 +158,7 @@ func ensureBackendPool(serverID int32, addr string) {
 	} else {
 		pool.addr = addr
 	}
-	connected := pool.session.IsAlive()
+	connected := pool.IsConnected()
 	backendPoolsMu.Unlock()
 	if connected {
 		return
@@ -203,7 +203,7 @@ func connectBackendSession(serverID int32, addr string) error {
 		session.Close()
 		return nil
 	}
-	if pool.session.IsAlive() {
+	if pool.IsConnected() {
 		backendPoolsMu.Unlock()
 		// 并发重连时可能已经有人先连上，直接放弃当前新连接。
 		session.Close()
@@ -349,7 +349,7 @@ func checkBackendSessions() {
 		if pool == nil {
 			continue
 		}
-		if pool.session.IsAlive() {
+		if pool.IsConnected() {
 			continue
 		}
 		if pool.session != nil {

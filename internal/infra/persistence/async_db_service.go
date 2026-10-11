@@ -3,9 +3,9 @@ package persistence
 import (
 	"runtime"
 
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/internal/constants"
 	playerpo "github.com/forfun/gforgame/internal/infra/persistence/po"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/persist"
 )
 
@@ -33,9 +33,10 @@ func NewAsyncDbService() *AsyncDBService {
 func (s *AsyncDBService) SaveToDb(entity persist.Entity) {
 	switch entity := entity.(type) {
 	case *playerpo.PlayerPO:
-		logger.LogWithActor(entity.GetId(), entity.GetKey(), constants.LoggerDebug, "model", "savePlayer")
+		logger.LogSystem(constants.LoggerDebug, "model", "savePlayer")
 		s.playerWorker.Receive(entity)
 	default:
+		logger.LogSystem(constants.LoggerDebug, "model", "saveCommon")
 		s.commonWorker.Receive(entity)
 	}
 }

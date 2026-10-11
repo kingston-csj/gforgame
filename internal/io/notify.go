@@ -42,7 +42,7 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 	}
 	if !serverconfig.ServerConfig.UseGateMode {
 		// 直连模式：playerId 映射的是客户端会话，直接发送即可
-		if s, found := session.GetSessionByOwnerId(playerID); found {
+		if s, found := session.GetSessionByUid(playerID); found {
 			_ = s.Send(data, index)
 		}
 		return

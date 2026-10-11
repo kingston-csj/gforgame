@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/dispatch"
 	serverpkg "github.com/forfun/gforgame/network/server"
 )

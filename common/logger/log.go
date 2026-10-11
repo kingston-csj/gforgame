@@ -47,6 +47,14 @@ func (h *plainTextHandler) WithGroup(_ string) slog.Handler {
 	return h
 }
 
+// 滚动周期时间格式
+const (
+	RollingDaily  = "%Y%m%d"   // 按天滚动
+	RollingHourly = "%Y%m%d%H" // 按小时滚动
+)
+
+const DefaultBusinessLogName = "business"
+
 var (
 	logs       map[string]*slog.Logger
 	logsMu     sync.RWMutex
@@ -87,14 +95,36 @@ func init() {
 	errorLog = createErrorLog()
 }
 
-func createBusinessLog(name string) *slog.Logger {
+func createBusinessLog(dirName string, name string, rollingPattern string) *slog.Logger {
 	name = strings.ToLower(name)
+	dirName = strings.ToLower(dirName)
 	writer, _ := rotatelogs.New(
-		"logs/"+name+"/"+name+".%Y%m%d",
-		rotatelogs.WithMaxAge(30 * time.Duration(24)*time.Hour),
+		"logs/"+dirName+"/"+name+"."+rollingPattern,
+		rotatelogs.WithMaxAge(30*time.Duration(24)*time.Hour),
 	)
-	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{Level: slog.LevelInfo})
-	return slog.New(handler).With("biz", name)
+	handler := slog.NewJSONHandler(writer, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			// 业务日志字段映射：
+			// - 默认 time -> date(格式化字符串)
+			// - 自定义 time(毫秒时间戳) 在 Log() 中写入
+			switch a.Key {
+			case slog.TimeKey:
+				// 只处理 slog 内置的 time（Value 为 time.Time 类型）
+				// 改键为 date，存格式化字符串
+				if t, ok := a.Value.Any().(time.Time); ok {
+					return slog.String("date", t.Format("2006-01-02 15:04:05.000"))
+				}
+				// 用户自定义的同名 attr（非 time.Time 类型）保持原键名不动
+				return a
+			case slog.LevelKey, slog.MessageKey:
+				return slog.Attr{}
+			default:
+				return a
+			}
+		},
+	})
+	return slog.New(handler)
 }
 
 func createConsoleLog() *slog.Logger {
@@ -109,20 +139,11 @@ func createConsoleLog() *slog.Logger {
 	return slog.New(handler)
 }
 
-// Log records a message with the specified log type and arguments.
-// The Log function writes a log message to the log file
-// Parameters:
-//
-//	name LogType: The type of log message being recorded.
-//	args ...interface{}: A variadic list of arguments to include in the log message.
-//
-// Example:
-//
-//	Log(Admin, "User logged in", user)
-//	Log(Player, "Failed to save data", err)
-func Log(name string, args ...interface{}) {
+// logWithPeriod 内部通用写日志函数
+// dirName:  实际写入的二级目录名。系统日志=name（每个日志独立目录），运营日志="business"（统一目录）
+func logWithPeriod(dirName string, name string, rollingPattern string, args ...any) {
 	if len(args)%2 != 0 {
-		panic("log arguments must be odd number")
+		panic("log arguments must be even number (key-value pairs)")
 	}
 	key := strings.ToLower(name)
 	logsMu.RLock()
@@ -133,23 +154,53 @@ func Log(name string, args ...interface{}) {
 		// double-check，避免并发重复创建
 		logger = logs[key]
 		if logger == nil {
-			logger = createBusinessLog(key)
+			logger = createBusinessLog(dirName, key, rollingPattern)
 			logs[key] = logger
 		}
 		logsMu.Unlock()
 	}
 
 	fields := make([]any, 0, len(args)+2)
+	// timestamp: 毫秒级 unix 时间戳（数字型），与 slog 内置 time 区分开
 	fields = append(fields, "time", time.Now().UnixNano()/1000000)
 	for i := 0; i < len(args); i += 2 {
-		key, ok := args[i].(string)
+		k, ok := args[i].(string)
 		if !ok {
 			panic(fmt.Sprintf("key is not a string: %v", args[i]))
 		}
 		value := args[i+1]
-		fields = append(fields, key, value)
+		fields = append(fields, k, value)
 	}
 	logger.Info("biz_log", fields...)
+}
+
+// LogSystem 系统日志（按天滚动，每个日志类型独立二级目录）
+// 路径：logs/{name}/{name}.%Y%m%d
+// 例：logs/admin/admin.20260920  logs/debug/debug.20260920
+//
+// 【禁止业务代码直接调用】请使用 internal/logger.LogSystem(category, args...)
+// 由封装层统一注入 sid/module/logType/logDesc 等标准字段。
+func LogSystem(loggerName string, args ...any) {
+	logWithPeriod(loggerName, loggerName, RollingDaily, args...)
+}
+
+// LogBusiness 运营/业务日志（按小时滚动，统一文件 business.%Y%m%d%H）
+// 路径：logs/business/business.%Y%m%d%H
+//
+// 【禁止业务代码直接调用】请使用 internal/logger.LogBusinessDefault(args...)
+// 由封装层统一注入 sid 等标准字段。
+func LogBusiness(args ...any) {
+	logWithPeriod("business", DefaultBusinessLogName, RollingHourly, args...)
+}
+
+// LogBusinessTo 指定业务模块名 + 按小时滚动，统一写入 business.%Y%m%d%H
+// 路径：logs/business/business.%Y%m%d%H
+// 注："module" 字段已由业务层（internal/logger/logutil.go）写入，此处不再重复注入，避免 JSON 中出现重复 key。
+//
+// 【禁止业务代码直接调用】请使用 internal/logger.LogBusinessWithActor 或 LogBusinessNoActor
+// 由封装层统一注入 module/logType/logDesc 等标准字段。
+func LogBusinessTo(loggerName string, args ...any) {
+	logWithPeriod("business", DefaultBusinessLogName, RollingHourly, args...)
 }
 
 // Info 记录一条日志
@@ -157,7 +208,7 @@ func Info(v string) {
 	consoleLog.Info(v)
 }
 
-func Debugf(format string, args ...interface{}) {
+func Debugf(format string, args ...any) {
 	consoleLog.Debug(fmt.Sprintf(format, args...))
 }
 
@@ -177,10 +228,8 @@ func createErrorLog() *slog.Logger {
 		panic(fmt.Sprintf("Failed to create rotatelogs: %v", err))
 	}
 
-	// 创建多输出目标：同时输出到文件和控制台
-	multiWriter := io.MultiWriter(writer, os.Stdout)
-	// 错误日志使用纯文本 handler，避免 stack 中换行被转义成 \n
-	handler := &plainTextHandler{out: multiWriter, level: slog.LevelInfo}
+	// 错误日志仅写入 err 文件；控制台和 app 日志由 consoleLog 统一输出，避免重复打印
+	handler := &plainTextHandler{out: writer, level: slog.LevelInfo}
 	return slog.New(handler)
 }
 
@@ -224,6 +273,7 @@ func Error(customMsg string, err error) {
 		message += "\nerror: " + err.Error()
 		message += "\nstack:\n" + strings.Join(optimizedStack, "\n")
 		errorLog.Error(message)
+		consoleLog.Error(message)
 	}
 }
 
@@ -244,5 +294,7 @@ func ErrorNoStack(customMsg any) {
 		return
 	}
 	// 重要错误单行日志：写入 error 文件，不带调用栈
-	errorLog.Error("ERROR: " + message)
+	message = "ERROR: " + message
+	errorLog.Error(message)
+	consoleLog.Error(message)
 }

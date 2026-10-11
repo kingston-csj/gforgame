@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/common/container/set"
-	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/gateway/contract"
 	"github.com/forfun/gforgame/internal/gatewayadapter"
 	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
@@ -28,11 +28,17 @@ var (
 )
 
 func main() {
+	// serverconfig.Init()
+
 	onlyLocalDiscovery, ok := serverconfig.GetExtraBool("discovery.onlylocal")
 	if !ok {
 		onlyLocalDiscovery = true
 	}
 
+	onlinePlayerRegistry := net.NewOnlinePlayerRegistry()
+
+	logicIoDispatcher = newLogicIoDispatcher(onlinePlayerRegistry)
+	
 	var err error
 	if onlyLocalDiscovery {
 		err = startLocalServerDiscoveryHeartbeat()
@@ -45,9 +51,7 @@ func main() {
 	startBackendSessionMonitor()
 	startOutboundDispatcher()
 	router := network.NewMessageRoute()
-	onlinePlayerRegistry := net.NewOnlinePlayerRegistry()
-
-	logicIoDispatcher = newLogicIoDispatcher(onlinePlayerRegistry)
+	
 	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: onlinePlayerRegistry}
 	ioDispatcher.AddHandler(&ClientRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})
 	codec := gateMsgCodec

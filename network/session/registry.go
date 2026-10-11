@@ -7,7 +7,7 @@ import (
 
 var (
 	sidMapper = sync.Map{}
-	ownerId2IdMap = sync.Map{} // ownerId → sid
+	uidMap      = sync.Map{} // uid → sid
 )
 
 func BindSID(session Session) {
@@ -16,23 +16,23 @@ func BindSID(session Session) {
 
 // Bind associates uid with an existing sid.
 // Returns any previously bound session for the same uid (duplicate login).
-func Bind(sid ID, ownerId OwnerID) (Session, error) {
-	if sid == "" {
+func Bind(id ID, uid OwnerID) (Session, error) {
+	if id == "" {
 		return nil, fmt.Errorf("sid is empty")
 	}
-	if ownerId == "" {
+	if uid == "" {
 		return nil, fmt.Errorf("uid is empty")
 	}
-	s, found := getSessionBySid(sid)
+	s, found := getSessionBySid(id)
 	if !found {
-		return nil, fmt.Errorf("session %s not found", sid)
+		return nil, fmt.Errorf("session %s not found", id)
 	}
 	var oldSession Session
-	if oldSID, found := getSessionId(ownerId); found && oldSID != sid {
+	if oldSID, found := getSid(uid); found && oldSID != id {
 		oldSession, _ = getSessionBySid(oldSID)
 	}
-	ownerId2IdMap.Store(ownerId, sid)
-	sidMapper.Store(sid, s)
+	uidMap.Store(uid, id)
+	sidMapper.Store(id, s)
 	return oldSession, nil
 }
 
@@ -41,8 +41,8 @@ func Unbind(sid ID)  {
 	if !found {
 		return
 	}
-	if nowSID, ok := getSessionId(s.GetOwnerId()); ok && nowSID == sid {
-		ownerId2IdMap.Delete(s.GetOwnerId())
+	if nowSID, ok := getSid(s.GetOwnerId()); ok && nowSID == sid {
+		uidMap.Delete(s.GetOwnerId())
 	}
 }
 
@@ -54,24 +54,24 @@ func popSession(sid ID) (Session, bool) {
 	return s.(Session), true
 }
 
-func GetSessionByOwnerId(ownerId OwnerID) (Session, bool) {
-	sid, ok := getSessionId(ownerId)
+func GetSessionByUid(uid OwnerID) (Session, bool) {
+	sid, ok := getSid(uid)
 	if !ok {
 		return nil, false
 	}
 	return getSessionBySid(sid)
 }
 
-func getSessionBySid(sid ID) (Session, bool) {
-	session, ok := sidMapper.Load(sid)
+func getSessionBySid(id ID) (Session, bool) {
+	session, ok := sidMapper.Load(id)
 	if !ok {
 		return nil, false
 	}
 	return session.(Session), ok
 }
 
-func getSessionId(ownerId OwnerID) (ID, bool) {
-	sid, ok := ownerId2IdMap.Load(ownerId)
+func getSid(uid OwnerID) (ID, bool) {
+	sid, ok := uidMap.Load(uid)
 	if !ok {
 		return "", false
 	}

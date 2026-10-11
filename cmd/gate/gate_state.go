@@ -15,6 +15,10 @@ type backendPool struct {
 	reconnecting bool
 }
 
+func (p *backendPool) IsConnected() bool {
+	return p.session != nil && p.session.IsAlive()
+}
+
 var (
 	gateMsgCodec        = json.NewSerializer()
 	logicIoDispatcher   dispatch.IoDispatch

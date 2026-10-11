@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/codec"
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/jsonutil"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/google/uuid"
 )
@@ -136,7 +136,7 @@ func (s *BaseSession) Send(msg any, index int32) error {
 	}
 	if err == nil {
 		if cmd != -151 && cmd != -300 {
-			logger.Info(fmt.Sprintf("[%s] 发送消息:  cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
+			logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", id, cmd, msgName, jsonStr))
 		}
 	}
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(index), msgData)
@@ -200,7 +200,8 @@ func (s *BaseSession) SendAndClose(msg any) error {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", cmd, e3))
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)
 	}
-	logger.Info(fmt.Sprintf("[%s] 发送消息 cmd:%d, name:%s, 内容:%v", s.GetOwnerId(), cmd, msgName, msg))
+	id := s.GetId()
+	logger.Info(fmt.Sprintf("id:%s 发送消息 cmd:%d, name:%s, 内容:%v", id, cmd, msgName, msg))
 	frame, _ := s.ProtocolCodec.Encode(cmd, int32(-1), msgData)
 	done := make(chan error, 1)
 	if err = s.enqueueFrame(frame, done); err != nil {

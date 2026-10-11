@@ -199,7 +199,6 @@ func (ps *PlayerService) Create(name string, camp int32) *playerdomain.Player {
 	player.Camp = camp
 	mysqldb.Db.Create(&player)
 
-	logger.Log(constants.LoggerPlayer, "Id", player.Id, "name", player.Name)
 	fmt.Printf(player.Name)
 
 	return player

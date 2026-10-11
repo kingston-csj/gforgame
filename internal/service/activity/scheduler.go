@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/schedule"
 	"github.com/forfun/gforgame/common/util/timeutil"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/constants"
 	configdomain "github.com/forfun/gforgame/internal/domain/config"
+	"github.com/forfun/gforgame/internal/logger"
 )
 
 // innerTaskMap 内层任务映射，保证并发安
@@ -19,7 +19,6 @@ type innerTaskMap struct {
 	mu    sync.RWMutex
 	tasks map[string]schedule.Cancellable
 }
-
 
 // ActivityScheduler 活动调度
 type ActivityScheduler struct {
@@ -33,7 +32,7 @@ type ActivityScheduler struct {
 // NewActivityScheduler 创建新的活动调度
 func NewActivityScheduler(taskScheduler schedule.TaskScheduler) *ActivityScheduler {
 	return &ActivityScheduler{
-		taskScheduler: taskScheduler,
+		taskScheduler:  taskScheduler,
 		scheduledTasks: sync.Map{},
 	}
 }
@@ -62,7 +61,7 @@ func (a *ActivityScheduler) ScheduleActivity(handler ActivityHandler) {
 	a.CancelScheduledActivity(activityId)
 
 	// 获取活动数据和时间信
-	activityData  := config.QueryById[configdomain.ActivityData](activityId)
+	activityData := config.QueryById[configdomain.ActivityData](activityId)
 	startCron := activityData.Start
 	endCron := activityData.End
 
@@ -121,10 +120,15 @@ func (a *ActivityScheduler) scheduleStartTask(
 	startDate, now, endDate time.Time) {
 	// 设置活动结束时间
 	handler.GetBaseHandler().EndTime = endDate.UnixMilli()
-	activityId := handler.GetBaseHandler().ActivityId	
+	activityId := handler.GetBaseHandler().ActivityId
 	// 定义开始任
 	startTask := func() {
-		logger.Log(constants.LoggerActivity, "type", "start", "activityId", activityId)
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("", fmt.Errorf("scheduleStartTask panic: %v", r))
+			}
+		}()
+		logger.LogSystem(constants.LoggerActivity, "type", "start", "activityId", activityId)
 		// 调用活动开始方
 		handler.GetBaseHandler().ActivityStart()
 	}
@@ -150,7 +154,7 @@ func (a *ActivityScheduler) scheduleStartTask(
 func (a *ActivityScheduler) scheduleEndTask(activityId int32, endDate, now time.Time) {
 	// 定义结束任务
 	endTask := func() {
-		logger.Log(constants.LoggerActivity, "type", "end", "activityId", activityId)
+		logger.LogSystem(constants.LoggerActivity, "type", "end", "activityId", activityId)
 		// 调用活动结束方法
 		handler, err := GetHandler(activityId)
 		if err != nil {
@@ -183,7 +187,7 @@ func (a *ActivityScheduler) scheduleCronTasks(handler BaseHandlerGetter, activit
 
 		// 定义 Cron 任务
 		cronTask := func() {
-			logger.Log(constants.LoggerActivity, "type", method.Name, "activityId", activityId)
+			logger.LogSystem(constants.LoggerActivity, "type", method.Name, "activityId", activityId)
 			// 调用对应方法
 			handler, err := GetHandler(activityId)
 			if err != nil {

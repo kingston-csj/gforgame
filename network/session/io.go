@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/protocol"
 
 	"github.com/gorilla/websocket"
@@ -111,7 +111,7 @@ func (s *BaseSession) readWebSocketStream(wsConn WebSocketConn) {
 			if strings.Contains(errMsg, "close 1006") || strings.Contains(errMsg, "unexpected EOF") {
 				return
 			}
-			logger.ErrorNoStack(fmt.Sprintf("websocket read failed %v", err))
+			logger.Info(fmt.Sprintf("websocket read failed %v", err))
 			return
 		}
 

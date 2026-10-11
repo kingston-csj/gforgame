@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/codec"
-	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/session"
 )

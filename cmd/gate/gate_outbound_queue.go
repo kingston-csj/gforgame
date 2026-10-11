@@ -2,7 +2,7 @@ package main
 
 import (
 	limitedlist "github.com/forfun/gforgame/common/container/list"
-	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/logger"
 )
 
 type backendOutboundMsg struct {

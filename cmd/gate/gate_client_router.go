@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/forfun/gforgame/common/logger"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/gateway/contract"
 	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/dispatch"
@@ -32,7 +32,7 @@ func (m *MyMessageDispatch) OnSessionClosed(s network.Session) {
 	unbindPlayer := false
 	if v, ok := s.GetAttr("sessionPlayerKey"); ok {
 		sessionPlayerKey := v.(string)
-		if current, found := session.GetSessionByOwnerId(sessionPlayerKey); found && current == s {
+		if current, found := session.GetSessionByUid(sessionPlayerKey); found && current == s {
 			unbindPlayer = true
 			notifyLogicPlayerLogout(s)
 			unbindPlayerServer(sessionPlayerKey)
@@ -115,7 +115,7 @@ func (g *ClientRouter) HandleLoginReq(s network.Session, loginReq contract.GateL
 	}
 
 	sessionPlayerKey := buildSessionPlayerKey(serverID, playerID)
-	oldSession, found := session.GetSessionByOwnerId(sessionPlayerKey)
+	oldSession, found := session.GetSessionByUid(sessionPlayerKey)
 	if found && oldSession != s {
 		logger.Info("玩家顶号登录[" + sessionPlayerKey + "]")
 		oldSession.SendAndClose(gateLoginAdapter.NewReplacingLoginPush())
@@ -126,8 +126,8 @@ func (g *ClientRouter) HandleLoginReq(s network.Session, loginReq contract.GateL
 	}
 	s.SetOwnerId(playerID)
 	s.SetAttr("serverId", serverID)
-	s.SetAttr("sessionPlayerKey", sessionPlayerKey)
-	session.Bind(s.GetOwnerId(), playerID)
+	s.SetOwnerId(sessionPlayerKey)
+	session.Bind(s.GetId(), s.GetOwnerId())
 	g.onlinePlayerRegistry.AddOnlinePlayer(playerID)
 
 	bindPlayerServer(sessionPlayerKey, serverID)
