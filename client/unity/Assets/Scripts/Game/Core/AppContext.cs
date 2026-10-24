@@ -13,7 +13,7 @@ namespace Game.Core
         public static AssetResourceFactory assetResourceFactory;
 
         // 配置数据管理器
-        public static DataManager dataManager;
+        public static DataRepository DataRepository;
         
         // 游戏配置
         public static GameConfig gameConfig;

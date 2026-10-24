@@ -9,8 +9,10 @@ namespace Game.Configs
 {
     public class DataRepository
     {
-        public ConfigItemContainer configItemContainer;
+        // 系统杂项表
         public ConfigCommonContainer configCommonContainer;
+        // 道具表
+        public ConfigItemContainer configItemContainer;
 
         private const string CONFIG_ROOT_PATH = "config/";
 
@@ -75,12 +77,9 @@ namespace Game.Configs
                             Debug.LogError($"实例化字段 {field.Name} 失败：构造函数返回 null！");
                             continue;
                         }
-                        
 
-                        //  给 DataManager 字段赋值
+                        //  给 DataRepository 字段赋值
                         field.SetValue(this, containerInstance);
-
-
                         Debug.Log($"实例化容器：{field.Name}（配置文件：{fileName}）");
                     }
                     catch (Exception e)

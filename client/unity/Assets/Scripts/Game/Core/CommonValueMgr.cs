@@ -21,7 +21,7 @@ public class CommonValueMgr
         {
             if (field.IsStatic) continue;
             // 从common表中获取相同key的值
-            var config = AppContext.dataManager.configCommonContainer.GetValue(field.Name);
+            var config = AppContext.DataRepository.configCommonContainer.GetValue(field.Name);
             if (config != null)
             {
                 // 注入值

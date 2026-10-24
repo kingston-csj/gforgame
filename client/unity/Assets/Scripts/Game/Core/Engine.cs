@@ -33,9 +33,9 @@ namespace Game.Core
             AssetResourceFactory _assetResourceFactory = Resources.Load<AssetResourceFactory>("AssetResourceBinding");
             AppContext.assetResourceFactory = _assetResourceFactory;
             // 配置数据管理器
-            DataManager dataManager = new DataManager();
-            dataManager.AutoInit();
-            AppContext.dataManager = dataManager;
+            DataRepository dataRepository = new DataRepository();
+            dataRepository.AutoInit();
+            AppContext.DataRepository = dataRepository;
             CommonValueMgr.Instance.AutoInject();
 
             // 游戏配置

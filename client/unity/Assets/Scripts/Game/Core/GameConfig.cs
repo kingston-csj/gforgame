@@ -7,7 +7,7 @@
     {
         //服务器端地址
         // public string serverUrl = "ws://127.0.0.1:9527/ws";
-        public string serverUrl = "192.168.1.67:8010";
+        public string serverUrl = "127.0.0.1:8010";
         
     }
 }
