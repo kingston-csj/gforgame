@@ -171,10 +171,10 @@ example/unity同时兼容websocket/socket通信方式。
 ## 协议在线调试（类似swagger文档）
 
 api 文档  
-![](/screenshots/protocol-doc.jpg "api文档")  
+![](/screenshots/protocol-doc.png "api文档")  
 
 在线调试  
-![](/screenshots/protocol-test.jpg "在线调试")  
+![](/screenshots/protocol-test.png "在线调试")  
 
 ## 部分客户端运行效果
 
@@ -182,25 +182,25 @@ api 文档
 ![](/screenshots/login.png "登录界面")
 
 主界面  
-![](/screenshots/main.jpg "主界面")
+![](/screenshots/main.png "主界面")
 
 背包界面  
-![](/screenshots/bag.jpg "背包界面")
+![](/screenshots/bag.png "背包界面")
 
 招募界面  
-![](/screenshots/recruit.jpg "招募界面")
+![](/screenshots/recruit.png "招募界面")
 
 英雄主界面  
-![](/screenshots/hero.jpg "英雄主界面")
+![](/screenshots/hero.png "英雄主界面")
 
 图鉴界面  
-![](/screenshots/tujian.jpg "图鉴界面")
+![](/screenshots/tujian.png "图鉴界面")
 
 邮件界面  
-![](/screenshots/mail.jpg "邮件界面")
+![](/screenshots/mail.png "邮件界面")
 
 排行榜界面  
-![](/screenshots/rank.jpg "排行榜界面")
+![](/screenshots/rank.png "排行榜界面")
 
 好友界面  
-![](/screenshots/friend.jpg "好友界面")
+![](/screenshots/friend.png "好友界面")
