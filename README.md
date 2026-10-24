@@ -171,13 +171,10 @@ example/unity同时兼容websocket/socket通信方式。
 ## 协议在线调试（类似swagger文档）
 
 api 文档  
-![](/screenshots/protocol-doc.png "api文档")
+![](/screenshots/protocol-doc.jpg "api文档")  
 
 在线调试  
-![](/screenshots/protocol-test.png "在线调试")
-
-登录界面  
-![](/screenshots/login.png "登录界面")
+![](/screenshots/protocol-test.jpg "在线调试")  
 
 ## 部分客户端运行效果
 
