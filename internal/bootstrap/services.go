@@ -181,6 +181,8 @@ func newGmService(
 	quest *quest.QuestService,
 	recharge *recharge.RechargeService,
 	mail *mail.MailService,
+	system *system.SystemService,
+	playerProfile *playerrepo.PlayerProfileService,
 ) *gm.GmService {
 	return gm.NewGmService(&gm.GmDependencies{
 		Player:   player,
@@ -188,6 +190,8 @@ func newGmService(
 		Quest:    quest,
 		Recharge: recharge,
 		Mail:     mail,
+		System:   system,
+		PlayerProfile: playerProfile,
 	})
 }
 

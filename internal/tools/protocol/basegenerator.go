@@ -6,8 +6,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -24,7 +24,7 @@ type ProtocolGenerator interface {
 	// Go类型 → 目标语言类型映射
 	MapType(goType string) string
 	// 构建模板数据
-	BuildTemplateData(si structInfo, msgIds map[string]int32) interface{}
+	BuildTemplateData(si structInfo, msgIds map[string]int32) any
 	// 返回模板文件路径
 	GetTemplatePath() string
 }
@@ -87,8 +87,9 @@ func (b *BaseGenerator) Generate(g ProtocolGenerator, msgIds map[string]int32) e
 		// 为每个结构体生成文件
 		for _, si := range structInfos {
 			sourceFile := strings.TrimSuffix(filePath, ".go")
-			// 去掉 internal/protos 前缀
-			sourceFile = strings.TrimPrefix(sourceFile, filepath.Join("internal", "protos"))
+			// 去掉 GoDir 前缀，兼容 internal/protos 等目录结构。
+			sourceFile = strings.TrimPrefix(sourceFile, b.GoDir+"\\")
+			sourceFile = strings.TrimPrefix(sourceFile, b.GoDir+"/")
 
 			si.SourceFile = sourceFile
 			if err := b.generateStructFile(g, si, msgIds); err != nil {
@@ -125,13 +126,58 @@ func (b *BaseGenerator) generateStructFile(g ProtocolGenerator, si structInfo, m
 
 // parseGoFile 通用AST解析
 func (b *BaseGenerator) parseGoFile(filePath string) ([]structInfo, error) {
+	return b.parseGoSource(filePath, nil)
+}
+
+// ParseSources reuses the protocol exporter parser for embedded protocol documentation.
+func (b *BaseGenerator) ParseSources(source fs.FS) ([]StructInfo, error) {
+	files, err := fs.Glob(source, "*.go")
+	if err != nil {
+		return nil, err
+	}
+	var result []StructInfo
+	for _, file := range files {
+		if strings.HasSuffix(file, "_test.go") {
+			continue
+		}
+		data, err := fs.ReadFile(source, file)
+		if err != nil {
+			return nil, err
+		}
+		infos, err := b.parseGoSource(file, data)
+		if err != nil {
+			return nil, err
+		}
+		for _, info := range infos {
+			info.SourceFile = strings.TrimSuffix(file, ".go")
+			result = append(result, info)
+		}
+	}
+	return result, nil
+}
+
+func (b *BaseGenerator) parseGoSource(filePath string, source any) ([]structInfo, error) {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, filePath, source, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
 
 	cm := ast.NewCommentMap(fset, node, node.Comments)
+	genDeclDocs := make(map[*ast.TypeSpec]*ast.CommentGroup)
+	for _, decl := range node.Decls {
+		gd, ok := decl.(*ast.GenDecl)
+		if !ok || gd.Tok != token.TYPE {
+			continue
+		}
+		for _, spec := range gd.Specs {
+			ts, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
+			}
+			genDeclDocs[ts] = gd.Doc
+		}
+	}
 	var structInfos []structInfo
 
 	ast.Inspect(node, func(n ast.Node) bool {
@@ -160,14 +206,27 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]structInfo, error) {
 				if fieldName == "_" {
 					continue
 				}
+				if !ast.IsExported(fieldName) {
+					continue
+				}
+				goName := fieldName
 				// fieldName以对应的json标签的值为准
 				if field.Tag != nil {
 					tagStr := strings.Trim(field.Tag.Value, "`")
-					fieldName = b.extractJsonTag(tagStr)
+					jsonName := strings.Split(b.extractJsonTag(tagStr), ",")[0]
+					if jsonName == "-" {
+						continue
+					}
+					if jsonName != "" {
+						fieldName = jsonName
+					}
 				}
 
 				fieldType := b.getFieldTypeStr(field.Type)
 				fieldComment := b.getCommentText(field.Comment)
+				if fieldComment == "" {
+					fieldComment = b.getCommentText(field.Doc)
+				}
 				jsonTag := ""
 				if field.Tag != nil {
 					tagStr := strings.Trim(field.Tag.Value, "`")
@@ -175,6 +234,7 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]structInfo, error) {
 				}
 
 				fields = append(fields, structField{
+					GoName:  goName,
 					Name:    fieldName,
 					Type:    fieldType,
 					Comment: fieldComment,
@@ -213,7 +273,10 @@ func (b *BaseGenerator) parseGoFile(filePath string) ([]structInfo, error) {
 		if structComment == "" {
 			structComment = b.getCommentText(ts.Doc)
 			if structComment == "" {
-				structComment = b.getCommentText(ts.Comment)
+				structComment = b.getCommentText(genDeclDocs[ts])
+				if structComment == "" {
+					structComment = b.getCommentText(ts.Comment)
+				}
 			}
 		}
 

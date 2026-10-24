@@ -16,9 +16,9 @@ type TypeScriptGenerator struct {
 func NewTypeScriptGenerator(goDir, outputDir, tplPath string) *TypeScriptGenerator {
 	return &TypeScriptGenerator{
 		BaseGenerator: BaseGenerator{
-			GoDir:     goDir,
-			TemplatePath:  tplPath,
-			OutputDir: outputDir,
+			GoDir:        goDir,
+			TemplatePath: tplPath,
+			OutputDir:    outputDir,
 		},
 		typeMap: map[string]string{
 			"int":     "number",
@@ -74,17 +74,17 @@ func (t *TypeScriptGenerator) MapType(goType string) string {
 
 // tSTemplateData TS模板数据
 type tSTemplateData struct {
-	Cmd   int32
-	ClassName     string
-	ClassComment       string
-	Fields        []tSField
+	Cmd          int32
+	ClassName    string
+	ClassComment string
+	Fields       []tSField
 }
 
 type tSField struct {
-	Name     string
-	FieldType   string
-	Comment  string
-	JsonTag  string
+	Name      string
+	FieldType string
+	Comment   string
+	JsonTag   string
 }
 
 func toLowerFirst(s string) string {
@@ -93,24 +93,25 @@ func toLowerFirst(s string) string {
 	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
+
 // BuildTemplateData 构建TS模板数据（子类差异化实现）
-func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) interface{} {
+func (t *TypeScriptGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) any {
 	var fields []tSField
 	for _, f := range si.Fields {
 		fields = append(fields, tSField{
 			// ts字段，一般首字母小写
-			Name:     toLowerFirst(f.Name),
-			FieldType:   t.MapType(f.Type),
-			Comment:  f.Comment,
-			JsonTag:  f.JsonTag,
+			Name:      toLowerFirst(f.Name),
+			FieldType: t.MapType(f.Type),
+			Comment:   f.Comment,
+			JsonTag:   f.JsonTag,
 		})
 	}
 
 	return tSTemplateData{
-		Cmd:   msgIds[si.Name],
-		ClassName:     si.Name,
-		ClassComment:       si.Comment,
-		Fields:        fields,
+		Cmd:          msgIds[si.Name],
+		ClassName:    si.Name,
+		ClassComment: si.Comment,
+		Fields:       fields,
 	}
 }
 

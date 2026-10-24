@@ -41,7 +41,7 @@ func NewGmService(deps *GmDependencies) *GmService {
 func (s *GmService) init(deps *GmDependencies) {
 	s.registerHandlers(
 		NewSystemGmHandler(deps.System, deps.Player),
-		NewPlayerGmHandler(deps.Player),
+		NewPlayerGmHandler(deps.Player, deps.PlayerProfile),
 		NewItemGmHandler(deps.Item),
 		NewQuestGmHandler(deps.Quest),
 		NewRechargeGmHandler(deps.Recharge),

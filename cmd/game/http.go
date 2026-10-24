@@ -12,12 +12,15 @@ import (
 
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/http"
+	"github.com/forfun/gforgame/internal/protocoldoc"
+	"github.com/forfun/gforgame/network"
 	serverpkg "github.com/forfun/gforgame/network/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func NewHttpServer(gameServer serverpkg.Server) *gin.Engine {
+func NewHttpServer(gameServer serverpkg.Server,
+		messageRoutes *network.MessageRoute,) *gin.Engine {
 	router := gin.Default()
 	// 关闭游戏服务器进
 	router.POST("/api/stop", func(c *gin.Context) {
@@ -34,6 +37,11 @@ func NewHttpServer(gameServer serverpkg.Server) *gin.Engine {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	protocoldoc.Register(router, messageRoutes)
+	if err := router.Run(serverconfig.ServerConfig.HttpUrl); err != nil {
+		panic(err)
+	}
 
 	err := router.Run(serverconfig.ServerConfig.HttpUrl)
 	if err != nil {

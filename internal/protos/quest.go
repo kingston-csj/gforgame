@@ -1,5 +1,6 @@
 package protos
 
+// 任务VO
 type QuestVo struct {
 	Id         int32 `json:"id"`
 	Progress   int32 `json:"progress"`   // 进度
@@ -8,11 +9,13 @@ type QuestVo struct {
 	AcceptTime int64 `json:"acceptTime"` // 接受时间
 }
 
-type PushQuestAutoTakeReward struct { // 主线任务——自动领奖
+// 主线任务——自动领奖
+type PushQuestAutoTakeReward struct { 
 	_         struct{}    `cmd_ref:"CMD_PUSH_QUEST_AUTO_REWARD" type:"push"`
 	RewardVos []*RewardVo `json:"rewardVos"`
 }
 
+// 任务——每日任务信息
 type PushQuestDailyInfo struct {
 	_                struct{}   `cmd_ref:"CMD_PUSH_DAILY_QUEST" type:"push"`
 	DailyRewardIndex int32      `json:"dailyRewardIndex"` // 已领取的档位索引（0为未领取)
@@ -20,16 +23,13 @@ type PushQuestDailyInfo struct {
 	Quests           []*QuestVo `json:"quests"`           // 所有任务
 }
 
-type PushQuestEntrustInfo struct { // 委托任务主界面信息
-	_      struct{}   `cmd_ref:"CmdPushQuestEntrustInfo"`
-	Quests []*QuestVo `json:"quests"` // 所有任务
-}
-
+ // 任务——刷新任务信息
 type PushQuestRefreshVo struct {
 	_     struct{} `cmd_ref:"CMD_PUSH_UPDATE_QUEST" type:"push"`
 	Quest *QuestVo `json:"quest"`
 }
 
+// 任务——替换任务
 type PushQuestReplace struct {
 	_          struct{} `cmd_ref:"CMD_RES_REPLACE_QUEST" type:"push"`
 	OldQuestId int32    `json:"oldQuestId"` // 旧任务id
@@ -37,38 +37,44 @@ type PushQuestReplace struct {
 	Quest *QuestVo `json:"quest"`
 }
 
-type PushQuestWeeklyInfo struct { // 每周任务主界面信息
+// 每周任务主界面信息
+type PushQuestWeeklyInfo struct { 
 	_                 struct{}   `cmd_ref:"CMD_PUSH_WEEKLY_QUEST" type:"push"`
 	WeeklyRewardIndex int32      `json:"weeklyRewardIndex"` // 已领取的档位索引（0为未领取)
 	WeeklyScore       int32      `json:"weeklyScore"`       // 本周活跃度
 	Quests            []*QuestVo `json:"quests"`            // 所有任务
 }
 
-type PushAchievementInfo struct { // 成就——加载所有信息
+// 成就——加载所有信息
+type PushAchievementInfo struct { 
 	_              struct{}   `cmd_ref:"CMD_PUSH_ACHIEVEMENT" type:"push"`
 	Score          int32      `json:"score"`          // 积分
 	AchievementVos []*QuestVo `json:"achievementVos"` // 所有任务
 }
 
-type ReqQuestTakeAllRewards struct { // 任务——一键领取所有奖励
+// 任务——一键领取所有奖励
+type ReqQuestTakeAllRewards struct { 
 	_ struct{} `cmd_ref:"CMD_REQ_QUEST_ALL_REWARD" type:"req"`
 
 	Category int32 `json:"category"` // 任务类型 1主线，2日常
 }
 
-type ReqQuestTakeProgressReward struct { // 任务——领取档位奖
+// 任务——领取档位奖
+type ReqQuestTakeProgressReward struct { 
 	_ struct{} `cmd_ref:"CMD_REQ_QUEST_PROGRESS_REWARD" type:"req"`
 
 	Type int32 `json:"type"` // 任务类型 2每日，5每周，6公会
 }
 
-type ReqQuestTakeReward struct { // 任务——领取达标奖
+// 任务——领取达标奖
+type ReqQuestTakeReward struct { 
 	_ struct{} `cmd_ref:"CMD_REQ_QUEST_REWARD" type:"req"`
 
 	Id int32 `json:"id"` // 任务id
 }
 
-type ResQuestTakeAllRewards struct { // 任务——一键领取所有奖励
+// 任务——一键领取所有奖励
+type ResQuestTakeAllRewards struct { 
 	_ struct{} `cmd_ref:"CMD_RES_QUEST_ALL_REWARD" type:"res"`
 
 	Category    int32       `json:"category"`    // 任务类型 1主线，2日常
@@ -79,28 +85,19 @@ type ResQuestTakeAllRewards struct { // 任务——一键领取所有奖励
 	Score       int32       `json:"score"`       // 总分数
 }
 
-type ResQuestTakeProgressReward struct { // 任务——领取档位奖
+// 任务——领取档位奖
+type ResQuestTakeProgressReward struct { 
 	_           struct{}    `cmd_ref:"CMD_RES_QUEST_PROGRESS_REWARD" type:"res"`
 	Type        int32       `json:"type"`        // 任务类型 2每日，5每周，6公会
 	RewardIndex int32       `json:"rewardIndex"` // 已领取的档位索引（0为未领取)
 	RewardVos   []*RewardVo `json:"rewardVos"`   // 奖励vo
 }
 
-type ResQuestTakeReward struct { // 任务——领取达标奖
+// 任务——领取达标奖
+type ResQuestTakeReward struct { 
 	_           struct{}    `cmd_ref:"CMD_RES_QUEST_REWARD" type:"res"`
 	Code        int32       `json:"code"`
 	DailyScore  int32       `json:"dailyScore"`  // 今日活跃度
 	WeeklyScore int32       `json:"weeklyScore"` // 本周活跃度
 	RewardVos   []*RewardVo `json:"rewardVos"`   // 奖励vo
-}
-
-type ReqQuestEntrust struct { // 任务——委托任务
-	_       struct{} `cmd_ref:"CmdReqQuestEntrust"`
-	QuestId int32    `json:"questId"` // 任务id
-	HeroId  int32    `json:"heroId"`  // 英雄id
-}
-
-type ResQuestEntrust struct { // 任务——委托任务
-	_    struct{} `cmd_ref:"CmdResQuestEntrust"`
-	Code int32    `json:"code"`
 }

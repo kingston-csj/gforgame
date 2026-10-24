@@ -1,4 +1,10 @@
 server:
   id: 1001
+
+game:
+  protocol-doc: true
+  protocol-doc-options:
+    # 网关模式时配置浏览器可访问的网关入口，如 ws://localhost:8091/ws
+    websocket-url: ""
 db:
   url: root:123456@tcp(127.0.0.1:3306)/gforgame?charset=utf8mb4&parseTime=True&loc=Local

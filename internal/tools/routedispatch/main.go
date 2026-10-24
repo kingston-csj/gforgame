@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 
-	outFile := filepath.Join(root, "cmd", "game", "route_dispatch_gen.go")
+	outFile := filepath.Join(root, "cmd", "logic", "route_dispatch_gen.go")
 	if err := writeGeneratedFile(outFile, methods, constructors); err != nil {
 		panic(err)
 	}
@@ -254,16 +254,13 @@ func parseReqParam(params *ast.FieldList) (reqType string, hasPlayer bool, hasIn
 		if ident, ok := field.Type.(*ast.Ident); ok && ident.Name == "int32" {
 			hasIndex = true
 		}
+		if isNetworkSessionType(field.Type) {
+			hasSession = true
+			continue
+		}
 		star, ok := field.Type.(*ast.StarExpr)
 		if !ok {
 			continue
-		}
-		if sel, ok := star.X.(*ast.SelectorExpr); ok {
-			pkgIdent, ok := sel.X.(*ast.Ident)
-			if ok && pkgIdent.Name == "network" && sel.Sel.Name == "Session" {
-				hasSession = true
-				continue
-			}
 		}
 		sel, ok := star.X.(*ast.SelectorExpr)
 		if !ok {
@@ -278,6 +275,18 @@ func parseReqParam(params *ast.FieldList) (reqType string, hasPlayer bool, hasIn
 		}
 	}
 	return reqType, hasPlayer, hasIndex, hasSession
+}
+
+func isNetworkSessionType(expr ast.Expr) bool {
+	switch v := expr.(type) {
+	case *ast.SelectorExpr:
+		pkgIdent, ok := v.X.(*ast.Ident)
+		return ok && pkgIdent.Name == "network" && v.Sel != nil && v.Sel.Name == "Session"
+	case *ast.StarExpr:
+		return isNetworkSessionType(v.X)
+	default:
+		return false
+	}
 }
 
 func isDispatchReqType(typeName string) bool {

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>游戏协议中心</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23366be3'/%3E%3Ctext x='9' y='24' fill='white' font-size='24'%3EP%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./protocol.css">
+</head>
+<body>
+  <header class="topbar"><div><span class="logo">P</span><strong>游戏协议中心</strong><span class="subtle">客户端文档与在线测试</span></div><span id="meta-status" role="status">正在加载协议…</span></header>
+  <div class="layout">
+    <aside><h2>模块导航</h2><nav id="modules" aria-label="协议模块"></nav></aside>
+    <main>
+      <div class="tabs" role="tablist"><button id="docs-tab" role="tab" aria-selected="true">协议文档</button><button id="test-tab" role="tab" aria-selected="false">在线测试</button></div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <section id="docs-panel" role="tabpanel" aria-labelledby="docs-tab">
+        <div class="toolbar"><h1 id="module-title">全部协议</h1><input id="doc-search" type="search" placeholder="搜索协议名称、cmd 或说明" aria-label="搜索协议"></div>
+        <div id="documents"></div>
+      </section>
+      <section id="test-panel" role="tabpanel" aria-labelledby="test-tab" hidden>
+        <div class="card login-card">
+          <h2>玩家登录 <span id="connection-status" class="status">未连接</span></h2>
+          <div class="toolbar"><label for="codec">消息编码</label><select id="codec"><option value="json">JSON（文本）</option></select><span class="hint">当前游戏服务使用 JSON 消息编码。</span></div>
+          <div class="toolbar"><label for="player-id">playerId</label><input id="player-id" placeholder="输入玩家 ID" autocomplete="off"><button id="login" class="primary" disabled>登录</button><button id="disconnect" disabled>断开</button></div>
+          <p class="hint">登录会使用真实游戏会话，同一玩家已有的客户端可能被顶下线。</p>
+          <p id="endpoint" class="hint"></p>
+        </div>
+        <div class="card">
+          <h2>请求协议</h2>
+          <div class="toolbar"><input id="request-search" type="search" placeholder="输入 Req 消息类名，支持模糊搜索" aria-label="搜索 Req 协议"><label class="check"><input id="all-modules" type="checkbox">全部模块</label></div>
+          <div id="request-options" class="options" aria-label="匹配的请求协议"></div>
+          <div id="request-detail" class="hint">选择协议后填写参数。</div>
+          <div class="actions"><button id="send" class="primary" disabled>发送请求</button><button id="reset" disabled>重置参数</button><span id="send-status" role="status"></span></div>
+        </div>
+        <div class="card">
+          <div class="toolbar"><h2>收发记录</h2><label class="check"><input id="pause-scroll" type="checkbox">暂停滚动</label><button id="clear-log">清空记录</button></div>
+          <p class="hint">保留最近 200 条记录；请求超时不会自动重发。</p>
+          <div id="messages" class="messages" role="log" aria-label="协议收发记录"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

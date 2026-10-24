@@ -17,6 +17,7 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 - 可视化 unity 游戏客户端，功能演示
 - 一键导出客户端协议（typescript/csharp）
 - 玩家可自由选择 Cocos 或 Unity 端进入游戏，双端同步运行、实时互联，打造无缝跨平台交互玩法。
+- 提供一个html页面，包含协议文档，以及协议在线调试工具。
 - cocos/unity 客户端，亦可作为 jforgame 的游戏客户端
 
 ## 快速入门
@@ -30,6 +31,7 @@ gforgame，jforgame 的 go 语言实现。是一个轻量级高性能手游服�
 cocos 客户端工程(推荐)：client/cocos
 unity 客户端工程：client/unity
 go 客户端入口：client/go/client.go
+html 客户端：http://127.0.1.1:8091/protocol-doc/index.html
 
 ### 私有协议栈
 
@@ -165,6 +167,17 @@ example/unity同时兼容websocket/socket通信方式。
 - 邮件
 - 排行榜
 - 红点系统
+
+## 协议在线调试（类似swagger文档）
+
+api 文档  
+![](/screenshots/protocol-doc.png "api文档")
+
+在线调试  
+![](/screenshots/protocol-test.png "在线调试")
+
+登录界面  
+![](/screenshots/login.png "登录界面")
 
 ## 部分客户端运行效果
 

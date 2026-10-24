@@ -12,12 +12,12 @@ type CSharpGenerator struct {
 }
 
 // NewCSharpGenerator 创建C#生成器实例
-func NewCSharpGenerator(goDir, outputDir,tplPath string) *CSharpGenerator {
+func NewCSharpGenerator(goDir, outputDir, tplPath string) *CSharpGenerator {
 	return &CSharpGenerator{
 		BaseGenerator: BaseGenerator{
-			GoDir:     goDir,
+			GoDir:        goDir,
 			TemplatePath: tplPath,
-			OutputDir: outputDir,
+			OutputDir:    outputDir,
 		},
 		typeMap: map[string]string{
 			"int":     "int",
@@ -76,24 +76,24 @@ type cSharpTemplateData struct {
 	StructName    string
 	StructComment string
 	SuperClass    string
-	Cmd           interface{}
+	Cmd           any
 	Fields        []cSharpField
 }
 
 type cSharpField struct {
-	Name       string
+	Name      string
 	FieldType string
-	Comment    string
+	Comment   string
 }
 
 // BuildTemplateData 构建C#模板数据
-func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) interface{} {
+func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int32) any {
 	var fields []cSharpField
 	for _, f := range si.Fields {
 		fields = append(fields, cSharpField{
-			Name:       f.Name,
+			Name:      f.Name,
 			FieldType: c.MapType(f.Type),
-			Comment:    f.Comment,
+			Comment:   f.Comment,
 		})
 	}
 
@@ -103,9 +103,9 @@ func (c *CSharpGenerator) BuildTemplateData(si structInfo, msgIds map[string]int
 		Fields:        fields,
 	}
 	if strings.HasPrefix(si.Name, "Req") || strings.HasPrefix(si.Name, "Push") {
-		data.SuperClass = "Message"
+		data.SuperClass = "GameSocketMsgBody"
 	} else {
-		data.SuperClass = "Response"
+		data.SuperClass = "AbsResData"
 	}
 	if val, ok := msgIds[si.Name]; ok {
 		data.Cmd = val

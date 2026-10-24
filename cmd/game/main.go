@@ -6,7 +6,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -137,7 +136,7 @@ func main() {
 
 	// 启动后台http服务
 	go func() {
-		NewHttpServer(node)
+		NewHttpServer(node, router)
 	}()
 
 	// 自启动，不会有额外消耗
@@ -154,8 +153,7 @@ func main() {
 	costSeconds := endTime.Sub(startTime).Seconds()
 	logger.Info(fmt.Sprintf("game server is starting at %s, cost %.2fs", serverconfig.ServerConfig.ServerUrl, costSeconds))
 
-	p := s.Player.GetOrCreatePlayer("aaa")
-	logger.Info("p.level " + strconv.Itoa(int(p.Level)))
+	// p := s.Player.GetOrCreatePlayer("aaa")
 
 	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)

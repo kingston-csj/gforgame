@@ -3,6 +3,7 @@ package gm
 import (
 	"fmt"
 
+	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/service/item"
 	"github.com/forfun/gforgame/internal/service/mail"
 	playerservice "github.com/forfun/gforgame/internal/service/player"
@@ -18,6 +19,7 @@ type GmDependencies struct {
 	Recharge *recharge.RechargeService
 	Mail     *mail.MailService
 	System   *system.SystemService
+	PlayerProfile *playerrepo.PlayerProfileService
 }
 
 var defaultDependencies *GmDependencies

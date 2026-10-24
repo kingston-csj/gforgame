@@ -15,9 +15,10 @@ type PlayerGmHandler struct {
 	playerProfile *playerrepo.PlayerProfileService
 }
 
-func NewPlayerGmHandler(playerService *playerservice.PlayerService) *PlayerGmHandler {
+func NewPlayerGmHandler(playerService *playerservice.PlayerService, playerProfileService *playerrepo.PlayerProfileService) *PlayerGmHandler {
 	return &PlayerGmHandler{
-		player: playerService,
+		player:        playerService,
+		playerProfile: playerProfileService,
 	}
 }
 

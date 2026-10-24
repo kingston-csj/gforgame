@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/forfun/gforgame/common/logger"
 	_ "github.com/forfun/gforgame/internal/protos"
 	protocolexporter "github.com/forfun/gforgame/internal/tools/protocol"
 	"github.com/forfun/gforgame/network/protocol"
@@ -13,7 +11,6 @@ import (
 
 func main() {
 	root, err := findProjectRoot()
-	logger.Info(fmt.Sprintf("项目根目录: %s", root))
 	if err != nil {
 		panic(err)
 	}
@@ -22,13 +19,13 @@ func main() {
 	}
 
 	protosDir := filepath.Join("internal", "protos")
-	clientProtoOutDir := filepath.Join("internal", "tools", "protocol", "output", "ts")
-	templatePath := filepath.Join("internal", "tools", "protocol", "templates", "tstemplate.tpl")
+	csharpOutDir := "internal\\tools\\protocol\\output\\csharp\\"
+	templatePath := "internal\\tools\\protocol\\templates\\csharptemplate.tpl"
 	registerFile := filepath.Join("internal", "protos", "register_gen.go")
 
-	generator := protocolexporter.NewTypeScriptGenerator(
+	generator := protocolexporter.NewCSharpGenerator(
 		protosDir,
-		clientProtoOutDir,
+		csharpOutDir,
 		templatePath,
 	)
 	if err := generator.Generate(protocol.GetMsgName2IdMapper()); err != nil {

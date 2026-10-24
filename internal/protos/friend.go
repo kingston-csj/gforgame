@@ -1,6 +1,6 @@
 package protos
 
-type FriendVo struct {
+type FriendVo struct { // 好友信息
 	ApplyId  string `json:"applyId"`
 	Id       string `json:"id"`
 	Name     string `json:"name"`
@@ -8,7 +8,7 @@ type FriendVo struct {
 	Fighting int64  `json:"fighting"`
 }
 
-type FriendApplyVo struct {
+type FriendApplyVo struct { // 好友申请信息
 	Id         string `json:"id"`
 	FromId     string `json:"fromId"`
 	FromName   string `json:"fromName"`
@@ -19,55 +19,55 @@ type FriendApplyVo struct {
 	Time       int64  `json:"time"`
 }
 
-type PushFriendInfo struct {
+type PushFriendInfo struct { // 好友——加载所有数据
 	_           struct{}         `cmd_ref:"CmdFriendPushApplyList"`
 	ApplyItems  []*FriendApplyVo `json:"applyItems"`
 	FriendItems []*FriendVo      `json:"friendItems"`
 	FriendSum   int32            `json:"friendSum"`
 }
 
-type ReqFriendSearchPlayers struct {
+type ReqFriendSearchPlayers struct { // 好友——搜索玩家
 	_   struct{} `cmd_ref:"CmdFriendReqSearchPlayers"`
-	Key string   `json:"key"`
+	Key string   `json:"key"` // 搜索关键词
 }
 
-type ReqFriendApply struct {
+type ReqFriendApply struct { // 好友——申请好友
 	_        struct{} `cmd_ref:"CmdFriendReqApply"`
 	FriendId string   `json:"friendId"`
 }
 
-type ReqFriendDealApplyRecord struct {
+type ReqFriendDealApplyRecord struct { // 好友——处理申请
 	_       struct{} `cmd_ref:"CmdFriendReqDealApply"`
 	ApplyId string   `json:"applyId"`
-	Status  int32    `json:"status"`
+	Status  int32    `json:"status"` // 处理结果：1同意 2拒绝
 }
 
-type ReqFriendDelete struct {
+type ReqFriendDelete struct { // 好友——删除
 	_        struct{} `cmd_ref:"CmdFriendReqDelete"`
-	FriendId string   `json:"friendId"`
+	FriendId string   `json:"friendId"` // 好友id
 }
 
-type ReqFriendQueryMyFriends struct {
+type ReqFriendQueryMyFriends struct { // 好友——查询我的好友
 	_ struct{} `cmd_ref:"CmdFriendReqQueryFriends"`
 }
 
-type ResFriendApply struct {
+type ResFriendApply struct { // 好友——申请好友
 	_    struct{} `cmd_ref:"CmdFriendResApply"`
 	Code int32    `json:"code"`
 }
 
-type ResFriendDealApplyRecord struct {
+type ResFriendDealApplyRecord struct { // 好友——处理申请
 	_    struct{} `cmd_ref:"CmdFriendResDealApply"`
 	Code int32    `json:"code"`
 }
 
-type ResFriendDelete struct {
+type ResFriendDelete struct { // 好友——删除
 	_    struct{} `cmd_ref:"CmdFriendResDelete"`
 	Code int32    `json:"code"`
 }
 
 // 查询我的好友列表
-type ResFriendQueryMyFriends struct {
+type ResFriendQueryMyFriends struct { // 好友——查询我的好友
 	_     struct{}    `cmd_ref:"CmdFriendResQueryFriends"`
 	Code  int         `json:"code"`
 	Items []*FriendVo `json:"items"`
@@ -77,5 +77,5 @@ type ResFriendQueryMyFriends struct {
 type ResFriendSearchPlayers struct {
 	_     struct{}    `cmd_ref:"CmdFriendResSearchPlayers"`
 	Code  int         `json:"code"`
-	Items []*FriendVo `json:"items"`
+	Items []*FriendVo `json:"items"` // 搜索结果
 }
