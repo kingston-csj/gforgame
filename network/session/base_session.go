@@ -22,15 +22,15 @@ type queuedWrite struct {
 
 // BaseSession 封装单条连接的运行时状态与基础发送能力。
 type BaseSession struct {
-	id ID
+	id      ID
 	ownerId OwnerID
-	conn net.Conn
+	conn    net.Conn
 	// 关闭标记
 	Die chan bool
 	// 私有协议栈编解码
 	ProtocolCodec protocol.ProtocolAdapter
 	// 消息编解码
-	MessageCodec codec.MessageCodec
+	MessageCodec   codec.MessageCodec
 	MessageFactory *protocol.MessageFactory
 	// 准备发送的出队消息(带缓冲)
 	dataToSend chan queuedWrite
@@ -64,6 +64,7 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec, messageFactory *
 		conn:             conn,
 		ProtocolCodec:    protocol.NewBinaryProtocolAdapter(),
 		MessageCodec:     messageCodec,
+		MessageFactory:   messageFactory,
 		Die:              make(chan bool, 1),
 		dataToSend:       make(chan queuedWrite, 128),
 		DataReceived:     make(chan *protocol.RequestDataFrame, 128),
@@ -73,12 +74,14 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec, messageFactory *
 		protocolType:     protocol.ProtocolTypeBinary,
 		payloadMode:      protocol.PayloadModeDecode,
 		lastRecvUnixNano: nowUnixNano,
-		MessageFactory:   messageFactory,
 	}
 }
 
 // NewSessionWithProtocol 创建指定协议类型的Session
 func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType, messageFactory *protocol.MessageFactory) *BaseSession {
+	if messageFactory == nil {
+		panic("message factory cannot be nil")
+	}
 	factory := &protocol.ProtocolFactory{}
 	protocolAdapter := factory.NewProtocolAdapter(protocolType)
 	nowUnixNano := time.Now().UnixNano()
@@ -86,6 +89,7 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 		conn:             conn,
 		ProtocolCodec:    protocolAdapter,
 		MessageCodec:     messageCodec,
+		MessageFactory:   messageFactory,
 		Die:              make(chan bool, 1),
 		dataToSend:       make(chan queuedWrite, 128),
 		DataReceived:     make(chan *protocol.RequestDataFrame, 128),
@@ -95,7 +99,6 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 		protocolType:     protocolType,
 		payloadMode:      protocol.PayloadModeDecode,
 		lastRecvUnixNano: nowUnixNano,
-		MessageFactory:   messageFactory,
 	}
 	s.id = uuid.NewString()
 	BindSID(s)
@@ -296,3 +299,5 @@ func (s *BaseSession) ToString() string {
 	}
 	return fmt.Sprintf("id:%s, remoteAddr:%s", id, s.conn.RemoteAddr().String())
 }
+
+func (s *BaseSession) GetMessageFactory() *protocol.MessageFactory { return s.MessageFactory }

@@ -1,10 +1,7 @@
 package config
 
 import (
-	"embed"
 	"fmt"
-
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -15,37 +12,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
-	// 服务器id
-	ServerId uint32
-	// 服务地址(socket/websocket)
-	ServerUrl string
-	// 是否使用网关模式（true: 客户端->gate->logic，false: 客户端直连logic）
-	UseGateMode bool
-	//后端管理地址
-	HttpUrl string
-	// pprof性能监测地址
-	PprofAddr string
-	// 未匹配到强类型字段的配置，按需手动读取
-	Extra map[string]any
-}
-
-var configFS embed.FS
-
 var (
-	ServerConfig Config
-	allServers   []serverNode
-	allServersMu sync.RWMutex
-	dynamicIDs   = make(map[uint32]struct{})
+	appConfig   AppConfig
+	appConfigMu sync.RWMutex
+	configOnce  sync.Once
 )
 
-type serverNode struct {
-	Id          uint32 `mapstructure:"id"`
-	Type        uint32 `mapstructure:"type"`
-	UseGateMode bool   `mapstructure:"useGateMode"`
-	Addr        string `mapstructure:"addr"`
-	HttpAddr    string `mapstructure:"httpAddr"`
-	PprofAddr   string `mapstructure:"pprofAddr"`
+// GetAppConfig 返回进程唯一的完整配置。Init 后供各模块只读访问。
+func GetAppConfig() *AppConfig {
+	return &appConfig
+}
+
+// GetCurrentNode 返回单例 NodeList 中的当前节点；初始化前返回 nil。
+func GetCurrentNode() *NodeConfig {
+	appConfigMu.RLock()
+	defer appConfigMu.RUnlock()
+	for i := range appConfig.NodeList {
+		if appConfig.NodeList[i].NodeId == appConfig.NodeId {
+			return &appConfig.NodeList[i]
+		}
+	}
+	return nil
 }
 
 type ServerNodeInfo struct {
@@ -64,257 +51,104 @@ type DynamicServerNode struct {
 	PprofAddr   string
 }
 
-// roleConfig 用于承接角色级配置（config-gate/config-game）。
-// 已定义字段自动注入，未定义字段进入 Extra。
-type roleConfig struct {
-	Server struct {
-		Id uint32 `mapstructure:"id"`
-	} `mapstructure:"server"`
-	Extra map[string]any `mapstructure:",remain"`
+// DiscoveryProvider 扩展集群发现方式，例如 etcd；实现方负责获取节点配置。
+// 在 Init 前注册，local 模式始终只使用 config.yml 的 nodeList。
+type DiscoveryProvider func(ClusterConfig) ([]NodeConfig, error)
+
+var discoveryProviders = map[string]DiscoveryProvider{}
+
+func RegisterDiscoveryProvider(name string, provider DiscoveryProvider) {
+	name = strings.ToLower(strings.TrimSpace(name))
+	if name == "" || name == "local" || provider == nil {
+		panic("服务发现扩展必须指定非 local 名称和有效 provider")
+	}
+	discoveryProviders[name] = provider
 }
 
-// 配置读取规则：
-// 加载顺序: default -> 角色配置(config-gate/config-logic)
-// 先加载的配置会被后加载的同名配置所替换！！！！
-// 1.优先读default.yml文件，应用程序内部配置，项目打包成二进制后不嵌入该配置
-// 2.根据ENV读取 config-{ENV}.yml（如 gate/logic）
-func init() {
-	// 创建 Viper 实例
+func loadConfig(path string) (AppConfig, error) {
 	v := viper.New()
-	v.SetConfigType("yml")
-
-	// 默认配置优先读取外部文件，便于打包后与二进制一起部署。
-	if defaultConfigFile := resolveDefaultConfigPath(); defaultConfigFile != "" {
-		v.SetConfigFile(defaultConfigFile)
-		if err := v.ReadInConfig(); err != nil {
-			panic(fmt.Errorf("failed to read config file %s: %w", defaultConfigFile, err))
+	v.SetConfigFile(path)
+	if err := v.ReadInConfig(); err != nil {
+		return AppConfig{}, fmt.Errorf("读取 config.yml 失败: %w", err)
+	}
+	var app AppConfig
+	if err := v.Unmarshal(&app); err != nil {
+		return AppConfig{}, fmt.Errorf("解析 config.yml 失败: %w", err)
+	}
+	app.Cluster.Discovery = strings.ToLower(strings.TrimSpace(app.Cluster.Discovery))
+	switch app.Cluster.Discovery {
+	case "local":
+	case "":
+		return AppConfig{}, fmt.Errorf("config.yml 必须指定 cluster.discovery")
+	default:
+		provider, ok := discoveryProviders[app.Cluster.Discovery]
+		if !ok {
+			return AppConfig{}, fmt.Errorf("尚未注册 cluster.discovery=%s 的发现实现（etcd 等扩展需在 Init 前注册）", app.Cluster.Discovery)
 		}
-		logger.Info(fmt.Sprintf("已加载默认配置: %s", defaultConfigFile))
-	} else {
-		// 外部 default.yml 不存在时，回退到二进制内嵌默认配置。
-		f, err := configFS.Open("default.yml")
+		nodes, err := provider(app.Cluster)
 		if err != nil {
-			panic(fmt.Errorf("failed to open embedded config file: %w", err))
+			return AppConfig{}, fmt.Errorf("发现集群节点失败: %w", err)
 		}
-		defer f.Close()
-		if err := v.ReadConfig(f); err != nil {
-			panic(fmt.Errorf("failed to read embedded config: %w", err))
+		app.NodeList = nodes
+	}
+	if len(app.NodeList) == 0 {
+		return AppConfig{}, fmt.Errorf("nodeList 为空")
+	}
+	nodeIDs := make(map[string]bool, len(app.NodeList))
+	serverIDs := make(map[int32]bool, len(app.NodeList))
+	for _, node := range app.NodeList {
+		if strings.TrimSpace(node.NodeId) == "" || node.ServerId <= 0 || node.Type <= NodeTypeUnknown {
+			return AppConfig{}, fmt.Errorf("无效节点配置 nodeId=%q serverId=%d type=%d", node.NodeId, node.ServerId, node.Type)
 		}
-		logger.Info("已加载内嵌默认配置")
+		if nodeIDs[node.NodeId] || serverIDs[node.ServerId] {
+			return AppConfig{}, fmt.Errorf("节点 nodeId 或 serverId 重复: %s/%d", node.NodeId, node.ServerId)
+		}
+		nodeIDs[node.NodeId], serverIDs[node.ServerId] = true, true
 	}
-
-	// 允许 Viper 读取环境变量
-	v.AutomaticEnv()
-	replacer := strings.NewReplacer(".", "_")
-	v.SetEnvKeyReplacer(replacer)
-
-	// 获取环境变量，确定要加载的配置文件
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "game"
-	}
-	v.SetConfigName("config-" + env)
-	if configFile := resolveEnvConfigPath(env); configFile != "" {
-		v.SetConfigFile(configFile)
-	}
-	// 再次读取配置文件，这次是根据环境变量，使用合并配置的方法确保旧配置被替换
-	if err := v.MergeInConfig(); err != nil {
-		logger.ErrorNoStack(fmt.Sprintf("加载环境配置失败，继续使用默认配置: %v", err))
-	} else {
-		logger.Info(fmt.Sprintf("已加载环境配置: %s", v.ConfigFileUsed()))
-	}
-	if err := v.UnmarshalKey("servers", &allServers); err != nil {
-		panic(fmt.Errorf("解析 servers 节点失败: %w", err))
-	}
-	var rc roleConfig
-	if err := v.Unmarshal(&rc); err != nil {
-		logger.ErrorNoStack(fmt.Sprintf("解析角色配置失败，继续使用兜底逻辑: %v", err))
-	}
-
-	serverID := rc.Server.Id
-	if serverID == 0 {
-		serverID = resolveServerID()
-	}
-	if serverID == 0 {
-		panic(fmt.Errorf("配置项 server.id 为空，请在 config-%s.yml 或环境变量 SERVER_ID 中提供", env))
-	}
-	currentNode := resolveCurrentServerNode(serverID)
-	if currentNode == nil {
-		panic(fmt.Errorf("未找到 server.id=%d 对应的节点配置，请检查 default.yml 的 servers 列表", serverID))
-	}
-
-	ServerConfig = Config{
-		ServerId:    currentNode.Id,
-		ServerUrl:   currentNode.Addr,
-		UseGateMode: currentNode.UseGateMode,
-		HttpUrl:     currentNode.HttpAddr,
-		PprofAddr:   currentNode.PprofAddr,
-		Extra:       rc.Extra,
-	}
-
-	logger.Info(fmt.Sprintf(
-		"服务配置加载完成 env=%s type=%d serverId=%d serverAddr=%s httpAddr=%s",
-		env,
-		currentNode.Type,
-		ServerConfig.ServerId,
-		ServerConfig.ServerUrl,
-		ServerConfig.HttpUrl,
-	))
+	return app, nil
 }
 
-func resolveCurrentServerNode(serverID uint32) *serverNode {
-	allServersMu.RLock()
-	defer allServersMu.RUnlock()
-	for i := range allServers {
-		if allServers[i].Id == serverID {
-			node := allServers[i]
-			return &node
+// Init 根据启动参数 nodeId 选择当前节点，只读取 config/config.yml。
+func Init(nodeID string) {
+	configOnce.Do(func() {
+		path, ok := pathutil.ResolveExistingRelativeFile(filepath.Join("config", "config.yml"))
+		if !ok {
+			panic("config/config.yml not found")
+		}
+		app, err := loadConfig(path)
+		if err != nil {
+			panic(err)
+		}
+		if err := applyConfig(app, nodeID); err != nil {
+			panic(err)
+		}
+		logger.Info(fmt.Sprintf("服务配置加载完成 discovery=%s nodeId=%s serverId=%d serverAddr=%s httpAddr=%s",
+			appConfig.Cluster.Discovery, appConfig.NodeId, GetCurrentNode().ServerId, GetCurrentNode().ServiceAddr, GetCurrentNode().HttpAddr))
+	})
+}
+
+func applyConfig(app AppConfig, nodeID string) error {
+	var current *NodeConfig
+	for i := range app.NodeList {
+		node := &app.NodeList[i]
+		if node.NodeId == nodeID {
+			current = node
 		}
 	}
+	if current == nil {
+		return fmt.Errorf("未找到 nodeId=%q 对应的节点，请检查 config.yml 的 nodeList 或 -nodeId 参数", nodeID)
+	}
+	app.NodeId = nodeID
+	appConfigMu.Lock()
+	appConfig = app
+	appConfigMu.Unlock()
 	return nil
 }
 
-func resolveServerID() uint32 {
-	if raw := strings.TrimSpace(os.Getenv("SERVER_ID")); raw != "" {
-		var id uint32
-		_, err := fmt.Sscanf(raw, "%d", &id)
-		if err == nil {
-			return id
-		}
-	}
-	return 0
-}
-
-func resolveEnvConfigPath(env string) string {
-	fileName := fmt.Sprintf("config-%s.yml", env)
-	if path, ok := pathutil.ResolveExistingRelativeFile(filepath.Join("config", fileName)); ok {
-		return path
-	}
-	return ""
-}
-
-func resolveDefaultConfigPath() string {
-	const fileName = "default.yml"
-	if path, ok := pathutil.ResolveExistingRelativeFile(filepath.Join("config", fileName)); ok {
-		return path
-	}
-	return ""
-}
-
-func GetServerAddrByType(serverType uint32) string {
-	allServersMu.RLock()
-	defer allServersMu.RUnlock()
-	for i := range allServers {
-		if allServers[i].Type == serverType {
-			return allServers[i].Addr
-		}
-	}
-	return ""
-}
-
-func GetServerTypeByID(serverID uint32) (uint32, bool) {
-	allServersMu.RLock()
-	defer allServersMu.RUnlock()
-	for i := range allServers {
-		if allServers[i].Id == serverID {
-			return allServers[i].Type, true
-		}
-	}
-	return 0, false
-}
-
-func GetServersByType(serverType uint32) []ServerNodeInfo {
-	allServersMu.RLock()
-	defer allServersMu.RUnlock()
-	result := make([]ServerNodeInfo, 0)
-	for i := range allServers {
-		if allServers[i].Type != serverType {
-			continue
-		}
-		result = append(result, ServerNodeInfo{
-			ServerId: allServers[i].Id,
-			Type:     allServers[i].Type,
-			Addr:     allServers[i].Addr,
-		})
-	}
-	return result
-}
-
-// RegisterDynamicServers 运行时注册或更新服务器节点。
-// 同 id 节点会被覆盖，不存在的节点会被追加。
-func RegisterDynamicServers(nodes []DynamicServerNode) {
-	if len(nodes) == 0 {
-		return
-	}
-
-	allServersMu.Lock()
-	defer allServersMu.Unlock()
-
-	indexByID := make(map[uint32]int, len(allServers))
-	for i := range allServers {
-		indexByID[allServers[i].Id] = i
-	}
-
-	for _, node := range nodes {
-		server := serverNode{
-			Id:          node.Id,
-			Type:        node.Type,
-			UseGateMode: node.UseGateMode,
-			Addr:        node.Addr,
-			HttpAddr:    node.HttpAddr,
-			PprofAddr:   node.PprofAddr,
-		}
-		if idx, ok := indexByID[node.Id]; ok {
-			allServers[idx] = server
-			continue
-		}
-		allServers = append(allServers, server)
-		indexByID[node.Id] = len(allServers) - 1
-	}
-}
-
-// SyncDynamicServers 使用最新列表全量同步动态节点。
-// 旧的动态节点会被移除，静态配置节点保持不变。
-func SyncDynamicServers(nodes []DynamicServerNode) {
-	allServersMu.Lock()
-	defer allServersMu.Unlock()
-
-	filtered := make([]serverNode, 0, len(allServers))
-	for _, server := range allServers {
-		if _, ok := dynamicIDs[server.Id]; ok {
-			continue
-		}
-		filtered = append(filtered, server)
-	}
-	allServers = filtered
-	dynamicIDs = make(map[uint32]struct{}, len(nodes))
-
-	indexByID := make(map[uint32]int, len(allServers))
-	for i := range allServers {
-		indexByID[allServers[i].Id] = i
-	}
-
-	for _, node := range nodes {
-		server := serverNode{
-			Id:          node.Id,
-			Type:        node.Type,
-			UseGateMode: node.UseGateMode,
-			Addr:        node.Addr,
-			HttpAddr:    node.HttpAddr,
-			PprofAddr:   node.PprofAddr,
-		}
-		if idx, ok := indexByID[node.Id]; ok {
-			allServers[idx] = server
-		} else {
-			allServers = append(allServers, server)
-			indexByID[node.Id] = len(allServers) - 1
-		}
-		dynamicIDs[node.Id] = struct{}{}
-	}
-}
+// --- Extra 工具方法 ---
 
 func GetExtraString(key string) (string, bool) {
-	val, ok := getExtraValueByPath(ServerConfig.Extra, key)
+	val, ok := getCurrentExtraValue(key)
 	if !ok || val == nil {
 		return "", false
 	}
@@ -322,7 +156,7 @@ func GetExtraString(key string) (string, bool) {
 }
 
 func GetExtraInt(key string) (int, bool) {
-	val, ok := getExtraValueByPath(ServerConfig.Extra, key)
+	val, ok := getCurrentExtraValue(key)
 	if !ok || val == nil {
 		return 0, false
 	}
@@ -330,11 +164,19 @@ func GetExtraInt(key string) (int, bool) {
 }
 
 func GetExtraBool(key string) (bool, bool) {
-	val, ok := getExtraValueByPath(ServerConfig.Extra, key)
+	val, ok := getCurrentExtraValue(key)
 	if !ok || val == nil {
 		return false, false
 	}
 	return conv.BooleanValue(val), true
+}
+
+func getCurrentExtraValue(key string) (any, bool) {
+	node := GetCurrentNode()
+	if node == nil {
+		return nil, false
+	}
+	return getExtraValueByPath(node.Extra, key)
 }
 
 func getExtraStringFromMap(extra map[string]any, key string) string {

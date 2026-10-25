@@ -3,6 +3,7 @@ package protocoldoc
 import (
 	"embed"
 	"encoding/json"
+	"net"
 	"net/http"
 
 	serverconfig "github.com/forfun/gforgame/config"
@@ -19,20 +20,20 @@ func Register(router *gin.Engine, routes *network.MessageRoute) {
 	if !enabled {
 		return
 	}
-	// node := serverconfig.GetCurrentNode()
-	// serviceAddr := node.ServiceAddr
-	// // 如果使用网关的话,取网关的服务地址
-	// if node.UseGateMode {
-	// 	gateNodes := serverconfig.GetServersByType(uint32(serverconfig.NodeTypeGateway))
-	// 	if (len(gateNodes) <= 0) {
-	// 		panic("gate node not found")
-	// 	}
-	// 	gate := gateNodes[0]
-	// 	serviceAddr = gate.Addr
-	// }
-	// _, port, _ := net.SplitHostPort(serviceAddr)
-	// connection := Connection{ServerID: node.ServerId, Port: port, Path: "/ws", Codecs: []string{"json"}}
-	// RegisterRoutes(router, Build(connection, routes))
+	node := serverconfig.GetCurrentNode()
+	serviceAddr := node.ServiceAddr
+	// 如果使用网关的话,取网关的服务地址
+	if node.UseGateMode {
+		gateNodes := serverconfig.GetServersByType(uint32(serverconfig.NodeTypeGateway))
+		if (len(gateNodes) <= 0) {
+			panic("gate node not found")
+		}
+		gate := gateNodes[0]
+		serviceAddr = gate.Addr
+	}
+	_, port, _ := net.SplitHostPort(serviceAddr)
+	connection := Connection{ServerID: node.ServerId, Port: port, Path: "/ws", Codecs: []string{"json"}}
+	RegisterRoutes(router, Build(connection, routes))
 }
 
 // RegisterRoutes serves an immutable metadata snapshot and the bundled frontend.

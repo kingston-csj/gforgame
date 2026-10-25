@@ -50,8 +50,7 @@ func ServeSession(session session.Session, ioDispatch IoDispatch, loopOpts *Sess
 }
 
 // CreateServeSession 创建会话并启动派发循环
-func CreateServeSession(conn net.Conn, messageCodec codec.MessageCodec, ioDispatch IoDispatch, payloadMode protocol.PayloadMode) {
-	factory := protocol.NewMessageFactory()
+func CreateServeSession(conn net.Conn, messageCodec codec.MessageCodec, ioDispatch IoDispatch, payloadMode protocol.PayloadMode, factory *protocol.MessageFactory) {
 	ioSession := session.NewSessionWithProtocol(conn, messageCodec, protocol.ProtocolTypeBinary, factory)
 	ioSession.SetPayloadMode(payloadMode)
 

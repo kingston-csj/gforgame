@@ -2,6 +2,7 @@ package idgen
 
 import (
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -34,10 +35,16 @@ func (g *IDGenerator) NextID() string {
 	return strconv.FormatInt(id, 10)
 }
 
-// DefaultIDGenerator 默认的全局ID生成器实例
-var DefaultIDGenerator = NewIDGenerator(int64(config.ServerConfig.ServerId))
+// DefaultIDGenerator 默认的全局ID生成器实例（懒初始化，首次使用时创建）
+var (
+	defaultIDGen     *IDGenerator
+	defaultIDGenOnce sync.Once
+)
 
 // GetNextID 使用默认生成器生成ID的便捷方法
 func GetNextID() string {
-	return DefaultIDGenerator.NextID()
+	defaultIDGenOnce.Do(func() {
+		defaultIDGen = NewIDGenerator(int64(config.GetCurrentNode().ServerId))
+	})
+	return defaultIDGen.NextID()
 }

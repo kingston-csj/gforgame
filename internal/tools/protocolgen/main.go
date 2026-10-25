@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -22,7 +23,7 @@ func main() {
 	csharpOutDir := "internal\\tools\\protocol\\output\\csharp\\"
 	templatePath := "internal\\tools\\protocol\\templates\\csharptemplate.tpl"
 	registerFile := filepath.Join("internal", "protos", "register_gen.go")
-
+	fmt.Printf("%sregisterFile：%s\n", registerFile, registerFile)
 	generator := protocolexporter.NewCSharpGenerator(
 		protosDir,
 		csharpOutDir,

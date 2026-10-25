@@ -27,7 +27,7 @@ type topFields struct {
 
 func buildTopFields(actorID, actorName string, category *constants.LoggerCategory) topFields {
 	t := topFields{
-		Sid:    config.ServerConfig.ServerId,
+		Sid:    currentServerID(),
 		Module: category.Code,
 	}
 	if actorID != "" {
@@ -178,7 +178,7 @@ func LogBusinessNoActor(category constants.LoggerCategory, args ...any) {
 func LogBusinessDefault(args ...any) {
 	extraTop, ext := splitArgs(args)
 	attrs := make([]any, 0, len(extraTop)+2)
-	sid := config.ServerConfig.ServerId
+	sid := currentServerID()
 	if sid != 0 {
 		attrs = append(attrs, "sid", sid)
 	}
@@ -187,4 +187,12 @@ func LogBusinessDefault(args ...any) {
 		attrs = append(attrs, "ext", ext)
 	}
 	logger.LogBusiness(attrs...)
+}
+
+// 初始化配置前的日志不附带节点 ID。
+func currentServerID() uint32 {
+	if node := config.GetCurrentNode(); node != nil {
+		return uint32(node.ServerId)
+	}
+	return 0
 }

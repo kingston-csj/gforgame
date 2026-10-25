@@ -1,0 +1,24 @@
+cluster:
+  name: game_cluster
+  discovery: local
+nodeList:
+  - nodeId: "gate1000"
+    serverId: 1000
+    type: 9
+    useGateMode: false
+    serviceAddr: 0.0.0.0:8021
+  - nodeId: "game1001"
+    serverId: 1001
+    type: 1
+    useGateMode: false
+    serviceAddr: 0.0.0.0:8021
+    # rpcAddr: 0.0.0.0:8022
+    httpAddr: 0.0.0.0:8049
+    pprofAddr: :6060
+    extra:
+      game:
+        protocol-doc: true
+      db:
+        url: root:123456@tcp(192.168.1.123:3306)/t11?charset=utf8mb4&parseTime=True&loc=Local
+      admin:
+        url: http://106.55.7.154:8080

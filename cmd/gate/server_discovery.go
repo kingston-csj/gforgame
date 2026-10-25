@@ -78,7 +78,6 @@ func FetchServerListFromURL(rawURL string) ([]DiscoveredServer, error) {
 
 // RegisterDiscoveredServers 将发现到的节点转换为运行时配置节点并注册。
 func RegisterDiscoveredServers(servers []DiscoveredServer) {
-	serverconfig.SyncDynamicServers(convertDiscoveredServers(servers))
 }
 
 func convertDiscoveredServers(servers []DiscoveredServer) []serverconfig.DynamicServerNode {

@@ -42,6 +42,7 @@ import (
 
 	"github.com/forfun/gforgame/internal/service/vip"
 
+	cross "github.com/forfun/gforgame/internal/service/gate"
 	"go.uber.org/dig"
 )
 
@@ -54,6 +55,7 @@ type Services struct {
 	OnlinePlayerRegistry *net.OnlinePlayerRegistry
 	PlayerTaskDispatcher *dispatch.PlayerTaskDispatcher
 	ActorSystem          *actor.ActorSystem
+	Cross                *cross.GateService
 	// dao层
 	PlayerRepo     *playerrepo.PlayerRepository
 	ProfileService *playerrepo.PlayerProfileService
@@ -150,6 +152,8 @@ func registerServices(c *dig.Container) {
 	_ = c.Provide(systemrepo.NewSystemRepository)
 
 	_ = c.Provide(system.NewSystemService)
+
+	_ = c.Provide(cross.NewGateService)
 
 	_ = c.Provide(item.NewItemService)
 	_ = c.Provide(mail.NewMailService)

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/forfun/gforgame/actor"
-	"github.com/forfun/gforgame/common/logger"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 )

@@ -16,11 +16,10 @@ type TcpSocketClient struct {
 	// 服务器ip+端口
 	RemoteAddress string
 	// 消息编解码
-	MsgCodec codec.MessageCodec
+	MsgCodec       codec.MessageCodec
+	MessageFactory *protocol.MessageFactory
 	// 消息分发器
 	IoDispatcher dispatch.IoDispatch
-
-	MessageFactory *protocol.MessageFactory
 }
 
 func (c *TcpSocketClient) OpenSession() (network.Session, error) {

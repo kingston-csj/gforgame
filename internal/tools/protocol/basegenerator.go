@@ -406,7 +406,7 @@ func (b *BaseGenerator) GenerateRegisterFromTags(goDir string, outputFile string
 	buf.WriteString("// 该文件为程序自动生成，请勿手动修改\n\n")
 	buf.WriteString("package protos\n\n")
 	buf.WriteString("import (\n\t\"github.com/forfun/gforgame/network/protocol\"\n)\n\n")
-	buf.WriteString("func init() {\n")
+	buf.WriteString("// RegisterMessages 将生成的协议注册到指定实例；每个工厂调用一次。\nfunc RegisterMessages(factory *protocol.MessageFactory) {\n")
 
 	fset := token.NewFileSet()
 	for _, file := range files {
@@ -436,6 +436,10 @@ func (b *BaseGenerator) GenerateRegisterFromTags(goDir string, outputFile string
 					}
 					tagStr := strings.Trim(fld.Tag.Value, "`")
 					tags := b.parseAllTags(tagStr)
+					// 内部 RPC 协议由专用注册函数管理，不暴露给客户端监听器。
+					if tags["scope"] == "rpc" {
+						return true
+					}
 					cmd := 0
 					found := false
 					if ref, ok := tags["cmd_ref"]; ok {
@@ -478,7 +482,7 @@ func (b *BaseGenerator) GenerateRegisterFromTags(goDir string, outputFile string
 		})
 		buf.WriteString(fmt.Sprintf("\t// ----from %s----\n", fileName))
 		for _, e := range list {
-			buf.WriteString(fmt.Sprintf("\tprotocol.RegisterMessage(%d, &%s{})\n", e.Cmd, e.Type))
+			buf.WriteString(fmt.Sprintf("\tfactory.RegisterMessage(%d, &%s{})\n", e.Cmd, e.Type))
 		}
 		buf.WriteString("\n")
 	}

@@ -38,9 +38,11 @@ func (m *MyMessageDispatch) OnSessionClosed(s network.Session) {
 			unbindPlayerServer(sessionPlayerKey)
 		}
 		if unbindPlayer {
-			// fmt.Sprintf("%d_%s", serverID, playerID)
-			uid := strings.Split(sessionPlayerKey, "_")[1]
-			m.onlinePlayerRegistry.RemoveOnlinePlayer(uid)
+			if playerID, ok := s.GetAttr("id"); ok {
+				if uid, ok := playerID.(string); ok {
+					m.onlinePlayerRegistry.RemoveOnlinePlayer(uid)
+				}
+			}
 		}
 	}
 }
@@ -74,7 +76,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-	msgName, _ := g.router.MessageFactory.GetMsgName(frame.Header.Cmd)
+	msgName, _ := session.GetMessageFactory().GetMsgName(frame.Header.Cmd)
 	logger.Info(fmt.Sprintf("接收消息: cmd:%d, name:%s, 内容:%s", frame.Header.Cmd, msgName, frame.Msg))
 	if frame.Header.Cmd == gateLoginAdapter.LoginCmd() {
 		body, ok := frame.Msg.([]byte)
@@ -124,10 +126,13 @@ func (g *ClientRouter) HandleLoginReq(s network.Session, loginReq contract.GateL
 	if oldSession == s {
 		logger.Info("玩家重复登录[" + sessionPlayerKey + "]")
 	}
-	s.SetOwnerId(playerID)
+	if _, err := session.Bind(s.GetId(), sessionPlayerKey); err != nil {
+		return fmt.Errorf("bind player session failed, playerId=%s: %w", playerID, err)
+	}
+	s.SetAttr("id", playerID)
 	s.SetAttr("serverId", serverID)
+	s.SetAttr("sessionPlayerKey", sessionPlayerKey)
 	s.SetOwnerId(sessionPlayerKey)
-	session.Bind(s.GetId(), s.GetOwnerId())
 	g.onlinePlayerRegistry.AddOnlinePlayer(playerID)
 
 	bindPlayerServer(sessionPlayerKey, serverID)
@@ -146,6 +151,9 @@ func transferMsgToLogic(session network.Session, frame *protocol.RequestDataFram
 		if s, ok := v.(string); ok {
 			playerID = s
 		}
+	}
+	if playerID == "" {
+		return fmt.Errorf("player is not bound to session, cmd=%d", frame.Header.Cmd)
 	}
 
 	serverID := forceServerID
@@ -225,9 +233,10 @@ func buildSessionPlayerKey(serverID int32, playerID string) string {
 }
 
 func isBackendServerConfigured(serverID int32) bool {
-	serverType, ok := serverconfig.GetServerTypeByID(uint32(serverID))
-	if !ok {
-		return false
+	for _, node := range serverconfig.GetAppConfig().NodeList {
+		if node.ServerId == serverID {
+			return node.Type == serverconfig.NodeTypeGame && strings.TrimSpace(node.RpcAddr) != ""
+		}
 	}
-	return serverType == logicServerType
+	return false
 }

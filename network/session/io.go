@@ -178,4 +178,3 @@ func (s *BaseSession) readTcpStream() {
 		s.decodeAndDeliverPackets(packets)
 	}
 }
-

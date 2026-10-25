@@ -11,10 +11,12 @@ const (
 	CmdGmReqCommand = -201
 	CmdGmResCommand = -251
 
-	CmdTransferMsgGateToLogic = -300
-	CmdTransferMsgLogicToGate = -301
-	CmdReqServerLogin         = -302
-	CmdResServerLogin         = -352
+	CmdTransferMsgGateToLogic   = -300
+	CmdTransferMsgLogicToGate   = -301
+	CmdReqServerLogin           = -302
+	CmdNotifyOnlinePlayerToGame = -304
+	CmdResServerLogin           = -352
+	CmdNotifyPlayerLogoutToGame = -303
 
 	CmdReqPlayerLogin        = 103
 	CmdReqPlayerUpLevel      = 105

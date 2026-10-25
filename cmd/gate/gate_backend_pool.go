@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/client"
+	"github.com/forfun/gforgame/rpc"
 )
 
 // sendTransferToBackend 将网关转发消息发送到指定后端节点。
@@ -20,7 +22,13 @@ func sendTransferToBackend(serverID int32, transfer any, index int32) error {
 		scheduleReconnect(serverID)
 		return fmt.Errorf("backend session not ready, serverId=%d", serverID)
 	}
-	if err := session.Send(transfer, index); err != nil {
+	if _, err := gameRPCClient.Request(session, transfer); err != nil {
+		var remote *rpc.ErrorResponse
+		if errors.Is(err, rpc.ErrTimeout) || errors.As(err, &remote) {
+			// 超时并不代表业务未执行，不能重放请求；远端拒绝也不应阻塞后续消息。
+			logger.ErrorNoStack(fmt.Errorf("backend RPC failed, serverId=%d err=%w", serverID, err))
+			return nil
+		}
 		if !session.IsAlive() {
 			// 连接已死亡才执行重连。
 			removeBackendSession(serverID, session)
@@ -45,7 +53,7 @@ func pickBackendSession(serverID int32) network.Session {
 	if !ok {
 		return nil
 	}
-	if !pool.session.IsAlive() {
+	if pool.session != nil && !pool.session.IsAlive() {
 		pool.session = nil
 	}
 	return pool.session
@@ -86,12 +94,15 @@ func syncDiscoveredBackendPools(servers []DiscoveredServer) {
 }
 
 // syncLocalBackendPools 仅根据本地配置同步后端连接。
-// 该模式下只在启动阶段执行一次，不启用外部服务发现心跳。
+// 仅连接配置了 RpcAddr 的游戏节点。
 func syncLocalBackendPools() {
-	servers := serverconfig.GetServersByType(logicServerType)
+	servers := serverconfig.GetAppConfig().NodeList
 	desired := make(map[int32]string, len(servers))
 	for _, server := range servers {
-		addr := strings.TrimSpace(server.Addr)
+		if server.Type != serverconfig.NodeTypeGame {
+			continue
+		}
+		addr := strings.TrimSpace(server.RpcAddr)
 		if addr == "" {
 			continue
 		}
@@ -184,7 +195,8 @@ func connectBackendSession(serverID int32, addr string) error {
 	}
 	backendPoolsMu.RUnlock()
 
-	socketClient := &client.WebSocketClient{RemoteAddress: addr, MsgCodec: gateMsgCodec}
+	factory := gameRPCClient.GetMessageFactory()
+	socketClient := &client.TcpSocketClient{RemoteAddress: addr, MsgCodec: gateMsgCodec, MessageFactory: factory}
 	session, err := socketClient.OpenSession()
 	if err != nil {
 		return err
@@ -219,7 +231,6 @@ func connectBackendSession(serverID int32, addr string) error {
 	pool.reconnecting = false
 	backendPoolsMu.Unlock()
 
-	logicIoDispatcher.OnSessionCreated(session)
 	if oldSession != nil {
 		// 替换成功后再关闭旧连接，避免短暂无连接窗口。
 		oldSession.Close()
@@ -227,6 +238,8 @@ func connectBackendSession(serverID int32, addr string) error {
 
 	logger.Info(fmt.Sprintf("gate connected to backend server: serverId=%d addr=%s", serverID, addr))
 	go consumeBackendSession(serverID, session)
+	// 消费循环必须先启动，否则同步 RPC 无法收到应答。
+	logicIoDispatcher.OnSessionCreated(session)
 	// 连接恢复后唤醒出站队列继续发送积压消息。
 	notifyOutboundDispatcher()
 	return nil

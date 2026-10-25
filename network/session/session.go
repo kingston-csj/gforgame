@@ -10,6 +10,8 @@ import (
 
 // Session 抽象一条连接上的会话能力
 type Session interface {
+	// GetMessageFactory 返回当前连接使用的消息注册表。
+	GetMessageFactory() *protocol.MessageFactory
 	// Read 启动读循环（应作为 goroutine 启动）。
 	Read()
 	// Write 启动写循环（应作为 goroutine 启动）。
@@ -54,7 +56,7 @@ type Session interface {
 	GetProtocolCodec() protocol.ProtocolAdapter
 	// GetMessageCodec 返回消息编解码器。
 	GetMessageCodec() codec.MessageCodec
-	
+
 	// Close 关闭会话（幂等）。
 	Close()
 	// ToString 打印会话关键信息，用于日志。

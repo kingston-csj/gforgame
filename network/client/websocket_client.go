@@ -23,7 +23,8 @@ type WebSocketClient struct {
 	// websocket 路径，未配置时默认使用 /ws
 	WsPath string
 	// 消息编解码
-	MsgCodec codec.MessageCodec
+	MsgCodec       codec.MessageCodec
+	MessageFactory *protocol.MessageFactory
 	// 消息分发器
 	IoDispatcher dispatch.IoDispatch
 	// 可选请求头
@@ -35,6 +36,9 @@ type WebSocketClient struct {
 }
 
 func (c *WebSocketClient) OpenSession() (network.Session, error) {
+	if c.MessageFactory == nil {
+		return nil, fmt.Errorf("message factory cannot be nil")
+	}
 	targetURL, err := c.buildURL()
 	if err != nil {
 		return nil, err
@@ -54,8 +58,7 @@ func (c *WebSocketClient) OpenSession() (network.Session, error) {
 		conn:        conn,
 		messageType: c.resolveMessageType(),
 	}
-	factory := protocol.NewMessageFactory()
-	s := session.NewSession(wsConn, c.MsgCodec, factory)
+	s := session.NewSession(wsConn, c.MsgCodec, c.MessageFactory)
 	go s.Write()
 	go s.Read()
 	return s, nil

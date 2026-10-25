@@ -11,11 +11,13 @@ import (
 
 	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/dispatch"
+	"github.com/forfun/gforgame/network/protocol"
 	serverpkg "github.com/forfun/gforgame/network/server"
 	"github.com/gorilla/websocket"
 )
 
 type WsServer struct {
+	serverpkg.BaseServer
 	Options
 	Name     string // 服务器名称
 	Running  chan bool
@@ -35,9 +37,14 @@ func NewServer(opts ...Option) *WsServer {
 		opt.wsPath = "ws"
 	}
 
+	var factory *protocol.MessageFactory
+	if opt.Router != nil {
+		factory = opt.Router.MessageFactory
+	}
 	s := &WsServer{
-		Options: opt,
-		Running: make(chan bool),
+		BaseServer: serverpkg.NewBaseServer(factory),
+		Options:    opt,
+		Running:    make(chan bool),
 	}
 
 	return s
@@ -95,7 +102,7 @@ func (n *WsServer) startListen() error {
 			return
 		}
 		go func(conn net.Conn) {
-			dispatch.CreateServeSession(conn, n.MessageCodec, n.IoDispatch, n.PayloadMode)
+			dispatch.CreateServeSession(conn, n.MessageCodec, n.IoDispatch, n.PayloadMode, n.MessageFactory)
 		}(c)
 	})
 

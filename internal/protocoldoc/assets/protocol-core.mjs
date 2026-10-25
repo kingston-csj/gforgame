@@ -79,9 +79,12 @@ export function scalarValue(type, value) {
 }
 
 export function matchingRequests(protocols, query, module) {
-  const term = query.trim().toLowerCase();
-  return protocols.filter(p => p.name.startsWith('Req') && p.testable &&
-    (!module || p.module === module) && p.name.toLowerCase().includes(term));
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return protocols.filter(p => {
+    if (!p.name.startsWith('Req') || !p.testable || (module && p.module !== module)) return false;
+    const fields = [p.name, String(p.cmd ?? ''), p.desc ?? ''].map(value => value.toLowerCase());
+    return terms.every(term => fields.some(value => value.includes(term)));
+  });
 }
 
 // Match actual handler return types first; conventional names cover requests without handlers.

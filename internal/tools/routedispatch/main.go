@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 
-	outFile := filepath.Join(root, "cmd", "logic", "route_dispatch_gen.go")
+	outFile := filepath.Join(root, "cmd", "game", "route_dispatch_gen.go")
 	if err := writeGeneratedFile(outFile, methods, constructors); err != nil {
 		panic(err)
 	}

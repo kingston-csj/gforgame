@@ -149,6 +149,7 @@ example/unity同时兼容websocket/socket通信方式。
 - 数据异步持久化，玩家数据实时更新缓存，定时持久化到数据库
 - http 管理后台
 - excel 配置文件读取, jforgame-data 实现
+- 分布式架构, 节点之间使用自研rpc通信, 也可降级为网关+游戏服务器模式, 甚至单节点模式
 
 ## AI 赋能
 
@@ -171,10 +172,10 @@ example/unity同时兼容websocket/socket通信方式。
 ## 协议在线调试（类似swagger文档）
 
 api 文档  
-![](/screenshots/protocol-doc.png "api文档")  
+![](/screenshots/protocol-doc.png "api文档")
 
 在线调试  
-![](/screenshots/protocol-test.png "在线调试")  
+![](/screenshots/protocol-test.png "在线调试")
 
 ## 部分客户端运行效果
 

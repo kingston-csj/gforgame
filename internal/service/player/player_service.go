@@ -125,7 +125,7 @@ func (ps *PlayerService) DoLogin(playerId string, s network.Session, index int32
 
 	// 非网关模式下，检查是否重复登录
 	// 网关模式下， 在网关端检查是否重复登录
-	if !serverconfig.ServerConfig.UseGateMode {
+	if !serverconfig.GetCurrentNode().UseGateMode {
 		if !newCreated {
 			oldSession := ps.onlinePlayerRegistry.GetSessionByPlayerID(player.Id)
 			if oldSession != nil {

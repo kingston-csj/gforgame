@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -13,9 +14,11 @@ import (
 	"github.com/forfun/gforgame/internal/gatewayadapter"
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/logger"
+	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
+	"github.com/forfun/gforgame/rpc"
 )
 
 var (
@@ -28,36 +31,38 @@ var (
 )
 
 func main() {
-	// serverconfig.Init()
-
-	onlyLocalDiscovery, ok := serverconfig.GetExtraBool("discovery.onlylocal")
-	if !ok {
-		onlyLocalDiscovery = true
-	}
+	nodeId := flag.String("nodeId", "gate1000", "当前节点ID")
+	flag.Parse()
+	serverconfig.Init(*nodeId)
 
 	onlinePlayerRegistry := net.NewOnlinePlayerRegistry()
+	rpcFactory := protocol.NewMessageFactory()
+	protos.RegisterGateRPCMessages(rpcFactory)
+	gameRPCClient = rpc.NewClient(5*time.Second, rpcFactory)
+	defer gameRPCClient.Close()
+	for _, req := range []any{&protos.TransferGateToLogic{}, &protos.NotifyPlayerLogoutToGame{}, &protos.NotifyOnlinePlayerToGame{}} {
+		if err := gameRPCClient.RegisterResponse(req, &protos.GateRPCResult{}); err != nil {
+			panic(err)
+		}
+	}
 
 	logicIoDispatcher = newLogicIoDispatcher(onlinePlayerRegistry)
-	
-	var err error
-	if onlyLocalDiscovery {
-		err = startLocalServerDiscoveryHeartbeat()
-	} else {
-		err = startServerDiscoveryHeartbeat()
-	}
+
+	err := startLocalServerDiscoveryHeartbeat()
 	if err != nil {
 		panic(err)
 	}
 	startBackendSessionMonitor()
 	startOutboundDispatcher()
-	factory :=  protocol.NewMessageFactory()
+	factory := protocol.NewMessageFactory()
+	protos.RegisterMessages(factory)
 	router := network.NewMessageRoute(factory)
-	
+
 	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: onlinePlayerRegistry}
 	ioDispatcher.AddHandler(&ClientRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})
 	codec := gateMsgCodec
 	node := ws.NewServer(
-		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
+		ws.WithAddress(serverconfig.GetCurrentNode().ServiceAddr),
 		ws.WithRouter(router),
 		ws.WithIoDispatch(ioDispatcher),
 		ws.WithCodec(codec),
@@ -81,6 +86,7 @@ func main() {
 	close(serverDiscoveryStop)
 	close(backendMonitorStop)
 	node.Stop()
+	gameRPCClient.Close()
 	stopOutboundDispatcher()
 	closeAllBackendSessions()
 	logFilter.Close()

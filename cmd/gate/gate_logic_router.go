@@ -87,13 +87,17 @@ type GateAndLogicMessageDispatch struct {
 func (d *GateAndLogicMessageDispatch) OnSessionCreated(session network.Session) {
 	playerIds := getPlayersByServerID(resolveBackendServerID(session))
 	req := &protos.NotifyOnlinePlayerToGame{PlayerIds: playerIds}
-	session.Send(req, 0)
+	if _, err := gameRPCClient.Request(session, req); err != nil {
+		logger.ErrorNoStack(fmt.Errorf("sync online players failed: %w", err))
+		session.Close()
+	}
 }
 
 func newLogicIoDispatcher(onlinePlayerRegistry *net.OnlinePlayerRegistry) dispatch.IoDispatch {
-	factory :=  protocol.NewMessageFactory()
+	factory := gameRPCClient.GetMessageFactory()
 	router := network.NewMessageRoute(factory)
 	ioDispatcher := &GateAndLogicMessageDispatch{}
+	ioDispatcher.AddHandler(gameRPCClient)
 	ioDispatcher.AddHandler(&LogicRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})
 	return ioDispatcher
 }

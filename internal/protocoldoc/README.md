@@ -3,10 +3,8 @@
 启动 logic 后访问管理 HTTP 端口的 `/protocol-doc/index.html`，当前默认配置为
 `http://localhost:8032/protocol-doc/index.html`。
 
-`config/config-logic.yml` 的 `game.protocol-doc` 控制是否注册页面和元数据路由；
-设为 `false` 可关闭。网关模式下将 `game.protocol-doc-options.websocket-url`
-设为浏览器可访问的网关地址（例如 `ws://localhost:8021/ws`）。直连模式默认
-使用页面所在主机、游戏端口和 `/ws`。HTTPS 页面需要可用的 `wss://` 入口。
+`config/config.yml` 当前节点 `extra` 中的 `game.protocol-doc` 控制是否注册页面和元数据路由；
+设为 `false` 可关闭。默认使用页面所在主机、游戏端口和 `/ws`。HTTPS 页面需要可用的 `wss://` 入口。
 
 页面和协议源码注释嵌入可执行文件，部署时无需复制资源目录。
 `/protocol-doc/meta.json` 复用 `internal/tools/protocol/basegenerator.go` 的字段解析，
@@ -24,8 +22,6 @@ JavaScript 中的 64 位整数以文本或 BigInt 保存，避免精度丢失。
 ```yaml
 game:
   protocol-doc: true
-  protocol-doc-options:
-    websocket-url: ""
 ```
 
 验证：`go test ./internal/tools/protocol ./internal/protocoldoc ./cmd/logic`；

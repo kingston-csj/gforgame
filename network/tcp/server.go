@@ -8,10 +8,12 @@ import (
 
 	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/network/dispatch"
+	"github.com/forfun/gforgame/network/protocol"
 	serverpkg "github.com/forfun/gforgame/network/server"
 )
 
 type TcpServer struct {
+	serverpkg.BaseServer
 	Options
 	Name     string // 服务器名称
 	Running  chan bool
@@ -26,9 +28,14 @@ func NewServer(opts ...Option) *TcpServer {
 	for _, option := range opts {
 		option(&opt)
 	}
+	var factory *protocol.MessageFactory
+	if opt.Router != nil {
+		factory = opt.Router.MessageFactory
+	}
 	s := &TcpServer{
-		Options: opt,
-		Running: make(chan bool),
+		BaseServer: serverpkg.NewBaseServer(factory),
+		Options:    opt,
+		Running:    make(chan bool),
 	}
 
 	return s
@@ -85,7 +92,7 @@ func (s *TcpServer) startListen() {
 			return
 		}
 		go func(conn net.Conn) {
-			dispatch.CreateServeSession(conn, s.MessageCodec, s.IoDispatch, s.PayloadMode)
+			dispatch.CreateServeSession(conn, s.MessageCodec, s.IoDispatch, s.PayloadMode, s.MessageFactory)
 		}(conn)
 	}
 }

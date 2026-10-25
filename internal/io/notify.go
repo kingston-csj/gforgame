@@ -5,11 +5,11 @@ import (
 	"sync"
 
 	"github.com/forfun/gforgame/codec/json"
-	"github.com/forfun/gforgame/common/logger"
 	"github.com/forfun/gforgame/common/util/jsonutil"
 	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/contract"
 	"github.com/forfun/gforgame/internal/infra/net"
+	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
@@ -18,8 +18,8 @@ import (
 
 var (
 	notifyCodec          = json.NewSerializer()
-	gateSession          network.Session
 	messageFactory       *protocol.MessageFactory
+	gateSession          network.Session
 	gateSessionMu        sync.RWMutex
 	onlinePlayerRegistry *net.OnlinePlayerRegistry
 )
@@ -28,7 +28,6 @@ var (
 func SetMessageFactory(factory *protocol.MessageFactory) {
 	messageFactory = factory
 }
-
 
 func SetGateSession(session network.Session) {
 	if session == nil {
@@ -44,10 +43,7 @@ func SetOnlinePlayerRegistry(registry *net.OnlinePlayerRegistry) {
 }
 
 func NotifyByPlayerId(playerID string, index int32, data any) {
-	if !onlinePlayerRegistry.IsOnline(playerID) {
-		return
-	}
-	if !serverconfig.ServerConfig.UseGateMode {
+	if !serverconfig.GetCurrentNode().UseGateMode {
 		// 直连模式：playerId 映射的是客户端会话，直接发送即可
 		if s, found := session.GetSessionByUid(playerID); found {
 			_ = s.Send(data, index)
@@ -78,7 +74,7 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 
 	msgName, _ := messageFactory.GetMsgName(cmd)
 	jsonStr, err := jsonutil.StructToJSON(data)
-	logger.Info(fmt.Sprintf("[%s] 发送消息:  cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
+	logger.Info(fmt.Sprintf("id:%v 发送消息 cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
 	_ = gs.Send(transferBody, index)
 }
 

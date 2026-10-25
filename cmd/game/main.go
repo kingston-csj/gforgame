@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
@@ -23,6 +24,7 @@ import (
 	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
+	"github.com/forfun/gforgame/rpc"
 )
 
 //go:generate go run ../../internal/tools/gen all
@@ -41,7 +43,7 @@ type MyMessageDispatch struct {
 }
 
 func (m *MyMessageDispatch) OnSessionCreated(session network.Session) {
-	if serverconfig.ServerConfig.UseGateMode {
+	if serverconfig.GetCurrentNode().UseGateMode {
 		io.SetGateSession(session)
 	}
 	logger.Info(fmt.Sprintf("logic session created: %s", session.ToString()))
@@ -64,23 +66,25 @@ func (m *MyMessageDispatch) OnSessionClosed(session network.Session) {
 }
 
 func main() {
+	nodeId := flag.String("nodeId", "game1001", "当前节点ID")
+	flag.Parse()
+	serverconfig.Init(*nodeId)
+
 	logger.Info("game server is starting...")
 	startTime := time.Now()
 
 	factory := protocol.NewMessageFactory()
 	protos.RegisterMessages(factory)
-	router := network.NewMessageRoute(factory)	
+	router := network.NewMessageRoute(factory)
 
-
-	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
 
 	mysqldb.InitMysql()
 	bootstrap.InitMysqlDdl()
-	// 加载配置数据
 	config.InitConfig()
-	// 注册所有服务
 	s := bootstrap.InitServices()
+	// resetTime := s.System.GetDailyReset().Data.(int64)
+	// logger.Info(fmt.Sprintf("daily reset time: %d", resetTime))
 	// 各自业务初始化
 	bootstrap.InitBusiness(s)
 	// 启动系统任务
@@ -116,50 +120,69 @@ func main() {
 	// 	tcp.WithDispatchWorkers(8),
 	// )
 
-	io.SetMessageFactory(factory)
 	io.SetOnlinePlayerRegistry(s.OnlinePlayerRegistry)
+	io.SetMessageFactory(factory)
 
 	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: s.OnlinePlayerRegistry}
-	if serverconfig.ServerConfig.UseGateMode {
-		ioDispatcher.AddHandler(NewGateTransformHandler(factory))
+	gameTaskHandler := NewGameTaskHandler(router, s.ActorSystem)
+	ioDispatcher.AddHandler(gameTaskHandler)
+
+	rpcFactory := protocol.NewMessageFactory()
+	protos.RegisterGateRPCMessages(rpcFactory)
+	rpcNode := rpc.NewTCPServer(serverconfig.GetCurrentNode().RpcAddr, rpcFactory, codec,
+		rpc.WithSessionHooks(ioDispatcher.OnSessionCreated, ioDispatcher.OnSessionClosed))
+	if serverconfig.GetCurrentNode().RpcAddr != "" {
+		if err := rpcNode.Register(newGateRPCService(route.NewGateRoute(s.Cross), gameTaskHandler, factory)); err != nil {
+			panic(err)
+		}
+		if err := rpcNode.Start(); err != nil {
+			panic(err)
+		}
+		defer rpcNode.Stop()
 	}
-	ioDispatcher.AddHandler(NewGameTaskHandler(router, s.ActorSystem))
 
-	node := ws.NewServer(
-		ws.WithAddress(serverconfig.ServerConfig.ServerUrl),
-		ws.WithRouter(router),
-		ws.WithIoDispatch(ioDispatcher),
-		ws.WithCodec(codec),
-		ws.WithUseGateway(serverconfig.ServerConfig.UseGateMode),
-		ws.WithWsPath("ws"),
-	)
-
-	err := node.Start()
-	if err != nil {
-		logger.Error("game server start fail", err)
-		panic(err)
+	// listener := tcp.NewServer(
+	// 	tcp.WithAddress(serverconfig.GetCurrentNode().ServiceAddr),
+	// 	tcp.WithRouter(router),
+	// 	tcp.WithIoDispatch(ioDispatcher),
+	// 	tcp.WithCodec(codec),
+	// )
+	nodde := serverconfig.GetCurrentNode()
+	if len(nodde.ServiceAddr) > 0 {
+		listener := ws.NewServer(
+			ws.WithAddress(nodde.ServiceAddr),
+			ws.WithRouter(router),
+			ws.WithIoDispatch(ioDispatcher),
+			ws.WithCodec(codec),
+			ws.WithUseGateway(nodde.UseGateMode),
+			ws.WithWsPath("ws"),
+		)
+		err := listener.Start()
+		if err != nil {
+			logger.Error("game server start fail", err)
+			panic(err)
+		}
 	}
 
 	// 启动后台http服务
 	go func() {
-		NewHttpServer(node, router)
+		NewHttpServer(router, s.PlayerRepo, s.Recharge, s.ProfileService)
 	}()
 
 	// 自启动，不会有额外消耗
-	if len(serverconfig.ServerConfig.PprofAddr) > 0 {
+	if len(serverconfig.GetCurrentNode().PprofAddr) > 0 {
 		// pprof性能监控
 		go func() {
 			mux := NewHttpServeMux()
 			// 监听并在 0.0.0.0:6060 上启动服务器
-			http.ListenAndServe(serverconfig.ServerConfig.PprofAddr, mux)
+
+			http.ListenAndServe(serverconfig.GetCurrentNode().PprofAddr, mux)
 		}()
 	}
 
 	endTime := time.Now()
 	costSeconds := endTime.Sub(startTime).Seconds()
-	logger.Info(fmt.Sprintf("game server is starting at %s, cost %.2fs", serverconfig.ServerConfig.ServerUrl, costSeconds))
-
-	// p := s.Player.GetOrCreatePlayer("aaa")
+	logger.Info(fmt.Sprintf("game server is starting at %s, cost %.2fs", serverconfig.GetCurrentNode().ServiceAddr, costSeconds))
 
 	sg := make(chan os.Signal, 1)
 	signal.Notify(sg, os.Interrupt, syscall.SIGTERM)
@@ -167,13 +190,16 @@ func main() {
 	select {
 	case sig := <-sg:
 		logger.Info(fmt.Sprintf("game server is closing (signal: %v)", sig))
-	case <-node.RunningChan():
-		logger.Info(fmt.Sprintf("game server is closing (signal: http)"))
+		// case <-listener.RunningChan():
+		// 	logger.Info("game server is closing (signal: http)")
 	}
 	// 执行所有关服逻辑
-	node.Stop()
+	rpcNode.Stop()
+	// listener.Stop()
+
 	// 框架模块
 	s.DbService.Shutdown()
+	// 业务模块
 
-	logger.Info(fmt.Sprintf("game server is closed"))
+	logger.Info("game server is closed")
 }
