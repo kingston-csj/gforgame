@@ -74,8 +74,10 @@ func main() {
 		Level:      999,
 	}
 	cross.PlayerLoginRemote(p, cross.Island)
-	protocol.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
-	protocol.RegisterMessage(protos.CmdResPlayerLogin, &protos.ResPlayerLogin{})
+	messageFactory := protocol.NewMessageFactory()
+	
+	messageFactory.RegisterMessage(protos.CmdChatReqChat, &protos.ReqChat{})
+	messageFactory.RegisterMessage(protos.CmdResPlayerLogin, &protos.ResPlayerLogin{})
 
 	// 服务器地址和端口
 	address := "127.0.0.1:9090"
@@ -84,7 +86,7 @@ func main() {
 
 	ioDispatcher := &dispatch.BaseIoDispatch{}
 	ioDispatcher.AddHandler(&GameTaskHandler{})
-	tcpClient := &client.TcpSocketClient{RemoteAddress: address, MsgCodec: msgCodec}
+	tcpClient := &client.TcpSocketClient{RemoteAddress: address, MsgCodec: msgCodec, MessageFactory: messageFactory}
 	session, err := tcpClient.OpenSession()
 	if err != nil {
 		panic(err)

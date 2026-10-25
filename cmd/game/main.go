@@ -17,9 +17,11 @@ import (
 	"github.com/forfun/gforgame/internal/infra/net"
 	mysqldb "github.com/forfun/gforgame/internal/infra/persistence"
 	"github.com/forfun/gforgame/internal/io"
+	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/route"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/dispatch"
+	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/ws"
 )
 
@@ -65,7 +67,10 @@ func main() {
 	logger.Info("game server is starting...")
 	startTime := time.Now()
 
-	router := network.NewMessageRoute()
+	factory := protocol.NewMessageFactory()
+	protos.RegisterMessages(factory)
+	router := network.NewMessageRoute(factory)	
+
 
 	// codec := protobuf.NewSerializer()
 	codec := json.NewSerializer()
@@ -111,11 +116,12 @@ func main() {
 	// 	tcp.WithDispatchWorkers(8),
 	// )
 
+	io.SetMessageFactory(factory)
 	io.SetOnlinePlayerRegistry(s.OnlinePlayerRegistry)
 
 	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: s.OnlinePlayerRegistry}
 	if serverconfig.ServerConfig.UseGateMode {
-		ioDispatcher.AddHandler(NewGateTransformHandler())
+		ioDispatcher.AddHandler(NewGateTransformHandler(factory))
 	}
 	ioDispatcher.AddHandler(NewGameTaskHandler(router, s.ActorSystem))
 

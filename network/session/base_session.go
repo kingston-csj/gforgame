@@ -31,6 +31,7 @@ type BaseSession struct {
 	ProtocolCodec protocol.ProtocolAdapter
 	// 消息编解码
 	MessageCodec codec.MessageCodec
+	MessageFactory *protocol.MessageFactory
 	// 准备发送的出队消息(带缓冲)
 	dataToSend chan queuedWrite
 	// 已经收到的入队消息(带缓冲)
@@ -54,7 +55,10 @@ type BaseSession struct {
 	lastRecvUnixNano int64
 }
 
-func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *BaseSession {
+func NewSession(conn net.Conn, messageCodec codec.MessageCodec, messageFactory *protocol.MessageFactory) *BaseSession {
+	if messageFactory == nil {
+		panic("message factory cannot be nil")
+	}
 	nowUnixNano := time.Now().UnixNano()
 	return &BaseSession{
 		conn:             conn,
@@ -69,11 +73,12 @@ func NewSession(conn net.Conn, messageCodec codec.MessageCodec) *BaseSession {
 		protocolType:     protocol.ProtocolTypeBinary,
 		payloadMode:      protocol.PayloadModeDecode,
 		lastRecvUnixNano: nowUnixNano,
+		MessageFactory:   messageFactory,
 	}
 }
 
 // NewSessionWithProtocol 创建指定协议类型的Session
-func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType) *BaseSession {
+func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, protocolType protocol.ProtocolType, messageFactory *protocol.MessageFactory) *BaseSession {
 	factory := &protocol.ProtocolFactory{}
 	protocolAdapter := factory.NewProtocolAdapter(protocolType)
 	nowUnixNano := time.Now().UnixNano()
@@ -90,6 +95,7 @@ func NewSessionWithProtocol(conn net.Conn, messageCodec codec.MessageCodec, prot
 		protocolType:     protocolType,
 		payloadMode:      protocol.PayloadModeDecode,
 		lastRecvUnixNano: nowUnixNano,
+		MessageFactory:   messageFactory,
 	}
 	s.id = uuid.NewString()
 	BindSID(s)
@@ -119,12 +125,12 @@ func (s *BaseSession) Send(msg any, index int32) error {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", index, err))
 		return fmt.Errorf("encode message %s cmd failed", msg)
 	}
-	cmd, e2 := protocol.GetMessageCmd(msg)
+	cmd, e2 := s.MessageFactory.GetMessageCmd(msg)
 	if e2 != nil {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", cmd, e2))
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
-	msgName, e3 := protocol.GetMsgName(cmd)
+	msgName, e3 := s.MessageFactory.GetMsgName(cmd)
 	if e3 != nil {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", cmd, e3))
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)
@@ -190,12 +196,12 @@ func (s *BaseSession) SendAndClose(msg any) error {
 	if err != nil {
 		return fmt.Errorf("encode message %s cmd failed", msg)
 	}
-	cmd, e2 := protocol.GetMessageCmd(msg)
+	cmd, e2 := s.MessageFactory.GetMessageCmd(msg)
 	if e2 != nil {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", cmd, e2))
 		return fmt.Errorf("get message %s cmd failed:%v", msg, e2)
 	}
-	msgName, e3 := protocol.GetMsgName(cmd)
+	msgName, e3 := s.MessageFactory.GetMsgName(cmd)
 	if e3 != nil {
 		logger.ErrorNoStack(fmt.Errorf("send message failed, fallback to reflect: cmd=%d err=%v", cmd, e3))
 		return fmt.Errorf("get message %s name failed:%v", msg, e3)

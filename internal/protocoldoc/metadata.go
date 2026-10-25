@@ -55,10 +55,9 @@ type Module struct {
 }
 
 type Connection struct {
-	URL         string   `json:"url"`
+	ServerID    int32    `json:"serverId"`
 	Port        string   `json:"port"`
 	Path        string   `json:"path"`
-	ServerID    uint32   `json:"serverId"`
 	TestEnabled bool     `json:"testEnabled"`
 	Codecs      []string `json:"codecs"`
 }
@@ -87,6 +86,13 @@ func sourceDocs() map[string]exporter.StructInfo {
 // Build derives IDs from the live registry and request/response pairs from installed handlers.
 func Build(connection Connection, routes *network.MessageRoute) Metadata {
 	m := Metadata{Version: 1, GeneratedAt: time.Now().UTC().Format(time.RFC3339), Connection: connection, Modules: []Module{}, Schemas: map[string]Schema{}}
+	var factory *protocol.MessageFactory
+	if routes != nil {
+		factory = routes.MessageFactory
+	} else {
+		factory = protocol.NewMessageFactory()
+		protos.RegisterMessages(factory)
+	}
 	docs := sourceDocs()
 	types := map[string]reflect.Type{}
 	var describe func(reflect.Type) Type
@@ -138,8 +144,8 @@ func Build(connection Connection, routes *network.MessageRoute) Metadata {
 		}
 		return Type{Kind: "unknown", Name: t.String()}
 	}
-	for _, cmd := range protocol.GetMsgName2IdMapper() {
-		t, _ := protocol.GetMessageType(cmd)
+	for _, cmd := range factory.GetMsgName2IdMapper() {
+		t, _ := factory.GetMessageType(cmd)
 		describe(t)
 	}
 	groups := map[string][]Message{}
@@ -155,7 +161,7 @@ func Build(connection Connection, routes *network.MessageRoute) Metadata {
 				msg.Direction = strings.ToUpper(dir)
 			}
 		}
-		if cmd, err := protocol.GetMessageCmdFromType(reflect.PointerTo(t)); err == nil {
+		if cmd, err := factory.GetMessageCmdFromType(reflect.PointerTo(t)); err == nil {
 			msg.Cmd = &cmd
 			if routes != nil && module != "cross" {
 				if handler, ok := routes.Handlers[cmd]; ok {

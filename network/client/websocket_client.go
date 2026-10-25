@@ -12,6 +12,7 @@ import (
 	"github.com/forfun/gforgame/codec"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/dispatch"
+	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/session"
 	"github.com/gorilla/websocket"
 )
@@ -53,7 +54,8 @@ func (c *WebSocketClient) OpenSession() (network.Session, error) {
 		conn:        conn,
 		messageType: c.resolveMessageType(),
 	}
-	s := session.NewSession(wsConn, c.MsgCodec)
+	factory := protocol.NewMessageFactory()
+	s := session.NewSession(wsConn, c.MsgCodec, factory)
 	go s.Write()
 	go s.Read()
 	return s, nil

@@ -50,7 +50,8 @@ func main() {
 	}
 	startBackendSessionMonitor()
 	startOutboundDispatcher()
-	router := network.NewMessageRoute()
+	factory :=  protocol.NewMessageFactory()
+	router := network.NewMessageRoute(factory)
 	
 	ioDispatcher := &MyMessageDispatch{onlinePlayerRegistry: onlinePlayerRegistry}
 	ioDispatcher.AddHandler(&ClientRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})

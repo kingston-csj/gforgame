@@ -74,7 +74,7 @@ func (g *ClientRouter) MessageReceived(session network.Session, frame *protocol.
 			logger.ErrorNoStack(fmt.Errorf("panic recovered: %v", r))
 		}
 	}()
-	msgName, _ := protocol.GetMsgName(frame.Header.Cmd)
+	msgName, _ := g.router.MessageFactory.GetMsgName(frame.Header.Cmd)
 	logger.Info(fmt.Sprintf("接收消息: cmd:%d, name:%s, 内容:%s", frame.Header.Cmd, msgName, frame.Msg))
 	if frame.Header.Cmd == gateLoginAdapter.LoginCmd() {
 		body, ok := frame.Msg.([]byte)

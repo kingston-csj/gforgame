@@ -22,11 +22,13 @@ import (
 // GateTransformHandler 将网关消息TransferGateToLogic转换为实际的消息
 type GateTransformHandler struct {
 	codec codec.MessageCodec
+	factory *protocol.MessageFactory
 }
 
-func NewGateTransformHandler() *GateTransformHandler {
+func NewGateTransformHandler(factory *protocol.MessageFactory) *GateTransformHandler {
 	return &GateTransformHandler{
 		codec: json.NewSerializer(),
+		factory: factory,
 	}
 }
 
@@ -39,7 +41,7 @@ func (g *GateTransformHandler) MessageReceived(session network.Session, frame *p
 		logger.ErrorNoStack(fmt.Errorf("invalid transfer message: %T", frame.Msg))
 		return false
 	}
-	typ, _ := protocol.GetMessageType(transfer.Cmd)
+	typ, _ :=  g.factory.GetMessageType(transfer.Cmd)
 	if typ == nil {
 		logger.ErrorNoStack(fmt.Errorf("message type not found: %d", transfer.Cmd))
 		return false
@@ -98,7 +100,7 @@ func (g *GameTaskHandler) MessageReceived(s network.Session, frame *protocol.Req
 		}
 	}
 	// 直连模式下打印入站消息，便于本地排查。
-	logInboundMessage(s, frame)
+	logInboundMessage(s, frame, g.router.MessageFactory)
 	playerId := frame.Header.Payload
 
 	var ref *actor.ActorRef
@@ -155,8 +157,8 @@ func (g *GameTaskHandler) getMessageHandler(frame *protocol.RequestDataFrame) *n
 	return msgHandler
 }
 
-func logInboundMessage(session network.Session, frame *protocol.RequestDataFrame) {
-	msgName, _ := protocol.GetMsgName(frame.Header.Cmd)
+func logInboundMessage(session network.Session, frame *protocol.RequestDataFrame, factory *protocol.MessageFactory) {
+	msgName, _ := factory.GetMsgName(frame.Header.Cmd)
 	jsonStr, err := jsonutil.StructToJSON(frame.Msg)
 	if err != nil || strings.Contains(msgName, "HeartBeat") {
 		return

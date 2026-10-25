@@ -91,7 +91,8 @@ func (d *GateAndLogicMessageDispatch) OnSessionCreated(session network.Session) 
 }
 
 func newLogicIoDispatcher(onlinePlayerRegistry *net.OnlinePlayerRegistry) dispatch.IoDispatch {
-	router := network.NewMessageRoute()
+	factory :=  protocol.NewMessageFactory()
+	router := network.NewMessageRoute(factory)
 	ioDispatcher := &GateAndLogicMessageDispatch{}
 	ioDispatcher.AddHandler(&LogicRouter{router: router, onlinePlayerRegistry: onlinePlayerRegistry})
 	return ioDispatcher

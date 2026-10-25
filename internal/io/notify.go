@@ -19,9 +19,16 @@ import (
 var (
 	notifyCodec          = json.NewSerializer()
 	gateSession          network.Session
+	messageFactory       *protocol.MessageFactory
 	gateSessionMu        sync.RWMutex
 	onlinePlayerRegistry *net.OnlinePlayerRegistry
 )
+
+// SetMessageFactory 设置业务协议注册表；在启动网络监听前调用。
+func SetMessageFactory(factory *protocol.MessageFactory) {
+	messageFactory = factory
+}
+
 
 func SetGateSession(session network.Session) {
 	if session == nil {
@@ -54,7 +61,7 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 		logger.ErrorNoStack(fmt.Errorf("gate session not ready, player=%s", playerID))
 		return
 	}
-	cmd, err := protocol.GetMessageCmd(data)
+	cmd, err := messageFactory.GetMessageCmd(data)
 	if err != nil {
 		return
 	}
@@ -69,7 +76,7 @@ func NotifyByPlayerId(playerID string, index int32, data any) {
 		Index:    index,
 	}
 
-	msgName, _ := protocol.GetMsgName(cmd)
+	msgName, _ := messageFactory.GetMsgName(cmd)
 	jsonStr, err := jsonutil.StructToJSON(data)
 	logger.Info(fmt.Sprintf("[%s] 发送消息:  cmd:%d, name:%s, 内容:%s", playerID, cmd, msgName, jsonStr))
 	_ = gs.Send(transferBody, index)

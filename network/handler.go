@@ -21,12 +21,16 @@ type (
 	}
 
 	MessageRoute struct {
-		Handlers map[int32]*Handler
+		MessageFactory *protocol.MessageFactory
+		Handlers       map[int32]*Handler
 	}
 )
 
-func NewMessageRoute() *MessageRoute {
-	return &MessageRoute{Handlers: make(map[int32]*Handler)}
+func NewMessageRoute(factory *protocol.MessageFactory) *MessageRoute {
+	if factory == nil {
+		panic("message factory cannot be nil")
+	}
+	return &MessageRoute{MessageFactory: factory, Handlers: make(map[int32]*Handler)}
 }
 
 var (
@@ -36,15 +40,12 @@ var (
 
 func (r *MessageRoute) RegisterMessageHandlers(comp any) error {
 	clazz := reflect.TypeOf(comp)
-	if clazz.Name() == "CrossRoute" {
-		// log.Printf("RegisterMessageHandlers: %s", clazz.Name())
-	}
 	for m := 0; m < clazz.NumMethod(); m++ {
 		method := clazz.Method(m)
 		mt := method.Type
 		if r.isHandlerMethod(method) {
 			hasPlayer, hasSession, containsIndex, cmdFieldIndex := parseHandlerSignature(mt)
-			cmd, err := protocol.GetMessageCmdFromType(mt.In(cmdFieldIndex))
+			cmd, err := r.MessageFactory.GetMessageCmdFromType(mt.In(cmdFieldIndex))
 			if err != nil {
 				return err
 			}

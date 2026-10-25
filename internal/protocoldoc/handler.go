@@ -3,7 +3,6 @@ package protocoldoc
 import (
 	"embed"
 	"encoding/json"
-	"net"
 	"net/http"
 
 	serverconfig "github.com/forfun/gforgame/config"
@@ -20,10 +19,20 @@ func Register(router *gin.Engine, routes *network.MessageRoute) {
 	if !enabled {
 		return
 	}
-	externalURL, _ := serverconfig.GetExtraString("game.protocol-doc-options.websocket-url")
-	_, port, _ := net.SplitHostPort(serverconfig.ServerConfig.ServerUrl)
-	connection := Connection{URL: externalURL, Port: port, Path: "/ws", ServerID: serverconfig.ServerConfig.ServerId, TestEnabled: !serverconfig.ServerConfig.UseGateMode || externalURL != "", Codecs: []string{"json"}}
-	RegisterRoutes(router, Build(connection, routes))
+	// node := serverconfig.GetCurrentNode()
+	// serviceAddr := node.ServiceAddr
+	// // 如果使用网关的话,取网关的服务地址
+	// if node.UseGateMode {
+	// 	gateNodes := serverconfig.GetServersByType(uint32(serverconfig.NodeTypeGateway))
+	// 	if (len(gateNodes) <= 0) {
+	// 		panic("gate node not found")
+	// 	}
+	// 	gate := gateNodes[0]
+	// 	serviceAddr = gate.Addr
+	// }
+	// _, port, _ := net.SplitHostPort(serviceAddr)
+	// connection := Connection{ServerID: node.ServerId, Port: port, Path: "/ws", Codecs: []string{"json"}}
+	// RegisterRoutes(router, Build(connection, routes))
 }
 
 // RegisterRoutes serves an immutable metadata snapshot and the bundled frontend.

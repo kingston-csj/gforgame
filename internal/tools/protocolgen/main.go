@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/forfun/gforgame/internal/protos"
+	"github.com/forfun/gforgame/internal/protos"
 	protocolexporter "github.com/forfun/gforgame/internal/tools/protocol"
 	"github.com/forfun/gforgame/network/protocol"
 )
@@ -28,7 +28,9 @@ func main() {
 		csharpOutDir,
 		templatePath,
 	)
-	if err := generator.Generate(protocol.GetMsgName2IdMapper()); err != nil {
+	factory := protocol.NewMessageFactory()
+	protos.RegisterMessages(factory)
+	if err := generator.Generate(factory.GetMsgName2IdMapper()); err != nil {
 		panic(err)
 	}
 	if err := generator.BaseGenerator.GenerateRegisterFromTags(protosDir, registerFile, nil); err != nil {

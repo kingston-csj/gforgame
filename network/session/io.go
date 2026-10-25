@@ -69,7 +69,7 @@ func (s *BaseSession) decodeAndDeliverPackets(packets []*protocol.Packet) {
 				Msg:    p.Data,
 			}
 		} else {
-			typ, _ := protocol.GetMessageType(p.Header.Cmd)
+			typ, _ := s.MessageFactory.GetMessageType(p.Header.Cmd)
 			if typ == nil {
 				logger.ErrorNoStack(fmt.Sprintf("message type not found %v", p.Header.Cmd))
 				continue
