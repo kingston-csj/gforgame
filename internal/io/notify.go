@@ -6,11 +6,11 @@ import (
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/util/jsonutil"
-	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/contract"
 	"github.com/forfun/gforgame/internal/infra/net"
 	"github.com/forfun/gforgame/internal/logger"
 	"github.com/forfun/gforgame/internal/protos"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/protocol"
 	"github.com/forfun/gforgame/network/session"

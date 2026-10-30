@@ -3,8 +3,8 @@ package logger
 // 日志工具函数 统一对外接口
 import (
 	"github.com/forfun/gforgame/common/logger"
-	"github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/constants"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 )
 
 // topLevelLogKeys 会放在 JSON 顶层；其他字段全部合并到 ext 嵌套对象。
@@ -191,7 +191,7 @@ func LogBusinessDefault(args ...any) {
 
 // 初始化配置前的日志不附带节点 ID。
 func currentServerID() uint32 {
-	if node := config.GetCurrentNode(); node != nil {
+	if node := serverconfig.GetCurrentNode(); node != nil {
 		return uint32(node.ServerId)
 	}
 	return 0

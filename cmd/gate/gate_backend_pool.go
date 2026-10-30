@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/logger"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/client"
 	"github.com/forfun/gforgame/rpc"

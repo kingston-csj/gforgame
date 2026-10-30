@@ -1,4 +1,4 @@
-package config
+package serverconfig
 
 // NodeType 节点类型，用 int 便于路由匹配和协议分发
 type NodeType int

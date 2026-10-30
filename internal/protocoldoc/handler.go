@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 
-	serverconfig "github.com/forfun/gforgame/config"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/network"
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +25,7 @@ func Register(router *gin.Engine, routes *network.MessageRoute) {
 	// 如果使用网关的话,取网关的服务地址
 	if node.UseGateMode {
 		gateNodes := serverconfig.GetServersByType(uint32(serverconfig.NodeTypeGateway))
-		if (len(gateNodes) <= 0) {
+		if len(gateNodes) <= 0 {
 			panic("gate node not found")
 		}
 		gate := gateNodes[0]

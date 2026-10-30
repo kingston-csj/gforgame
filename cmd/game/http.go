@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/forfun/gforgame/common/util/jsonutil"
-	serverconfig "github.com/forfun/gforgame/config"
 	playerrepo "github.com/forfun/gforgame/internal/infra/repository/player"
 	"github.com/forfun/gforgame/internal/protocoldoc"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/internal/service/recharge"
 	"github.com/forfun/gforgame/network"
 	"github.com/gin-contrib/cors"

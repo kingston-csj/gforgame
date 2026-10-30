@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	serverconfig "github.com/forfun/gforgame/config"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/network"

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"hash/fnv"
 
-	serverconfig "github.com/forfun/gforgame/config"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/network/protocol"
 )
 

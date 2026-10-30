@@ -6,8 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/forfun/gforgame/config"
-
+	"github.com/forfun/gforgame/internal/serverconfig"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,10 +17,10 @@ var (
 	dbOnce sync.Once
 )
 
-// InitMysql 初始化数据库连接，必须在 config.Init() 之后调用。
+// InitMysql 初始化数据库连接，必须在 serverconfig.Init() 之后调用。
 func InitMysql() {
 	dbOnce.Do(func() {
-		dbURL, ok := config.GetExtraString("db.url")
+		dbURL, ok := serverconfig.GetExtraString("db.url")
 		if !ok || dbURL == "" {
 			panic("配置项 db.url 为空，请在 config.yml 中配置")
 		}

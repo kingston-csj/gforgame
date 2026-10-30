@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/forfun/gforgame/config"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 )
 
 // IDGenerator 全局唯一ID生成器
@@ -44,7 +44,7 @@ var (
 // GetNextID 使用默认生成器生成ID的便捷方法
 func GetNextID() string {
 	defaultIDGenOnce.Do(func() {
-		defaultIDGen = NewIDGenerator(int64(config.GetCurrentNode().ServerId))
+		defaultIDGen = NewIDGenerator(int64(serverconfig.GetCurrentNode().ServerId))
 	})
 	return defaultIDGen.NextID()
 }

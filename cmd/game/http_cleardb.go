@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/logger"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/gin-gonic/gin"
 )
 

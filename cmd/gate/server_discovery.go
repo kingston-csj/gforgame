@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/logger"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 )
 
 const serverDiscoveryRefreshInterval = 5 * time.Minute

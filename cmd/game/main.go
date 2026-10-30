@@ -12,7 +12,6 @@ import (
 
 	"github.com/forfun/gforgame/codec/json"
 	"github.com/forfun/gforgame/common/logger"
-	serverconfig "github.com/forfun/gforgame/config"
 	"github.com/forfun/gforgame/internal/bootstrap"
 	"github.com/forfun/gforgame/internal/config"
 	"github.com/forfun/gforgame/internal/infra/net"
@@ -20,6 +19,7 @@ import (
 	"github.com/forfun/gforgame/internal/io"
 	"github.com/forfun/gforgame/internal/protos"
 	"github.com/forfun/gforgame/internal/route"
+	serverconfig "github.com/forfun/gforgame/internal/serverconfig"
 	"github.com/forfun/gforgame/network"
 	"github.com/forfun/gforgame/network/dispatch"
 	"github.com/forfun/gforgame/network/protocol"
